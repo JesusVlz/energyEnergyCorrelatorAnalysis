@@ -156,6 +156,7 @@ public:
   Bool_t fIsRealData;                // Simplification from fDataType: True = any measured data, False = any simulation
   Bool_t fIsPPbData;                 // Flag for any pPb dataset: True = any pPb dataset, False = anything else
   Bool_t fIsPpData;                  // Flag for any pp dataset: True = any pp dataset, False = anything else
+  Bool_t fIsOOData;                  // Flag for any OO dataset: True = any OO dataset, False = anything else
   
   // Weights for filling the MC histograms
   Double_t fVzWeight;                // Weight for vz in MC

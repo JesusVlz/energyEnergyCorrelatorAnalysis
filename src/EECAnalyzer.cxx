@@ -257,8 +257,40 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
     } else {
       fEnergyWeightSmearer = NULL;
     } 
+  
+  } else if(fIsOOData) {
     
-  } else if(fIsPPbData){
+   // 1. Skip Track Corrections: Return a dummy corrector or NULL
+    fTrackEfficiencyCorrector = NULL; 
+
+    // 2. Apply PbPb Weights: Use the parameters you provided for Vz and Centrality
+    fVzWeightFunction = new TF1("fvz","pol6",-15,15);
+    fVzWeightFunction->SetParameters(1.00591, -0.0193751, 0.000961142, -2.44303e-05, -8.24443e-06, 1.66679e-07, 1.11028e-08);
+    
+    fCentralityWeightFunctionCentral = new TF1("fCentralWeight","pol6",0,30);
+    fCentralityWeightFunctionCentral->SetParameters(4.73421, -0.0477343, -0.0332804, 0.00355699, -0.00017427, 4.18398e-06, -3.94746e-08);
+    
+    fCentralityWeightFunctionPeripheral = new TF1("fPeripheralWeight","pol6",30,90);
+    fCentralityWeightFunctionPeripheral->SetParameters(3.38091, -0.0609601, -0.00228529, 9.43076e-05, -1.39593e-06, 9.85435e-09, -2.77153e-11);
+    
+    fMultiplicityWeightFunction = new TF1("fMultiWeight", totalMultiplicityWeight, 0, 5000, 0);
+
+    // 3. Skip JEC: Do not initialize fJetCorrector here
+    // In the JEC section, ensure OO does not call AddLevel()
+
+    // 4. Skip Mixing: Disable flags
+    fDoMixedCone = false;
+    fDoPerpendicularCone = false;
+
+    // Set remaining helpers to NULL to ensure they are skipped
+    fTrackPairEfficiencyCorrector = NULL;
+    fEnergyResolutionSmearingFinder = NULL;
+    fDeltaRSmearer = NULL;
+    fEnergyWeightSmearer = NULL;
+
+  } 
+
+  else if(fIsPPbData){
     
     // Track correction for 2016 pPb data
     fTrackEfficiencyCorrector = new TrkEff2016pPb(false, "trackCorrectionTables/pPb2016/");
@@ -387,8 +419,11 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
 
   bool disableTrackPairEfficiencyCorrection = (fCard->Get("DisableTrackPairEfficiencyCorrection") == 1);
   if((fMcCorrelationType == kGenGen) || (fMcCorrelationType == kRecoGen)) disableTrackPairEfficiencyCorrection = true; // Disable the track pair efficiency correction for generator level particles
-  fTrackPairEfficiencyCorrector->SetDisableCorrection(disableTrackPairEfficiencyCorrection);
+  if((fDataType == ForestReader::kOO || fDataType == ForestReader::kOOMC)) disableTrackPairEfficiencyCorrection = true; // Disable the track pair efficiency correction for OO data sets
 
+  if(fTrackPairEfficiencyCorrector != NULL) {
+    fTrackPairEfficiencyCorrector->SetDisableCorrection(fCard->Get("DisableTrackPairEfficiencyCorrection"));
+  }
 }
 
 /*
@@ -649,9 +684,10 @@ void EECAnalyzer::ReadConfigurationFromCard(){
   fTriggerSelection = fCard->Get("TriggerSelection");
 
   // Determine the helper data types
-  fIsRealData = (fDataType != ForestReader::kPpMC && fDataType != ForestReader::kPbPbMC && fDataType != ForestReader::kPPbMC_pToMinusEta && fDataType != ForestReader::kPPbMC_pToPlusEta);
+  fIsRealData = (fDataType != ForestReader::kPpMC && fDataType != ForestReader::kPbPbMC && fDataType != ForestReader::kPPbMC_pToMinusEta && fDataType != ForestReader::kPPbMC_pToPlusEta && fDataType != ForestReader::kOOMC);
   fIsPPbData = (fDataType == ForestReader::kPPb_pToMinusEta || fDataType == ForestReader::kPPb_pToPlusEta || fDataType == ForestReader::kPPb_pToMinusEta_5TeV || fDataType == ForestReader::kPPbMC_pToMinusEta || fDataType == ForestReader::kPPbMC_pToPlusEta);
   fIsPpData = (fDataType == ForestReader::kPp || fDataType == ForestReader::kPpMC);
+  fIsOOData = (fDataType == ForestReader::kOO || fDataType == ForestReader::kOOMC);
 
   
   //****************************************
@@ -978,6 +1014,8 @@ void EECAnalyzer::RunAnalysis(){
   correctionFileRelative[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
   correctionFileRelative[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
   correctionFileRelative[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_pgoing_Embedded_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kOO] = "";
+  correctionFileRelative[ForestReader::kOOMC] = "";
 
   std::string correctionFileResidual[ForestReader::knDataTypes];
   correctionFileResidual[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_L2L3Residual_AK4PF.txt";
@@ -989,6 +1027,8 @@ void EECAnalyzer::RunAnalysis(){
   correctionFileResidual[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
   correctionFileResidual[ForestReader::kPPbMC_pToMinusEta] = "CorrectionNotAppliedPF.txt";
   correctionFileResidual[ForestReader::kPPbMC_pToPlusEta] = "CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kOO] = "CorrectionNotAppliedPF.txt"; // Use the dummy string
+  correctionFileResidual[ForestReader::kOOMC] = "CorrectionNotAppliedPF.txt";
 
   std::string uncertaintyFile[ForestReader::knDataTypes];
   uncertaintyFile[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_Uncertainty_AK4PF.txt";
@@ -1000,9 +1040,11 @@ void EECAnalyzer::RunAnalysis(){
   uncertaintyFile[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
   uncertaintyFile[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
   uncertaintyFile[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
+  uncertaintyFile[ForestReader::kOO] = "";
+  uncertaintyFile[ForestReader::kOOMC] = "";
   
   // For calo jets, use the correction files for calo jets (otherwise same name, but replace PF with Calo)
-  if(fJetType == 0){
+  if(fJetType == 0 && !fIsOOData){
     size_t pfIndex = 0;
     pfIndex = correctionFileRelative[fDataType].find("PF", pfIndex);
     correctionFileRelative[fDataType].replace(pfIndex, 2, "Calo");
@@ -1083,6 +1125,9 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[0][ForestReader::kPPb_pToMinusEta_5TeV][0] = "none"; // only mega skimmed mixing available for pPb p -> -eta 5 TeV
   fileListName[0][ForestReader::kPPbMC_pToMinusEta][0] = "none"; // currently no mixing implemented for pPb MC
   fileListName[0][ForestReader::kPPbMC_pToPlusEta][0] = "none"; // currently no mixing implemented for pPb MC
+  fileListName[0][ForestReader::kOO][0] = "none"; // currently no mixing implemented for OO
+  fileListName[0][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
+
 
   // Local test, regular mixing forest
   fileListName[1][ForestReader::kPp][0] = "none";  // only mega skimmed mixing available for pp
@@ -1094,6 +1139,8 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[1][ForestReader::kPPb_pToMinusEta_5TeV][0] = "none"; // only mega skimmed mixing available for pPb p -> -eta 5 TeV
   fileListName[1][ForestReader::kPPbMC_pToMinusEta][0] = "none"; // currently no mixing implemented for pPb MC
   fileListName[1][ForestReader::kPPbMC_pToPlusEta][0] = "mixingFileList/mixingFilesPPb_pToPlusEta.txt"; // low statistics test mixing file for pPb MC p -> + eta
+  fileListName[1][ForestReader::kOO][0] = "none"; // currently no mixing implemented for OO
+  fileListName[1][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
 
   // CRAB running, mega skimmed mixing forest
   fileListName[0][ForestReader::kPp][1] = "mixingFileList/zeroBiasPp2017_5TeV_megaSkim_2025-06-24.txt"; // pp data for CRAB
@@ -1105,6 +1152,9 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[0][ForestReader::kPPb_pToMinusEta_5TeV][1] = "mixingFileList/minimumBiasPPb2016_5TeV_megaSkim_pToMinusEta.txt"; // pPb pToMinusEta 5 TeV for CRAB
   fileListName[0][ForestReader::kPPbMC_pToMinusEta][1] = "none"; // currently no mixing implemented for pPb MC
   fileListName[0][ForestReader::kPPbMC_pToPlusEta][1] = "mixingFileList/EPOS_pToPlusEta_pPb816Summer16DR_megaSkim_2026-02-13.txt"; // currently no mixing implemented for pPb MC
+  fileListName[0][ForestReader::kOO][0] = "none"; // currently no mixing implemented for OO
+  fileListName[0][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
+
 
   // Local test, mega skimmed mixing forest
   fileListName[1][ForestReader::kPp][1] = "mixingFileList/mixingFilesPp_zeroBias_megaSkim.txt";  // pp data for local test
@@ -1116,6 +1166,9 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[1][ForestReader::kPPb_pToMinusEta_5TeV][1] = "mixingFileList/mixingFilesPPb_pToMinusEta_megaSkim.txt"; // pPb p -> -eta 5 TeV for local test
   fileListName[1][ForestReader::kPPbMC_pToMinusEta][1] = "none"; // currently no mixing implemented for pPb MC
   fileListName[1][ForestReader::kPPbMC_pToPlusEta][1] = "mixingFileList/mixingFilesEpos_pToPlusEta_megaSkim.txt"; // pPb MC p -> +eta
+  fileListName[1][ForestReader::kOO][0] = "none"; // currently no mixing implemented for OO
+  fileListName[1][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
+
         
   // Read the mixing files if defined and a file list exists
   if(fDoMixedCone){
@@ -3559,6 +3612,7 @@ Double_t EECAnalyzer::GetTrackEfficiencyCorrection(const Int_t iTrack){
   
   // No correction for generator level tracks
   if(fMcCorrelationType == kRecoGen || fMcCorrelationType == kGenGen) return 1;
+  if(fIsOOData) return 1.0; // Force no correction for OO data, as instructed by tracking group for now. This is because the tracking efficiency correction for OO data is not yet available.
   
   // Get track information
   Float_t trackPt = fTrackReader->GetTrackPt(iTrack);    // Track pT
@@ -3584,6 +3638,9 @@ Double_t EECAnalyzer::GetTrackEfficiencyCorrection(const Float_t trackPt, const 
   
   // No correction for generator level tracks
   if(fMcCorrelationType == kRecoGen || fMcCorrelationType == kGenGen) return 1;
+  if(fDataType == ForestReader::kOO || fDataType == ForestReader::kOOMC) return 1;   // No correction for OO dataset, as instructed by tracking group for now. This is because the tracking efficiency correction for OO data is not yet available.
+
+
   
   // Weight factor only for 2017 pp MC as instructed be the tracking group
   double preWeight = 1.0;

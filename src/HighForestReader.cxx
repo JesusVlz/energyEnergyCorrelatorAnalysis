@@ -1,5 +1,12 @@
 // Implementation for HighForestReader
 
+//
+// Modified: Jesus Corral, 09-May-2026
+// ===========================================================
+// Added support for OO data and MC
+// including the new jet trigger, branches and filters for OO and the centrality definition for OO. 
+// 
+//===========================================================
 // Own includes
 #include "HighForestReader.h"
 
@@ -347,7 +354,7 @@ void HighForestReader::Initialize(){
     fHeavyIonTree->SetBranchAddress("hiHFminus", &fHFMinus, &fHFMinusBranch);
   }
 
-  if(fDataType == kPbPb || fDataType == kPbPbMC){
+  if(fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC){
     fHeavyIonTree->SetBranchStatus("hiBin", 1);
     fHeavyIonTree->SetBranchAddress("hiBin", &fHiBin, &fHiBinBranch);
   } else {
@@ -436,6 +443,7 @@ void HighForestReader::Initialize(){
   //
   //         tree                      branch                         What it is
   //  hltanalysis/HltTree   HLT_HIPuAK4CaloJet100_Eta5p1_v1      Event selection for PbPb
+  //  hltanalysis/HltTree   HLT_OxyL1SingleJet20_v1              Event selection for OO
   //  hltanalysis/HltTree      HLT_AK4CaloJet80_Eta5p1_v1         Event selection for pp
   // skimanalysis/HltTree         pprimaryVertexFilter           Event selection for PbPb
   // skimanalysis/HltTree    HBHENoiseFilterResultRun2Loose   Event selection for pp and PbPb
@@ -491,6 +499,28 @@ void HighForestReader::Initialize(){
       // Calo jet 100 trigger
       fHltTree->SetBranchStatus("HLT_PAAK4CaloJet100_Eta5p1_v3", 1);
       fHltTree->SetBranchAddress("HLT_PAAK4CaloJet100_Eta5p1_v3", &fCaloJet100FilterBit, &fCaloJet100FilterBranch);
+
+    } else if(fDataType == kOO || fDataType == kOOMC) { //  OO data or MC
+
+      // Calo jet 20 trigger
+      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet20_v1", 1);
+      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet20_v1", &fCaloJet15FilterBit, &fCaloJet15FilterBranch);
+
+      // Calo jet 35 trigger
+      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet35_v1", 1);
+      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet35_v1", &fCaloJet30FilterBit, &fCaloJet30FilterBranch);
+
+      // Calo jet 44 trigger
+      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet44_v1", 1);
+      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet44_v1", &fCaloJet40FilterBit, &fCaloJet40FilterBranch);
+
+       // Calo jet 60 trigger
+      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet60_v1", 1);
+      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet60_v1", &fCaloJet60FilterBit, &fCaloJet60FilterBranch);
+      
+      // No high jet pT triggers in OO forests
+      fCaloJet80FilterBit = 1;
+      fCaloJet100FilterBit = 1;
 
     } else { // PbPb data or MC
 
@@ -570,6 +600,22 @@ void HighForestReader::Initialize(){
       fSkimTree->SetBranchAddress("pVertexFilterCutdz1p0", &fPileupFilterBit, &fPileupFilterBranch);
 
       fClusterCompatibilityFilterBit = 1; // No cluster compatibility requirement for pPb
+
+     } else if(fDataType == kOO || fDataType == kOOMC){ // OO data or MC
+
+      // Primary vertex has at least two tracks, is within 25 cm in z-direction and within 2 cm in xy-direction
+      fSkimTree->SetBranchStatus("pprimaryVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pprimaryVertexFilter", &fPrimaryVertexFilterBit, &fPrimaryVertexBranch);
+     
+      // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
+      // accumulated by the energies of PF (particle-flow)candidates
+      fSkimTree->SetBranchStatus("pphfCoincFilterPF2Th4", 1);
+      fSkimTree->SetBranchAddress("pphfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+
+      fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
+      fClusterCompatibilityFilterBit = 1; // No cluster compatibility requirement for OO
+      fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
+      fPileupFilterBit = 1;        // No pile-up filter for OO
 
     } else { // PbPb data or MC
     
@@ -770,9 +816,9 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
     treeName[1] = "akCs4PFJetAnalyzer/t";       // Tree for csPF jets
     treeName[2] = "akPu4PFJetAnalyzer/t";       // Tree for puPF jets
     treeName[3] = "akFlowPuCs4PFJetAnalyzer/t"; // Tree for flow subtracted csPF jets
-  } else { // pp or pPb data or MC
+  } else { // pp or OO or pPb data or MC
     treeName[0] = "ak4CaloJetAnalyzer/t"; // Tree for calo jets
-    treeName[1] = "ak4PFJetAnalyzer/t";   // Tree for PF jets
+    treeName[1] = "ak0PFJetAnalyzer/t";   // Tree for PF jets, we produce this for OO
     treeName[2] = "akCs4PFJetAnalyzer/t"; // Tree for constituent subtracted PF jets
   }
 
