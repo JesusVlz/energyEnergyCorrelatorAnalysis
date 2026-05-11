@@ -1014,21 +1014,21 @@ void EECAnalyzer::RunAnalysis(){
   correctionFileRelative[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
   correctionFileRelative[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
   correctionFileRelative[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_pgoing_Embedded_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kOO] = "";
-  correctionFileRelative[ForestReader::kOOMC] = "";
+  correctionFileRelative[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt"; // Use the dummy string
+  correctionFileRelative[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
 
   std::string correctionFileResidual[ForestReader::knDataTypes];
   correctionFileResidual[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_L2L3Residual_AK4PF.txt";
   correctionFileResidual[ForestReader::kPbPb] = "jetEnergyCorrections/Autumn18_HI_V8_DATA_L2L3Residual_AK4PF.txt";
-  correctionFileResidual[ForestReader::kPpMC] = "CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kPpMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
   correctionFileResidual[ForestReader::kPbPbMC] = "CorrectionNotAppliedPF.txt";
   correctionFileResidual[ForestReader::kPPb_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
   correctionFileResidual[ForestReader::kPPb_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
   correctionFileResidual[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
   correctionFileResidual[ForestReader::kPPbMC_pToMinusEta] = "CorrectionNotAppliedPF.txt";
   correctionFileResidual[ForestReader::kPPbMC_pToPlusEta] = "CorrectionNotAppliedPF.txt";
-  correctionFileResidual[ForestReader::kOO] = "CorrectionNotAppliedPF.txt"; // Use the dummy string
-  correctionFileResidual[ForestReader::kOOMC] = "CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt"; // Use the dummy string
+  correctionFileResidual[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
 
   std::string uncertaintyFile[ForestReader::knDataTypes];
   uncertaintyFile[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_Uncertainty_AK4PF.txt";
@@ -1040,8 +1040,8 @@ void EECAnalyzer::RunAnalysis(){
   uncertaintyFile[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
   uncertaintyFile[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
   uncertaintyFile[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
-  uncertaintyFile[ForestReader::kOO] = "";
-  uncertaintyFile[ForestReader::kOOMC] = "";
+  uncertaintyFile[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  uncertaintyFile[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
   
   // For calo jets, use the correction files for calo jets (otherwise same name, but replace PF with Calo)
   if(fJetType == 0 && !fIsOOData){
@@ -1058,12 +1058,17 @@ void EECAnalyzer::RunAnalysis(){
   }
   
   vector<string> correctionFiles;
-  correctionFiles.push_back(correctionFileRelative[fDataType]);
-  if(fIsRealData)  correctionFiles.push_back(correctionFileResidual[fDataType]);
+  
+  // ONLY push back correction files if the system is NOT Oxygen-Oxygen --- The corrections for OO are not yet ready, and we want to be able to run the analysis without them for now. 
+  // For all other systems, the corrections are needed to get the correct jet pT and thus to get any results at all.
+  if(!fIsOOData) {
+      correctionFiles.push_back(correctionFileRelative[fDataType]);
+      if(fIsRealData)  correctionFiles.push_back(correctionFileResidual[fDataType]);
+  }
   
   fJetCorrector = new JetCorrector(correctionFiles);
   fJetUncertainty = new JetUncertainty(uncertaintyFile[fDataType]);
-  
+    
   //************************************************
   //      Find forest readers for data files
   //************************************************
@@ -2462,7 +2467,16 @@ void EECAnalyzer::CalculateEnergyEnergyCorrelator(const vector<double> selectedT
           }
 
           // Find the pair efficiency correction for the track pair
-          std::tie(trackPairEfficiencyCorrection, trackPairEfficiencyError) = fTrackPairEfficiencyCorrector->GetTrackPairEfficiencyCorrection(trackDeltaR, centrality, trackPt1, trackPt2, jetPt);
+          // Default to 1.0 (no correction) and 0.0 error for OO data and for systematic uncertainty evaluation if the corrector is not provided or the correction is not defined for the given kinematics
+          trackPairEfficiencyCorrection = 1.0;
+          trackPairEfficiencyError = 0.0;
+
+          // Only call the corrector if it actually exists! 
+          // The corrector will return 1.0 if the correction is not defined for the given kinematics, but we want to avoid the function call if we know beforehand that the corrector is not provided.
+          // For OO data, the corrector is not provided and the track pair efficiency correction is not needed, so we can save some time by not calling the corrector at all.
+          if(fTrackPairEfficiencyCorrector != NULL) {
+              std::tie(trackPairEfficiencyCorrection, trackPairEfficiencyError) = fTrackPairEfficiencyCorrector->GetTrackPairEfficiencyCorrection(trackDeltaR, centrality, trackPt1, trackPt2, jetPt);
+          }
 
           // Fill the energy-energy correlator histograms
           fillerEnergyEnergyCorrelator[0] = trackDeltaR;               // Axis 0: DeltaR between the two tracks
