@@ -33,10 +33,10 @@ void compareEECinDefinedBins(){
   //fileName.push_back("data/pPb/pPb_5TeV_pToMinusEta_pfJets_eschemeAxis_nominalEnergyWeight_minimumBias_jetEtaMCcut_mixHFPlus_processed_2025-06-13.root");
   //fileName.push_back("data/pPb/pPb_5TeV_pToMinusEta_pfJets_eschemeAxis_nominalEnergyWeight_minimumBias_jetEtaMCcut_mixHFMinus_processed_2025-06-13.root");
 
-  fileName.push_back("pythiaEposPilot_GenGen_truthLevelBackground_processed.root");
-  fileName.push_back("pythiaEposPilot_GenGen_mixingWithNominalHF_processed.root");
-  fileName.push_back("pythiaEposPilot_GenGen_mixingWithShiftedHF_processed.root");
-  fileName.push_back("pythiaEposPilot_GenGen_perpendicularConeBackground_processed.root");
+  //fileName.push_back("pythiaEposPilot_GenGen_truthLevelBackground_processed.root");
+  //fileName.push_back("pythiaEposPilot_GenGen_mixingWithNominalHF_processed.root");
+  //fileName.push_back("pythiaEposPilot_GenGen_mixingWithShiftedHF_processed.root");
+  fileName.push_back("myRootFileProcessed.root");
     
 
   const int nComparisonFiles = fileName.size();
@@ -65,10 +65,12 @@ void compareEECinDefinedBins(){
   //fileDescription.push_back("pPb 5 TeV, unsubtracted");
   //fileDescription.push_back("pPb 5 TeV, perp cone sub");
   //fileDescription.push_back("pPb 5 TeV, perp cone and CS sub");
-  fileDescription.push_back("Pythia+EPOS, truth signal");
-  fileDescription.push_back("Mixed cone, no HF shift");
-  fileDescription.push_back("Mixed cone, with HF shift");
-  fileDescription.push_back("Perpendicular cone");
+  //fileDescription.push_back("Pythia+EPOS, truth signal");
+  //fileDescription.push_back("Mixed cone, no HF shift");
+  //fileDescription.push_back("Mixed cone, with HF shift");
+//  fileDescription.push_back("Perpendicular cone");
+  fileDescription.push_back("OO 5.02 TeV");
+
 
   // Check that a description exists for each file
   if(fileDescription.size() < fileName.size()){
@@ -121,25 +123,25 @@ void compareEECinDefinedBins(){
   
   // Select explicitly which bins from the files are compared:
   std::vector<std::pair<double,double>> comparedCentralityBin;
-  comparedCentralityBin.push_back(std::make_pair(0,10));
+  //comparedCentralityBin.push_back(std::make_pair(0,10));
   //comparedCentralityBin.push_back(std::make_pair(10,30));
   //comparedCentralityBin.push_back(std::make_pair(30,50));
-  //comparedCentralityBin.push_back(std::make_pair(50,90));
+  comparedCentralityBin.push_back(std::make_pair(50,90));
   bool individualCentrality = true; // True = make different figure for each bin. False = plot all centrality bin to the same figure.
 
   std::vector<std::pair<double,double>> comparedJetPtBin;
-  comparedJetPtBin.push_back(std::make_pair(30,40));
+  comparedJetPtBin.push_back(std::make_pair(10,20));
   //comparedJetPtBin.push_back(std::make_pair(40,50));
   //comparedJetPtBin.push_back(std::make_pair(50,60));
   //comparedJetPtBin.push_back(std::make_pair(60,80));
   bool individualJetPt = true; // True = make different figure for each bin. False = plot all jet pT bin to the same figure.
 
   std::vector<double> comparedTrackPtBin;
-  comparedTrackPtBin.push_back(1.0);
+  comparedTrackPtBin.push_back(0.7);  // T0 = lowest track pT bin
   //comparedTrackPtBin.push_back(1.5);
   //comparedTrackPtBin.push_back(2.0);
   //comparedTrackPtBin.push_back(2.5);
-  //comparedTrackPtBin.push_back(3.0);
+  comparedTrackPtBin.push_back(3.0);
   bool individualTrackPt = true; // True = make different figure for each bin. False = plot all track pT bin to the same figure.
 
   // Different normalization options
@@ -154,7 +156,7 @@ void compareEECinDefinedBins(){
   // EECHistogramManager::kEnergyEnergyCorrelatorBackgroundAfterUnfolding = Estimated background after unfolding
   // EECHistogramManager::kEnergyEnergyCorrelatorUnfoldedSignal = Unfolded energy-energy correlator signal
   // EECHistogramManager::knEnergyEnergyCorrelatorProcessingLevels = Raw energy-energy correlator
-  int drawnEnergyEnergyCorrelator = EECHistogramManager::kEnergyEnergyCorrelatorSignal;
+  int drawnEnergyEnergyCorrelator = EECHistogramManager::knEnergyEnergyCorrelatorProcessingLevels;
 
   // Choose the pairing type if raw energy-energy correlator is drawn
   // EECHistograms::kSameJetPair;
@@ -188,8 +190,8 @@ void compareEECinDefinedBins(){
   // ====================================================
   
   // Figure saving
-  const bool saveFigures = false;  // Save figures
-  const char* saveComment = "_pPbSignalHFShift";   // Comment given for this specific file
+  const bool saveFigures = true;
+  const char* saveComment = "_OO_raw";
   const char* figureFormat = "pdf"; // Format given for the figures
 
   // Drawing configuration
