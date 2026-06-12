@@ -402,10 +402,22 @@ void HighForestReader::Initialize(){
   
     fJetTree->SetBranchStatus("nref", 1);
     fJetTree->SetBranchAddress("nref", &fnJets, &fnJetsBranch);
-    fJetTree->SetBranchStatus("rawpt", 1);
-    fJetTree->SetBranchAddress("rawpt", &fJetRawPtArray, &fJetRawPtBranch);
-    fJetTree->SetBranchStatus("trackMax", 1);
-    fJetTree->SetBranchAddress("trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
+
+    // OO forests use different branch names for raw pT and maximum track pT inside a jet
+    // In OO forests, the raw pT is stored in the "jtptUncorrected" branch, while in other forests it is stored in the "rawpt" branch. 
+    // Similarly, the maximum track pT inside a jet is stored in the "chargedMax" branch in OO forests and in the "trackMax" branch in other forests.
+    if(fDataType == kOO || fDataType == kOOMC){
+      fJetTree->SetBranchStatus("jtptUncorrected", 1);
+      fJetTree->SetBranchAddress("jtptUncorrected", &fJetRawPtArray, &fJetRawPtBranch);
+      fJetTree->SetBranchStatus("chargedMax", 1);
+      fJetTree->SetBranchAddress("chargedMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
+    } else {
+      fJetTree->SetBranchStatus("rawpt", 1);
+      fJetTree->SetBranchAddress("rawpt", &fJetRawPtArray, &fJetRawPtBranch);
+      fJetTree->SetBranchStatus("trackMax", 1);
+      fJetTree->SetBranchAddress("trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
+    }
+    
   
     // If we are looking at Monte Carlo, connect the reference pT and parton arrays
     if(fIsMC){
@@ -794,7 +806,7 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
   TFile* inputFile = TFile::Open(fileList.at(0));
   TTree* miniAODcheck;
   // The track tree has different name in miniAOD and AOD
-  if(fDataType == kPbPb || fDataType == kPbPbMC){
+  if(fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC){
     miniAODcheck = (TTree*)inputFile->Get("PbPbTracks/trackTree");
   } else {
     miniAODcheck = (TTree*)inputFile->Get("ppTracks/trackTree");
@@ -816,16 +828,21 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
     treeName[1] = "akCs4PFJetAnalyzer/t";       // Tree for csPF jets
     treeName[2] = "akPu4PFJetAnalyzer/t";       // Tree for puPF jets
     treeName[3] = "akFlowPuCs4PFJetAnalyzer/t"; // Tree for flow subtracted csPF jets
-  } else { // pp or OO or pPb data or MC
+  } else if(fDataType == kOO || fDataType == kOOMC){
+    treeName[0] = "akCs2PFJetAnalyzer/t";       // Tree for cs R=0.2 PF jets
+    treeName[1] = "akCs4PFJetAnalyzer/t";       // Tree for cs R=0.4 PF jets
+    treeName[2] = "akCs6PFJetAnalyzer/t";       // Tree for cs R=0.6 PF jets
+    treeName[3] = "akCs8PFJetAnalyzer/t";       // Tree for cs R=0.8 PF jets
+  } else { // pp or pPb data or MC
     treeName[0] = "ak4CaloJetAnalyzer/t"; // Tree for calo jets
-    treeName[1] = "ak0PFJetAnalyzer/t";   // Tree for PF jets, we produce this for OO
+    treeName[1] = "ak4PFJetAnalyzer/t";   // Tree for PF jets
     treeName[2] = "akCs4PFJetAnalyzer/t"; // Tree for constituent subtracted PF jets
   }
 
   if(!fMixingMode) fJetTree = new TChain(treeName[fJetType]);
 
   if(fReadTrackTree){
-    if(fIsMiniAOD && (fDataType == kPbPb || fDataType == kPbPbMC)){
+    if(fIsMiniAOD && (fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC)){
       fTrackTree = new TChain("PbPbTracks/trackTree");
     } else {
       if(fIsMiniAOD){
