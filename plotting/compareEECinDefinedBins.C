@@ -36,7 +36,7 @@ void compareEECinDefinedBins(){
   //fileName.push_back("pythiaEposPilot_GenGen_truthLevelBackground_processed.root");
   //fileName.push_back("pythiaEposPilot_GenGen_mixingWithNominalHF_processed.root");
   //fileName.push_back("pythiaEposPilot_GenGen_mixingWithShiftedHF_processed.root");
-  fileName.push_back("myRootFileProcessed.root");
+  fileName.push_back("myRootFile_merged_processed.root");
     
 
   const int nComparisonFiles = fileName.size();
@@ -124,13 +124,13 @@ void compareEECinDefinedBins(){
   // Select explicitly which bins from the files are compared:
   std::vector<std::pair<double,double>> comparedCentralityBin;
   //comparedCentralityBin.push_back(std::make_pair(0,10));
-  //comparedCentralityBin.push_back(std::make_pair(10,30));
-  //comparedCentralityBin.push_back(std::make_pair(30,50));
+  comparedCentralityBin.push_back(std::make_pair(0,30));
+  comparedCentralityBin.push_back(std::make_pair(30,50));
   comparedCentralityBin.push_back(std::make_pair(50,90));
   bool individualCentrality = true; // True = make different figure for each bin. False = plot all centrality bin to the same figure.
 
   std::vector<std::pair<double,double>> comparedJetPtBin;
-  comparedJetPtBin.push_back(std::make_pair(10,20));
+  comparedJetPtBin.push_back(std::make_pair(100,120));
   //comparedJetPtBin.push_back(std::make_pair(40,50));
   //comparedJetPtBin.push_back(std::make_pair(50,60));
   //comparedJetPtBin.push_back(std::make_pair(60,80));
@@ -141,7 +141,7 @@ void compareEECinDefinedBins(){
   //comparedTrackPtBin.push_back(1.5);
   //comparedTrackPtBin.push_back(2.0);
   //comparedTrackPtBin.push_back(2.5);
-  comparedTrackPtBin.push_back(3.0);
+  //comparedTrackPtBin.push_back(3.0);
   bool individualTrackPt = true; // True = make different figure for each bin. False = plot all track pT bin to the same figure.
 
   // Different normalization options

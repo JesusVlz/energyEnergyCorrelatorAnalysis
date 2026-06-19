@@ -74,7 +74,7 @@ MinJetPtUnfoldingReco 80  # Minimum jet pT for reconstructed jets in the respons
 MinJetPtUnfoldingTruth 60 # Minimum jet pT for generator level jets in the response matrix
 
 # Binning for THnSparses
-CentralityBinEdges  0 10 30 50 90  # Centrality binning
+CentralityBinEdges  0 30 50 90  # Centrality binning
 TrackPtBinEdges     0.7 1 2 3 4 8 12 300                   # Track pT binning
 PtHatBinEdges       0 30 50 80 120 170 220 280 370 460  # pT hat binning
 

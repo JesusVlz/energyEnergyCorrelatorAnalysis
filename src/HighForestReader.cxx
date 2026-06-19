@@ -341,7 +341,7 @@ void HighForestReader::Initialize(){
   fHeavyIonTree->SetBranchStatus("evt", 1);
   fHeavyIonTree->SetBranchAddress("evt", &fEventNumber, &fEventNumberBranch);
 
-  if(fDataType == kPp || fDataType == kPpMC){
+  if(fDataType == kPp || fDataType == kPpMC || fDataType == kOO || fDataType == kOOMC){
     // We do not have HF tower information for pp. In this case find HF like energy from particle flow candidates
     fHeavyIonTree->SetBranchStatus("hiHFPlus_pf", 1);
     fHeavyIonTree->SetBranchAddress("hiHFPlus_pf", &fHFPlus, &fHFPlusBranch);
@@ -621,11 +621,14 @@ void HighForestReader::Initialize(){
      
       // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
       // accumulated by the energies of PF (particle-flow)candidates
-      fSkimTree->SetBranchStatus("pphfCoincFilterPF2Th4", 1);
-      fSkimTree->SetBranchAddress("pphfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+      fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
+      fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+
+      // Calculated from pixel clusters. Ensures that measured and predicted primary vertices are compatible
+      fSkimTree->SetBranchStatus("pclusterCompatibilityFilter", 1);
+      fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
 
       fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
-      fClusterCompatibilityFilterBit = 1; // No cluster compatibility requirement for OO
       fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
       fPileupFilterBit = 1;        // No pile-up filter for OO
 
