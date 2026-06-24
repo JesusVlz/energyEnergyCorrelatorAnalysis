@@ -24,7 +24,7 @@ FilledHistograms 31 # Bit 0 = Event information histograms                  (to 
                     # Examples: All = 511, Everything for regular analysis = 31
 
 # Cuts for dijets
-JetType 1                 # 0 = Calo jets, 1 = PF CS jets, 2 = PF PU jets, 3 = PF flow CS jets
+JetType 1                  # 0 =  R2 PF CS jets, 1 = R4 PF CS jets, 2 = R6 PF CS jets, 3 = R8 PF CS jets
 JetAxis 0                  # 0 = E-scheme axis, 1 = WTA axis
 JetEtaCut 1.6              # Region in eta around midrapidity taken into account in analysis
 MinJetPtCut 10             # Minimum pT of a jet accepted in the analysis
@@ -65,7 +65,7 @@ JetRadius 0.4       # Radius around jets used to calculate the correlations
 WeightExponent 1 2  # Exponents given for the energy weight in EECs
 SmearDeltaR 0       # Flag for smearing DeltaR values in EECs
 SmearEnergyWeight 0 # Flag for smearing energy weights in EECs
-JetPtBinEdgesEEC 10 20 30 40 60 80 100 120 140 160 180 200 220 240 260 280 300 500 5020 # Jet pT bin edges for EEC
+JetPtBinEdgesEEC 10 40 80 120 160 200 220 240 260 280 300 500 5020 # Jet pT bin edges for EEC
 TrackPtBinEdgesEEC 0.7 1 1.5 2 2.5 3 3.5 4 300 # Track pT bin edges for EEC
 
 # Configuration for unfolding response matrices
