@@ -1,0 +1,98 @@
+# Configuration card for energy-energy correlator analysis
+
+# Data type for the analysis
+DataType 9  # 0 = pp, 1 = PbPb, 2 = pp MC, 3 = PbPb MC, 4 = pPb p -> -eta, 5 = pPb p -> +eta, 6 = pPb 5 TeV, 7 = pPb MC p -> -eta, 8 = pPb MC p -> +eta, 9 = OO, 10 = OO MC
+  
+
+# Select correlation type for Monte Carlo runs (Jet-Track)
+McCorrelationType 0 # 0 = RecoReco, 1 = RecoGen, 2 = GenReco, 3 = GenGen
+MatchJets 0 # Only relevant for Monte Carlo, keep this 0 for data
+
+# Select if you want to use the jet trigger
+TriggerSelection 0   # 0 = No trigger, 1 = CaloJet80, 2 = CaloJet100, 3 = CaloJet80 || CaloJet100, 4 = CaloJet60, 5 = CaloJet60 || CaloJet80 || CaloJet100 for sample filtered with CaloJet80 || CaloJet100, 6 = CaloJet60 || CaloJet80 || CaloJet100 for sample filtered with CaloJet60
+
+# Select which histograms to save. Checked bit by bit. Needed for memory issues.
+FilledHistograms 31 # Bit 0 = Event information histograms                  (to set: 1)
+                    # Bit 1 = Jet histograms                                (to set: 2)
+                    # Bit 2 = Track histograms                              (to set: 4)
+                    # Bit 3 = Multiplicity and particle density within jets (to set: 8)
+                    # Bit 4 = Regular energy-energy correlators             (to set: 16)
+                    # Bit 5 = Energy-energy correlators for systematics     (to set: 32)
+                    # Bit 6 = Jet pT closure histograms                     (to set: 64)
+                    # Bit 7 = Jet pT unfolding histograms                   (to set: 128)
+                    # Bit 8 = Particle/track matching histograms            (to set: 256)
+                    # Examples: All = 511, Everything for regular analysis = 31
+
+# Cuts for dijets
+JetType 1                  # 0 =  R2 PF CS jets, 1 = R4 PF CS jets, 2 = R6 PF CS jets, 3 = R8 PF CS jets
+JetAxis 0                  # 0 = E-scheme axis, 1 = WTA axis
+JetEtaCut 1.6              # Region in eta around midrapidity taken into account in analysis
+MinJetPtCut 10             # Minimum pT of a jet accepted in the analysis
+MaxJetPtCut 5020           # Maximum pT of a jet accepted in the analysis
+CutBadPhi 0                # Cut the problematic phi region. 0 = No cut, 1 = crude cut
+CutWithEtaCM 0             # Cut jets that are outside of symmetric eta CM acceptance for pPb collisions within the defined jet eta cut in lab frame
+MinMaxTrackPtFraction 0.01 # Minimum fraction of jet pT taken by the highest pT track in jet
+MaxMaxTrackPtFraction 0.98 # Maximum fraction of jet pT taken by the highest pT track in jet
+JetUncertainty 0           # 0 = Nominal jet pT, 1 = Minus uncertainty, 2 = Plus uncertainty, 3 = Nominal smear for MC, 4 = Less smearing for MC, 5 = More smearing for MC
+
+# Cuts for tracks
+TrackEtaCut 2.4             # Region in eta around midrapidity from which tracks are accepted
+MinTrackPtCut 0.7           # Minimum track pT considered in the analysis
+MaxTrackPtCut 500           # Maximum track pT considered in the analysis
+MaxTrackPtRelativeError 0.1 # Maximum relative error allowed for track pT. 0.1 = Nominal, 0.15 = Loose, 0.05 = Tight
+VertexMaxDistance 3         # Position with respect to PV resolution. 3 = Nominal, 5 = Loose, 2 = Tight
+CalorimeterSignalLimitPt 20 # Require signal in calorimeters for all track above this pT
+HighPtEtFraction 0.5        # For high pT tracks, require Et to be at least this fraction of pT
+Chi2QualityCut 0.18         # Maximum accepted chi2/(nDof*nHits) for tracks. 0.18 = Nominal, 0.18 = Loose, 0.15 = Tight
+MinimumTrackHits 11         # Require this many hits for each track
+SubeventCut 2               # Cut on subevent index. 0 = 0, 1 = (>0), 2 = no cut
+
+# Systematic variations applied
+TrackEfficiencyVariation 0.024 # For tracking uncertainties, vary the efficiency correction by 2.4%
+JetPtWeight 0 # In MC: 0 = Do not weight jet pT. 1 = Weight jet pT. 2 = Weight only true jet pT for response matrices.
+
+# Flags for residual correction method
+DisableTrackPairEfficiencyCorrection 1 # 0 = Do not disable the correction. 1 = Disable the correction
+
+# Cuts for event selection
+ZVertexCut 15       # Maximum vz value for accepted tracks
+LowPtHatCut -1      # Minimum accepted pT hat
+HighPtHatCut 1      # Maximum accepted pT hat
+MultiplicityMode 0  # 0 = Weight MC centrality to match data. 1 = Weight multiplicity to match
+
+# Configuration for energy-energy correlators
+JetRadius 0.4       # Radius around jets used to calculate the correlations
+WeightExponent 1 2  # Exponents given for the energy weight in EECs
+SmearDeltaR 0       # Flag for smearing DeltaR values in EECs
+SmearEnergyWeight 0 # Flag for smearing energy weights in EECs
+JetPtBinEdgesEEC 10 40 80 120 160 200 220 240 260 280 300 500 5020 # Jet pT bin edges for EEC
+TrackPtBinEdgesEEC 0.7 1 1.5 2 2.5 3 3.5 4 300 # Track pT bin edges for EEC
+
+# Configuration for unfolding response matrices
+SkipCovarianceMatrix 1 # 0 = Fill covariance matrix. 1 = Do not fill covariance matrix
+MinJetPtUnfoldingReco 80  # Minimum jet pT for reconstructed jets in the response matrix
+MinJetPtUnfoldingTruth 60 # Minimum jet pT for generator level jets in the response matrix
+
+# Binning for THnSparses
+CentralityBinEdges  0 30 50 90  # Centrality binning
+TrackPtBinEdges     0.7 1 2 3 4 8 12 300                   # Track pT binning
+PtHatBinEdges       0 30 50 80 120 170 220 280 370 460  # pT hat binning
+
+# Choose which background estimation methods are evaluated and parameters for them
+BackgroundMethods 0  # Bit 0 = Reflected-eta cone       (to set: 1)
+                     # Bit 1 = Perpendicular cone       (to set: 2)
+                     # Bit 2 = Mixed cones              (to set: 4)
+                     # Examples: All = 7, Everything but no mixing = 3
+MegaSkimMixing 0 # 0 = If doing mixing, use regular mixing files. 1 = Use megaskimmed mixing files
+EventMatchForMixing 0 # 0 = Match HiBin, 1 = Match HF energy, 2 = Match background multiplicity
+BinnedMixing 0 # 0 = Match events without bin borders for mixing. 1 = Use binned event matching for mixing
+
+# For the mixing bins, if exactly two values are given, these are interpreted as an example bin border, and bin width. The mixing bins are then automatically contructed using this information with even bin width. If more than two values are given, these are directly interpreted as bin borders.
+VzMixingBins -0.5 1 # vz binning for mixing
+HiBinMixingBins -0.5 1 # HiBin binning for mixing
+HFEnergyMixingBins 0 1 # HF energy binning for mixing
+MultiplicityMixingBins -0.5 1 # Multiplicity binning for mixing
+HFEnergyShift 25 # Shift in HF energy when matching to find mixed events
+
+# Debug
+DebugLevel 2   # 0 = No debug messages, 1 = Some debug messages, 2 = All debug messages

@@ -1,5 +1,12 @@
 // Implementation for HighForestReader
 
+//
+// Modified: Jesus Corral, 09-May-2026
+// ===========================================================
+// Added support for OO data and MC
+// including the new jet trigger, branches and filters for OO and the centrality definition for OO. 
+// 
+//===========================================================
 // Own includes
 #include "HighForestReader.h"
 
@@ -334,7 +341,7 @@ void HighForestReader::Initialize(){
   fHeavyIonTree->SetBranchStatus("evt", 1);
   fHeavyIonTree->SetBranchAddress("evt", &fEventNumber, &fEventNumberBranch);
 
-  if(fDataType == kPp || fDataType == kPpMC){
+  if(fDataType == kPp || fDataType == kPpMC || fDataType == kOO || fDataType == kOOMC){
     // We do not have HF tower information for pp. In this case find HF like energy from particle flow candidates
     fHeavyIonTree->SetBranchStatus("hiHFPlus_pf", 1);
     fHeavyIonTree->SetBranchAddress("hiHFPlus_pf", &fHFPlus, &fHFPlusBranch);
@@ -347,7 +354,7 @@ void HighForestReader::Initialize(){
     fHeavyIonTree->SetBranchAddress("hiHFminus", &fHFMinus, &fHFMinusBranch);
   }
 
-  if(fDataType == kPbPb || fDataType == kPbPbMC){
+  if(fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC){
     fHeavyIonTree->SetBranchStatus("hiBin", 1);
     fHeavyIonTree->SetBranchAddress("hiBin", &fHiBin, &fHiBinBranch);
   } else {
@@ -395,10 +402,22 @@ void HighForestReader::Initialize(){
   
     fJetTree->SetBranchStatus("nref", 1);
     fJetTree->SetBranchAddress("nref", &fnJets, &fnJetsBranch);
-    fJetTree->SetBranchStatus("rawpt", 1);
-    fJetTree->SetBranchAddress("rawpt", &fJetRawPtArray, &fJetRawPtBranch);
-    fJetTree->SetBranchStatus("trackMax", 1);
-    fJetTree->SetBranchAddress("trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
+
+    // OO forests use different branch names for raw pT and maximum track pT inside a jet
+    // In OO forests, the raw pT is stored in the "jtptUncorrected" branch, while in other forests it is stored in the "rawpt" branch. 
+    // Similarly, the maximum track pT inside a jet is stored in the "chargedMax" branch in OO forests and in the "trackMax" branch in other forests.
+    if(fDataType == kOO || fDataType == kOOMC){
+      fJetTree->SetBranchStatus("jtptUncorrected", 1);
+      fJetTree->SetBranchAddress("jtptUncorrected", &fJetRawPtArray, &fJetRawPtBranch);
+      fJetTree->SetBranchStatus("chargedMax", 1);
+      fJetTree->SetBranchAddress("chargedMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
+    } else {
+      fJetTree->SetBranchStatus("rawpt", 1);
+      fJetTree->SetBranchAddress("rawpt", &fJetRawPtArray, &fJetRawPtBranch);
+      fJetTree->SetBranchStatus("trackMax", 1);
+      fJetTree->SetBranchAddress("trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
+    }
+    
   
     // If we are looking at Monte Carlo, connect the reference pT and parton arrays
     if(fIsMC){
@@ -436,6 +455,7 @@ void HighForestReader::Initialize(){
   //
   //         tree                      branch                         What it is
   //  hltanalysis/HltTree   HLT_HIPuAK4CaloJet100_Eta5p1_v1      Event selection for PbPb
+  //  hltanalysis/HltTree   HLT_OxyL1SingleJet20_v1              Event selection for OO
   //  hltanalysis/HltTree      HLT_AK4CaloJet80_Eta5p1_v1         Event selection for pp
   // skimanalysis/HltTree         pprimaryVertexFilter           Event selection for PbPb
   // skimanalysis/HltTree    HBHENoiseFilterResultRun2Loose   Event selection for pp and PbPb
@@ -491,6 +511,28 @@ void HighForestReader::Initialize(){
       // Calo jet 100 trigger
       fHltTree->SetBranchStatus("HLT_PAAK4CaloJet100_Eta5p1_v3", 1);
       fHltTree->SetBranchAddress("HLT_PAAK4CaloJet100_Eta5p1_v3", &fCaloJet100FilterBit, &fCaloJet100FilterBranch);
+
+    } else if(fDataType == kOO || fDataType == kOOMC) { //  OO data or MC
+
+      // Calo jet 20 trigger
+      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet20_v1", 1);
+      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet20_v1", &fCaloJet15FilterBit, &fCaloJet15FilterBranch);
+
+      // Calo jet 35 trigger
+      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet35_v1", 1);
+      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet35_v1", &fCaloJet30FilterBit, &fCaloJet30FilterBranch);
+
+      // Calo jet 44 trigger
+      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet44_v1", 1);
+      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet44_v1", &fCaloJet40FilterBit, &fCaloJet40FilterBranch);
+
+       // Calo jet 60 trigger
+      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet60_v1", 1);
+      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet60_v1", &fCaloJet60FilterBit, &fCaloJet60FilterBranch);
+      
+      // No high jet pT triggers in OO forests
+      fCaloJet80FilterBit = 1;
+      fCaloJet100FilterBit = 1;
 
     } else { // PbPb data or MC
 
@@ -570,6 +612,25 @@ void HighForestReader::Initialize(){
       fSkimTree->SetBranchAddress("pVertexFilterCutdz1p0", &fPileupFilterBit, &fPileupFilterBranch);
 
       fClusterCompatibilityFilterBit = 1; // No cluster compatibility requirement for pPb
+
+     } else if(fDataType == kOO || fDataType == kOOMC){ // OO data or MC
+
+      // Primary vertex has at least two tracks, is within 25 cm in z-direction and within 2 cm in xy-direction
+      fSkimTree->SetBranchStatus("pprimaryVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pprimaryVertexFilter", &fPrimaryVertexFilterBit, &fPrimaryVertexBranch);
+     
+      // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
+      // accumulated by the energies of PF (particle-flow)candidates
+      fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
+      fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+
+      // Calculated from pixel clusters. Ensures that measured and predicted primary vertices are compatible
+      fSkimTree->SetBranchStatus("pclusterCompatibilityFilter", 1);
+      fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
+
+      fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
+      fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
+      fPileupFilterBit = 1;        // No pile-up filter for OO
 
     } else { // PbPb data or MC
     
@@ -748,7 +809,7 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
   TFile* inputFile = TFile::Open(fileList.at(0));
   TTree* miniAODcheck;
   // The track tree has different name in miniAOD and AOD
-  if(fDataType == kPbPb || fDataType == kPbPbMC){
+  if(fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC){
     miniAODcheck = (TTree*)inputFile->Get("PbPbTracks/trackTree");
   } else {
     miniAODcheck = (TTree*)inputFile->Get("ppTracks/trackTree");
@@ -770,6 +831,11 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
     treeName[1] = "akCs4PFJetAnalyzer/t";       // Tree for csPF jets
     treeName[2] = "akPu4PFJetAnalyzer/t";       // Tree for puPF jets
     treeName[3] = "akFlowPuCs4PFJetAnalyzer/t"; // Tree for flow subtracted csPF jets
+  } else if(fDataType == kOO || fDataType == kOOMC){
+    treeName[0] = "akCs2PFJetAnalyzer/t";       // Tree for cs R=0.2 PF jets
+    treeName[1] = "akCs4PFJetAnalyzer/t";       // Tree for cs R=0.4 PF jets
+    treeName[2] = "akCs6PFJetAnalyzer/t";       // Tree for cs R=0.6 PF jets
+    treeName[3] = "akCs8PFJetAnalyzer/t";       // Tree for cs R=0.8 PF jets
   } else { // pp or pPb data or MC
     treeName[0] = "ak4CaloJetAnalyzer/t"; // Tree for calo jets
     treeName[1] = "ak4PFJetAnalyzer/t";   // Tree for PF jets
@@ -779,7 +845,7 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
   if(!fMixingMode) fJetTree = new TChain(treeName[fJetType]);
 
   if(fReadTrackTree){
-    if(fIsMiniAOD && (fDataType == kPbPb || fDataType == kPbPbMC)){
+    if(fIsMiniAOD && (fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC)){
       fTrackTree = new TChain("PbPbTracks/trackTree");
     } else {
       if(fIsMiniAOD){
