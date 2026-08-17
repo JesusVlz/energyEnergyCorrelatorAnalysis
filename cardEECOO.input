@@ -25,7 +25,7 @@ FilledHistograms 31 # Bit 0 = Event information histograms                  (to 
 
 # Cuts for dijets
 JetType 1                  # 0 =  R2 PF CS jets, 1 = R4 PF CS jets, 2 = R6 PF CS jets, 3 = R8 PF CS jets
-JetAxis 0                  # 0 = E-scheme axis, 1 = WTA axis
+JetAxis 1                  # 0 = E-scheme axis, 1 = WTA axis
 JetEtaCut 1.6              # Region in eta around midrapidity taken into account in analysis
 MinJetPtCut 10             # Minimum pT of a jet accepted in the analysis
 MaxJetPtCut 5020           # Maximum pT of a jet accepted in the analysis
@@ -44,7 +44,7 @@ VertexMaxDistance 3         # Position with respect to PV resolution. 3 = Nomina
 CalorimeterSignalLimitPt 20 # Require signal in calorimeters for all track above this pT
 HighPtEtFraction 0.5        # For high pT tracks, require Et to be at least this fraction of pT
 Chi2QualityCut 0.18         # Maximum accepted chi2/(nDof*nHits) for tracks. 0.18 = Nominal, 0.18 = Loose, 0.15 = Tight
-MinimumTrackHits 11         # Require this many hits for each track
+MinimumTrackHits 0         # Require this many hits for each track
 SubeventCut 2               # Cut on subevent index. 0 = 0, 1 = (>0), 2 = no cut
 
 # Systematic variations applied
@@ -55,7 +55,7 @@ JetPtWeight 0 # In MC: 0 = Do not weight jet pT. 1 = Weight jet pT. 2 = Weight o
 DisableTrackPairEfficiencyCorrection 1 # 0 = Do not disable the correction. 1 = Disable the correction
 
 # Cuts for event selection
-ZVertexCut 15       # Maximum vz value for accepted tracks
+ZVertexCut 15      # Maximum vz value for accepted tracks
 LowPtHatCut -1      # Minimum accepted pT hat
 HighPtHatCut 1      # Maximum accepted pT hat
 MultiplicityMode 0  # 0 = Weight MC centrality to match data. 1 = Weight multiplicity to match

@@ -624,13 +624,19 @@ void HighForestReader::Initialize(){
       fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
       fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
 
-      // Calculated from pixel clusters. Ensures that measured and predicted primary vertices are compatible
-      fSkimTree->SetBranchStatus("pclusterCompatibilityFilter", 1);
-      fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
+      fSkimTree->SetBranchStatus("pileupVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pileupVertexFilter", &fPileupFilterBit, &fPileupFilterBranch);
 
+      // Calculated from pixel clusters. Ensures that measured and predicted primary vertices are compatible
+      //fSkimTree->SetBranchStatus("pclusterCompatibilityFilter", 1);
+      //fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
+
+      //fPrimaryVertexFilterBit = 1; // No primary vertex filter for OO
+      //fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
+      //fPileupFilterBit = 1; // No pile-up filter for OO
       fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
       fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
-      fPileupFilterBit = 1;        // No pile-up filter for OO
+      fClusterCompatibilityFilterBit = 1; // No Cluster compatibility, no good for 2025 data
 
     } else { // PbPb data or MC
     
