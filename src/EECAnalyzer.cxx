@@ -422,7 +422,8 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   if((fDataType == ForestReader::kOO || fDataType == ForestReader::kOOMC)) disableTrackPairEfficiencyCorrection = true; // Disable the track pair efficiency correction for OO data sets
 
   if(fTrackPairEfficiencyCorrector != NULL) {
-    fTrackPairEfficiencyCorrector->SetDisableCorrection(fCard->Get("DisableTrackPairEfficiencyCorrection"));
+    fTrackPairEfficiencyCorrector->SetDisableCorrection(disableTrackPairEfficiencyCorrection);
+    fTrackPairEfficiencyCorrector->SetJetRadius(fJetRadius);
   }
 }
 
@@ -1640,7 +1641,7 @@ void EECAnalyzer::RunAnalysis(){
                 // If the track is close to a jet, change the track eta-phi coordinates to a system where the jet axis is at origin
                 deltaRTrackJet = GetDeltaR(jetEta, jetPhi, trackEta, trackPhi);
                 
-                if(deltaRTrackJet < 0.4){
+                if(deltaRTrackJet < fJetRadius){
                   if(trackPt > manualMaxTrackPt) manualMaxTrackPt = trackPt;
                 }
                 
@@ -1882,10 +1883,10 @@ void EECAnalyzer::RunAnalysis(){
               
             } // Track close to jet
             
-            // For the track density, use a fixed cone size around the jet axis. TODO: Synchronize the cone size with EECHistograms
+            // For the track density, use a cone size synchronized with maxDeltaRTrackDensity in EECHistograms
             if(fFillJetConeHistograms){
               
-              if(deltaRTrackJet < 0.8){
+              if(deltaRTrackJet < 2*fJetRadius){
                 fillerParticleDensityInJetCone[0] = deltaRTrackJet;     // Axis 0: DeltaR between the track and the jet
                 fillerParticleDensityInJetCone[1] = jetPt;              // Axis 1: jet pT
                 fillerParticleDensityInJetCone[2] = trackPt;            // Axis 2: track pT
@@ -1924,9 +1925,9 @@ void EECAnalyzer::RunAnalysis(){
                 } // Fill jet cone histograms
               }
               
-              // For the track density, use a fixed cone size around the jet axis. TODO: Synchronize the cone size with EECHistograms
+              // For the track density, use a cone size synchronized with maxDeltaRTrackDensity in EECHistograms
               if(fFillJetConeHistograms){
-                if(deltaRTrackJet < 0.8){
+                if(deltaRTrackJet < 2*fJetRadius){
                   fillerParticleDensityInJetCone[0] = deltaRTrackJet;     // Axis 0: DeltaR between the track and the jet
                   fillerParticleDensityInJetCone[1] = jetPt;              // Axis 1: jet pT
                   fillerParticleDensityInJetCone[2] = trackPt;            // Axis 2: track pT
@@ -3932,8 +3933,8 @@ Double_t EECAnalyzer::GetPerpendicularPhi(const Double_t phi, const Int_t direct
 Double_t EECAnalyzer::TransformToUnfoldingAxis(const Double_t deltaR, const Double_t jetPt) const{
 
   const Int_t nJetPtBinsEEC = fCard->GetNBin("JetPtBinEdgesEEC");
-  const Double_t maxDeltaR = 0.8;
-  Double_t transformedDeltaR = deltaR;
+  // Must match maxDeltaREEC in EECHistograms::CreateHistograms
+  const Double_t maxDeltaR = 2*fCard->Get("JetRadius");  Double_t transformedDeltaR = deltaR;
   for(Int_t iJetPt = 1; iJetPt < nJetPtBinsEEC+1; iJetPt++){
     if(jetPt >= fCard->Get("JetPtBinEdgesEEC",iJetPt)){
       transformedDeltaR += maxDeltaR;

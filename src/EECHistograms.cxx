@@ -439,15 +439,17 @@ void EECHistograms::CreateHistograms(){
   const Double_t minEnergyWeightEEC = -0.5;
   const Double_t maxEnergyWeightEEC = nEnergyWeightsEEC - 0.5;
 
-  // DeltaR binning for track density
+  // DeltaR binning for track density. Range must cover the full cone diameter (2*R),
+  // since two tracks inside a cone of radius R can be separated by up to 2R.
   const Int_t nDeltaRBinsTrackDensity = 80;
   const Double_t minDeltaRTrackDensity = 0;
-  const Double_t maxDeltaRTrackDensity = 0.8;
+  const Double_t maxDeltaRTrackDensity = 2*fCard->Get("JetRadius");
   
-  // Logarithmic deltaR binning for energy-energy correlator histograms
+  // Logarithmic deltaR binning for energy-energy correlator histograms. Range must cover
+  // the full cone diameter (2*R) for the same reason as above.
   const Int_t nDeltaRBinsEEC = 32;
   const Double_t minDeltaREEC = 0;
-  const Double_t maxDeltaREEC = 0.8;
+  const Double_t maxDeltaREEC = 2*fCard->Get("JetRadius");
   const Double_t binnerShift = 0.01;
   const Double_t deltaRlogBinWidth = (TMath::Log(maxDeltaREEC+binnerShift) - TMath::Log(minDeltaREEC+binnerShift)) / nDeltaRBinsEEC;
   Double_t deltaRBinsEEC[nDeltaRBinsEEC+1];
