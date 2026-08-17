@@ -23,11 +23,11 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   const char* fileWriteMode = "UPDATE";
   
   // Choose which figure sets to draw
-  bool drawEventInformation = false;
-  bool drawJets = false;
-  bool drawTracks = false;
+  bool drawEventInformation = true;
+  bool drawJets = true;
+  bool drawTracks = true;
   bool drawUncorrectedTracks = false;
-  bool drawEnergyEnergyCorrelators = true;
+  bool drawEnergyEnergyCorrelators = false;
   bool drawEnergyEnergyCorrelatorsEfficiencyVariationPlus = false;
   bool drawEnergyEnergyCorrelatorsEfficiencyVariationMinus = false;
   bool drawEnergyEnergyCorrelatorsPairEfficiencyVariationPlus = false;
@@ -73,16 +73,16 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   
   // Bin range to be drawn
   int firstDrawnCentralityBin = 0;
-  int lastDrawnCentralityBin = 0;
+  int lastDrawnCentralityBin = 2;
   
-  int firstDrawnTrackPtBin = 0;
-  int lastDrawnTrackPtBin = 0;
+  int firstDrawnTrackPtBin = 3;
+  int lastDrawnTrackPtBin = 3;
   
   int firstDrawnJetPtBinEEC = 1;
-  int lastDrawnJetPtBinEEC = 1; // Note: Jets integrated over all pT ranges are in nJetPtBinsEEC bin
+  int lastDrawnJetPtBinEEC = 4; // Note: Jets integrated over all pT ranges are in nJetPtBinsEEC bin
   
-  int firstDrawnTrackPtBinEEC = 1;
-  int lastDrawnTrackPtBinEEC = 1;
+  int firstDrawnTrackPtBinEEC =3;
+  int lastDrawnTrackPtBinEEC = 3;
   
   // Remove centrality selection from pp data
   if(collisionSystem.Contains("pp")){
@@ -106,7 +106,7 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   const bool drawEnergyEnergyCorrelatorSignal = false;       // Draw background subtracted energy-energy correlators
   
   // Figure saving
-  const bool saveFigures = false;
+  const bool saveFigures = true;  // Save figures to file
   const char* figureFormat = "pdf";
   TString figureNameSuffix = "";
 
@@ -130,8 +130,8 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   // Select the style of histograms drawn for energy-energy correlators
   const bool drawIndividualEnergyEnergyCorrelators = false;
   const bool drawEnergyEnergyCorrelatorsForConstantJetPt = false;
-  const bool drawEnergyEnergyCorrelatorsForConstantTrackPt = false;
-  bool drawEnergyEnergyCorrelatorsSubevent = true;
+  const bool drawEnergyEnergyCorrelatorsForConstantTrackPt = true;
+  bool drawEnergyEnergyCorrelatorsSubevent = false; // Draw energy-energy correlators with subevent decomposition (only for PbPb and pPb MC)
   
   // Select which subevents to draw
   bool drawAllSubevents = true;   // Draw histograms without subevent selection

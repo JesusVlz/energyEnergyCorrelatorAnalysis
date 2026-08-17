@@ -761,10 +761,10 @@ void EECComparingDrawer::DrawEnergyEnergyCorrelatorHistograms(){
   
   // Legend helper variable
   TLegend *legend;
-  double legendX1 = 0.27; // Default x1 location for the legend
-  double legendY1 = 0.1;  // Default y1 location for the legend
-  double legendX2 = 0.47; // Default x2 location for the legend
-  double legendY2 = 0.38 + 0.06*fnAddedHistograms; // Default y2 location for the legend
+  double legendX1 = 0.45; // Default x1 location for the legend
+  double legendY1 = 0.05;  // Default y1 location for the legend
+  double legendX2 = 0.7; // Default x2 location for the legend
+  double legendY2 = 0.2 + 0.06*fnAddedHistograms; // Default y2 location for the legend
   
   // If we are not doing log-log drawing, move the legend to top right corner
   if(!fLogDeltaR || !fLogEEC){
@@ -1247,13 +1247,13 @@ std::tuple<double,double> EECComparingDrawer::GetHistogramAverageAndDifferenceIn
  *  TSTring additionalString = Yet another string to be added to the legend!
  */
 void EECComparingDrawer::SetupLegend(TLegend *legend, TString centralityString, TString trackString, TString asymmetryString, TString extraString, TString additionalString){
-  legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
+  legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.04);legend->SetTextFont(62);
   if(fAddSystemToLegend || fAddEnergyToLegend){
-    TString systemAndEnergy = Form("%s 5.02 TeV", fBaseHistograms->GetCard()->GetAlternativeDataType(fIncludeMCtype).Data());
+    TString systemAndEnergy = Form("%s 5.36 TeV", fBaseHistograms->GetCard()->GetAlternativeDataType(fIncludeMCtype).Data());
     if(!fAddEnergyToLegend) systemAndEnergy = fBaseHistograms->GetCard()->GetAlternativeDataType(fIncludeMCtype);
     legend->AddEntry((TObject*) 0,systemAndEnergy.Data(),"");
   }
-  if(fBaseHistograms->GetSystem().Contains("PbPb")) legend->AddEntry((TObject*) 0,centralityString.Data(),"");
+  if(fBaseHistograms->GetSystem().Contains("PbPb") or fBaseHistograms->GetSystem().Contains("OO")) legend->AddEntry((TObject*) 0,centralityString.Data(),"");
   if(trackString != "") legend->AddEntry((TObject*) 0,trackString.Data(),"");
   if(asymmetryString != "") legend->AddEntry((TObject*) 0,asymmetryString.Data(),"");
   if(extraString != "") legend->AddEntry((TObject*) 0,extraString.Data(),"");

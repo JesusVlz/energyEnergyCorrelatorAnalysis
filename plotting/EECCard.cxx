@@ -83,9 +83,9 @@ void EECCard::ReadVectors(){
 void EECCard::FindDataTypeString(){
   
   // Define the different data types corresponding to certain indices
-  TString dataTypes[9] = {"pp","PbPb","pp MC","PbPb MC","pPb p #rightarrow -#eta","pPb p #rightarrow +#eta", "pPb p #rightarrow -#eta 5TeV", "pPb MC p #rightarrow -#eta", "pPb MC p #rightarrow +#eta"};
-  TString alternativeDataTypes[9] = {"pp","PbPb","Pythia8","Pythia+Hydjet","pPb p #rightarrow -#eta","pPb p #rightarrow +#eta", "pPb", "Pythia+EPOS p #rightarrow -#eta","Pythia+EPOS p #rightarrow +#eta",};
-  if(fDataType < 0 || fDataType > 8){
+  TString dataTypes[11] = {"pp","PbPb","pp MC","PbPb MC","pPb p #rightarrow -#eta","pPb p #rightarrow +#eta", "pPb p #rightarrow -#eta 5TeV", "pPb MC p #rightarrow -#eta", "pPb MC p #rightarrow +#eta", "OO","OO MC"}; 
+  TString alternativeDataTypes[11] = {"pp","PbPb","Pythia8","Pythia+Hydjet","pPb p #rightarrow -#eta","pPb p #rightarrow +#eta", "pPb", "Pythia+EPOS p #rightarrow -#eta","Pythia+EPOS p #rightarrow +#eta", "OO","OO MC"};
+  if(fDataType < 0 || fDataType > 10){
     fDataTypeString = "Unknown";
     fAlternativeDataTypeString = "Unknown";
     fDataTypeStringWithoutMCType = "Unknown";
@@ -175,6 +175,11 @@ int EECCard::GetJetType() const{
 // Getter for the minimum jet pT cut
 double EECCard::GetJetPtCut() const{
   return (*fCardEntries[kMinPtCut])[1];
+}
+
+// Getter for the jet radios used in energy-energy correlator analysis
+double EECCard::GetJetRadius() const{
+  return (*fCardEntries[kJetRadius])[1];   // valor escalar guardado en la posición 0
 }
 
 /*

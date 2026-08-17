@@ -12,8 +12,13 @@ void compareEEChistograms(){
   // ==================================================================
   
   // Define the used data files, and a comment describing the data in each file
-  const int nDatasets = 4;
-  TString inputFileName[] = {"data/pPb/pPb_8TeV_pToPlusEta_pfJets_eschemeAxis_nominalEnergyWeight_minimumBias_jetEtaCMcut_lowPt_processed_2025-07-17.root", "data/pPb/pPb_8TeV_pToMinusEta_pfJets_eschemeAxis_nominalEnergyWeight_minimumBias_jetEtaCMcut_lowPt_processed_2025-07-17.root",  "data/pPb/pythiaEpos_8TeV_RecoReco_pToPlusEta_pfJets_eschemeAxis_nominalEnergyWeight_jetEtaCMcut_processed_2025-07-16.root", "data/pPb/pythiaEpos_8TeV_RecoReco_pToMinusEta_pfJets_eschemeAxis_nominalEnergyWeight_jetEtaCMcut_processed_2025-07-16.root"};
+  const int nDatasets = 5;
+  TString inputFileName[] = {"/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_minbias_processed.root", 
+    "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_primaryvertex_processed.root", 
+    "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_zvertex_processed.root",
+    "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_pileupf_processed.root",
+    "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_hfcoinc_processed.root"
+  };
   //TString inputFileName[] = {"data/ppMC2017_GenGen_Pythia8_pfJets_eschemeAxis_energyWeightSquared_processed_2025-02-19.root", "data/ppMC2017_GenGen_Pythia8_pfJets_wtaAxis_optimizedUnfoldingBins_energyWeightSquared_nominalSmear_truthReference_processed_2024-01-10.root"};
   // eecAnalysis_akFlowJets_updatedMultiplicityAndDensity_eschemeAxis_preprocessed_2022-10-17.root
   // eecAnalysis_akFlowJets_updatedMultiplicityAndDensity_wtaAxis_preprocessed_2022-10-17.root
@@ -22,7 +27,8 @@ void compareEEChistograms(){
   // PbPbMC2018_GenGen_eecAnalysis_akFlowJets_miniAOD_4pCentShift_noTrigger_finalMcWeight_processed_2023-03-08.root
   // data/MinBiasHydjet_RecoGen_eecAnalysis_akFlowJet_firstMinBiasScan_noTrigger_preprocessed_2022-10-10.root
   
-  TString legendComment[] = {"pPb 8.16 TeV p #rightarrow +#eta", "pPb 8.16 TeV p #rightarrow -#eta", "Pythia+EPOS 8.16 TeV p #rightarrow +#eta", "Pythia+EPOS 8.16 TeV p #rightarrow -#eta"};
+  TString legendBase[] = {"Min Bias Selection", "+ Primary Vertex Filter", "+ Z Vertex Filter", "+ Pileup Filter", "+ HF Coincidence Filter"};
+  TString legendComment[nDatasets];
   
   // Try to open the files
   TFile* inputFile[nDatasets];
@@ -41,7 +47,7 @@ void compareEEChistograms(){
   EECCard* card = new EECCard(inputFile[0]);
   
   // Choose which figure sets to draw
-  bool drawEventInformation = true;
+  bool drawEventInformation = false;
   bool drawJets = false;
   bool drawTracks = false;
   bool drawUncorrectedTracks = false;
@@ -59,7 +65,7 @@ void compareEEChistograms(){
   bool drawParticlePtDensityAroundJetsPtBinned = false;
   
   // Energy-energy correlators
-  bool drawEnergyEnergyCorrelators = false;
+  bool drawEnergyEnergyCorrelators = true;
   bool drawEnergyEnergyCorrelatorsEfficiencyVariationPlus = false;
   bool drawEnergyEnergyCorrelatorsEfficiencyVariationMinus = false;
   bool drawEnergyEnergyCorrelatorsPairEfficiencyVariationPlus = false;
@@ -111,11 +117,13 @@ void compareEEChistograms(){
   bool useDifferenceInsteadOfRatio = false;
   double minZoom = 0.8;
   double maxZoom = 1.2;
-  TString ratioLabel = "#frac{MC}{Data}";
-  bool manualLegend = false; // Set this true if you want to set legend manually in EECComparingDrawer.cxx code instead of using automatic legend generation
-  bool addSystemToLegend = false;  // Add the collision system from first file to legend. Useful if all files are from same system
+  //TString ratioLabel = "#frac{MC}{Data}";
+  TString ratioLabel = "Ratio to Min Bias";
+
+  bool manualLegend = true; // Set this true if you want to set legend manually in EECComparingDrawer.cxx code instead of using automatic legend generation
+  bool addSystemToLegend = true;  // Add the collision system from first file to legend. Useful if all files are from same system
   bool includeMCtype = false;      // Include MC type in the system
-  bool addEnergyToLegend = false;  // Add the collision energy from the first file to legend. Useful if all files are from same system
+  bool addEnergyToLegend = true;  // Add the collision energy from the first file to legend. Useful if all files are from same system
   
   // Scaling for histograms
   int scaleHistograms = 1; // 0 = Do not scale histograms. 1 = Scale integral to one. 2 = Scale average to one
@@ -139,16 +147,16 @@ void compareEEChistograms(){
   
   // Bin range to be drawn
   int firstDrawnCentralityBin = 0;
-  int lastDrawnCentralityBin = nCentralityBins-1;
+  int lastDrawnCentralityBin = 0;
   
-  int firstDrawnTrackPtBin = 1;
-  int lastDrawnTrackPtBin = 1;
+  int firstDrawnTrackPtBin = 0;
+  int lastDrawnTrackPtBin = 0;
   
-  int firstDrawnJetPtBinEEC = 5;
-  int lastDrawnJetPtBinEEC = 5; // Note: Jets integrated over all pT ranges are in nJetPtBinsEEC bin
+  int firstDrawnJetPtBinEEC = 2;
+  int lastDrawnJetPtBinEEC = 2; // Note: Jets integrated over all pT ranges are in nJetPtBinsEEC bin
 
-  int firstDrawnTrackPtBinEEC = 1;
-  int lastDrawnTrackPtBinEEC = 5;
+  int firstDrawnTrackPtBinEEC =3;
+  int lastDrawnTrackPtBinEEC = 3;
   
   // ==================================================================
   // ===================== Configuration ready ========================
@@ -184,6 +192,22 @@ void compareEEChistograms(){
     histograms[iDataset]->SetTrackPtBinRange(firstDrawnTrackPtBin,lastDrawnTrackPtBin);
     histograms[iDataset]->SetJetPtBinRangeEEC(firstDrawnJetPtBinEEC,lastDrawnJetPtBinEEC);
     histograms[iDataset]->SetTrackPtBinRangeEEC(firstDrawnTrackPtBinEEC,lastDrawnTrackPtBinEEC);
+
+    // Build legend string with event count. GetNEvents() lee el histograma
+    // Build legend string with the ENTRIES of the specific EEC projection
+    // (not the raw event count). Bin combo must match firstDrawnCentralityBin /
+    // firstDrawnJetPtBinEEC / firstDrawnTrackPtBinEEC set above (currently C2/J0/T4).
+    // iSubevent = EECHistograms::knSubeventCombinations selects the inclusive/combined
+    // subevent bin, correct for real data (no MC subevent split).
+    TH1D* legendRefHisto = histograms[iDataset]->GetHistogramEnergyEnergyCorrelator(
+        EECHistogramManager::kEnergyEnergyCorrelator,
+        firstDrawnCentralityBin,
+        firstDrawnJetPtBinEEC,
+        firstDrawnTrackPtBinEEC,
+        EECHistograms::kSameJetPair,
+        EECHistograms::knSubeventCombinations
+    );
+    legendComment[iDataset] = Form("%s ( %.0f )", legendBase[iDataset].Data(), legendRefHisto->GetEntries());
     
     // Load the histograms from the file
     //histograms[iDataset]->LoadProcessedHistograms();

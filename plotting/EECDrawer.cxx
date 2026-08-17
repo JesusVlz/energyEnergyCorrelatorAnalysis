@@ -39,8 +39,9 @@ EECDrawer::EECDrawer(EECHistogramManager *inputHistograms) :
   TString collisionSystem = fHistograms->GetCard()->GetAlternativeDataType(false);
   
   // Make a string for collision system based on information on the card
-  fSystemAndEnergy = Form("%s 5.02 TeV",collisionSystem.Data());
-  fCompactSystemAndEnergy = fSystemAndEnergy;
+  TString collisionEnergy = "5.02 TeV";
+  if(collisionSystem.Contains("OO")) collisionEnergy = "5.36 TeV";
+  fSystemAndEnergy = Form("%s %s", collisionSystem.Data(), collisionEnergy.Data());  fCompactSystemAndEnergy = fSystemAndEnergy;
   fCompactSystemAndEnergy.ReplaceAll(" ","");
   fCompactSystemAndEnergy.ReplaceAll(".","v");
   
@@ -832,8 +833,14 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
                 namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetPairingTypeSaveName(iPairingType));
                 
                 // For logarithmic x-axis, cannot go all the way to zero
-                if(fLogDeltaR) drawnHistogram->GetXaxis()->SetRangeUser(0.006,0.8);
-                
+                if(fLogDeltaR){
+                  double jetR = fHistograms->GetCard()->GetJetRadius();
+                  if(jetR > 0.6){                                              // R = 0.8
+                    drawnHistogram->GetXaxis()->SetRangeUser(0.008, 1.6);
+                  } else {                                                     // R = 0.4 (default)
+                    drawnHistogram->GetXaxis()->SetRangeUser(0.008, 0.8);
+                  }
+                }                
                 fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ");
                 legend = new TLegend(0.62,0.7,0.82,0.9);
                 legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
@@ -868,12 +875,13 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
             compactSubeventString = fHistograms->GetSubeventCombinationSaveName(iSubevent);
             
             // Only one legend for the plot
-            legend = new TLegend(0.62,0.35,0.82,0.9);
+            legend = new TLegend(0.18,0.20,0.50,0.70);
             legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
             legend->AddEntry((TObject*) 0, fSystemAndEnergy.Data(), "");
             if(iSubevent < EECHistograms::knSubeventCombinations) legend->AddEntry((TObject*) 0, subeventString.Data(), "");
-            //legend->AddEntry((TObject*) 0, centralityString.Data(), "");
-            legend->AddEntry((TObject*) 0, "Cent: 0-10%", "");
+            legend->AddEntry((TObject*) 0, centralityString.Data(), "");
+            //legend->AddEntry((TObject*) 0, "Cent: 0-10%", "");
+            legend->AddEntry((TObject*) 0, Form("anti-k_{T} R = %.1f", fHistograms->GetCard()->GetJetRadius()), "");
             legend->AddEntry((TObject*) 0, jetPtString.Data(), "");
             
             
@@ -889,11 +897,19 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
               drawnHistogram->SetMarkerStyle(style[iTrackPt-fFirstDrawnTrackPtBinEEC]);
               
               // For logarithmic x-axis, cannot go all the way to zero
-              if(fLogDeltaR) drawnHistogram->GetXaxis()->SetRangeUser(0.008,0.8);
-              
+              if(fLogDeltaR){
+                double jetR = fHistograms->GetCard()->GetJetRadius();
+                if(jetR > 0.6){                                              // R = 0.8
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 1.6);
+                } else {                                                     // R = 0.4 (default)
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 0.8);
+                }
+              }
+
+
               if(iTrackPt == fFirstDrawnTrackPtBinEEC){
-                //namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetPairingTypeSaveName(iPairingType));
                 namerY = "EEC";
+                drawnHistogram->GetYaxis()->SetRangeUser(2e-5, drawnHistogram->GetMaximum()*5);
                 fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ","p");
               } else {
                 drawnHistogram->Draw("p,same");
@@ -933,12 +949,13 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
               compactSubeventString = fHistograms->GetSubeventCombinationSaveName(iSubevent);
               
               // Only one legend for the plot
-              legend = new TLegend(0.62,0.35,0.82,0.9);
+              legend = new TLegend(0.18,0.20,0.50,0.70);
               legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
               legend->AddEntry((TObject*) 0, fSystemAndEnergy.Data(), "");
               if(iSubevent < EECHistograms::knSubeventCombinations) legend->AddEntry((TObject*) 0, subeventString.Data(), "");
-              //legend->AddEntry((TObject*) 0, centralityString.Data(),"");
-              legend->AddEntry((TObject*) 0, "Cent: 0-10%","");
+              legend->AddEntry((TObject*) 0, centralityString.Data(),"");
+              //legend->AddEntry((TObject*) 0, "Cent: 0-10%","");
+              legend->AddEntry((TObject*) 0, Form("anti-k_{T} R = %.1f", fHistograms->GetCard()->GetJetRadius()), "");
               legend->AddEntry((TObject*) 0, trackPtString.Data(),"");
               
               // Loop over jet pT bins
@@ -953,11 +970,19 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
                 drawnHistogram->SetMarkerStyle(style[iJetPt-fFirstDrawnJetPtBinEEC]);
                 
                 // For logarithmic x-axis, cannot go all the way to zero
-                if(fLogDeltaR) drawnHistogram->GetXaxis()->SetRangeUser(0.008,0.8);
+                if(fLogDeltaR){
+                double jetR = fHistograms->GetCard()->GetJetRadius();
+                if(jetR > 0.6){                                              // R = 0.8
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 1.6);
+                } else {                                                     // R = 0.4 (default)
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 0.8);
+                }
+                }
                 
                 if(iJetPt == fFirstDrawnJetPtBinEEC){
                   //namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetPairingTypeSaveName(iPairingType));
                   namerY = "EEC";
+                  drawnHistogram->GetYaxis()->SetRangeUser(2e-4, drawnHistogram->GetMaximum()*5);
                   fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ","p");
                 } else {
                   drawnHistogram->Draw("p,same");
@@ -1003,10 +1028,12 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
               legendY1 = (fLegendComment != "") ? 0.5 : 0.55;
               legend = new TLegend(0.22,legendY1,0.42,0.8);
               legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
-              legend->AddEntry((TObject*) 0, Form("%s 5.02 TeV", fHistograms->GetCard()->GetAlternativeDataType(false).Data()), "");
+              TString sysLabel = fHistograms->GetCard()->GetAlternativeDataType(false);
+              TString eLabel   = sysLabel.Contains("OO") ? "5.36 TeV" : "5.02 TeV";
+              legend->AddEntry((TObject*) 0, Form("%s %s", sysLabel.Data(), eLabel.Data()), "");
               if(fLegendComment != "") legend->AddEntry((TObject*) 0, fLegendComment.Data(), "");
-              //legend->AddEntry((TObject*) 0, centralityString.Data(),"");
-              legend->AddEntry((TObject*) 0, "Cent: 0-10%","");
+              legend->AddEntry((TObject*) 0, centralityString.Data(),"");
+              //legend->AddEntry((TObject*) 0, "Cent: 0-10%","");
               legend->AddEntry((TObject*) 0, jetPtString.Data(),"");
               legend->AddEntry((TObject*) 0, trackPtString.Data(),"");
               
@@ -1029,8 +1056,14 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
               } else {
                 drawnHistogram->GetYaxis()->SetRangeUser(0.00005, 60);
               }
-              if(fLogDeltaR) drawnHistogram->GetXaxis()->SetRangeUser(0.008,0.39);
-              
+              if(fLogDeltaR){
+                double jetR = fHistograms->GetCard()->GetJetRadius();
+                if(jetR > 0.6){                                              // R = 0.8
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 1.6);
+                } else {                                                     // R = 0.4 (default)
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 0.8);
+                }
+              }
               //namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetPairingTypeSaveName(iPairingType));
               namerY = "EEC";
               fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ");
@@ -1137,7 +1170,14 @@ void EECDrawer::DrawProcessedEnergyEnergyCorrelators(){
               namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetEnergyEnergyCorrelatorProcessSaveName(iProcessLevel));
               
               // For logarithmic x-axis, cannot go all the way to zero
-              if(fLogDeltaR) drawnHistogram->GetXaxis()->SetRangeUser(0.006,0.8);
+              if(fLogDeltaR){
+                double jetR = fHistograms->GetCard()->GetJetRadius();
+                if(jetR > 0.6){                                              // R = 0.8
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 1.6);
+                } else {                                                     // R = 0.4 (default)
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 0.8);
+                }
+              }
               
               fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ");
               legend = new TLegend(0.62,0.7,0.82,0.9);
@@ -1177,7 +1217,14 @@ void EECDrawer::DrawProcessedEnergyEnergyCorrelators(){
             drawnHistogram->SetLineColor(color[iTrackPt]);
             
             // For logarithmic x-axis, cannot go all the way to zero
-            if(fLogDeltaR) drawnHistogram->GetXaxis()->SetRangeUser(0.006,0.8);
+            if(fLogDeltaR){
+              double jetR = fHistograms->GetCard()->GetJetRadius();
+              if(jetR > 0.6){                                              // R = 0.8
+                drawnHistogram->GetXaxis()->SetRangeUser(0.008, 1.6);
+              } else {                                                     // R = 0.4 (default)
+                drawnHistogram->GetXaxis()->SetRangeUser(0.008, 0.8);
+              }
+            }
             
             if(iTrackPt == fFirstDrawnTrackPtBinEEC){
               namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetEnergyEnergyCorrelatorProcessSaveName(iProcessLevel));
@@ -1209,7 +1256,7 @@ void EECDrawer::DrawProcessedEnergyEnergyCorrelators(){
             compactTrackPtString.ReplaceAll(".","v");
             
             // Only one legend for the plot
-            legend = new TLegend(0.62,0.35,0.82,0.9);
+            legend = new TLegend(0.18,0.20,0.50,0.70);
             legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
             legend->AddEntry((TObject*) 0, fSystemAndEnergy.Data(), "");
             legend->AddEntry((TObject*) 0, centralityString.Data(),"");
@@ -1224,7 +1271,14 @@ void EECDrawer::DrawProcessedEnergyEnergyCorrelators(){
               drawnHistogram->SetLineColor(color[iJetPt]);
               
               // For logarithmic x-axis, cannot go all the way to zero
-              if(fLogDeltaR) drawnHistogram->GetXaxis()->SetRangeUser(0.006,0.8);
+              if(fLogDeltaR){
+                double jetR = fHistograms->GetCard()->GetJetRadius();
+                if(jetR > 0.6){                                              // R = 0.8
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 1.6);
+                } else {                                                     // R = 0.4 (default)
+                  drawnHistogram->GetXaxis()->SetRangeUser(0.008, 0.8);
+                }
+              }
               
               if(iJetPt == fFirstDrawnJetPtBinEEC){
                 namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetEnergyEnergyCorrelatorProcessSaveName(iProcessLevel));
@@ -1342,7 +1396,7 @@ void EECDrawer::DrawCovarianceMatrices(){
 void EECDrawer::SetupLegend(TLegend *legend, TString centralityString, TString jetString, TString trackString, TString extraString, TString anotherString){
   legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62); // Size: 0.05
   legend->AddEntry((TObject*) 0, fSystemAndEnergy.Data(), "");
-  if(fSystemAndEnergy.Contains("PbPb") || fSystemAndEnergy.Contains("Hydjet")) legend->AddEntry((TObject*) 0,centralityString.Data(),"");
+  if(fSystemAndEnergy.Contains("PbPb") || fSystemAndEnergy.Contains("Hydjet") || fSystemAndEnergy.Contains("OO")) legend->AddEntry((TObject*) 0,centralityString.Data(),""); 
   if(jetString != "") legend->AddEntry((TObject*) 0,jetString.Data(),"");
   if(trackString != "") legend->AddEntry((TObject*) 0,trackString.Data(),"");
   if(extraString != "") legend->AddEntry((TObject*) 0,extraString.Data(),"");
