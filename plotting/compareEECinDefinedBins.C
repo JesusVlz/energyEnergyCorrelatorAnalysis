@@ -36,7 +36,9 @@ void compareEECinDefinedBins(){
   //fileName.push_back("pythiaEposPilot_GenGen_truthLevelBackground_processed.root");
   //fileName.push_back("pythiaEposPilot_GenGen_mixingWithNominalHF_processed.root");
   //fileName.push_back("pythiaEposPilot_GenGen_mixingWithShiftedHF_processed.root");
-  fileName.push_back("myRootFile_merged_processed.root");
+  //fileName.push_back("/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_eecOO_2025-09-10-processed.root");
+  fileName.push_back("/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_eecppRef_2024-09-10-processed.root");
+
     
 
   const int nComparisonFiles = fileName.size();
@@ -69,8 +71,8 @@ void compareEECinDefinedBins(){
   //fileDescription.push_back("Mixed cone, no HF shift");
   //fileDescription.push_back("Mixed cone, with HF shift");
 //  fileDescription.push_back("Perpendicular cone");
-  fileDescription.push_back("OO 5.02 TeV");
-
+  //fileDescription.push_back("OO 5.36 TeV, raw");
+  fileDescription.push_back("pp 5.36 TeV, raw");
 
   // Check that a description exists for each file
   if(fileDescription.size() < fileName.size()){
@@ -130,7 +132,7 @@ void compareEECinDefinedBins(){
   bool individualCentrality = true; // True = make different figure for each bin. False = plot all centrality bin to the same figure.
 
   std::vector<std::pair<double,double>> comparedJetPtBin;
-  comparedJetPtBin.push_back(std::make_pair(100,120));
+  comparedJetPtBin.push_back(std::make_pair(80,100));
   //comparedJetPtBin.push_back(std::make_pair(40,50));
   //comparedJetPtBin.push_back(std::make_pair(50,60));
   //comparedJetPtBin.push_back(std::make_pair(60,80));

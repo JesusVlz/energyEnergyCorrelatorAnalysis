@@ -28,10 +28,38 @@ using namespace std;
 class ForestReader{
   
 public:
-  
-  // Possible data types to be read with the reader class
-  enum enumDataTypes{kPp, kPbPb, kPpMC, kPbPbMC, kPPb_pToMinusEta, kPPb_pToPlusEta, kPPb_pToMinusEta_5TeV, kPPbMC_pToMinusEta, kPPbMC_pToPlusEta, kOO, kOOMC, knDataTypes};
-  //  # 0 = pp, 1 = PbPb, 2 = pp MC, 3 = PbPb MC, 4 = pPb p -> -eta, 5 = pPb p -> +eta, 6 = pPb 5 TeV, 7 = pPb MC p -> -eta, 8 = pPb MC p -> +eta, 9 = OO, 10 = OO MC
+
+// Possible data types to be read with the reader class
+  enum enumDataTypes {
+    kPp                    = 0,
+    kPbPb                  = 1,
+    kPpMC                  = 2,
+    kPbPbMC                = 3,
+    kPPb_pToMinusEta       = 4,
+    kPPb_pToPlusEta        = 5,
+    kPPb_pToMinusEta_5TeV  = 6,
+    kPPbMC_pToMinusEta     = 7,
+    kPPbMC_pToPlusEta      = 8,
+    kOO                    = 9,
+    kOOMC                  = 10,
+    kPpRef5p36TeV          = 11,
+    kPpRef5p36TeVMC        = 12,
+    knDataTypes
+  };
+
+ // 0 = pp Ref 5 TeV,
+ // 1 = PbPb 5 TeV, 
+ // 2 = pp MC, 
+ // 3 = PbPb MC, 
+ // 4 = pPb p -> -eta, 
+ // 5 = pPb p -> +eta, 
+ // 6 = pPb 5 TeV, 
+ // 7 = pPb MC p -> -eta, 
+ // 8 = pPb MC p -> +eta, 
+ // 9 = OO, 
+ // 10 = OO MC, 
+ // 11 = pp Ref 5.36 TeV, 
+ // 12 = pp Ref 5.36 TeV MC
   
   // Constructors and destructors
   ForestReader();                                          // Default constructor

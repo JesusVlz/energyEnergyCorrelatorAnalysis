@@ -16,8 +16,9 @@ void compareEEChistograms(){
   TString inputFileName[] = {"/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_minbias_processed.root", 
     "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_primaryvertex_processed.root", 
     "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_zvertex_processed.root",
+    "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_hfcoinc_processed.root",
     "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_pileupf_processed.root",
-    "/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/merged_R4_axisWTA_hfcoinc_processed.root"
+
   };
   //TString inputFileName[] = {"data/ppMC2017_GenGen_Pythia8_pfJets_eschemeAxis_energyWeightSquared_processed_2025-02-19.root", "data/ppMC2017_GenGen_Pythia8_pfJets_wtaAxis_optimizedUnfoldingBins_energyWeightSquared_nominalSmear_truthReference_processed_2024-01-10.root"};
   // eecAnalysis_akFlowJets_updatedMultiplicityAndDensity_eschemeAxis_preprocessed_2022-10-17.root
@@ -49,7 +50,7 @@ void compareEEChistograms(){
   // Choose which figure sets to draw
   bool drawEventInformation = false;
   bool drawJets = false;
-  bool drawTracks = false;
+  bool drawTracks = true;
   bool drawUncorrectedTracks = false;
   
   // Multiplicity in jet cone
@@ -152,11 +153,11 @@ void compareEEChistograms(){
   int firstDrawnTrackPtBin = 0;
   int lastDrawnTrackPtBin = 0;
   
-  int firstDrawnJetPtBinEEC = 2;
-  int lastDrawnJetPtBinEEC = 2; // Note: Jets integrated over all pT ranges are in nJetPtBinsEEC bin
+  int firstDrawnJetPtBinEEC = 0;
+  int lastDrawnJetPtBinEEC = 0; // Note: Jets integrated over all pT ranges are in nJetPtBinsEEC bin
 
-  int firstDrawnTrackPtBinEEC =3;
-  int lastDrawnTrackPtBinEEC = 3;
+  int firstDrawnTrackPtBinEEC =1;
+  int lastDrawnTrackPtBinEEC = 1;
   
   // ==================================================================
   // ===================== Configuration ready ========================

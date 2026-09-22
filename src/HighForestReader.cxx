@@ -341,7 +341,7 @@ void HighForestReader::Initialize(){
   fHeavyIonTree->SetBranchStatus("evt", 1);
   fHeavyIonTree->SetBranchAddress("evt", &fEventNumber, &fEventNumberBranch);
 
-  if(fDataType == kPp || fDataType == kPpMC || fDataType == kOO || fDataType == kOOMC){
+  if(fDataType == kPp || fDataType == kPpMC || fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
     // We do not have HF tower information for pp. In this case find HF like energy from particle flow candidates
     fHeavyIonTree->SetBranchStatus("hiHFPlus_pf", 1);
     fHeavyIonTree->SetBranchAddress("hiHFPlus_pf", &fHFPlus, &fHFPlusBranch);
@@ -406,7 +406,7 @@ void HighForestReader::Initialize(){
     // OO forests use different branch names for raw pT and maximum track pT inside a jet
     // In OO forests, the raw pT is stored in the "jtptUncorrected" branch, while in other forests it is stored in the "rawpt" branch. 
     // Similarly, the maximum track pT inside a jet is stored in the "chargedMax" branch in OO forests and in the "trackMax" branch in other forests.
-    if(fDataType == kOO || fDataType == kOOMC){
+    if(fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
       fJetTree->SetBranchStatus("jtptUncorrected", 1);
       fJetTree->SetBranchAddress("jtptUncorrected", &fJetRawPtArray, &fJetRawPtBranch);
       fJetTree->SetBranchStatus("chargedMax", 1);
@@ -455,12 +455,14 @@ void HighForestReader::Initialize(){
   //
   //         tree                      branch                         What it is
   //  hltanalysis/HltTree   HLT_HIPuAK4CaloJet100_Eta5p1_v1      Event selection for PbPb
-  //  hltanalysis/HltTree   HLT_OxyL1SingleJet20_v1              Event selection for OO
   //  hltanalysis/HltTree      HLT_AK4CaloJet80_Eta5p1_v1         Event selection for pp
   // skimanalysis/HltTree         pprimaryVertexFilter           Event selection for PbPb
   // skimanalysis/HltTree    HBHENoiseFilterResultRun2Loose   Event selection for pp and PbPb
   // skimanalysis/HltTree         pPAprimaryVertexFilter          Event selection for pp
   // skimanalysis/HltTree           pBeamScrapingFilter           Event selection for pp
+  //  hltanalysis/HltTree     HLT_MinimumBiasHF_OR_BptxAND_v1      Run-3 OO data trigger
+  //  hltanalysis/HltTree     HLT_PPRefZeroBias_v6                  Run-3 ppRef data trigger
+
   
   // Connect the branches to the HLT tree
   if(fUseJetTrigger){
@@ -514,25 +516,35 @@ void HighForestReader::Initialize(){
 
     } else if(fDataType == kOO || fDataType == kOOMC) { //  OO data or MC
 
-      // Calo jet 20 trigger
-      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet20_v1", 1);
-      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet20_v1", &fCaloJet15FilterBit, &fCaloJet15FilterBranch);
+      // Run-3 OO minimum-bias trigger, required for both data and MC.
+      //
+      // The first legacy trigger slot is reused as the generic Run-3
+      // minimum-bias trigger bit. TriggerSelection 8 reads this slot.
+      fHltTree->SetBranchStatus("HLT_MinimumBiasHF_OR_BptxAND_v1", 1);
+      fHltTree->SetBranchAddress("HLT_MinimumBiasHF_OR_BptxAND_v1", &fCaloJet15FilterBit, &fCaloJet15FilterBranch);
 
-      // Calo jet 35 trigger
-      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet35_v1", 1);
-      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet35_v1", &fCaloJet30FilterBit, &fCaloJet30FilterBranch);
+      // The Run-3 minimum-bias analysis does not use jet-trigger paths.
+      fCaloJet30FilterBit = 0;
+      fCaloJet40FilterBit = 0;
+      fCaloJet60FilterBit = 0;
+      fCaloJet80FilterBit = 0;
+      fCaloJet100FilterBit = 0;
 
-      // Calo jet 44 trigger
-      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet44_v1", 1);
-      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet44_v1", &fCaloJet40FilterBit, &fCaloJet40FilterBranch);
+    } else if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
 
-       // Calo jet 60 trigger
-      fHltTree->SetBranchStatus("HLT_OxyL1SingleJet60_v1", 1);
-      fHltTree->SetBranchAddress("HLT_OxyL1SingleJet60_v1", &fCaloJet60FilterBit, &fCaloJet60FilterBranch);
-      
-      // No high jet pT triggers in OO forests
-      fCaloJet80FilterBit = 1;
-      fCaloJet100FilterBit = 1;
+      // Run-3 pp-reference ZeroBias trigger, required for both data and MC.
+      //
+      // The first legacy trigger slot is reused as the generic Run-3
+      // minimum-bias/zero-bias trigger bit. TriggerSelection 8 reads it.
+      fHltTree->SetBranchStatus("HLT_PPRefZeroBias_v6", 1);
+      fHltTree->SetBranchAddress("HLT_PPRefZeroBias_v6", &fCaloJet15FilterBit, &fCaloJet15FilterBranch);
+
+      // The Run-3 ZeroBias analysis does not use jet-trigger paths.
+      fCaloJet30FilterBit = 0;
+      fCaloJet40FilterBit = 0;
+      fCaloJet60FilterBit = 0;
+      fCaloJet80FilterBit = 0;
+      fCaloJet100FilterBit = 0;
 
     } else { // PbPb data or MC
 
@@ -621,8 +633,8 @@ void HighForestReader::Initialize(){
      
       // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
       // accumulated by the energies of PF (particle-flow)candidates
-      fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
-      fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+      //fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
+      //fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
 
       fSkimTree->SetBranchStatus("pileupVertexFilter", 1);
       fSkimTree->SetBranchAddress("pileupVertexFilter", &fPileupFilterBit, &fPileupFilterBranch);
@@ -632,8 +644,33 @@ void HighForestReader::Initialize(){
       //fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
 
       //fPrimaryVertexFilterBit = 1; // No primary vertex filter for OO
-      //fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
+      fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
       //fPileupFilterBit = 1; // No pile-up filter for OO
+      fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
+      fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
+      fClusterCompatibilityFilterBit = 1; // No Cluster compatibility, no good for 2025 data
+
+     } else if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){ // ppRef data or MC 5.36TeV
+
+      // Primary vertex has at least two tracks, is within 25 cm in z-direction and within 2 cm in xy-direction
+      fSkimTree->SetBranchStatus("pprimaryVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pprimaryVertexFilter", &fPrimaryVertexFilterBit, &fPrimaryVertexBranch);
+     
+      // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
+      // accumulated by the energies of PF (particle-flow)candidates
+      //fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
+      //fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+
+      //fSkimTree->SetBranchStatus("pileupVertexFilter", 1);
+      //fSkimTree->SetBranchAddress("pileupVertexFilter", &fPileupFilterBit, &fPileupFilterBranch);
+
+      // Calculated from pixel clusters. Ensures that measured and predicted primary vertices are compatible
+      //fSkimTree->SetBranchStatus("pclusterCompatibilityFilter", 1);
+      //fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
+
+      //fPrimaryVertexFilterBit = 1; // No primary vertex filter for OO
+      fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
+      fPileupFilterBit = 1; // No pile-up filter for OO
       fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
       fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
       fClusterCompatibilityFilterBit = 1; // No Cluster compatibility, no good for 2025 data

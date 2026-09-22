@@ -83,14 +83,44 @@ void EECCard::ReadVectors(){
 void EECCard::FindDataTypeString(){
   
   // Define the different data types corresponding to certain indices
-  TString dataTypes[11] = {"pp","PbPb","pp MC","PbPb MC","pPb p #rightarrow -#eta","pPb p #rightarrow +#eta", "pPb p #rightarrow -#eta 5TeV", "pPb MC p #rightarrow -#eta", "pPb MC p #rightarrow +#eta", "OO","OO MC"}; 
-  TString alternativeDataTypes[11] = {"pp","PbPb","Pythia8","Pythia+Hydjet","pPb p #rightarrow -#eta","pPb p #rightarrow +#eta", "pPb", "Pythia+EPOS p #rightarrow -#eta","Pythia+EPOS p #rightarrow +#eta", "OO","OO MC"};
-  if(fDataType < 0 || fDataType > 10){
-    fDataTypeString = "Unknown";
-    fAlternativeDataTypeString = "Unknown";
-    fDataTypeStringWithoutMCType = "Unknown";
-    return;
-  }
+  TString dataTypes[13] = {
+  "pp",                              // 0
+  "PbPb",                            // 1
+  "pp MC",                           // 2
+  "PbPb MC",                         // 3
+  "pPb p #rightarrow -#eta",         // 4
+  "pPb p #rightarrow +#eta",         // 5
+  "pPb p #rightarrow -#eta 5TeV",    // 6
+  "pPb MC p #rightarrow -#eta",      // 7
+  "pPb MC p #rightarrow +#eta",      // 8
+  "OO",                              // 9
+  "OO MC",                           // 10
+  "ppRef 5.36 TeV",                  // 11
+  "ppRef 5.36 TeV MC"                // 12
+};
+
+TString alternativeDataTypes[13] = {
+  "pp",
+  "PbPb",
+  "Pythia8",
+  "Pythia+Hydjet",
+  "pPb p #rightarrow -#eta",
+  "pPb p #rightarrow +#eta",
+  "pPb",
+  "Pythia+EPOS p #rightarrow -#eta",
+  "Pythia+EPOS p #rightarrow +#eta",
+  "OO",
+  "OO MC",
+  "ppRef",
+  "ppRef MC"
+};
+
+if(fDataType < 0 || fDataType > 12){
+  fDataTypeString = "Unknown";
+  fAlternativeDataTypeString = "Unknown";
+  fDataTypeStringWithoutMCType = "Unknown";
+  return;
+}
   
   // Remember the data type without the MC type
   fDataTypeStringWithoutMCType = alternativeDataTypes[fDataType];

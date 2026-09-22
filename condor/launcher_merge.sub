@@ -1,0 +1,24 @@
+executable              = merge4.sh
+
+# Pasamos la ruta completa del archivo actual como argumento al script d
+# Transferimos la tarjeta de configuración alhivos de log dinámicos por cada archivo procesado
+# Condor reemplazará caracteres especiales para que no colisionen los nombres
+log                     = log_condor/job.$(ClusterId).$(ProcId).log
+output                  = output_condor/job.$(ClusterId).$(ProcId).out
+error                   = error_condor/job.$(ClusterId).$(ProcId).err
+
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+
+# "workday" da hasta 8 horas de procesamiento nativo en lxplus8 (el8)
+# Resource requests
++JobFlavour             = "workday"
++AccountingGroup        = "group_u_CMS.CAF.COMM"
+request_cpus            = 1
+request_memory          = 4000M
+
+
+# AUTOMATIZACIÓN: Procesa cada línea dentro de tu archivo de texto
+# Reemplaza 'mis_inputs_oo.txt' por el nombre real de tu archivo de texto
+queue 1
+

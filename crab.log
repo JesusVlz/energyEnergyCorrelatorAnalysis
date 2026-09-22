@@ -1,0 +1,61 @@
+DEBUG 2026-09-15 19:32:57.570 UTC: 	 CRAB Client version: v3.260630
+DEBUG 2026-09-15 19:32:57.570 UTC: 	 Running on: Linux lxplus977.cern.ch 5.14.0-687.38.1.el9_8.x86_64 #1 SMP PREEMPT_DYNAMIC Sun Aug 9 21:18:40 EDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+DEBUG 2026-09-15 19:32:57.570 UTC: 	 Not using Singularity
+DEBUG 2026-09-15 19:32:57.570 UTC: 	 Operating System: Red Hat Enterprise Linux 9.8 (Plow)
+DEBUG 2026-09-15 19:32:57.570 UTC: 	 Executing command: 'checkwrite'
+DEBUG 2026-09-15 19:32:57.572 UTC: 	 Found CRAB cache file /afs/cern.ch/user/j/jvelazqu/.crab3
+DEBUG 2026-09-15 19:32:57.575 UTC: 	 Checking credentials
+DEBUG 2026-09-15 19:32:57.575 UTC: 	 Proxy file /tmp/x509up_u157769 not found
+DEBUG 2026-09-15 19:32:57.575 UTC: 	 Creating new proxy for 172:00 hours
+DEBUG 2026-09-15 19:32:57.575 UTC: 	 Executing command :
+ voms-proxy-init --rfc --cert ~/.globus/usercert.pem --key ~/.globus/userkey.pem --out /tmp/x509up_u157769 --valid 192:00 --voms cms:/cms
+DEBUG 2026-09-15 19:33:02.319 UTC: 	 output : 
+ error: 
+ retcode : 0
+DEBUG 2026-09-15 19:33:02.319 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /tmp/x509up_u157769
+DEBUG 2026-09-15 19:33:02.357 UTC: 	 output : 691200
+691200
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-15 19:33:02.358 UTC: 	 Proxy created.
+DEBUG 2026-09-15 19:33:02.358 UTC: 	 Retrieving username ...
+DEBUG 2026-09-15 19:33:02.358 UTC: 	 Retrieving username from CRIC...
+DEBUG 2026-09-15 19:33:03.176 UTC: 	 username is jvelazqu
+INFO 2026-09-15 19:33:04.908 UTC: 	 Rucio client intialized for account jvelazqu
+DEBUG 2026-09-15 19:33:04.908 UTC: 	 Command use: checkwrite
+DEBUG 2026-09-15 19:33:04.908 UTC: 	 Options use: ['--site=T2_US_Nebraska']
+DEBUG 2026-09-15 19:33:04.908 UTC: 	 Instance is None
+DEBUG 2026-09-15 19:33:04.908 UTC: 	 Server base url is None
+DEBUG 2026-09-15 19:33:04.908 UTC: 	 Retrieving username ...
+DEBUG 2026-09-15 19:33:04.908 UTC: 	 Retrieving username from CRIC...
+DEBUG 2026-09-15 19:33:05.741 UTC: 	 username is jvelazqu
+INFO 2026-09-15 19:33:05.742 UTC: 	 Will check write permission in the default location /store/user/<username>
+INFO 2026-09-15 19:33:05.742 UTC: 	 Validating LFN /store/user/jvelazqu...
+INFO 2026-09-15 19:33:05.742 UTC: 	 LFN /store/user/jvelazqu is valid.
+INFO 2026-09-15 19:33:05.768 UTC: 	 Will use `gfal-copy`, `gfal-rm` commands for checking write permissions
+INFO 2026-09-15 19:33:05.769 UTC: 	 Will check write permission in /store/user/jvelazqu on site T2_US_Nebraska
+INFO 2026-09-15 19:33:05.794 UTC: 	 Will use PFN: davs://xrootd-local.unl.edu:1094/store/user/jvelazqu/crab3checkwrite_20260915_213305_e6b07421-c72e-4d7d-8fa9-d95b41e04bbd/e6b07421-c72e-4d7d-8fa9-d95b41e04bbd.tmp
+INFO 2026-09-15 19:33:05.794 UTC: 	 
+Attempting to create (dummy) directory crab3checkwrite_20260915_213305_e6b07421-c72e-4d7d-8fa9-d95b41e04bbd and copy (dummy) file e6b07421-c72e-4d7d-8fa9-d95b41e04bbd.tmp to /store/user/jvelazqu
+
+INFO 2026-09-15 19:33:05.805 UTC: 	 Executing command: which scram >/dev/null 2>&1 && eval `scram unsetenv -sh`; gfal-copy -p -v -t 180 file:///afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/e6b07421-c72e-4d7d-8fa9-d95b41e04bbd.tmp 'davs://xrootd-local.unl.edu:1094/store/user/jvelazqu/crab3checkwrite_20260915_213305_e6b07421-c72e-4d7d-8fa9-d95b41e04bbd/e6b07421-c72e-4d7d-8fa9-d95b41e04bbd.tmp'
+INFO 2026-09-15 19:33:05.806 UTC: 	 Please wait...
+INFO 2026-09-15 19:36:37.044 UTC: 	 Failed running copy command
+INFO 2026-09-15 19:36:37.044 UTC: 	   Stderr:
+    Command timed out after 180 seconds!
+    
+INFO 2026-09-15 19:36:37.049 UTC: 	 
+Checkwrite Result:
+INFO 2026-09-15 19:36:37.049 UTC: 	 Unable to check write permission in /store/user/jvelazqu on site T2_US_Nebraska
+Please try again later or contact the site administrators sending them the 'crab checkwrite' output as printed above.
+INFO 2026-09-15 19:36:37.049 UTC: 	 Note: You cannot write to a site if you did not ask permission.
+WARNING 2026-09-15 19:36:37.049 UTC: 	 Command checkwrite failed
+ERROR 2026-09-15 19:36:37.049 UTC: 	 Caught CommandFailedException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.260630.00/bin/crab.py", line 157, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.260630.00/bin/crab.py", line 144, in __call__
+    raise CommandFailedException("Command %s failed" % str(args[0]))
+CRABClient.ClientExceptions.CommandFailedException: Command checkwrite failed

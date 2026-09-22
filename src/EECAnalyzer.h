@@ -26,7 +26,9 @@
 #include "JetCorrector.h"
 #include "JetUncertainty.h"
 #include "trackingEfficiency2018PbPb.h"
+#include "trackingEfficiency2025OO.h"
 #include "trackingEfficiency2017pp.h"
+#include "trackingEfficiency2024pp.h"
 #include "trackingEfficiency2016pPb.h"
 #include "TrackingEfficiencyInterface.h"
 #include "TrackPairEfficiencyCorrector.h"
@@ -155,8 +157,10 @@ public:
   Int_t fDebugLevel;                 // Amount of debug messages printed to console
   Bool_t fIsRealData;                // Simplification from fDataType: True = any measured data, False = any simulation
   Bool_t fIsPPbData;                 // Flag for any pPb dataset: True = any pPb dataset, False = anything else
-  Bool_t fIsPpData;                  // Flag for any pp dataset: True = any pp dataset, False = anything else
+  Bool_t fIsPpData;                  // Flag for any pp dataset: True = any Run 2 pp dataset, False = anything else
   Bool_t fIsOOData;                  // Flag for any OO dataset: True = any OO dataset, False = anything else
+  Bool_t fIsPp2024Data;              // Flag for any pp dataset: True = any Run 3 pp dataset, False = anything else
+
   
   // Weights for filling the MC histograms
   Double_t fVzWeight;                // Weight for vz in MC

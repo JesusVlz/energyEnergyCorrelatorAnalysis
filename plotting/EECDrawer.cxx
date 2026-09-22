@@ -318,6 +318,7 @@ void EECDrawer::DrawTrackHistograms(){
       
       // === Track pT ===
       drawnHistogram = fHistograms->GetHistogramTrackPt(iTrackType,iCentrality);
+      drawnHistogram->Rebin(2);                   // 500 bins over 0-50 GeV -> 100 bins of 500 MeV
       drawnHistogram->Scale(1.0/numberOfEvents);  // Normalize with the number of events
       namerX = Form("%s p_{T}  (GeV)",fHistograms->GetTrackAxisName(iTrackType));
       fDrawer->DrawHistogram(drawnHistogram,namerX.Data(),"#frac{1}{N_{event}} #frac{dN}{dp_{T}}  (1/GeV)"," ");

@@ -71,6 +71,8 @@ EECAnalyzer::EECAnalyzer() :
   fIsRealData(true),
   fIsPPbData(false),
   fIsPpData(false),
+  fIsOOData(false),
+  fIsPp2024Data(false),
   fVzWeight(1),
   fCentralityWeight(1),
   fPtHatWeight(1),
@@ -258,14 +260,21 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
       fEnergyWeightSmearer = NULL;
     } 
   
-  } else if(fIsOOData) {
+  } else if(fIsOOData){
     
-   // 1. Skip Track Corrections: Return a dummy corrector or NULL
-    fTrackEfficiencyCorrector = NULL; 
+    // 1. Apply the nominal 2025 OO tracking correction.
+    // This is currently the only OO table available, so Loose/Tight track
+    // selections still use the nominal table and print an explicit warning.
+    if(!fTrackSelectionVariation.empty()){
+      cout << "WARNING: No " << fTrackSelectionVariation
+          << " OO tracking correction table is available. Using the nominal table." << endl;
+    }
+    fTrackEfficiencyCorrector = new TrkEff2025OO( false, "trackCorrectionTables/OO2025/Eff_OO_2025_Hijing_MB_Centrality_fromHihfpf_NoPU_3D_Nominal_Official_18Nov2025.root");
 
     // 2. Apply PbPb Weights: Use the parameters you provided for Vz and Centrality
+    // But we need to change the multiplicity weight function to match the OO multiplicity distribution.
     fVzWeightFunction = new TF1("fvz","pol6",-15,15);
-    fVzWeightFunction->SetParameters(1.00591, -0.0193751, 0.000961142, -2.44303e-05, -8.24443e-06, 1.66679e-07, 1.11028e-08);
+    //fVzWeightFunction->SetParameters(1.00591, -0.0193751, 0.000961142, -2.44303e-05, -8.24443e-06, 1.66679e-07, 1.11028e-08);
     
     fCentralityWeightFunctionCentral = new TF1("fCentralWeight","pol6",0,30);
     fCentralityWeightFunctionCentral->SetParameters(4.73421, -0.0477343, -0.0332804, 0.00355699, -0.00017427, 4.18398e-06, -3.94746e-08);
@@ -274,9 +283,6 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
     fCentralityWeightFunctionPeripheral->SetParameters(3.38091, -0.0609601, -0.00228529, 9.43076e-05, -1.39593e-06, 9.85435e-09, -2.77153e-11);
     
     fMultiplicityWeightFunction = new TF1("fMultiWeight", totalMultiplicityWeight, 0, 5000, 0);
-
-    // 3. Skip JEC: Do not initialize fJetCorrector here
-    // In the JEC section, ensure OO does not call AddLevel()
 
     // 4. Skip Mixing: Disable flags
     fDoMixedCone = false;
@@ -288,9 +294,73 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
     fDeltaRSmearer = NULL;
     fEnergyWeightSmearer = NULL;
 
-  } 
+  }
+  else if(fIsPp2024Data) {
 
-  else if(fIsPPbData){
+  // ============================================================
+  // Run-3 pp reference at sqrt(s) = 5.36 TeV
+  //
+  // Do not reuse:
+  //   - 2017 pp tracking tables
+  //   - 2017 pp vz weights
+  //   - 2017 pp track-pair correction
+  //   - 2017 pp DeltaR/energy response files
+  //   - 2017 pp jet-spectrum weighting
+  // ============================================================
+
+  // Run-3 ppRef tracking efficiency.
+  fTrackEfficiencyCorrector = new TrkEff2024ppRef(false, "trackCorrectionTables/pp2024/Eff_ppref_2024_Pythia_QCD_pThat15_NopU_2D_Nominal_Official.root");
+
+  // A dedicated ppRef vz weight has not been installed yet.
+  // Use an explicit unity function rather than the 2017 pp polynomial.
+  // This function is required for DataType 12 because GetVzWeight()
+  // evaluates fVzWeightFunction for MC.
+  fVzWeightFunction = new TF1("fvzPpRef5p36TeV", "1", -15, 15);
+
+  // pp has no centrality correction.
+  fCentralityWeightFunctionCentral = NULL;
+  fCentralityWeightFunctionPeripheral = NULL;
+  fMultiplicityWeightFunction = NULL;
+
+  // Do not use the 2017 pp track-pair table for Run-3 ppRef.
+  // Keep a valid object because the EEC code dereferences this pointer.
+  fTrackPairEfficiencyCorrector = new TrackPairEfficiencyCorrector();
+
+  // No dedicated Run-3 ppRef JER scale factors are configured yet.
+  fEnergyResolutionSmearingFinder = NULL;
+
+  // No Run-3 ppRef response-smearing files are configured yet.
+  fDeltaRSmearer = NULL;
+  fEnergyWeightSmearer = NULL;
+
+  // Protect against accidentally applying the Run-2 pp jet-spectrum
+  // weight to DataType 12.
+  if(fJetPtWeightConfiguration != 0){
+    cerr
+      << "ERROR: JetPtWeight is not configured for Run-3 ppRef. "
+      << "Use JetPtWeight 0 until a dedicated ppRef weight is derived."
+      << endl;
+    assert(0);
+  }
+
+  // Protect against entering the 2017 pp or PbPb JER-smearing paths.
+  if(fJetUncertaintyMode != 0){
+    cerr
+      << "ERROR: JetUncertainty/JER variations are not configured "
+      << "for Run-3 ppRef. Use JetUncertainty 0."
+      << endl;
+    assert(0);
+  }
+
+  if(fSmearDeltaR || fSmearEnergyWeight){
+    cerr
+      << "ERROR: EEC response smearing is not configured for "
+      << "Run-3 ppRef. Use SmearDeltaR 0 and SmearEnergyWeight 0."
+      << endl;
+    assert(0);
+  }
+
+} else if(fIsPPbData){
     
     // Track correction for 2016 pPb data
     fTrackEfficiencyCorrector = new TrkEff2016pPb(false, "trackCorrectionTables/pPb2016/");
@@ -420,10 +490,9 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   bool disableTrackPairEfficiencyCorrection = (fCard->Get("DisableTrackPairEfficiencyCorrection") == 1);
   if((fMcCorrelationType == kGenGen) || (fMcCorrelationType == kRecoGen)) disableTrackPairEfficiencyCorrection = true; // Disable the track pair efficiency correction for generator level particles
   if((fDataType == ForestReader::kOO || fDataType == ForestReader::kOOMC)) disableTrackPairEfficiencyCorrection = true; // Disable the track pair efficiency correction for OO data sets
-
+  if(fIsPp2024Data){disableTrackPairEfficiencyCorrection = true;} // Disable the track pair efficiency correction for Run-3 ppRef data sets}
   if(fTrackPairEfficiencyCorrector != NULL) {
     fTrackPairEfficiencyCorrector->SetDisableCorrection(disableTrackPairEfficiencyCorrection);
-    fTrackPairEfficiencyCorrector->SetJetRadius(fJetRadius);
   }
 }
 
@@ -453,6 +522,8 @@ EECAnalyzer::EECAnalyzer(const EECAnalyzer& in) :
   fIsRealData(in.fIsRealData),
   fIsPPbData(in.fIsPPbData),
   fIsPpData(in.fIsPpData),
+  fIsPp2024Data(in.fIsPp2024Data),
+  fIsOOData(in.fIsOOData),
   fVzWeight(in.fVzWeight),
   fCentralityWeight(in.fCentralityWeight),
   fPtHatWeight(in.fPtHatWeight),
@@ -566,6 +637,8 @@ EECAnalyzer& EECAnalyzer::operator=(const EECAnalyzer& in){
   fDebugLevel = in.fDebugLevel;
   fIsRealData = in.fIsRealData;
   fIsPPbData = in.fIsPPbData;
+  fIsPp2024Data = in.fIsPp2024Data;
+  fIsOOData = in.fIsOOData;
   fIsPpData = in.fIsPpData;
   fVzWeight = in.fVzWeight;
   fCentralityWeight = in.fCentralityWeight;
@@ -684,11 +757,30 @@ void EECAnalyzer::ReadConfigurationFromCard(){
   fDataType = fCard->Get("DataType");
   fTriggerSelection = fCard->Get("TriggerSelection");
 
-  // Determine the helper data types
-  fIsRealData = (fDataType != ForestReader::kPpMC && fDataType != ForestReader::kPbPbMC && fDataType != ForestReader::kPPbMC_pToMinusEta && fDataType != ForestReader::kPPbMC_pToPlusEta && fDataType != ForestReader::kOOMC);
-  fIsPPbData = (fDataType == ForestReader::kPPb_pToMinusEta || fDataType == ForestReader::kPPb_pToPlusEta || fDataType == ForestReader::kPPb_pToMinusEta_5TeV || fDataType == ForestReader::kPPbMC_pToMinusEta || fDataType == ForestReader::kPPbMC_pToPlusEta);
-  fIsPpData = (fDataType == ForestReader::kPp || fDataType == ForestReader::kPpMC);
-  fIsOOData = (fDataType == ForestReader::kOO || fDataType == ForestReader::kOOMC);
+  // Determine the helper data types.
+  //
+  // Keep Run-2 pp and Run-3 ppRef separate because they use different
+  // tracking, JEC, pair-efficiency, weighting, and smearing inputs.
+  fIsRealData = 
+    (fDataType != ForestReader::kPpMC &&
+    fDataType != ForestReader::kPbPbMC &&
+    fDataType != ForestReader::kPPbMC_pToMinusEta &&
+    fDataType != ForestReader::kPPbMC_pToPlusEta &&
+    fDataType != ForestReader::kOOMC &&
+    fDataType != ForestReader::kPpRef5p36TeVMC);
+  // Run-2 pPb data and MC, and Run-3 pPb data.
+  fIsPPbData = (fDataType == ForestReader::kPPb_pToMinusEta ||
+    fDataType == ForestReader::kPPb_pToPlusEta ||
+    fDataType == ForestReader::kPPb_pToMinusEta_5TeV ||
+    fDataType == ForestReader::kPPbMC_pToMinusEta ||
+    fDataType == ForestReader::kPPbMC_pToPlusEta);
+  // Legacy Run-2 pp only.
+  fIsPpData = (fDataType == ForestReader::kPp ||fDataType == ForestReader::kPpMC);
+  // Run-3 pp reference at 5.36 TeV only.
+  fIsPp2024Data =  (fDataType == ForestReader::kPpRef5p36TeV || fDataType == ForestReader::kPpRef5p36TeVMC);
+  //Run 3 - OO data and MC
+  fIsOOData = (fDataType == ForestReader::kOO ||     fDataType == ForestReader::kOOMC);
+
 
   
   //****************************************
@@ -771,7 +863,7 @@ void EECAnalyzer::ReadConfigurationFromCard(){
   //    Turn off certain track cuts for generated tracks, pp, and pPb 
   //********************************************************************
   
-  if(fMcCorrelationType == kGenGen || fMcCorrelationType == kRecoGen || fIsPpData || fIsPPbData){
+  if(fMcCorrelationType == kGenGen || fMcCorrelationType == kRecoGen || fIsPpData || fIsPp2024Data || fIsPPbData){
     fCalorimeterSignalLimitPt = 10000;
     fChi2QualityCut = 10000;
     fMinimumTrackHits = 0;
@@ -886,6 +978,14 @@ void EECAnalyzer::RunAnalysis(){
   Bool_t caloJet60Trigger;
   Bool_t caloJet80Trigger;
   Bool_t caloJet100Trigger;
+
+  // TriggerSelection 8:
+  //   DataType 9/10  -> HLT_MinimumBiasHF_OR_BptxAND_v1
+  //   DataType 11/12 -> HLT_PPRefZeroBias_v6
+  //
+  // HighForestReader and GeneratorLevelForestReader map the selected
+  // Run-3 trigger to the legacy caloJet15 trigger slot.
+  const Bool_t useRun3MinimumBiasTrigger = (fTriggerSelection == 8);
   
   // Variables for jets
   Double_t jetPt = 0;               // pT of the i:th jet in the event
@@ -1015,8 +1115,11 @@ void EECAnalyzer::RunAnalysis(){
   correctionFileRelative[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
   correctionFileRelative[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
   correctionFileRelative[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_pgoing_Embedded_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt"; // Use the dummy string
-  correctionFileRelative[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  correctionFileRelative[ForestReader::kOO] = "jetEnergyCorrections/L2Relative_AK4PF_OO_V1.txt";
+  correctionFileRelative[ForestReader::kOOMC] = "jetEnergyCorrections/L2Relative_AK4PF_OO_V1.txt";
+  correctionFileRelative[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/Prompt24HIpp_V1_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/Prompt24HIpp_V1_MC_L2Relative_AK4PF.txt";
+
 
   std::string correctionFileResidual[ForestReader::knDataTypes];
   correctionFileResidual[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_L2L3Residual_AK4PF.txt";
@@ -1030,6 +1133,8 @@ void EECAnalyzer::RunAnalysis(){
   correctionFileResidual[ForestReader::kPPbMC_pToPlusEta] = "CorrectionNotAppliedPF.txt";
   correctionFileResidual[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt"; // Use the dummy string
   correctionFileResidual[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt";
+  correctionFileResidual[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt";
 
   std::string uncertaintyFile[ForestReader::knDataTypes];
   uncertaintyFile[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_Uncertainty_AK4PF.txt";
@@ -1043,6 +1148,8 @@ void EECAnalyzer::RunAnalysis(){
   uncertaintyFile[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
   uncertaintyFile[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
   uncertaintyFile[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  uncertaintyFile[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  uncertaintyFile[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
   
   // For calo jets, use the correction files for calo jets (otherwise same name, but replace PF with Calo)
   if(fJetType == 0 && !fIsOOData){
@@ -1060,11 +1167,14 @@ void EECAnalyzer::RunAnalysis(){
   
   vector<string> correctionFiles;
   
-  // ONLY push back correction files if the system is NOT Oxygen-Oxygen --- The corrections for OO are not yet ready, and we want to be able to run the analysis without them for now. 
-  // For all other systems, the corrections are needed to get the correct jet pT and thus to get any results at all.
-  if(!fIsOOData) {
-      correctionFiles.push_back(correctionFileRelative[fDataType]);
-      if(fIsRealData)  correctionFiles.push_back(correctionFileResidual[fDataType]);
+  // The relative correction is available for every configured collision system
+  correctionFiles.push_back(correctionFileRelative[fDataType]);
+
+  // OO currently has only an L2Relative correction. Do not append a dummy
+  // L2L3Residual level; add the OO residual here once it becomes available.
+
+  if(fIsRealData && !fIsOOData) {
+    correctionFiles.push_back(correctionFileResidual[fDataType]);
   }
   
   fJetCorrector = new JetCorrector(correctionFiles);
@@ -1482,7 +1592,10 @@ void EECAnalyzer::RunAnalysis(){
       caloJet100Trigger = (fJetReader->GetCaloJet100FilterBit() == 1);
       
       // Fill the trigger histograms before the trigger selection
-      if(fFillEventInformation){
+      // The existing trigger QA histogram describes only the legacy
+      // CaloJet60/80/100 combinations. Do not fill it for the Run-3
+      // minimum-bias or ZeroBias trigger.
+      if(fFillEventInformation && !useRun3MinimumBiasTrigger){
         if(!caloJet60Trigger && !caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggers->Fill(EECHistograms::kNoTrigger);
         if(caloJet60Trigger && !caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggers->Fill(EECHistograms::kOnlyCaloJet60);
         if(!caloJet60Trigger && caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggers->Fill(EECHistograms::kOnlyCaloJet80);
@@ -1501,9 +1614,18 @@ void EECAnalyzer::RunAnalysis(){
       if(fTriggerSelection == 5 && (!caloJet80Trigger && !caloJet100Trigger)) continue; // Select events with CaloJet60 OR CaloJet80 OR CaloJet100 triggers. This selection is used with the sample forested filtering with CaloJet80 and CaloJet100 trigger.
       if(fTriggerSelection == 6 && (!caloJet60Trigger || caloJet80Trigger || caloJet100Trigger)) continue; // Select events with CaloJet60 OR CaloJet80 OR CaloJet100 triggers. This selection is used with the sample forested filtering with CaloJet60 trigger. Any events containing CaloJet80 or CaloJet100 triggers must be vetoed to avoid double counting when combining the two samples.
       if(fTriggerSelection == 7 && (!caloJet60Trigger && !caloJet80Trigger)) continue; // Select events with CaloJet60 OR CaloJet80 triggers
+      // Run-3 baseline trigger:
+      //   DataType 9/10  -> HLT_MinimumBiasHF_OR_BptxAND_v1
+      //   DataType 11/12 -> HLT_PPRefZeroBias_v6
+      //
+      // The corresponding HLT branch is mapped to the first trigger slot
+      // by HighForestReader or GeneratorLevelForestReader.
+      if(fTriggerSelection == 8 && !caloJet15Trigger) continue;
       if(fTriggerSelection == 15 && !caloJet15Trigger) continue; // Select events with CaloJet15 trigger
       if(fTriggerSelection == 30 && !caloJet30Trigger) continue; // Select events with CaloJet30 trigger
       if(fTriggerSelection == 40 && !caloJet40Trigger) continue; // Select events with CaloJet40 trigger
+
+      
 
       // Fill the histogram for triggered events
       fHistograms->fhEvents->Fill(EECHistograms::kTriggered);
@@ -1547,14 +1669,17 @@ void EECAnalyzer::RunAnalysis(){
         fHistograms->fhPtHatWeighted->Fill(ptHat, fTotalEventWeight);           // pT het histogram weighted with corresponding cross section and event number
 
         // Fill the trigger histograms after the trigger selection
-        if(!caloJet60Trigger && !caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kNoTrigger);
-        if(caloJet60Trigger && !caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kOnlyCaloJet60);
-        if(!caloJet60Trigger && caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kOnlyCaloJet80);
-        if(!caloJet60Trigger && !caloJet80Trigger && caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kOnlyCaloJet100);
-        if(caloJet60Trigger && caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kCaloJet60And80);
-        if(caloJet60Trigger && !caloJet80Trigger && caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kCaloJet60And100);
-        if(!caloJet60Trigger && caloJet80Trigger && caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kCaloJet80And100);
-        if(caloJet60Trigger && caloJet80Trigger && caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kCaloJet60And80And100);
+        // These categories describe only the legacy jet triggers.
+      if(!useRun3MinimumBiasTrigger){
+          if(!caloJet60Trigger && !caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kNoTrigger);
+          if(caloJet60Trigger && !caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kOnlyCaloJet60);
+          if(!caloJet60Trigger && caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kOnlyCaloJet80);
+          if(!caloJet60Trigger && !caloJet80Trigger && caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kOnlyCaloJet100);
+          if(caloJet60Trigger && caloJet80Trigger && !caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kCaloJet60And80);
+          if(caloJet60Trigger && !caloJet80Trigger && caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kCaloJet60And100);
+          if(!caloJet60Trigger && caloJet80Trigger && caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kCaloJet80And100);
+          if(caloJet60Trigger && caloJet80Trigger && caloJet100Trigger) fHistograms->fhTriggersAfterSelection->Fill(EECHistograms::kCaloJet60And80And100);
+        }
       }
       
       // ======================================
@@ -3627,12 +3752,11 @@ Double_t EECAnalyzer::GetTrackEfficiencyCorrection(const Int_t iTrack){
   
   // No correction for generator level tracks
   if(fMcCorrelationType == kRecoGen || fMcCorrelationType == kGenGen) return 1;
-  if(fIsOOData) return 1.0; // Force no correction for OO data, as instructed by tracking group for now. This is because the tracking efficiency correction for OO data is not yet available.
   
   // Get track information
   Float_t trackPt = fTrackReader->GetTrackPt(iTrack);    // Track pT
   Float_t trackEta = fTrackReader->GetTrackEta(iTrack);  // Track eta
-  Int_t hiBin = fTrackReader->GetHiBin();                // hiBin for 2018 track correction
+  Int_t hiBin = fTrackReader->GetHiBin(); // Event hiBin for the collision-system-specific correction
   
   // Get the correction using the track and event information
   return GetTrackEfficiencyCorrection(trackPt, trackEta, hiBin);
@@ -3653,15 +3777,12 @@ Double_t EECAnalyzer::GetTrackEfficiencyCorrection(const Float_t trackPt, const 
   
   // No correction for generator level tracks
   if(fMcCorrelationType == kRecoGen || fMcCorrelationType == kGenGen) return 1;
-  if(fDataType == ForestReader::kOO || fDataType == ForestReader::kOOMC) return 1;   // No correction for OO dataset, as instructed by tracking group for now. This is because the tracking efficiency correction for OO data is not yet available.
-
-
   
   // Weight factor only for 2017 pp MC as instructed be the tracking group
   double preWeight = 1.0;
   if(fDataType == ForestReader::kPpMC) preWeight = 0.979;
   
-  // For PbPb2018 and pp2017, there is an efficiency table from which the correction comes
+  // For PbPb2018, ppref2017, OO2025, ppref2024 , there is an efficiency table from which the correction comes
   return preWeight * fTrackEfficiencyCorrector->getCorrection(trackPt, trackEta, hiBin);
   
 }

@@ -1,0 +1,24 @@
+# Executable to run
+executable              = compileAndRun.sh
+
+# Log: UNO por cluster (política lxbatch enero 2026, sin $(ProcId))
+log                     = log_condor/job.$(ClusterId).log
+# out/err sí por job: los necesitas para depurar cada filelist
+output                  = output_condor/job.$(ClusterId).$(ProcId).out
+error                   = error_condor/job.$(ClusterId).$(ProcId).err
+
+# Environment settings
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+
+# Resource requests
++JobFlavour             = "workday"
++AccountingGroup        = "group_u_CMS.CAF.COMM"
+request_cpus            = 1
+request_memory          = 4000M
+
+# Cada job recibe UNA filelist como argumento
+arguments               = $(inputfile)
+
+# Lanza un job por cada línea de filelists.txt → 7 jobs en paralelo
+queue inputfile from filelists.txt

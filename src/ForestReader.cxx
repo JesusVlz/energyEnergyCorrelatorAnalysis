@@ -389,8 +389,18 @@ void ForestReader::SetDataType(Int_t dataType){
     fDataType = dataType;
 
     // Also set the relevant flags for this data type
-    fIsMC = (fDataType == kPpMC) || (fDataType == kPbPbMC) || (fDataType == kPPbMC_pToMinusEta) || (fDataType == kPPbMC_pToPlusEta);
-    fIsPPb = (fDataType == kPPb_pToMinusEta) || (fDataType == kPPb_pToPlusEta) || (fDataType == kPPb_pToMinusEta_5TeV) || (fDataType == kPPbMC_pToMinusEta) || (fDataType == kPPbMC_pToPlusEta);
+    fIsMC = (fDataType == kPpMC) ||
+            (fDataType == kPbPbMC) ||
+            (fDataType == kPPbMC_pToMinusEta) ||
+            (fDataType == kPPbMC_pToPlusEta) ||
+            (fDataType == kOOMC) ||
+            (fDataType == kPpRef5p36TeVMC);    
+
+    fIsPPb = (fDataType == kPPb_pToMinusEta) || 
+             (fDataType == kPPb_pToPlusEta) || 
+             (fDataType == kPPb_pToMinusEta_5TeV) || 
+             (fDataType == kPPbMC_pToMinusEta) || 
+             (fDataType == kPPbMC_pToPlusEta);
   }
 }
 

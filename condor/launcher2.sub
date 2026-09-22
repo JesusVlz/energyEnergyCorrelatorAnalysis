@@ -1,0 +1,27 @@
+# Executable to run
+executable              = compileAndRun2.sh
+
+# Condor log files (helps you track down crashes)
+log                     = log_condor/job.$(ClusterId).$(ProcId).log
+output                  = output_condor/job.$(ClusterId).$(ProcId).out
+error                   = error_condor/job.$(ClusterId).$(ProcId).err
+
+# Environment settings
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+
+# Resource requests
+# "workday" allows up to 8 hours of runtime. Adjust to "longlunch" (2h) or "tomorrow" (1d) if needed.
++JobFlavour             = "workday"
++AccountingGroup = "group_u_CMS.CAF.COMM"
+
+# Request typical memory for heavy ion track analysis
+request_cpus            = 1
+request_memory          = 4000M
+
+arguments               = $(inputfile)
+
+# Queue the single job
+queue inputfile from oo_data_filelist6.txt
+
+#queue 1

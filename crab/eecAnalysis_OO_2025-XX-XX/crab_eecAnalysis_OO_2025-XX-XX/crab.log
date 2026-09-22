@@ -1,0 +1,433 @@
+DEBUG 2026-09-09 23:07:41.702 UTC: 	 CRAB Client version: v3.260630
+DEBUG 2026-09-09 23:07:41.702 UTC: 	 Running on: Linux lxplus927.cern.ch 5.14.0-687.39.1.el9_8.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Aug 11 21:20:33 EDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+DEBUG 2026-09-09 23:07:41.702 UTC: 	 Not using Singularity
+DEBUG 2026-09-09 23:07:41.702 UTC: 	 Operating System: Red Hat Enterprise Linux 9.8 (Plow)
+DEBUG 2026-09-09 23:07:41.702 UTC: 	 Executing command: 'submit'
+DEBUG 2026-09-09 23:07:41.703 UTC: 	 Found CRAB cache file /afs/cern.ch/user/j/jvelazqu/.crab3
+INFO 2026-09-09 23:07:41.706 UTC: 	 Will use CRAB configuration file crabEECOO.py
+DEBUG 2026-09-09 23:07:41.706 UTC: 	 Loading CRAB configuration file.
+DEBUG 2026-09-09 23:07:41.713 UTC: 	 Will use CRAB plugin ANALYSIS (i.e. will run an analysis job type).
+DEBUG 2026-09-09 23:07:41.837 UTC: 	 Checking credentials
+DEBUG 2026-09-09 23:07:41.837 UTC: 	 Found proxy file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:07:41.837 UTC: 	 Making sure it has proper VOMS extension
+DEBUG 2026-09-09 23:07:41.837 UTC: 	 Executing command :
+ voms-proxy-info --vo --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:07:41.878 UTC: 	 output : cms
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:07:41.878 UTC: 	 Getting proxy life time left
+DEBUG 2026-09-09 23:07:41.878 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:07:41.910 UTC: 	 output : 43144
+43144
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:07:41.911 UTC: 	 Proxy valid for 11:59:04 hours
+DEBUG 2026-09-09 23:07:41.911 UTC: 	 Encoded data for curl request: subresource=delegatedn
+DEBUG 2026-09-09 23:07:41.992 UTC: 	 Registering user credentials on myproxy for /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+DEBUG 2026-09-09 23:07:41.992 UTC: 	 Executing command :
+ voms-proxy-info --identity --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:07:42.036 UTC: 	 output : /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:07:42.037 UTC: 	 Getting myproxy life time left for 29942b412918fcbaf82774396e8ba772b03e2264
+DEBUG 2026-09-09 23:07:42.037 UTC: 	 Executing command :
+ myproxy-info -s myproxy.cern.ch -l 29942b412918fcbaf82774396e8ba772b03e2264
+DEBUG 2026-09-09 23:07:42.340 UTC: 	 output : username: 29942b412918fcbaf82774396e8ba772b03e2264
+owner: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral
+  renewal policy: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  trusted retrieval policy: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  timeleft: 403:00:28  (16.8 days)
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:07:42.340 UTC: 	 Myproxy is valid: 1450800
+DEBUG 2026-09-09 23:07:42.340 UTC: 	 Result of myproxy credential check:
+  Credential exists on myproxy: username: 29942b412918fcbaf82774396e8ba772b03e2264  - validity: 16 days, 19:00:00
+DEBUG 2026-09-09 23:07:42.340 UTC: 	 Command use: submit
+DEBUG 2026-09-09 23:07:42.340 UTC: 	 Options use: ['-c', 'crabEECOO.py']
+DEBUG 2026-09-09 23:07:42.341 UTC: 	 Encoded data for curl request: subresource=version
+DEBUG 2026-09-09 23:07:42.394 UTC: 	 CRABClient version: v3.260630
+DEBUG 2026-09-09 23:07:42.395 UTC: 	 Instance is prod
+DEBUG 2026-09-09 23:07:42.395 UTC: 	 Server base url is cmsweb.cern.ch
+DEBUG 2026-09-09 23:07:42.395 UTC: 	 Command api workflow
+DEBUG 2026-09-09 23:07:42.395 UTC: 	 Started submission
+DEBUG 2026-09-09 23:07:42.395 UTC: 	 Working on /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:07:42.451 UTC: 	 Loading required information from the environment
+DEBUG 2026-09-09 23:07:42.452 UTC: 	 Found CMSSW_15_0_9_patch4 for el9_amd64_gcc12 with base /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4
+DEBUG 2026-09-09 23:07:42.452 UTC: 	 Loading required information from the environment
+DEBUG 2026-09-09 23:07:42.452 UTC: 	 Found CMSSW_15_0_9_patch4 for el9_amd64_gcc12 with base /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4
+DEBUG 2026-09-09 23:07:42.452 UTC: 	 UNIQUE NAME: tarUUID 8b4eb9ea-258d-46eb-887e-2bfb52c5167c 
+DEBUG 2026-09-09 23:07:42.452 UTC: 	 self.config: from WMCore.Configuration import Configuration
+config = Configuration()
+config.section_('General')
+config.General.requestName = 'eecAnalysis_OO_2025-XX-XX'
+config.General.workArea = 'eecAnalysis_OO_2025-XX-XX'
+config.section_('JobType')
+config.JobType.maxJobRuntimeMin = 120
+config.JobType.inputFiles = ['FrameworkJobReport.xml', 'eecOO.tar.gz', 'cardEECOO.input']
+config.JobType.psetName = 'PSet.py'
+config.JobType.pluginName = 'Analysis'
+config.JobType.scriptArgs = ['card=cardEECOO.input', 'output=eecAnalysis_OO_2025-XX-XX.root', 'location=1', 'mixinglist=none']
+config.JobType.outputFiles = ['eecAnalysis_OO_2025-XX-XX.root']
+config.JobType.maxMemoryMB = 600
+config.JobType.scriptExe = 'compileAndRun.sh'
+config.section_('Data')
+config.Data.totalUnits = 1
+config.Data.outputPrimaryDataset = 'eecOOHistograms'
+config.Data.outLFNDirBase = '/store/group/phys_heavyions/jvelazqu/energycorr/OO2025/eecAnalysis_OO_2025-XX-XX'
+config.Data.publication = False
+config.Data.unitsPerJob = 1
+config.Data.splitting = 'FileBased'
+config.Data.userInputFiles = ['/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root\n']
+config.section_('Site')
+config.Site.storageSite = 'T2_CH_CERN'
+config.Site.whitelist = ['T2_CH_CERN']
+config.section_('Debug')
+config.Debug.extraJDL = ['+CMS_ALLOW_OVERFLOW=False']
+
+DEBUG 2026-09-09 23:07:42.452 UTC: 	 self.config.JobType.psetName: PSet.py
+INFO 2026-09-09 23:07:42.452 UTC: 	 Importing CMSSW configuration PSet.py
+INFO 2026-09-09 23:07:42.697 UTC: 	 Finished importing CMSSW configuration PSet.py
+DEBUG 2026-09-09 23:07:42.697 UTC: 	 Writing CMSSW configuration to /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/PSet.py
+DEBUG 2026-09-09 23:07:42.711 UTC: 	 The following EDM output files will be collected: []
+DEBUG 2026-09-09 23:07:42.711 UTC: 	 The following TFile output files will be collected: []
+WARNING 2026-09-09 23:07:42.711 UTC: 	 The following user output files (not listed as PoolOuputModule or TFileService in the CMSSW PSet) will be collected: 'eecAnalysis_OO_2025-XX-XX.root'
+DEBUG 2026-09-09 23:07:42.712 UTC: 	 Loading required information from the environment
+DEBUG 2026-09-09 23:07:42.712 UTC: 	 Found CMSSW_15_0_9_patch4 for el9_amd64_gcc12 with base /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4
+DEBUG 2026-09-09 23:07:42.712 UTC: 	 Making tarball in /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/8b4eb9ea-258d-46eb-887e-2bfb52c5167cdefault.tgz
+DEBUG 2026-09-09 23:07:42.713 UTC: 	 Checking directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/bin
+DEBUG 2026-09-09 23:07:42.713 UTC: 	 Adding directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/bin to tarball
+DEBUG 2026-09-09 23:07:42.726 UTC: 	 Checking directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/python
+DEBUG 2026-09-09 23:07:42.726 UTC: 	 Adding directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/python to tarball
+DEBUG 2026-09-09 23:07:42.730 UTC: 	 Checking directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/cfipython
+DEBUG 2026-09-09 23:07:42.731 UTC: 	 Adding directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/cfipython to tarball
+DEBUG 2026-09-09 23:07:42.738 UTC: 	 Checking directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/lib
+DEBUG 2026-09-09 23:07:42.738 UTC: 	 Adding directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/lib to tarball
+DEBUG 2026-09-09 23:07:42.743 UTC: 	 Checking directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/biglib
+DEBUG 2026-09-09 23:07:42.743 UTC: 	 Adding directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/biglib to tarball
+DEBUG 2026-09-09 23:07:42.749 UTC: 	 Checking directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/module
+DEBUG 2026-09-09 23:07:42.749 UTC: 	 Checking directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/config/SCRAM/hooks
+DEBUG 2026-09-09 23:07:42.749 UTC: 	 Adding directory /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/config/SCRAM/hooks to tarball
+DEBUG 2026-09-09 23:07:45.614 UTC: 	 Adding file FrameworkJobReport.xml to tarball
+DEBUG 2026-09-09 23:07:45.617 UTC: 	 Adding file eecOO.tar.gz to tarball
+DEBUG 2026-09-09 23:07:47.514 UTC: 	 Adding file cardEECOO.input to tarball
+DEBUG 2026-09-09 23:07:49.128 UTC: 	 Uploading archive /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/8b4eb9ea-258d-46eb-887e-2bfb52c5167cdefault.tgz (14 MB) to the CRAB cache.
+DEBUG 2026-09-09 23:07:51.140 UTC: 	 Encoded data for curl request: subresource=upload&objecttype=sandbox&tarballname=f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz
+DEBUG 2026-09-09 23:07:51.229 UTC: 	 Will execute:
+curl -f -v -X POST  -H "User-Agent: CRAB" -F "key=jvelazqu/sandboxes/f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz" -F "AWSAccessKeyId=715203df6482458ba839e73e6dab634b" -F "policy=eyJleHBpcmF0aW9uIjogIjIwMjYtMDktMTBUMDA6MDc6NTFaIiwgImNvbmRpdGlvbnMiOiBbeyJidWNrZXQiOiAiY3JhYmNhY2hlX3Byb2QifSwgeyJrZXkiOiAianZlbGF6cXUvc2FuZGJveGVzL2YzYmRiOWY1YzQzOGJhYWYxNDU2OWJmOTIzNmY2MTczMzgzMjYwYWRiZWIxZTc4NWVhNDM1ZjgwYTdlOGZiYjUudGFyLmd6In1dfQ==" -F "signature=KWcTUPfrmp8+auNyeKaeEcu55xM=" -F "file=@/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/8b4eb9ea-258d-46eb-887e-2bfb52c5167cdefault.tgz" "https://s3.cern.ch/crabcache_prod"
+DEBUG 2026-09-09 23:07:52.607 UTC: 	 exitcode: 0
+stdout: b''
+DEBUG 2026-09-09 23:07:52.607 UTC: 	 upload to S3 of sandbox /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/8b4eb9ea-258d-46eb-887e-2bfb52c5167cdefault.tgz completed
+DEBUG 2026-09-09 23:07:52.607 UTC: 	 make sure that object is ready for retrieve
+DEBUG 2026-09-09 23:07:53.609 UTC: 	 Encoded data for curl request: subresource=download&objecttype=sandbox&tarballname=f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz&clientmethod=head_object
+DEBUG 2026-09-09 23:07:53.674 UTC: 	 PreSignedUrl to download sandbox received OK
+DEBUG 2026-09-09 23:07:53.678 UTC: 	 Will execute:
+ curl -v -s -f -o /dev/null --head  "https://s3.cern.ch/crabcache_prod/jvelazqu/sandboxes/f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz?AWSAccessKeyId=715203df6482458ba839e73e6dab634b&Signature=352b8V3sYjJfJOG9XvBxAxt6zsw%3D&Expires=1788998873"
+DEBUG 2026-09-09 23:07:53.723 UTC: 	 exitcode: 0
+stdout: b''
+DEBUG 2026-09-09 23:07:53.724 UTC: 	 sandbox /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/8b4eb9ea-258d-46eb-887e-2bfb52c5167cdefault.tgz successfully uploaded to S3
+DEBUG 2026-09-09 23:07:53.724 UTC: 	 Loading required information from the environment
+DEBUG 2026-09-09 23:07:53.724 UTC: 	 Found CMSSW_15_0_9_patch4 for el9_amd64_gcc12 with base /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4
+DEBUG 2026-09-09 23:07:53.724 UTC: 	 Making tarball in /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/debugFiles.tgz
+DEBUG 2026-09-09 23:07:53.741 UTC: 	 Uploading archive /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/debugFiles.tgz (1 KB) to the CRAB cache.
+DEBUG 2026-09-09 23:07:53.744 UTC: 	 Encoded data for curl request: subresource=upload&objecttype=sandbox&tarballname=0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz
+DEBUG 2026-09-09 23:07:53.801 UTC: 	 Will execute:
+curl -f -v -X POST  -H "User-Agent: CRAB" -F "key=jvelazqu/sandboxes/0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz" -F "AWSAccessKeyId=715203df6482458ba839e73e6dab634b" -F "policy=eyJleHBpcmF0aW9uIjogIjIwMjYtMDktMTBUMDA6MDc6NTNaIiwgImNvbmRpdGlvbnMiOiBbeyJidWNrZXQiOiAiY3JhYmNhY2hlX3Byb2QifSwgeyJrZXkiOiAianZlbGF6cXUvc2FuZGJveGVzLzA2NDNmYTEwZGI1ZmJiNWIwZmIxMmMwODVkNzJhMTg4M2Q1N2JiYWMwZTFiMTFjMzRhNDk5NzY0OWNiNzkxYTAudGFyLmd6In1dfQ==" -F "signature=ACfDawtUZRvuiPxPhqPQ7YqoXbo=" -F "file=@/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/debugFiles.tgz" "https://s3.cern.ch/crabcache_prod"
+DEBUG 2026-09-09 23:07:53.867 UTC: 	 exitcode: 0
+stdout: b''
+DEBUG 2026-09-09 23:07:53.867 UTC: 	 upload to S3 of sandbox /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/debugFiles.tgz completed
+DEBUG 2026-09-09 23:07:53.867 UTC: 	 make sure that object is ready for retrieve
+DEBUG 2026-09-09 23:07:54.869 UTC: 	 Encoded data for curl request: subresource=download&objecttype=sandbox&tarballname=0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz&clientmethod=head_object
+DEBUG 2026-09-09 23:07:54.957 UTC: 	 PreSignedUrl to download sandbox received OK
+DEBUG 2026-09-09 23:07:54.961 UTC: 	 Will execute:
+ curl -v -s -f -o /dev/null --head  "https://s3.cern.ch/crabcache_prod/jvelazqu/sandboxes/0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz?AWSAccessKeyId=715203df6482458ba839e73e6dab634b&Signature=Vvbw%2FfczEbw2DJS%2FeZsAowxClW0%3D&Expires=1788998874"
+DEBUG 2026-09-09 23:07:55.020 UTC: 	 exitcode: 0
+stdout: b''
+DEBUG 2026-09-09 23:07:55.020 UTC: 	 sandbox /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/inputs/debugFiles.tgz successfully uploaded to S3
+DEBUG 2026-09-09 23:07:55.020 UTC: 	 Result uploading input files: f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz 
+DEBUG 2026-09-09 23:07:55.021 UTC: 	 Attaching list of user-specified primary input files.
+DEBUG 2026-09-09 23:07:55.021 UTC: 	 submit() - self.configuration from WMCore.Configuration import Configuration
+config = Configuration()
+config.section_('General')
+config.General.requestName = 'eecAnalysis_OO_2025-XX-XX'
+config.General.workArea = 'eecAnalysis_OO_2025-XX-XX'
+config.section_('JobType')
+config.JobType.maxJobRuntimeMin = 120
+config.JobType.inputFiles = ['FrameworkJobReport.xml', 'eecOO.tar.gz', 'cardEECOO.input']
+config.JobType.psetName = 'PSet.py'
+config.JobType.pluginName = 'Analysis'
+config.JobType.scriptArgs = ['card=cardEECOO.input', 'output=eecAnalysis_OO_2025-XX-XX.root', 'location=1', 'mixinglist=none']
+config.JobType.outputFiles = ['eecAnalysis_OO_2025-XX-XX.root']
+config.JobType.maxMemoryMB = 600
+config.JobType.scriptExe = 'compileAndRun.sh'
+config.section_('Data')
+config.Data.totalUnits = 1
+config.Data.outputPrimaryDataset = 'eecOOHistograms'
+config.Data.outLFNDirBase = '/store/group/phys_heavyions/jvelazqu/energycorr/OO2025/eecAnalysis_OO_2025-XX-XX'
+config.Data.publication = False
+config.Data.unitsPerJob = 1
+config.Data.splitting = 'FileBased'
+config.Data.userInputFiles = ['/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root\n']
+config.section_('Site')
+config.Site.storageSite = 'T2_CH_CERN'
+config.Site.whitelist = ['T2_CH_CERN']
+config.section_('Debug')
+config.Debug.extraJDL = ['+CMS_ALLOW_OVERFLOW=False']
+
+DEBUG 2026-09-09 23:07:55.021 UTC: 	 submit() - self.configreq {'dryrun': 0, 'workflow': 'crab_eecAnalysis_OO_2025-XX-XX', 'saveoutput': 1, 'savelogsflag': 0, 'primarydataset': 'eecOOHistograms', 'nonvaliddata': 0, 'userfiles': ['/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root\n'], 'dbsurl': 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader', 'useparent': 0, 'ignorelocality': 0, 'splitalgo': 'FileBased', 'algoargs': 1, 'totalunits': 1, 'lfn': '/store/group/phys_heavyions/jvelazqu/energycorr/OO2025/eecAnalysis_OO_2025-XX-XX', 'publication': 0, 'publishdbsurl': 'https://cmsweb.cern.ch/dbs/prod/phys03/DBSWriter', 'jobtype': 'Analysis', 'generator': 'pythia', 'addoutputfiles': ['eecAnalysis_OO_2025-XX-XX.root'], 'maxjobruntime': 120, 'numcores': 1, 'maxmemory': 600, 'priority': 10, 'nonprodsw': 0, 'scriptexe': 'compileAndRun.sh', 'scriptargs': ['card=cardEECOO.input', 'output=eecAnalysis_OO_2025-XX-XX.root', 'location=1', 'mixinglist=none'], 'asyncdest': 'T2_CH_CERN', 'sitewhitelist': ['T2_CH_CERN'], 'requireaccelerator': 0, 'oneEventMode': 0, 'extrajdl': ['+CMS_ALLOW_OVERFLOW=False'], 'ignoreglobalblacklist': 0, 'partialdataset': 0, 'inputblocks': []}
+DEBUG 2026-09-09 23:07:55.021 UTC: 	 submit() - jobconfig {'addoutputfiles': ['eecAnalysis_OO_2025-XX-XX.root'], 'tfileoutfiles': [], 'edmoutfiles': [], 'jobarch': 'el9_amd64_gcc12', 'jobminuarch': 'x86-64-v3', 'jobsw': 'CMSSW_15_0_9_patch4', 'cachefilename': 'f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz', 'debugfilename': '0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz', 'userfiles': {'/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root'}, 'primarydataset': 'eecOOHistograms', 'jobtype': 'Analysis'}
+INFO 2026-09-09 23:07:55.021 UTC: 	 Sending the request to the server at cmsweb.cern.ch
+DEBUG 2026-09-09 23:07:55.022 UTC: 	 Submitting {'dryrun': 0, 'workflow': 'crab_eecAnalysis_OO_2025-XX-XX', 'saveoutput': 1, 'savelogsflag': 0, 'primarydataset': 'eecOOHistograms', 'nonvaliddata': 0, 'userfiles': {'/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root'}, 'dbsurl': 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader', 'useparent': 0, 'ignorelocality': 0, 'splitalgo': 'FileBased', 'algoargs': 1, 'totalunits': 1, 'lfn': '/store/group/phys_heavyions/jvelazqu/energycorr/OO2025/eecAnalysis_OO_2025-XX-XX', 'publication': 0, 'publishdbsurl': 'https://cmsweb.cern.ch/dbs/prod/phys03/DBSWriter', 'jobtype': 'Analysis', 'generator': 'pythia', 'addoutputfiles': ['eecAnalysis_OO_2025-XX-XX.root'], 'maxjobruntime': 120, 'numcores': 1, 'maxmemory': 600, 'priority': 10, 'nonprodsw': 0, 'scriptexe': 'compileAndRun.sh', 'scriptargs': ['card=cardEECOO.input', 'output=eecAnalysis_OO_2025-XX-XX.root', 'location=1', 'mixinglist=none'], 'asyncdest': 'T2_CH_CERN', 'sitewhitelist': ['T2_CH_CERN'], 'requireaccelerator': 0, 'oneEventMode': 0, 'extrajdl': ['+CMS_ALLOW_OVERFLOW=False'], 'ignoreglobalblacklist': 0, 'partialdataset': 0, 'inputblocks': [], 'tfileoutfiles': [], 'edmoutfiles': [], 'jobarch': 'el9_amd64_gcc12', 'jobminuarch': 'x86-64-v3', 'jobsw': 'CMSSW_15_0_9_patch4', 'cachefilename': 'f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz', 'debugfilename': '0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz'} 
+DEBUG 2026-09-09 23:07:55.022 UTC: 	 Encoded data for curl request: dryrun=0&workflow=crab_eecAnalysis_OO_2025-XX-XX&saveoutput=1&savelogsflag=0&primarydataset=eecOOHistograms&nonvaliddata=0&dbsurl=https%3A%2F%2Fcmsweb.cern.ch%2Fdbs%2Fprod%2Fglobal%2FDBSReader&useparent=0&ignorelocality=0&splitalgo=FileBased&algoargs=1&totalunits=1&lfn=%2Fstore%2Fgroup%2Fphys_heavyions%2Fjvelazqu%2Fenergycorr%2FOO2025%2FeecAnalysis_OO_2025-XX-XX&publication=0&publishdbsurl=https%3A%2F%2Fcmsweb.cern.ch%2Fdbs%2Fprod%2Fphys03%2FDBSWriter&jobtype=Analysis&generator=pythia&maxjobruntime=120&numcores=1&maxmemory=600&priority=10&nonprodsw=0&scriptexe=compileAndRun.sh&asyncdest=T2_CH_CERN&requireaccelerator=0&oneEventMode=0&ignoreglobalblacklist=0&partialdataset=0&jobarch=el9_amd64_gcc12&jobminuarch=x86-64-v3&jobsw=CMSSW_15_0_9_patch4&cachefilename=f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz&debugfilename=0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz&addoutputfiles=eecAnalysis_OO_2025-XX-XX.root&sitewhitelist=T2_CH_CERN&userfiles=/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root&scriptargs=card%3DcardEECOO.input&scriptargs=output%3DeecAnalysis_OO_2025-XX-XX.root&scriptargs=location%3D1&scriptargs=mixinglist%3Dnone&extrajdl=%2BCMS_ALLOW_OVERFLOW%3DFalse
+DEBUG 2026-09-09 23:07:55.182 UTC: 	 Result: {'result': [{'RequestName': '260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX'}]}
+INFO 2026-09-09 23:07:55.188 UTC: 	 Success: Your task has been delivered to the prod CRAB3 server.
+INFO 2026-09-09 23:07:55.188 UTC: 	 Task name: 260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:07:55.188 UTC: 	 Project dir: eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:07:55.189 UTC: 	 Please use ' crab status -d eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX ' to check how the submission process proceeds.
+DEBUG 2026-09-09 23:07:55.189 UTC: 	 About to return
+INFO 2026-09-09 23:07:55.195 UTC: 	 Log file is /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/crab.log
+DEBUG 2026-09-09 23:08:33.634 UTC: 	 CRAB Client version: v3.260630
+DEBUG 2026-09-09 23:08:33.634 UTC: 	 Running on: Linux lxplus927.cern.ch 5.14.0-687.39.1.el9_8.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Aug 11 21:20:33 EDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+DEBUG 2026-09-09 23:08:33.634 UTC: 	 Not using Singularity
+DEBUG 2026-09-09 23:08:33.634 UTC: 	 Operating System: Red Hat Enterprise Linux 9.8 (Plow)
+DEBUG 2026-09-09 23:08:33.634 UTC: 	 Executing command: 'status'
+DEBUG 2026-09-09 23:08:33.635 UTC: 	 Found CRAB cache file /afs/cern.ch/user/j/jvelazqu/.crab3
+DEBUG 2026-09-09 23:08:33.642 UTC: 	 Checking credentials
+DEBUG 2026-09-09 23:08:33.642 UTC: 	 Found proxy file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:08:33.642 UTC: 	 Making sure it has proper VOMS extension
+DEBUG 2026-09-09 23:08:33.642 UTC: 	 Executing command :
+ voms-proxy-info --vo --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:08:33.673 UTC: 	 output : cms
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:08:33.674 UTC: 	 Getting proxy life time left
+DEBUG 2026-09-09 23:08:33.674 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:08:33.706 UTC: 	 output : 43092
+43092
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:08:33.707 UTC: 	 Proxy valid for 11:58:12 hours
+DEBUG 2026-09-09 23:08:33.707 UTC: 	 Encoded data for curl request: subresource=delegatedn
+DEBUG 2026-09-09 23:08:33.759 UTC: 	 Registering user credentials on myproxy for /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+DEBUG 2026-09-09 23:08:33.759 UTC: 	 Executing command :
+ voms-proxy-info --identity --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:08:33.789 UTC: 	 output : /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:08:33.789 UTC: 	 Getting myproxy life time left for 29942b412918fcbaf82774396e8ba772b03e2264
+DEBUG 2026-09-09 23:08:33.789 UTC: 	 Executing command :
+ myproxy-info -s myproxy.cern.ch -l 29942b412918fcbaf82774396e8ba772b03e2264
+DEBUG 2026-09-09 23:08:34.082 UTC: 	 output : username: 29942b412918fcbaf82774396e8ba772b03e2264
+owner: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral
+  renewal policy: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  trusted retrieval policy: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  timeleft: 402:59:36  (16.8 days)
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:08:34.082 UTC: 	 Myproxy is valid: 1450740
+DEBUG 2026-09-09 23:08:34.082 UTC: 	 Result of myproxy credential check:
+  Credential exists on myproxy: username: 29942b412918fcbaf82774396e8ba772b03e2264  - validity: 16 days, 18:59:00
+DEBUG 2026-09-09 23:08:34.082 UTC: 	 Retrieving username ...
+DEBUG 2026-09-09 23:08:34.082 UTC: 	 Retrieving username from CRIC...
+DEBUG 2026-09-09 23:08:35.052 UTC: 	 username is jvelazqu
+INFO 2026-09-09 23:08:36.405 UTC: 	 Rucio client intialized for account jvelazqu
+DEBUG 2026-09-09 23:08:36.406 UTC: 	 Command use: status
+DEBUG 2026-09-09 23:08:36.406 UTC: 	 Options use: ['-d', 'eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX']
+DEBUG 2026-09-09 23:08:36.406 UTC: 	 Encoded data for curl request: subresource=version
+DEBUG 2026-09-09 23:08:36.466 UTC: 	 CRABClient version: v3.260630
+DEBUG 2026-09-09 23:08:36.466 UTC: 	 Instance is prod
+DEBUG 2026-09-09 23:08:36.466 UTC: 	 Server base url is cmsweb.cern.ch
+DEBUG 2026-09-09 23:08:36.466 UTC: 	 Command api workflow
+DEBUG 2026-09-09 23:08:36.466 UTC: 	 Encoded data for curl request: subresource=search&workflow=260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:08:36.532 UTC: 	 Got information from server oracle database: {'desc': {'columns': ['tm_taskname', 'tm_activity', 'tm_task_status', 'tm_task_command', 'tm_start_time', 'tm_start_injection', 'tm_end_injection', 'tm_task_failure', 'tm_job_sw', 'tm_job_arch', 'tm_input_dataset', 'tm_nonvalid_input_dataset', 'tm_use_parent', 'tm_site_whitelist', 'tm_site_blacklist', 'tm_split_algo', 'tm_split_args', 'tm_user_sandbox', 'tm_cache_url', 'tm_username', 'tm_user_dn', 'tm_user_vo', 'tm_user_role', 'tm_user_group', 'tm_publish_name', 'tm_publish_groupname', 'tm_asyncdest', 'tm_dbs_url', 'tm_publish_dbs_url', 'tm_publication', 'tm_outfiles', 'tm_tfile_outfiles', 'tm_edm_outfiles', 'tm_job_type', 'tm_generator', 'tm_events_per_lumi', 'tm_arguments', 'tm_save_logs', 'tw_name', 'tm_user_infiles', 'tm_maxjobruntime', 'tm_numcores', 'tm_maxmemory', 'tm_priority', 'tm_output_dataset', 'tm_task_warnings', 'tm_user_webdir', 'tm_scriptexe', 'tm_scriptargs', 'tm_extrajdl', 'tm_collector', 'tm_schedd', 'tm_dry_run', 'tm_user_files', 'tm_transfer_outputs', 'tm_output_lfn', 'tm_ignore_locality', 'tm_fail_limit', 'tm_one_event_mode', 'tm_secondary_input_dataset', 'tm_primary_dataset', 'tm_last_publication', 'tm_debug_files', 'clusterid', 'tm_ignore_global_blacklist', 'tm_submitter_ip_addr', 'tm_totalunits', 'tm_ddm_reqid', 'tm_user_config', 'tm_transfer_container', 'tm_transfer_rule', 'tm_publish_rule', 'tm_multipub_rule', 'tm_job_min_microarch', 'tm_dagman_status', 'tm_num_jobs', 'tm_uploaded']}, 'result': ['260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX', 'None', 'SUBMITTED', 'SUBMIT', '2026-09-09 23:07:55.173905', 'None', '2026-09-09 23:08:16.910978', 'None', 'CMSSW_15_0_9_patch4', 'el9_amd64_gcc12', 'None', 'F', '0', "['T2_CH_CERN']", '[]', 'FileBased', "{'halt_job_on_file_boundaries': False, 'splitOnRun': False, 'files_per_job': 1, 'runs': [], 'lumis': []}", 'f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz', 'S3/crabcache_prod', 'jvelazqu', '/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral', 'cms', 'None', 'None', 'crab_eecAnalysis_OO_2025-XX-XX-00000000000000000000000000000000', 'F', 'T2_CH_CERN', 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader', 'https://cmsweb.cern.ch/dbs/prod/phys03/DBSWriter', 'F', "['eecAnalysis_OO_2025-XX-XX.root']", '[]', '[]', 'Analysis', 'pythia', 'None', '{}', 'F', 'crab-prod-tw01', '[]', '120', '1', '600', '10', 'None', '[]', 'None', 'compileAndRun.sh', "['card=cardEECOO.input', 'output=eecAnalysis_OO_2025-XX-XX.root', 'location=1', 'mixinglist=none']", "['+CMS_ALLOW_OVERFLOW=False']", 'None', 'crab3@vocms0194.cern.ch', 'F', "['/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root']", 'T', '/store/group/phys_heavyions/jvelazqu/energycorr/OO2025/eecAnalysis_OO_2025-XX-XX', 'F', 'None', 'F', 'None', 'eecOOHistograms', 'None', '0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz', '157023219', 'F', '188.185.89.202', '1.0', 'None', '{"partialdataset": false, "requireaccelerator": false, "acceleratorparams": null, "inputblocks": null}', 'None', 'None', 'None', 'None', 'x86-64-v3', 'NOT_READY', '1', 'T']}
+INFO 2026-09-09 23:08:36.533 UTC: 	 CRAB project directory:		/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:08:36.533 UTC: 	 Task name:			260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:08:36.533 UTC: 	 Grid scheduler - Task Worker:	crab3@vocms0194.cern.ch - crab-prod-tw01
+INFO 2026-09-09 23:08:36.533 UTC: 	 Status on the CRAB server:	SUBMITTED
+INFO 2026-09-09 23:08:36.533 UTC: 	 Task URL to use for HELP:	https://cmsweb.cern.ch/crabserver/ui/task/260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:08:36.552 UTC: 	 Dashboard monitoring URL:	https://monit-grafana.cern.ch/d/cmsTMDetail/cms-task-monitoring-task-view?orgId=11&var-user=jvelazqu&var-task=260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX&from=1788991675000&to=now
+DEBUG 2026-09-09 23:08:36.552 UTC: 	 The CRAB server submitted your task to the Grid scheduler (cluster ID: 157023219)
+INFO 2026-09-09 23:08:36.552 UTC: 	 Waiting for the Grid scheduler to bootstrap your task
+DEBUG 2026-09-09 23:08:36.552 UTC: 	 Schedd has not reported back the webdir (yet)
+INFO 2026-09-09 23:08:36.556 UTC: 	 Log file is /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/crab.log
+DEBUG 2026-09-09 23:09:33.163 UTC: 	 CRAB Client version: v3.260630
+DEBUG 2026-09-09 23:09:33.163 UTC: 	 Running on: Linux lxplus927.cern.ch 5.14.0-687.39.1.el9_8.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Aug 11 21:20:33 EDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+DEBUG 2026-09-09 23:09:33.163 UTC: 	 Not using Singularity
+DEBUG 2026-09-09 23:09:33.163 UTC: 	 Operating System: Red Hat Enterprise Linux 9.8 (Plow)
+DEBUG 2026-09-09 23:09:33.163 UTC: 	 Executing command: 'status'
+DEBUG 2026-09-09 23:09:33.163 UTC: 	 Found CRAB cache file /afs/cern.ch/user/j/jvelazqu/.crab3
+DEBUG 2026-09-09 23:09:33.168 UTC: 	 Checking credentials
+DEBUG 2026-09-09 23:09:33.168 UTC: 	 Found proxy file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:09:33.168 UTC: 	 Making sure it has proper VOMS extension
+DEBUG 2026-09-09 23:09:33.168 UTC: 	 Executing command :
+ voms-proxy-info --vo --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:09:33.219 UTC: 	 output : cms
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:09:33.219 UTC: 	 Getting proxy life time left
+DEBUG 2026-09-09 23:09:33.220 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:09:33.249 UTC: 	 output : 43032
+43032
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:09:33.249 UTC: 	 Proxy valid for 11:57:12 hours
+DEBUG 2026-09-09 23:09:33.249 UTC: 	 Encoded data for curl request: subresource=delegatedn
+DEBUG 2026-09-09 23:09:33.313 UTC: 	 Registering user credentials on myproxy for /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+DEBUG 2026-09-09 23:09:33.313 UTC: 	 Executing command :
+ voms-proxy-info --identity --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:09:33.350 UTC: 	 output : /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:09:33.350 UTC: 	 Getting myproxy life time left for 29942b412918fcbaf82774396e8ba772b03e2264
+DEBUG 2026-09-09 23:09:33.350 UTC: 	 Executing command :
+ myproxy-info -s myproxy.cern.ch -l 29942b412918fcbaf82774396e8ba772b03e2264
+DEBUG 2026-09-09 23:09:33.654 UTC: 	 output : username: 29942b412918fcbaf82774396e8ba772b03e2264
+owner: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral
+  renewal policy: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  trusted retrieval policy: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  timeleft: 402:58:37  (16.8 days)
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:09:33.654 UTC: 	 Myproxy is valid: 1450680
+DEBUG 2026-09-09 23:09:33.654 UTC: 	 Result of myproxy credential check:
+  Credential exists on myproxy: username: 29942b412918fcbaf82774396e8ba772b03e2264  - validity: 16 days, 18:58:00
+DEBUG 2026-09-09 23:09:33.654 UTC: 	 Retrieving username ...
+DEBUG 2026-09-09 23:09:33.654 UTC: 	 Retrieving username from CRIC...
+DEBUG 2026-09-09 23:09:34.440 UTC: 	 username is jvelazqu
+INFO 2026-09-09 23:09:35.592 UTC: 	 Rucio client intialized for account jvelazqu
+DEBUG 2026-09-09 23:09:35.592 UTC: 	 Command use: status
+DEBUG 2026-09-09 23:09:35.592 UTC: 	 Options use: ['-d', 'eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX']
+DEBUG 2026-09-09 23:09:35.593 UTC: 	 Encoded data for curl request: subresource=version
+DEBUG 2026-09-09 23:09:35.651 UTC: 	 CRABClient version: v3.260630
+DEBUG 2026-09-09 23:09:35.651 UTC: 	 Instance is prod
+DEBUG 2026-09-09 23:09:35.651 UTC: 	 Server base url is cmsweb.cern.ch
+DEBUG 2026-09-09 23:09:35.651 UTC: 	 Command api workflow
+DEBUG 2026-09-09 23:09:35.651 UTC: 	 Encoded data for curl request: subresource=search&workflow=260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:09:35.717 UTC: 	 Got information from server oracle database: {'desc': {'columns': ['tm_taskname', 'tm_activity', 'tm_task_status', 'tm_task_command', 'tm_start_time', 'tm_start_injection', 'tm_end_injection', 'tm_task_failure', 'tm_job_sw', 'tm_job_arch', 'tm_input_dataset', 'tm_nonvalid_input_dataset', 'tm_use_parent', 'tm_site_whitelist', 'tm_site_blacklist', 'tm_split_algo', 'tm_split_args', 'tm_user_sandbox', 'tm_cache_url', 'tm_username', 'tm_user_dn', 'tm_user_vo', 'tm_user_role', 'tm_user_group', 'tm_publish_name', 'tm_publish_groupname', 'tm_asyncdest', 'tm_dbs_url', 'tm_publish_dbs_url', 'tm_publication', 'tm_outfiles', 'tm_tfile_outfiles', 'tm_edm_outfiles', 'tm_job_type', 'tm_generator', 'tm_events_per_lumi', 'tm_arguments', 'tm_save_logs', 'tw_name', 'tm_user_infiles', 'tm_maxjobruntime', 'tm_numcores', 'tm_maxmemory', 'tm_priority', 'tm_output_dataset', 'tm_task_warnings', 'tm_user_webdir', 'tm_scriptexe', 'tm_scriptargs', 'tm_extrajdl', 'tm_collector', 'tm_schedd', 'tm_dry_run', 'tm_user_files', 'tm_transfer_outputs', 'tm_output_lfn', 'tm_ignore_locality', 'tm_fail_limit', 'tm_one_event_mode', 'tm_secondary_input_dataset', 'tm_primary_dataset', 'tm_last_publication', 'tm_debug_files', 'clusterid', 'tm_ignore_global_blacklist', 'tm_submitter_ip_addr', 'tm_totalunits', 'tm_ddm_reqid', 'tm_user_config', 'tm_transfer_container', 'tm_transfer_rule', 'tm_publish_rule', 'tm_multipub_rule', 'tm_job_min_microarch', 'tm_dagman_status', 'tm_num_jobs', 'tm_uploaded']}, 'result': ['260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX', 'None', 'SUBMITTED', 'SUBMIT', '2026-09-09 23:07:55.173905', 'None', '2026-09-09 23:08:16.910978', 'None', 'CMSSW_15_0_9_patch4', 'el9_amd64_gcc12', 'None', 'F', '0', "['T2_CH_CERN']", '[]', 'FileBased', "{'halt_job_on_file_boundaries': False, 'splitOnRun': False, 'files_per_job': 1, 'runs': [], 'lumis': []}", 'f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz', 'S3/crabcache_prod', 'jvelazqu', '/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral', 'cms', 'None', 'None', 'crab_eecAnalysis_OO_2025-XX-XX-00000000000000000000000000000000', 'F', 'T2_CH_CERN', 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader', 'https://cmsweb.cern.ch/dbs/prod/phys03/DBSWriter', 'F', "['eecAnalysis_OO_2025-XX-XX.root']", '[]', '[]', 'Analysis', 'pythia', 'None', '{}', 'F', 'crab-prod-tw01', '[]', '120', '1', '600', '10', 'None', '[]', 'http://vocms0194.cern.ch/mon/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX', 'compileAndRun.sh', "['card=cardEECOO.input', 'output=eecAnalysis_OO_2025-XX-XX.root', 'location=1', 'mixinglist=none']", "['+CMS_ALLOW_OVERFLOW=False']", 'None', 'crab3@vocms0194.cern.ch', 'F', "['/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root']", 'T', '/store/group/phys_heavyions/jvelazqu/energycorr/OO2025/eecAnalysis_OO_2025-XX-XX', 'F', 'None', 'F', 'None', 'eecOOHistograms', 'None', '0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz', '157023219', 'F', '188.185.89.202', '1.0', 'None', '{"partialdataset": false, "requireaccelerator": false, "acceleratorparams": null, "inputblocks": null}', 'None', 'None', 'None', 'None', 'x86-64-v3', 'NOT_READY', '1', 'T']}
+INFO 2026-09-09 23:09:35.717 UTC: 	 CRAB project directory:		/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:09:35.717 UTC: 	 Task name:			260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:09:35.717 UTC: 	 Grid scheduler - Task Worker:	crab3@vocms0194.cern.ch - crab-prod-tw01
+INFO 2026-09-09 23:09:35.717 UTC: 	 Status on the CRAB server:	SUBMITTED
+INFO 2026-09-09 23:09:35.718 UTC: 	 Task URL to use for HELP:	https://cmsweb.cern.ch/crabserver/ui/task/260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:09:35.731 UTC: 	 Dashboard monitoring URL:	https://monit-grafana.cern.ch/d/cmsTMDetail/cms-task-monitoring-task-view?orgId=11&var-user=jvelazqu&var-task=260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX&from=1788991675000&to=now
+DEBUG 2026-09-09 23:09:35.732 UTC: 	 The CRAB server submitted your task to the Grid scheduler (cluster ID: 157023219)
+DEBUG 2026-09-09 23:09:35.732 UTC: 	 Webdir is located at http://vocms0194.cern.ch/mon/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:09:35.732 UTC: 	 Encoded data for curl request: subresource=webdirprx&workflow=260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:09:35.786 UTC: 	 Proxied webdir is located at https://cmsweb.cern.ch/scheddmon/0194/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:09:35.786 UTC: 	 Retrieving 'status_cache' file from https://cmsweb.cern.ch/scheddmon/0194/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX/status_cache.pkl
+DEBUG 2026-09-09 23:09:35.786 UTC: 	 Will execute:
+curl -sS --capath /etc/grid-security/certificates --cert /tmp/x509up_u157769 --key /tmp/x509up_u157769 -o /tmp/crab_status-cache-hzgsyvfe.pkl -w %"{http_code}" "https://cmsweb.cern.ch/scheddmon/0194/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX/status_cache.pkl"
+DEBUG 2026-09-09 23:09:35.786 UTC: 	 Executing command :
+ curl -sS --capath /etc/grid-security/certificates --cert /tmp/x509up_u157769 --key /tmp/x509up_u157769 -o /tmp/crab_status-cache-hzgsyvfe.pkl -w %"{http_code}" "https://cmsweb.cern.ch/scheddmon/0194/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX/status_cache.pkl"
+DEBUG 2026-09-09 23:09:35.836 UTC: 	 output : 200
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:09:35.837 UTC: 	 exitcode: 0
+stdout: 200
+stderr: 
+error details: 
+INFO 2026-09-09 23:09:35.837 UTC: 	 Task bootstrapped at 2026-09-09 23:09:19 UTC. 16 seconds ago
+INFO 2026-09-09 23:09:35.837 UTC: 	 Status information will be available within a few minutes
+INFO 2026-09-09 23:09:35.840 UTC: 	 Log file is /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/crab.log
+DEBUG 2026-09-09 23:13:12.608 UTC: 	 CRAB Client version: v3.260630
+DEBUG 2026-09-09 23:13:12.608 UTC: 	 Running on: Linux lxplus927.cern.ch 5.14.0-687.39.1.el9_8.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Aug 11 21:20:33 EDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+DEBUG 2026-09-09 23:13:12.608 UTC: 	 Not using Singularity
+DEBUG 2026-09-09 23:13:12.608 UTC: 	 Operating System: Red Hat Enterprise Linux 9.8 (Plow)
+DEBUG 2026-09-09 23:13:12.608 UTC: 	 Executing command: 'status'
+DEBUG 2026-09-09 23:13:12.610 UTC: 	 Found CRAB cache file /afs/cern.ch/user/j/jvelazqu/.crab3
+DEBUG 2026-09-09 23:13:12.616 UTC: 	 Checking credentials
+DEBUG 2026-09-09 23:13:12.617 UTC: 	 Found proxy file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:13:12.617 UTC: 	 Making sure it has proper VOMS extension
+DEBUG 2026-09-09 23:13:12.617 UTC: 	 Executing command :
+ voms-proxy-info --vo --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:13:12.660 UTC: 	 output : cms
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:13:12.660 UTC: 	 Getting proxy life time left
+DEBUG 2026-09-09 23:13:12.660 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:13:12.693 UTC: 	 output : 42813
+42813
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:13:12.694 UTC: 	 Proxy valid for 11:53:33 hours
+DEBUG 2026-09-09 23:13:12.694 UTC: 	 Encoded data for curl request: subresource=delegatedn
+DEBUG 2026-09-09 23:13:12.777 UTC: 	 Registering user credentials on myproxy for /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+DEBUG 2026-09-09 23:13:12.777 UTC: 	 Executing command :
+ voms-proxy-info --identity --file /tmp/x509up_u157769
+DEBUG 2026-09-09 23:13:12.811 UTC: 	 output : /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:13:12.811 UTC: 	 Getting myproxy life time left for 29942b412918fcbaf82774396e8ba772b03e2264
+DEBUG 2026-09-09 23:13:12.811 UTC: 	 Executing command :
+ myproxy-info -s myproxy.cern.ch -l 29942b412918fcbaf82774396e8ba772b03e2264
+DEBUG 2026-09-09 23:13:13.115 UTC: 	 output : username: 29942b412918fcbaf82774396e8ba772b03e2264
+owner: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral
+  renewal policy: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  trusted retrieval policy: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=cmscrab/CN=(817881|373708)/CN=Robot: cms crab|/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=crabint1/CN=373708/CN=Robot: CMS CRAB Integration 1
+  timeleft: 402:54:57  (16.8 days)
+
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:13:13.116 UTC: 	 Myproxy is valid: 1450440
+DEBUG 2026-09-09 23:13:13.116 UTC: 	 Result of myproxy credential check:
+  Credential exists on myproxy: username: 29942b412918fcbaf82774396e8ba772b03e2264  - validity: 16 days, 18:54:00
+DEBUG 2026-09-09 23:13:13.116 UTC: 	 Retrieving username ...
+DEBUG 2026-09-09 23:13:13.116 UTC: 	 Retrieving username from CRIC...
+DEBUG 2026-09-09 23:13:13.908 UTC: 	 username is jvelazqu
+INFO 2026-09-09 23:13:14.972 UTC: 	 Rucio client intialized for account jvelazqu
+DEBUG 2026-09-09 23:13:14.972 UTC: 	 Command use: status
+DEBUG 2026-09-09 23:13:14.972 UTC: 	 Options use: ['-d', 'eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX']
+DEBUG 2026-09-09 23:13:14.972 UTC: 	 Encoded data for curl request: subresource=version
+DEBUG 2026-09-09 23:13:15.026 UTC: 	 CRABClient version: v3.260630
+DEBUG 2026-09-09 23:13:15.026 UTC: 	 Instance is prod
+DEBUG 2026-09-09 23:13:15.026 UTC: 	 Server base url is cmsweb.cern.ch
+DEBUG 2026-09-09 23:13:15.026 UTC: 	 Command api workflow
+DEBUG 2026-09-09 23:13:15.026 UTC: 	 Encoded data for curl request: subresource=search&workflow=260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:13:15.085 UTC: 	 Got information from server oracle database: {'desc': {'columns': ['tm_taskname', 'tm_activity', 'tm_task_status', 'tm_task_command', 'tm_start_time', 'tm_start_injection', 'tm_end_injection', 'tm_task_failure', 'tm_job_sw', 'tm_job_arch', 'tm_input_dataset', 'tm_nonvalid_input_dataset', 'tm_use_parent', 'tm_site_whitelist', 'tm_site_blacklist', 'tm_split_algo', 'tm_split_args', 'tm_user_sandbox', 'tm_cache_url', 'tm_username', 'tm_user_dn', 'tm_user_vo', 'tm_user_role', 'tm_user_group', 'tm_publish_name', 'tm_publish_groupname', 'tm_asyncdest', 'tm_dbs_url', 'tm_publish_dbs_url', 'tm_publication', 'tm_outfiles', 'tm_tfile_outfiles', 'tm_edm_outfiles', 'tm_job_type', 'tm_generator', 'tm_events_per_lumi', 'tm_arguments', 'tm_save_logs', 'tw_name', 'tm_user_infiles', 'tm_maxjobruntime', 'tm_numcores', 'tm_maxmemory', 'tm_priority', 'tm_output_dataset', 'tm_task_warnings', 'tm_user_webdir', 'tm_scriptexe', 'tm_scriptargs', 'tm_extrajdl', 'tm_collector', 'tm_schedd', 'tm_dry_run', 'tm_user_files', 'tm_transfer_outputs', 'tm_output_lfn', 'tm_ignore_locality', 'tm_fail_limit', 'tm_one_event_mode', 'tm_secondary_input_dataset', 'tm_primary_dataset', 'tm_last_publication', 'tm_debug_files', 'clusterid', 'tm_ignore_global_blacklist', 'tm_submitter_ip_addr', 'tm_totalunits', 'tm_ddm_reqid', 'tm_user_config', 'tm_transfer_container', 'tm_transfer_rule', 'tm_publish_rule', 'tm_multipub_rule', 'tm_job_min_microarch', 'tm_dagman_status', 'tm_num_jobs', 'tm_uploaded']}, 'result': ['260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX', 'None', 'SUBMITTED', 'SUBMIT', '2026-09-09 23:07:55.173905', 'None', '2026-09-09 23:08:16.910978', 'None', 'CMSSW_15_0_9_patch4', 'el9_amd64_gcc12', 'None', 'F', '0', "['T2_CH_CERN']", '[]', 'FileBased', "{'halt_job_on_file_boundaries': False, 'splitOnRun': False, 'files_per_job': 1, 'runs': [], 'lumis': []}", 'f3bdb9f5c438baaf14569bf9236f6173383260adbeb1e785ea435f80a7e8fbb5.tar.gz', 'S3/crabcache_prod', 'jvelazqu', '/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=jvelazqu/CN=865853/CN=Jesus Corral', 'cms', 'None', 'None', 'crab_eecAnalysis_OO_2025-XX-XX-00000000000000000000000000000000', 'F', 'T2_CH_CERN', 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader', 'https://cmsweb.cern.ch/dbs/prod/phys03/DBSWriter', 'F', "['eecAnalysis_OO_2025-XX-XX.root']", '[]', '[]', 'Analysis', 'pythia', 'None', '{}', 'F', 'crab-prod-tw01', '[]', '120', '1', '600', '10', "['/FakeDataset/fakefile-FakePublish-6346b516d8b9071e8e665d0e1073c36b/USER']", '[]', 'http://vocms0194.cern.ch/mon/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX', 'compileAndRun.sh', "['card=cardEECOO.input', 'output=eecAnalysis_OO_2025-XX-XX.root', 'location=1', 'mixinglist=none']", "['+CMS_ALLOW_OVERFLOW=False']", 'None', 'crab3@vocms0194.cern.ch', 'F', "['/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_100.root']", 'T', '/store/group/phys_heavyions/jvelazqu/energycorr/OO2025/eecAnalysis_OO_2025-XX-XX', 'F', 'None', 'F', 'None', 'eecOOHistograms', 'None', '0643fa10db5fbb5b0fb12c085d72a1883d57bbac0e1b11c34a4997649cb791a0.tar.gz', '157023219', 'F', '188.185.89.202', '1.0', 'None', '{"partialdataset": false, "requireaccelerator": false, "acceleratorparams": null, "inputblocks": null}', 'None', 'None', 'None', 'None', 'x86-64-v3', 'RUNNING', '1', 'T']}
+INFO 2026-09-09 23:13:15.085 UTC: 	 CRAB project directory:		/afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:13:15.085 UTC: 	 Task name:			260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:13:15.085 UTC: 	 Grid scheduler - Task Worker:	crab3@vocms0194.cern.ch - crab-prod-tw01
+INFO 2026-09-09 23:13:15.085 UTC: 	 Status on the CRAB server:	SUBMITTED
+INFO 2026-09-09 23:13:15.085 UTC: 	 Task URL to use for HELP:	https://cmsweb.cern.ch/crabserver/ui/task/260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+INFO 2026-09-09 23:13:15.095 UTC: 	 Dashboard monitoring URL:	https://monit-grafana.cern.ch/d/cmsTMDetail/cms-task-monitoring-task-view?orgId=11&var-user=jvelazqu&var-task=260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX&from=1788991675000&to=now
+DEBUG 2026-09-09 23:13:15.095 UTC: 	 The CRAB server submitted your task to the Grid scheduler (cluster ID: 157023219)
+DEBUG 2026-09-09 23:13:15.095 UTC: 	 Webdir is located at http://vocms0194.cern.ch/mon/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:13:15.095 UTC: 	 Encoded data for curl request: subresource=webdirprx&workflow=260909_230755%3Ajvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:13:15.149 UTC: 	 Proxied webdir is located at https://cmsweb.cern.ch/scheddmon/0194/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX
+DEBUG 2026-09-09 23:13:15.149 UTC: 	 Retrieving 'status_cache' file from https://cmsweb.cern.ch/scheddmon/0194/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX/status_cache.pkl
+DEBUG 2026-09-09 23:13:15.149 UTC: 	 Will execute:
+curl -sS --capath /etc/grid-security/certificates --cert /tmp/x509up_u157769 --key /tmp/x509up_u157769 -o /tmp/crab_status-cache-gflpqlqu.pkl -w %"{http_code}" "https://cmsweb.cern.ch/scheddmon/0194/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX/status_cache.pkl"
+DEBUG 2026-09-09 23:13:15.149 UTC: 	 Executing command :
+ curl -sS --capath /etc/grid-security/certificates --cert /tmp/x509up_u157769 --key /tmp/x509up_u157769 -o /tmp/crab_status-cache-gflpqlqu.pkl -w %"{http_code}" "https://cmsweb.cern.ch/scheddmon/0194/jvelazqu/260909_230755:jvelazqu_crab_eecAnalysis_OO_2025-XX-XX/status_cache.pkl"
+DEBUG 2026-09-09 23:13:15.192 UTC: 	 output : 200
+ error: 
+ retcode : 0
+DEBUG 2026-09-09 23:13:15.192 UTC: 	 exitcode: 0
+stdout: 200
+stderr: 
+error details: 
+DEBUG 2026-09-09 23:13:15.192 UTC: 	 Got information from status cache file: {'1': {'Retries': 0, 'Restarts': 0, 'SiteHistory': ['Unknown'], 'ResidentSetSize': [0], 'SubmitTimes': [1788995364.0], 'StartTimes': [], 'EndTimes': [], 'TotalUserCpuTimeHistory': [0.0], 'TotalSysCpuTimeHistory': [0.0], 'WallDurations': [0], 'JobIds': ['157023231.0'], 'State': 'running', 'RecordedSite': False}}
+INFO 2026-09-09 23:13:15.192 UTC: 	 Status on the scheduler:	RUNNING
+INFO 2026-09-09 23:13:15.193 UTC: 	 
+Jobs status:                    running      		100.0% (1/1)
+INFO 2026-09-09 23:13:15.193 UTC: 	 
+No publication information (publication has been disabled in the CRAB configuration file)
+INFO 2026-09-09 23:13:15.197 UTC: 	 Log file is /afs/cern.ch/user/j/jvelazqu/EECAnalysis/CMSSW_15_0_9_patch4/src/energyEnergyCorrelatorAnalysis/crab/eecAnalysis_OO_2025-XX-XX/crab_eecAnalysis_OO_2025-XX-XX/crab.log

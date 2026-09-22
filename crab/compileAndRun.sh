@@ -12,7 +12,7 @@ MIXINGLIST=${5#*=}
 tar xf input_files.tar.gz
 
 # Unzip tar ball
-tar -xvzf eec5TeV.tar.gz
+tar -xvzf eecOO.tar.gz
 
 # Compile the code
 make
