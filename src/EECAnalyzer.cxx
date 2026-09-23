@@ -183,6 +183,7 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   fHistograms(0),
   fJetCorrector(),
   fJetUncertainty(),
+  fTrackPairEfficiencyCorrector(nullptr),
   fVzWeight(1),
   fCentralityWeight(1),
   fPtHatWeight(1),
@@ -273,8 +274,9 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
 
     // 2. Apply PbPb Weights: Use the parameters you provided for Vz and Centrality
     // But we need to change the multiplicity weight function to match the OO multiplicity distribution.
-    fVzWeightFunction = new TF1("fvz","pol6",-15,15);
+    //fVzWeightFunction = new TF1("fvz","pol6",-15,15);
     //fVzWeightFunction->SetParameters(1.00591, -0.0193751, 0.000961142, -2.44303e-05, -8.24443e-06, 1.66679e-07, 1.11028e-08);
+    fVzWeightFunction = new TF1("fvzOO","1",-15,15);
     
     fCentralityWeightFunctionCentral = new TF1("fCentralWeight","pol6",0,30);
     fCentralityWeightFunctionCentral->SetParameters(4.73421, -0.0477343, -0.0332804, 0.00355699, -0.00017427, 4.18398e-06, -3.94746e-08);
@@ -284,9 +286,9 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
     
     fMultiplicityWeightFunction = new TF1("fMultiWeight", totalMultiplicityWeight, 0, 5000, 0);
 
-    // 4. Skip Mixing: Disable flags
-    fDoMixedCone = false;
-    fDoPerpendicularCone = false;
+    // Mixed cones are not configured for OO. Reflected and perpendicular
+    // cones follow BackgroundMethods from the card.
+     fDoMixedCone = false;
 
     // Set remaining helpers to NULL to ensure they are skipped
     fTrackPairEfficiencyCorrector = NULL;
@@ -1555,24 +1557,29 @@ void EECAnalyzer::RunAnalysis(){
       // We need to apply pT hat cuts before getting pT hat weight. There might be rare events above the upper
       // limit from which the weights are calculated, which could cause the code to crash.
       if(ptHat < fMinimumPtHat || ptHat >= fMaximumPtHat) continue;
+
+      // Diagnostic Run-3 MC baseline: use unit weights until each factor is validated.
+      const bool diagnosticRun3MC = (fDataType == ForestReader::kOOMC || fDataType == ForestReader::kPpRef5p36TeVMC);
       
       // Get the weighting for the event
-      fVzWeight = GetVzWeight(vz);
+      fVzWeight = diagnosticRun3MC ? 1.0 : GetVzWeight(vz);
       if(fMultiplicityMode){
         // Multiplicity based weight
         trackMultiplicity = GetMultiplicity();
-        fCentralityWeight = GetMultiplicityWeight(trackMultiplicity);
+        fCentralityWeight = diagnosticRun3MC ? 1.0 : GetMultiplicityWeight(trackMultiplicity);
         centrality = GetCentralityFromMultiplicity(trackMultiplicity);
       } else {
         // Regular centrality based weight
-        fCentralityWeight = GetCentralityWeight(hiBin);
+        fCentralityWeight = diagnosticRun3MC ? 1.0 : GetCentralityWeight(hiBin);
+
       }
 
       // Event weight for 2018 MC
       if(!(fDataType == ForestReader::kPPbMC_pToMinusEta) && !(fDataType == ForestReader::kPPbMC_pToPlusEta)){
 
         // Event-by-event weight for pp and PbPb MC
-        fPtHatWeight = fJetReader->GetEventWeight();
+        fPtHatWeight = diagnosticRun3MC ? 1.0 : fJetReader->GetEventWeight();
+
       } 
       fTotalEventWeight = fVzWeight*fCentralityWeight*fPtHatWeight;
       
@@ -3115,7 +3122,6 @@ void EECAnalyzer::ConstructParticleResponses(){
   Double_t trackPairEfficiencyError;      // Track pair efficiency error
   Int_t trackCharge;                      // Charge of the particle
   Int_t nTracks;                          // Number of generator level particles
-  Bool_t trackPairCorrectionFlag;         // Flag about enabling track pair efficiency correction
 
   // Event variables
   Int_t hiBin = fUnfoldingForestReader->GetHiBin();
@@ -3326,11 +3332,12 @@ void EECAnalyzer::ConstructParticleResponses(){
         deltaRTracks = GetDeltaR(std::get<kTrackEta>(selectedTrackInformation.at(iTrack)), std::get<kTrackPhi>(selectedTrackInformation.at(iTrack)), std::get<kTrackEta>(selectedTrackInformation.at(jTrack)), std::get<kTrackPhi>(selectedTrackInformation.at(jTrack)));
         deltaRParticles = GetDeltaR(std::get<kTrackEta>(selectedParticleInformation.at(std::get<kMatchIndex>(selectedTrackInformation.at(iTrack)))), std::get<kTrackPhi>(selectedParticleInformation.at(std::get<kMatchIndex>(selectedTrackInformation.at(iTrack)))), std::get<kTrackEta>(selectedParticleInformation.at(std::get<kMatchIndex>(selectedTrackInformation.at(jTrack)))), std::get<kTrackPhi>(selectedParticleInformation.at(std::get<kMatchIndex>(selectedTrackInformation.at(jTrack)))));
 
-        // Find the pair acceptance correction for the track pair regardless if it is disabled in the main code or not
-        trackPairCorrectionFlag = fTrackPairEfficiencyCorrector->GetDisableCorrection();
-        fTrackPairEfficiencyCorrector->SetDisableCorrection(false);
-        std::tie(trackPairEfficiencyCorrection, trackPairEfficiencyError) = fTrackPairEfficiencyCorrector->GetTrackPairEfficiencyCorrection(deltaRTracks, centrality, std::get<kTrackPt>(selectedTrackInformation.at(iTrack)), std::get<kTrackPt>(selectedTrackInformation.at(jTrack)), jetPt);
-        fTrackPairEfficiencyCorrector->SetDisableCorrection(trackPairCorrectionFlag);
+        // Use unity if pair corrections are disabled or no table exists.
+        trackPairEfficiencyCorrection = 1.0;
+        trackPairEfficiencyError = 0.0;
+        if(fTrackPairEfficiencyCorrector != nullptr && !fTrackPairEfficiencyCorrector->GetDisableCorrection()){
+          std::tie(trackPairEfficiencyCorrection, trackPairEfficiencyError) = fTrackPairEfficiencyCorrector->GetTrackPairEfficiencyCorrection(deltaRTracks, centrality, std::get<kTrackPt>(selectedTrackInformation.at(iTrack)), std::get<kTrackPt>(selectedTrackInformation.at(jTrack)), jetPt);
+        }
 
         // Fill the matched deltaR values to the response matrix
         fillerParticleDeltaRResponseMatrix[0] = deltaRTracks;

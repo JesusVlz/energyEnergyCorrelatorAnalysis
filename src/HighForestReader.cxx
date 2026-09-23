@@ -403,20 +403,12 @@ void HighForestReader::Initialize(){
     fJetTree->SetBranchStatus("nref", 1);
     fJetTree->SetBranchAddress("nref", &fnJets, &fnJetsBranch);
 
-    // OO forests use different branch names for raw pT and maximum track pT inside a jet
-    // In OO forests, the raw pT is stored in the "jtptUncorrected" branch, while in other forests it is stored in the "rawpt" branch. 
-    // Similarly, the maximum track pT inside a jet is stored in the "chargedMax" branch in OO forests and in the "trackMax" branch in other forests.
-    if(fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
-      fJetTree->SetBranchStatus("jtptUncorrected", 1);
-      fJetTree->SetBranchAddress("jtptUncorrected", &fJetRawPtArray, &fJetRawPtBranch);
-      fJetTree->SetBranchStatus("chargedMax", 1);
-      fJetTree->SetBranchAddress("chargedMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
-    } else {
-      fJetTree->SetBranchStatus("rawpt", 1);
-      fJetTree->SetBranchAddress("rawpt", &fJetRawPtArray, &fJetRawPtBranch);
-      fJetTree->SetBranchStatus("trackMax", 1);
-      fJetTree->SetBranchAddress("trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
-    }
+    
+    fJetTree->SetBranchStatus("rawpt", 1);
+    fJetTree->SetBranchAddress("rawpt", &fJetRawPtArray, &fJetRawPtBranch);
+    fJetTree->SetBranchStatus("trackMax", 1);
+    fJetTree->SetBranchAddress("trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
+    
     
   
     // If we are looking at Monte Carlo, connect the reference pT and parton arrays
