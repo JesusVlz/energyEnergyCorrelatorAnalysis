@@ -36,7 +36,7 @@ JetUncertainty 0           # 0 = Nominal jet pT, 1 = Minus uncertainty, 2 = Plus
 
 # Cuts for tracks
 TrackEtaCut 2.4             # Region in eta around midrapidity from which tracks are accepted
-MinTrackPtCut 0.7           # Minimum track pT considered in the analysis
+MinTrackPtCut 0.5           # Minimum track pT considered in the analysis
 MaxTrackPtCut 500           # Maximum track pT considered in the analysis
 MaxTrackPtRelativeError 0.1 # Maximum relative error allowed for track pT. 0.1 = Nominal, 0.1 = Loose, 0.05 = Tight
 VertexMaxDistance 3         # Position with respect to PV resolution. 3 = Nominal, 5 = Loose, 2 = Tight
@@ -55,8 +55,8 @@ DisableTrackPairEfficiencyCorrection 1 # 0 = Do not disable the correction. 1 = 
 
 # Cuts for event selection
 ZVertexCut 15       # Maximum vz value for accepted tracks
-LowPtHatCut 50      # Minimum accepted pT hat
-HighPtHatCut 960    # Maximum accepted pT hat
+LowPtHatCut -15      # Minimum accepted pT hat
+HighPtHatCut 5020      # Maximum accepted pT hat
 MultiplicityMode 0 # 0 = Weight MC centrality to match data. 1 = Weight multiplicity to match
 
 # Configuration for energy-energy correlators
@@ -64,8 +64,8 @@ JetRadius 0.4       # Radius around jets used to calculate the correlations
 WeightExponent 1 2  # Exponents given for the energy weight in EECs
 SmearDeltaR 0       # Flag for smearing DeltaR values in EECs
 SmearEnergyWeight 0 # Flag for smearing energy weights in EECs
-JetPtBinEdgesEEC 40 50 60 80 100 120 140 160 180 200 300 500 5020 # Jet pT bin edges for EEC
-TrackPtBinEdgesEEC 0.7 1 1.5 2 2.5 3 3.5 4 300 # Track pT bin edges for EEC
+JetPtBinEdgesEEC 40 80 120 160 200 300 500 5020 # Jet pT bin edges for EEC
+TrackPtBinEdgesEEC 0.5 1 1.5 2 2.5 3 3.5 4 300 # Track pT bin edges for EEC
 
 # Configuration for unfolding response matrices
 SkipCovarianceMatrix 0 # 0 = Fill covariance matrix. 1 = Do not fill covariance matrix
