@@ -26,7 +26,7 @@ FilledHistograms 31 # Bit 0 = Event information histograms                  (to 
 JetType 1                  # 0 =  R2 PF CS jets, 1 = R4 PF CS jets, 2 = R6 PF CS jets, 3 = R8 PF CS jets
 JetAxis 1                  # 0 = E-scheme axis, 1 = WTA axis
 JetEtaCut 1.6              # Region in eta around midrapidity taken into account in analysis
-MinJetPtCut 20             # Minimum pT of a leading jet accepted in the analysis
+MinJetPtCut 10             # Minimum pT of a leading jet accepted in the analysis
 MaxJetPtCut 5020           # Maximum pT of a leading jet accepted in the analysis
 CutBadPhi 0                # Cut the problematic phi region. 0 = No cut, 1 = crude cut
 CutWithEtaCM 0             # Cut jets that are outside of symmetric eta CM acceptance for pPb collisions within the defined jet eta cut in lab frame

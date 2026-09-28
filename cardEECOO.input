@@ -26,7 +26,7 @@ FilledHistograms 31 # Bit 0 = Event information histograms                  (to 
 JetType 1                  # 0 =  R2 PF CS jets, 1 = R4 PF CS jets, 2 = R6 PF CS jets, 3 = R8 PF CS jets
 JetAxis 1                  # 0 = E-scheme axis, 1 = WTA axis
 JetEtaCut 1.6              # Region in eta around midrapidity taken into account in analysis
-MinJetPtCut 20             # Minimum pT of a jet accepted in the analysis
+MinJetPtCut 10             # Minimum pT of a jet accepted in the analysis
 MaxJetPtCut 5020           # Maximum pT of a jet accepted in the analysis
 CutBadPhi 0                # Cut the problematic phi region. 0 = No cut, 1 = crude cut
 CutWithEtaCM 0             # Cut jets that are outside of symmetric eta CM acceptance for pPb collisions within the defined jet eta cut in lab frame
@@ -65,7 +65,7 @@ WeightExponent 1 2  # Exponents given for the energy weight in EECs
 SmearDeltaR 0       # Flag for smearing DeltaR values in EECs
 SmearEnergyWeight 0 # Flag for smearing energy weights in EECs
 JetPtBinEdgesEEC 40 80 120 160 200 300 500 5020 # Jet pT bin edges for EEC
-TrackPtBinEdgesEEC 0.7 1 1.5 2 2.5 3 3.5 4 300 # Track pT bin edges for EEC
+TrackPtBinEdgesEEC 0.5 1 1.5 2 2.5 3 3.5 4 300 # Track pT bin edges for EEC
 
 # Configuration for unfolding response matrices
 SkipCovarianceMatrix 1 # 0 = Fill covariance matrix. 1 = Do not fill covariance matrix
