@@ -1,9 +1,9 @@
 from WMCore.Configuration import Configuration
 config = Configuration()
 
-card='cardEECpp5v36TeV.input'
-jobTag='eecAnalysis_ppData2024_KU_cones_test_v5'
-inputList='ppData2024ForestFiles.txt'
+card='cardEECOOMC.input'
+jobTag='eecAnalysis_OOMC_run3_v1'
+inputList='OOMC2025ForestFiles.txt'
 outputFile=jobTag+'.root'
 fileLocation='2'  # Vanderbilt
 
@@ -25,14 +25,14 @@ config.JobType.maxMemoryMB = 2500
 config.section_("Data")
 config.Data.userInputFiles = open(inputList).readlines() 
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 5
+config.Data.unitsPerJob = 2
 config.Data.totalUnits = len(config.Data.userInputFiles)
-config.Data.outputPrimaryDataset = 'eecpp2024conesHistograms'
+config.Data.outputPrimaryDataset = 'eecOOMCHistograms'
 config.Data.outLFNDirBase = '/store/group/phys_heavyions/jvelazqu/eec/'+config.General.requestName
 config.Data.publication = False
 
 config.section_("Site")
-config.Site.whitelist = ['T2_CH_CERN']
+config.Site.whitelist = ['T2_US_Vanderbilt']
 config.Site.storageSite = 'T2_CH_CERN'
 
 config.section_("Debug")

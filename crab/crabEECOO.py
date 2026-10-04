@@ -2,14 +2,15 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 card='cardEECOO.input'
-jobTag='eecAnalysis_OO_2025-09-10'
+jobTag='eecAnalysis_OO_KU_Cones_v5'
 inputList='OOForestFiles.txt'
 outputFile=jobTag+'.root'
-fileLocation='1'  # CERN
+fileLocation='2'  # Vanderbilt
 
 config.section_("General")
 config.General.requestName = jobTag
 config.General.workArea = config.General.requestName 
+config.General.transferOutputs = True
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
@@ -24,10 +25,10 @@ config.JobType.maxMemoryMB = 2500
 config.section_("Data")
 config.Data.userInputFiles = open(inputList).readlines() 
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 2
+config.Data.unitsPerJob = 14
 config.Data.totalUnits = len(config.Data.userInputFiles)
-config.Data.outputPrimaryDataset = 'eecOOHistograms'
-config.Data.outLFNDirBase = '/store/group/phys_heavyions/jvelazqu/energycorr/'+config.General.requestName
+config.Data.outputPrimaryDataset = 'eecOOconesHistograms'
+config.Data.outLFNDirBase = '/store/group/phys_heavyions/jvelazqu/eec/'+config.General.requestName
 config.Data.publication = False
 
 config.section_("Site")
