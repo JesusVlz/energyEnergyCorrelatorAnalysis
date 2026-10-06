@@ -272,23 +272,20 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
     }
     fTrackEfficiencyCorrector = new TrkEff2025OO( false, "trackCorrectionTables/OO2025/Eff_OO_2025_Hijing_MB_Centrality_fromHihfpf_NoPU_3D_Nominal_Official_18Nov2025.root");
 
-    // 2. Apply PbPb Weights: Use the parameters you provided for Vz and Centrality
-    // But we need to change the multiplicity weight function to match the OO multiplicity distribution.
-    //fVzWeightFunction = new TF1("fvz","pol6",-15,15);
-    //fVzWeightFunction->SetParameters(1.00591, -0.0193751, 0.000961142, -2.44303e-05, -8.24443e-06, 1.66679e-07, 1.11028e-08);
-    fVzWeightFunction = new TF1("fvzOO","1",-15,15);
-    
+    fVzWeightFunction = new TF1("fvzOO", "pol6", -15, 15);
+    fVzWeightFunction->SetParameters(0.906064, -0.0132366, 0.00361657, -4.99943e-05, 7.33997e-06, 5.57207e-08, -4.63876e-08);
+
     fCentralityWeightFunctionCentral = new TF1("fCentralWeight","pol6",0,30);
-    fCentralityWeightFunctionCentral->SetParameters(4.73421, -0.0477343, -0.0332804, 0.00355699, -0.00017427, 4.18398e-06, -3.94746e-08);
+    fCentralityWeightFunctionCentral->SetParameters(0.0999326, 0.446336, -0.0920313, 0.00960203, -0.000517518, 1.37051e-05, -1.41088e-07);
     
     fCentralityWeightFunctionPeripheral = new TF1("fPeripheralWeight","pol6",30,90);
-    fCentralityWeightFunctionPeripheral->SetParameters(3.38091, -0.0609601, -0.00228529, 9.43076e-05, -1.39593e-06, 9.85435e-09, -2.77153e-11);
+    fCentralityWeightFunctionPeripheral->SetParameters(30.8387, -3.65511, 0.183064, -0.00480757, 6.96826e-05, -5.30443e-07, 1.66781e-09);
     
     fMultiplicityWeightFunction = new TF1("fMultiWeight", totalMultiplicityWeight, 0, 5000, 0);
 
     // Mixed cones are not configured for OO. Reflected and perpendicular
     // cones follow BackgroundMethods from the card.
-     fDoMixedCone = false;
+     fDoMixedCone = true;
 
     // Set remaining helpers to NULL to ensure they are skipped
     fTrackPairEfficiencyCorrector = NULL;
@@ -317,7 +314,8 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   // Use an explicit unity function rather than the 2017 pp polynomial.
   // This function is required for DataType 12 because GetVzWeight()
   // evaluates fVzWeightFunction for MC.
-  fVzWeightFunction = new TF1("fvzPpRef5p36TeV", "1", -15, 15);
+  fVzWeightFunction = new TF1("fvzPpRef5p36TeV", "pol6", -15, 15);
+  fVzWeightFunction->SetParameters( 0.901743, -0.0100148, 0.00349298, -5.14891e-05, 6.59866e-06, 7.97589e-08, -5.10072e-08); 
 
   // pp has no centrality correction.
   fCentralityWeightFunctionCentral = NULL;
@@ -1562,7 +1560,7 @@ void EECAnalyzer::RunAnalysis(){
       const bool diagnosticRun3MC = (fDataType == ForestReader::kOOMC || fDataType == ForestReader::kPpRef5p36TeVMC);
       
       // Get the weighting for the event
-      fVzWeight = diagnosticRun3MC ? 1.0 : GetVzWeight(vz);
+      fVzWeight = (fDataType == ForestReader::kOOMC)? GetVzWeight(vz) : (diagnosticRun3MC ? 1.0 : GetVzWeight(vz));
       if(fMultiplicityMode){
         // Multiplicity based weight
         trackMultiplicity = GetMultiplicity();
@@ -1570,8 +1568,7 @@ void EECAnalyzer::RunAnalysis(){
         centrality = GetCentralityFromMultiplicity(trackMultiplicity);
       } else {
         // Regular centrality based weight
-        fCentralityWeight = diagnosticRun3MC ? 1.0 : GetCentralityWeight(hiBin);
-
+        fCentralityWeight = (fDataType == ForestReader::kOOMC)?GetCentralityWeight(hiBin): (diagnosticRun3MC ? 1.0 : GetCentralityWeight(hiBin));
       }
 
       // Event weight for 2018 MC
@@ -3399,6 +3396,12 @@ Double_t EECAnalyzer::GetVzWeight(const Double_t vz) const{
  *   return: Multiplicative correction factor for the given CMS hiBin
  */
 Double_t EECAnalyzer::GetCentralityWeight(const Int_t hiBin) const{
+  if(fDataType == ForestReader::kOOMC){
+  if(hiBin < 0 || hiBin >= 180) return 1.0; // OO fit covers 0–90%
+  if(hiBin < 60) return fCentralityWeightFunctionCentral->Eval(hiBin/2.0);
+  return fCentralityWeightFunctionPeripheral->Eval(hiBin/2.0);
+  }
+
   if(fDataType != ForestReader::kPbPbMC) return 1;
   
   // No weighting for the most peripheral centrality bins. Different weight function for central and peripheral.

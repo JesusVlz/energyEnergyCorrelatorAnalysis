@@ -617,7 +617,7 @@ void HighForestReader::Initialize(){
 
       fClusterCompatibilityFilterBit = 1; // No cluster compatibility requirement for pPb
 
-     } else if(fDataType == kOO || fDataType == kOOMC){ // OO data or MC
+     } else if(fDataType == kOO ){ // OO data 
 
       // Primary vertex has at least two tracks, is within 25 cm in z-direction and within 2 cm in xy-direction
       fSkimTree->SetBranchStatus("pprimaryVertexFilter", 1);
@@ -625,8 +625,8 @@ void HighForestReader::Initialize(){
      
       // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
       // accumulated by the energies of PF (particle-flow)candidates
-      //fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
-      //fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+      fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
+      fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
 
       fSkimTree->SetBranchStatus("pileupVertexFilter", 1);
       fSkimTree->SetBranchAddress("pileupVertexFilter", &fPileupFilterBit, &fPileupFilterBranch);
@@ -636,7 +636,32 @@ void HighForestReader::Initialize(){
       //fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
 
       //fPrimaryVertexFilterBit = 1; // No primary vertex filter for OO
-      fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
+      //fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
+      //fPileupFilterBit = 1; // No pile-up filter for OO
+      fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
+      fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
+      fClusterCompatibilityFilterBit = 1; // No Cluster compatibility, no good for 2025 data
+
+     } else if(fDataType == kOOMC){ // MC
+
+      // Primary vertex has at least two tracks, is within 25 cm in z-direction and within 2 cm in xy-direction
+      fSkimTree->SetBranchStatus("pprimaryVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pprimaryVertexFilter", &fPrimaryVertexFilterBit, &fPrimaryVertexBranch);
+     
+      // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
+      // accumulated by the energies of PF (particle-flow)candidates
+      fSkimTree->SetBranchStatus("OOphfCoincFilterPF2Th4", 1);
+      fSkimTree->SetBranchAddress("OOphfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+
+      fSkimTree->SetBranchStatus("pileupVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pileupVertexFilter", &fPileupFilterBit, &fPileupFilterBranch);
+
+      // Calculated from pixel clusters. Ensures that measured and predicted primary vertices are compatible
+      //fSkimTree->SetBranchStatus("pclusterCompatibilityFilter", 1);
+      //fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
+
+      //fPrimaryVertexFilterBit = 1; // No primary vertex filter for OO
+      //fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
       //fPileupFilterBit = 1; // No pile-up filter for OO
       fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
       fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO

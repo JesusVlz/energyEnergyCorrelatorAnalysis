@@ -30,8 +30,21 @@ GeneratorLevelForestReader::GeneratorLevelForestReader() :
  * Custom constructor
  *
  *  Arguments:
- *   Int_t dataType: 0 = pp, 1 = PbPb, 2 = pp MC, 3 = PbPb MC, 4 = pPb p -> -eta, 5 = pPb p -> +eta 6 = pPb 5 TeV, 7 = pPb MC p -> -eta, 8 = pPb MC p -> +eta
- *   Int_t useJetTrigger: 0 = Do not use any triggers, > 0 = Require jet trigger
+ // 0 = pp Ref 5 TeV,
+ // 1 = PbPb 5 TeV, 
+ // 2 = pp MC, 
+ // 3 = PbPb MC, 
+ // 4 = pPb p -> -eta, 
+ // 5 = pPb p -> +eta, 
+ // 6 = pPb 5 TeV, 
+ // 7 = pPb MC p -> -eta, 
+ // 8 = pPb MC p -> +eta, 
+ // 9 = OO, 
+ // 10 = OO MC, 
+ // 11 = pp Ref 5.36 TeV, 
+ // 12 = pp Ref 5.36 TeV MC
+ // 
+ //  *   Int_t useJetTrigger: 0 = Do not use any triggers, > 0 = Require jet trigger
  *   Int_t jetType: 0 = Calo jets, 1 = PF jets
  *   Int_t jetAxis: 0 = Anti-kT axis, 1 = WTA axis
  *   Int_t matchJets: non-0 = Do matching for reco and gen jets. 0 = Do not require matching
@@ -150,7 +163,7 @@ void GeneratorLevelForestReader::Initialize(){
   fHeavyIonTree->SetBranchStatus("evt",1);
   fHeavyIonTree->SetBranchAddress("evt", &fEventNumber, &fEventNumberBranch);
 
-  if(fDataType == kPpMC){
+  if(fDataType == kPpMC || fDataType == kOOMC || fDataType == kPpRef5p36TeVMC){
     // We do not have HF tower information for pp. In this case find HF like energy from particle flow candidates
     fHeavyIonTree->SetBranchStatus("hiHFPlus_pf", 1);
     fHeavyIonTree->SetBranchAddress("hiHFPlus_pf", &fHFPlus, &fHFPlusBranch);
@@ -290,6 +303,38 @@ void GeneratorLevelForestReader::Initialize(){
       fHltTree->SetBranchStatus("HLT_PAAK4CaloJet100_Eta5p1_v3", 1);
       fHltTree->SetBranchAddress("HLT_PAAK4CaloJet100_Eta5p1_v3", &fCaloJet100FilterBit, &fCaloJet100FilterBranch);
 
+    } else if(fDataType == kOOMC) { //  OO data or MC
+
+      // Run-3 OO minimum-bias trigger, required for both data and MC.
+      //
+      // The first legacy trigger slot is reused as the generic Run-3
+      // minimum-bias trigger bit. TriggerSelection 8 reads this slot.
+      fHltTree->SetBranchStatus("HLT_MinimumBiasHF_OR_BptxAND_v1", 1);
+      fHltTree->SetBranchAddress("HLT_MinimumBiasHF_OR_BptxAND_v1", &fCaloJet15FilterBit, &fCaloJet15FilterBranch);
+
+      // The Run-3 minimum-bias analysis does not use jet-trigger paths.
+      fCaloJet30FilterBit = 0;
+      fCaloJet40FilterBit = 0;
+      fCaloJet60FilterBit = 0;
+      fCaloJet80FilterBit = 0;
+      fCaloJet100FilterBit = 0;
+
+    } else if(fDataType == kPpRef5p36TeVMC){
+
+      // Run-3 pp-reference ZeroBias trigger, required for both data and MC.
+      //
+      // The first legacy trigger slot is reused as the generic Run-3
+      // minimum-bias/zero-bias trigger bit. TriggerSelection 8 reads it.
+      fHltTree->SetBranchStatus("HLT_PPRefZeroBias_v6", 1);
+      fHltTree->SetBranchAddress("HLT_PPRefZeroBias_v6", &fCaloJet15FilterBit, &fCaloJet15FilterBranch);
+
+      // The Run-3 ZeroBias analysis does not use jet-trigger paths.
+      fCaloJet30FilterBit = 0;
+      fCaloJet40FilterBit = 0;
+      fCaloJet60FilterBit = 0;
+      fCaloJet80FilterBit = 0;
+      fCaloJet100FilterBit = 0;
+
     } else { // PbPb MC
 
       // No low jet pT triggers in PbPb forests
@@ -363,6 +408,56 @@ void GeneratorLevelForestReader::Initialize(){
       fSkimTree->SetBranchAddress("pVertexFilterCutdz1p0", &fPileupFilterBit, &fPileupFilterBranch);
 
       fClusterCompatibilityFilterBit = 1; // No cluster compatibility requirement for pPb
+
+    } else if(fDataType == kOOMC){ // OO data or MC
+
+      // Primary vertex has at least two tracks, is within 25 cm in z-direction and within 2 cm in xy-direction
+      fSkimTree->SetBranchStatus("pprimaryVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pprimaryVertexFilter", &fPrimaryVertexFilterBit, &fPrimaryVertexBranch);
+     
+      // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
+      // accumulated by the energies of PF (particle-flow)candidates
+      fSkimTree->SetBranchStatus("OOphfCoincFilterPF2Th4", 1);
+      fSkimTree->SetBranchAddress("OOphfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+
+      fSkimTree->SetBranchStatus("pileupVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pileupVertexFilter", &fPileupFilterBit, &fPileupFilterBranch);
+
+      // Calculated from pixel clusters. Ensures that measured and predicted primary vertices are compatible
+      //fSkimTree->SetBranchStatus("pclusterCompatibilityFilter", 1);
+      //fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
+
+      //fPrimaryVertexFilterBit = 1; // No primary vertex filter for OO
+      //fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
+      //fPileupFilterBit = 1; // No pile-up filter for OO
+      fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
+      fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
+      fClusterCompatibilityFilterBit = 1; // No Cluster compatibility, no good for 2025 data
+
+     } else if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){ // ppRef data or MC 5.36TeV
+
+      // Primary vertex has at least two tracks, is within 25 cm in z-direction and within 2 cm in xy-direction
+      fSkimTree->SetBranchStatus("pprimaryVertexFilter", 1);
+      fSkimTree->SetBranchAddress("pprimaryVertexFilter", &fPrimaryVertexFilterBit, &fPrimaryVertexBranch);
+     
+      // Have at least two towers on both of the HF calorimerter to have energies above 4 GeV
+      // accumulated by the energies of PF (particle-flow)candidates
+      //fSkimTree->SetBranchStatus("OOpfCoincFilterPF2Th4", 1);
+      //fSkimTree->SetBranchAddress("OOpfCoincFilterPF2Th4", &fHfCoincidenceFilterBit, &fHfCoincidenceBranch);
+
+      //fSkimTree->SetBranchStatus("pileupVertexFilter", 1);
+      //fSkimTree->SetBranchAddress("pileupVertexFilter", &fPileupFilterBit, &fPileupFilterBranch);
+
+      // Calculated from pixel clusters. Ensures that measured and predicted primary vertices are compatible
+      //fSkimTree->SetBranchStatus("pclusterCompatibilityFilter", 1);
+      //fSkimTree->SetBranchAddress("pclusterCompatibilityFilter", &fClusterCompatibilityFilterBit, &fClusterCompatibilityBranch);
+
+      //fPrimaryVertexFilterBit = 1; // No primary vertex filter for OO
+      fHfCoincidenceFilterBit = 1; // No HF coincidence filter for OO
+      fPileupFilterBit = 1; // No pile-up filter for OO
+      fHBHENoiseFilterBit = 1; // HBHE noise filter bit is not available in the OO MiniAOD forests.
+      fBeamScrapingFilterBit = 1;  // No beam scraping filter for OO
+      fClusterCompatibilityFilterBit = 1; // No Cluster compatibility, no good for 2025 data
 
     } else { // PbPb MC
     
@@ -452,7 +547,7 @@ void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fil
   if(!fMegaSkimMode) fSkimTree = new TChain("skimanalysis/HltTree");
 
   // The jet tree has different name in different datasets
-  if(fDataType == kPp || fDataType == kPpMC){
+  if(fDataType == kPp || fDataType == kPpMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
     treeName[0] = "ak4CaloJetAnalyzer/t"; // Tree for calo jets
     treeName[1] = "ak4PFJetAnalyzer/t";   // Tree for PF jets
   } else { // PbPb data or MC
