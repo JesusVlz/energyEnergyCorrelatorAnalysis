@@ -283,10 +283,7 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
     
     fMultiplicityWeightFunction = new TF1("fMultiWeight", totalMultiplicityWeight, 0, 5000, 0);
 
-    // Mixed cones are not configured for OO. Reflected and perpendicular
-    // cones follow BackgroundMethods from the card.
-     fDoMixedCone = true;
-
+  
     // Set remaining helpers to NULL to ensure they are skipped
     fTrackPairEfficiencyCorrector = NULL;
     fEnergyResolutionSmearingFinder = NULL;
@@ -1241,7 +1238,7 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[0][ForestReader::kPPb_pToMinusEta_5TeV][0] = "none"; // only mega skimmed mixing available for pPb p -> -eta 5 TeV
   fileListName[0][ForestReader::kPPbMC_pToMinusEta][0] = "none"; // currently no mixing implemented for pPb MC
   fileListName[0][ForestReader::kPPbMC_pToPlusEta][0] = "none"; // currently no mixing implemented for pPb MC
-  fileListName[0][ForestReader::kOO][0] = "none"; // currently no mixing implemented for OO
+  fileListName[0][ForestReader::kOO][0] = "mixingFileList/OO2025_MB_pool_pilot.txt"; // currently no mixing implemented for OO
   fileListName[0][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
 
 
@@ -1255,7 +1252,7 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[1][ForestReader::kPPb_pToMinusEta_5TeV][0] = "none"; // only mega skimmed mixing available for pPb p -> -eta 5 TeV
   fileListName[1][ForestReader::kPPbMC_pToMinusEta][0] = "none"; // currently no mixing implemented for pPb MC
   fileListName[1][ForestReader::kPPbMC_pToPlusEta][0] = "mixingFileList/mixingFilesPPb_pToPlusEta.txt"; // low statistics test mixing file for pPb MC p -> + eta
-  fileListName[1][ForestReader::kOO][0] = "none"; // currently no mixing implemented for OO
+  fileListName[1][ForestReader::kOO][0] = "mixingFileList/OO2025_MB_pool_pilot.txt"; // currently no mixing implemented for OO
   fileListName[1][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
 
   // CRAB running, mega skimmed mixing forest
@@ -1268,7 +1265,7 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[0][ForestReader::kPPb_pToMinusEta_5TeV][1] = "mixingFileList/minimumBiasPPb2016_5TeV_megaSkim_pToMinusEta.txt"; // pPb pToMinusEta 5 TeV for CRAB
   fileListName[0][ForestReader::kPPbMC_pToMinusEta][1] = "none"; // currently no mixing implemented for pPb MC
   fileListName[0][ForestReader::kPPbMC_pToPlusEta][1] = "mixingFileList/EPOS_pToPlusEta_pPb816Summer16DR_megaSkim_2026-02-13.txt"; // currently no mixing implemented for pPb MC
-  fileListName[0][ForestReader::kOO][0] = "none"; // currently no mixing implemented for OO
+  fileListName[0][ForestReader::kOO][0] = "mixingFileList/OO2025_MB_pool_pilot.txt"; // currently no mixing implemented for OO
   fileListName[0][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
 
 
@@ -1282,13 +1279,17 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[1][ForestReader::kPPb_pToMinusEta_5TeV][1] = "mixingFileList/mixingFilesPPb_pToMinusEta_megaSkim.txt"; // pPb p -> -eta 5 TeV for local test
   fileListName[1][ForestReader::kPPbMC_pToMinusEta][1] = "none"; // currently no mixing implemented for pPb MC
   fileListName[1][ForestReader::kPPbMC_pToPlusEta][1] = "mixingFileList/mixingFilesEpos_pToPlusEta_megaSkim.txt"; // pPb MC p -> +eta
-  fileListName[1][ForestReader::kOO][0] = "none"; // currently no mixing implemented for OO
+  fileListName[1][ForestReader::kOO][0] = "mixingFileList/OO2025_MB_pool_pilot.txt"; // currently no mixing implemented for OO
   fileListName[1][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
 
         
   // Read the mixing files if defined and a file list exists
   if(fDoMixedCone){
     if(std::string(fileListName[fLocalRun][fDataType][fMegaSkimMode]) == "none"){
+      if(fDataType == ForestReader::kOO){
+        throw std::runtime_error("OO mixing requires a dedicated mixing file list");
+      }
+    
 
       cout << "EECAnalyzer::Note: You are trying to do mixed cone background estimation for a dataset for which no mixed event file list is defined in the code! The input file list is used also for mixing." << endl;
       mixingFiles = fFileNames;
@@ -4981,7 +4982,7 @@ void EECAnalyzer::PrepareBinnedMixingVectors(){
         // Event selection is already applied in mega skim mode. No need to check it again here.
         fMixedEventVzBin.push_back(FindMixingVzBin(fMixedEventReader->GetVz()));
         fMixedEventMultiplicityBin.push_back(FindMixingMultiplicityBin(GetGenMultiplicity(fMixedEventReader, kSubeventAny, true)));
-      } else if(PassEventCuts(fMixedEventReader,false)){
+      } else if(PassEventCuts(fMixedEventReader,false) &&  (fDataType != ForestReader::kOO || fMixedEventReader->GetCaloJet15FilterBit() == 1)){
         fMixedEventVzBin.push_back(FindMixingVzBin(fMixedEventReader->GetVz()));
         fMixedEventMultiplicityBin.push_back(FindMixingMultiplicityBin(GetGenMultiplicity(fMixedEventReader, kSubeventAny, false)));
       } else { // If event cuts not passed, input values such that events will never be mixed with these

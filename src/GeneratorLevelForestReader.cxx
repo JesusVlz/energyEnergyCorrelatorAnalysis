@@ -176,7 +176,7 @@ void GeneratorLevelForestReader::Initialize(){
     fHeavyIonTree->SetBranchAddress("hiHFminus", &fHFMinus, &fHFMinusBranch);
   }
 
-  if(fDataType == kPbPbMC){
+  if(fDataType == kPbPbMC || fDataType == kOOMC){
     fHeavyIonTree->SetBranchStatus("hiBin", 1);
     fHeavyIonTree->SetBranchAddress("hiBin", &fHiBin, &fHiBinBranch);
   } else {
