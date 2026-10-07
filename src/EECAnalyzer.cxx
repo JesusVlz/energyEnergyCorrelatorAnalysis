@@ -4877,7 +4877,7 @@ void EECAnalyzer::PrepareMixingVectors(){
         // Event selection is already applied in mega skim mode. No need to check it again here.
         fMixedEventVz.push_back(fMixedEventReader->GetVz());
         fMixedEventHiBin.push_back(fMixedEventReader->GetHiBin());
-      } else if(PassEventCuts(fMixedEventReader,false)){
+     } else if(PassEventCuts(fMixedEventReader,false) &&  (fDataType != ForestReader::kOO || fMixedEventReader->GetCaloJet15FilterBit() == 1)){
         fMixedEventVz.push_back(fMixedEventReader->GetVz());
         fMixedEventHiBin.push_back(fMixedEventReader->GetHiBin());
       } else { // If event cuts not passed, input values such that events will never be mixed with these
@@ -4982,7 +4982,7 @@ void EECAnalyzer::PrepareBinnedMixingVectors(){
         // Event selection is already applied in mega skim mode. No need to check it again here.
         fMixedEventVzBin.push_back(FindMixingVzBin(fMixedEventReader->GetVz()));
         fMixedEventMultiplicityBin.push_back(FindMixingMultiplicityBin(GetGenMultiplicity(fMixedEventReader, kSubeventAny, true)));
-      } else if(PassEventCuts(fMixedEventReader,false) &&  (fDataType != ForestReader::kOO || fMixedEventReader->GetCaloJet15FilterBit() == 1)){
+      } else if(PassEventCuts(fMixedEventReader,false)){
         fMixedEventVzBin.push_back(FindMixingVzBin(fMixedEventReader->GetVz()));
         fMixedEventMultiplicityBin.push_back(FindMixingMultiplicityBin(GetGenMultiplicity(fMixedEventReader, kSubeventAny, false)));
       } else { // If event cuts not passed, input values such that events will never be mixed with these
