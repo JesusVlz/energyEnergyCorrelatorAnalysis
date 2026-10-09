@@ -184,8 +184,9 @@ ForestReader::ForestReader(Int_t dataType, Int_t useJetTrigger, Int_t jetType, I
   
   SetDataType(dataType);
 
-  // We do not use trigger in mixed event mode, so disable jet trigger if mixing mode is used
-  if(fMixingMode) fUseJetTrigger = false;
+  // Regular OO mixing requires the minimum-bias trigger from the HLT tree.
+  if(fMixingMode && (fDataType != kOO || fMegaSkimMode))
+    fUseJetTrigger = false;
   
 }
 

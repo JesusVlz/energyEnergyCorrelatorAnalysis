@@ -1393,6 +1393,20 @@ void EECAnalyzer::RunAnalysis(){
       // Find the event matching variables from mixed event list
       PrepareMixingVectors();
 
+      std::size_t nEligible = 0;
+      for (Double_t value : fMixedEventVz) {
+        if (TMath::Abs(value - kNonsenseValue) >= 1e-6) ++nEligible;
+      }
+
+      cout << "OO mixing: pool entries = " << fnEventsInMixingFile
+           << ", eligible after event cuts and MB trigger = "
+           << nEligible << endl;
+
+      if (nEligible < 2) {
+        throw std::runtime_error(
+            "OO mixing: fewer than two eligible pool events");
+      }
+
       // Make a two dimensional illustration of the mixed event statistics
       std::vector<Double_t> vzMixingCountVector = GetMixingBinBorders(fVzMixingBinBorders, fMixedEventVz);
       std::vector<Double_t> eventActivityCountVector;
@@ -4870,22 +4884,46 @@ void EECAnalyzer::PrepareMixingVectors(){
 
   // Event matching based on HiBin
   if(fEventMatchForMixing == kMatchHiBin){
+    Long64_t nPassCuts = 0, nPassMB = 0, nPassBoth = 0;
+    Long64_t nPV = 0, nHF = 0, nPileup = 0, nVz = 0;
+
     for(Int_t iMixedEvent = 0; iMixedEvent < fnEventsInMixingFile; iMixedEvent++){
       fMixedEventReader->GetEvent(iMixedEvent);
       fMixedEventEventNumber.push_back(fMixedEventReader->GetEventNumber());
+
       if(fMegaSkimMode){
         // Event selection is already applied in mega skim mode. No need to check it again here.
         fMixedEventVz.push_back(fMixedEventReader->GetVz());
         fMixedEventHiBin.push_back(fMixedEventReader->GetHiBin());
-     } else if(PassEventCuts(fMixedEventReader,false) &&  (fDataType != ForestReader::kOO || fMixedEventReader->GetCaloJet15FilterBit() == 1)){
-        fMixedEventVz.push_back(fMixedEventReader->GetVz());
-        fMixedEventHiBin.push_back(fMixedEventReader->GetHiBin());
-      } else { // If event cuts not passed, input values such that events will never be mixed with these
-        fMixedEventVz.push_back(kNonsenseValue);
-        fMixedEventHiBin.push_back(kNonsenseValue);
-      }
+      } else {
+        const Bool_t passCuts = PassEventCuts(fMixedEventReader, false);
+        const Bool_t passMB = (fDataType != ForestReader::kOO || fMixedEventReader->GetCaloJet15FilterBit() == 1);
+
+        nPV     += (fMixedEventReader->GetPrimaryVertexFilterBit() != 0);
+        nHF     += (fMixedEventReader->GetHfCoincidenceFilterBit() != 0);
+        nPileup += (fMixedEventReader->GetPileupFilterBit() != 0);
+        nVz     += (TMath::Abs(fMixedEventReader->GetVz()) <= fVzCut);
+        nPassCuts += passCuts;
+        nPassMB   += passMB;
+        nPassBoth += (passCuts && passMB);
+
+        if (passCuts && passMB) {
+          fMixedEventVz.push_back(fMixedEventReader->GetVz());
+          fMixedEventHiBin.push_back(fMixedEventReader->GetHiBin());
+        } else {
+          fMixedEventVz.push_back(kNonsenseValue);
+          fMixedEventHiBin.push_back(kNonsenseValue);
+        }
     } // Loop over all mixed events
   } // Event matching based on HiBin
+  if (fDataType == ForestReader::kOO && !fMegaSkimMode) {
+        cout << "OO pool QA: total=" << fnEventsInMixingFile
+            << " PV=" << nPV << " HF=" << nHF
+            << " pileup=" << nPileup << " vz=" << nVz
+            << " allEventCuts=" << nPassCuts
+            << " MB=" << nPassMB << " both=" << nPassBoth << endl;
+      }
+    } 
 
   // Event matching based on background multiplicity
   else if(fEventMatchForMixing == kMatchMultiplicity){
