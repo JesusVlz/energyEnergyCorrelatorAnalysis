@@ -1,6 +1,6 @@
-# Energy-energy correlators in O–O and ppRef collisions at 5.36 TeV
+# Energy-energy correlators in OO and pp collisions at 5.36 TeV
 
-This repository contains the framework used to calculate energy-energy correlators (EECs) inside jets. The current development focuses on Run-3 O–O collisions and the pp reference at \(\sqrt{s_{\mathrm{NN}}}=5.36\) TeV. The legacy PbPb/pp analysis used for the published 5.02 TeV result is also retained.
+This repository contains the framework used to calculate energy-energy correlators (EECs) inside jets. The current development focuses on Run-3 OO collisions and the pp reference at \(\sqrt{s_{\mathrm{NN}}}=5.36\) TeV. The legacy PbPb/pp analysis used for the published 5.02 TeV result is also retained.
 
 > **Current status:** the reconstructed-level O–O and ppRef workflow is available for local tests, CRAB production, QA, and reflected/perpendicular-cone studies. Track-pair corrections, Run-3 JER, detector response, unfolding, and the final corrected O–O/ppRef ratio are still under validation.
 
@@ -40,7 +40,7 @@ Run the executable without arguments to print its command-line help:
 The same command on one line is:
 
 ```bash
-./eecAnalysis /eos/cms/store/group/phys_heavyions/jvelazqu/OO2025_dataset_MinimumBias_filtered/IonPhysics0/OO_MinimumBias_filtered_IonPhysics0/260908_000643/0000/L1_object_data_541.root cardEECOO.input test_OO.root 1 true
+./eecAnalysis /eos/cms/store/group/phys_heavyions/jvelazqu/Forest/OO/L1_object_data.root cardEECOO.input test_OO.root 1 true
 ```
 
 The arguments are:
