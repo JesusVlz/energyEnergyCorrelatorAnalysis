@@ -1,6 +1,9 @@
 #ifndef EECUNFOLDCONFIGURATION_H
 #define EECUNFOLDCONFIGURATION_H
 
+// C++ includes
+#include <vector>
+
 // Own includes
 #include "EECCard.h"
 
@@ -22,12 +25,15 @@ public:
   static const int kNTrackPtBins = 8;         // Number of track pT bins for which the background scale is determined
   
   EECUnfoldConfiguration();               // Constructor
-  EECUnfoldConfiguration(EECCard* card, const int iSplit = 0, const int iSystematic = 0, const int iWeightExponent = 1);  // Custom constructor with a card
+  // OO and ppRef require an explicit response file and a positive iteration count.
+  // When supplied, both are used verbatim; no legacy split/systematic file is substituted.
+  EECUnfoldConfiguration(EECCard* card, const int iSplit = 0, const int iSystematic = 0, const int iWeightExponent = 1, const TString responseFileName = "", const int numberOfIterations = 0);
   ~EECUnfoldConfiguration();              // Destructor
 
   // Getter for unfolding configuration
   double GetNumberOfIterations(const std::pair<double,double> centralityBinBorders, double trackPtBorderLow) const; // Getter for the number of iterations
   TString GetResponseFileName() const; // Getter for the name of the file containing the response matrices
+  static std::vector<std::pair<double,double>> SelectUnfoldedJetPtBins(const EECCard& card); // Native Run-3 bins fully inside 120-200 GeV; legacy four-bin study otherwise
   
 private:
   
@@ -36,6 +42,7 @@ private:
   int fSystematicIndex;            // Index for systematic uncertainty study
   int fSplitIndex;                 // Index for the MC split. 0 = Whole dataset. 1 = Split 1, 2 = Split 2
   int fWeightExponent;             // Exponent used for the energy weights for energy-energy correlators
+  int fExplicitNumberOfIterations; // User-selected count for an explicit response, pending a dedicated closure study
   TString fResponseMatrixFileName; // Response matrix file name for which the configuration is determined
 
   // Binning information for the scaling tables
@@ -50,6 +57,7 @@ private:
   
   // Initialize the number of iterations array based on the predefined configuration index
   void InitializeArrays();
+  void ValidateResponseFile(EECCard* card) const; // Check the explicit response's species, MC content and analysis definition
   
 };
 

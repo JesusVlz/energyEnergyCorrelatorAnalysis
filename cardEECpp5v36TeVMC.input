@@ -8,7 +8,7 @@ McCorrelationType 0 # 0 = RecoReco, 1 = RecoGen, 2 = GenReco, 3 = GenGen
 MatchJets 0 # Only relevant for Monte Carlo, keep this 0 for data
 
 # Select if you want to use the jet trigger
-TriggerSelection 8  # 0 = No trigger, 8 = ZeroBias ppref, 1 = CaloJet80, 2 = CaloJet100, 3 = CaloJet80 || CaloJet100, 4 = CaloJet60, 7 = CaloJet60 || CaloJet80, 15 = CaloJet15, 30 = CaloJet30, 40 = CaloJet40
+TriggerSelection 0   # MC: no trigger requirement
 
 # Select which histograms to save. Checked bit by bit. Needed for memory issues.
 FilledHistograms 31 # Bit 0 = Event information histograms                  (to set: 1)

@@ -2,9 +2,13 @@
 *.[oa]
 *.so
 
+# Python validation-script bytecode
+__pycache__/
+
 # Ignore data files and figures
 data
 *.root
+!trackCorrectionTables/pp2024/Eff_ppref_2024_Pythia_QCD_pThat15_NopU_2D_Nominal_Official.root
 *.pdf
 *.png
 

@@ -164,6 +164,7 @@ public:
   int GetLastUnfoldedJetPtBin() const;       // Getter for the last unfolded jet pT bin index
   int GetSubeventCut() const;       // Get the index for used subevent cut
   int GetJetType() const;           // Get the jet type index
+  int GetJetAxis() const;           // Get the E-scheme (0) or WTA (1) jet axis
   double GetJetPtCut() const;       // Get the minimum jet pT cut
   double GetJetRadius() const;   // Getter for the jet radius R
   int GetBackgroundMethods() const; // Get infprmation which backgorund methods are included in the file

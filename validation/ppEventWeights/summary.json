@@ -1,0 +1,422 @@
+{
+  "inputs": {
+    "data": {
+      "path": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/merged_eecpp2024_run3_v7_processed.root",
+      "sha256": "83a82c8d582055b7c34409a5e49dc7100229736fcc64bf96cdaf551d3031a0f9",
+      "card": {
+        "GitHash": "9325db1467560e431cca9336932b517567c52e1d",
+        "DataType": [
+          11.0
+        ],
+        "McCorrelationType": [
+          0.0
+        ],
+        "MatchJets": [
+          0.0
+        ],
+        "TriggerSelection": [
+          8.0
+        ],
+        "JetType": [
+          1.0
+        ],
+        "JetAxis": [
+          1.0
+        ],
+        "JetEtaCut": [
+          1.600000023841858
+        ],
+        "MinJetPtCut": [
+          10.0
+        ],
+        "MaxJetPtCut": [
+          5020.0
+        ],
+        "CutBadPhi": [
+          0.0
+        ],
+        "MinMaxTrackPtFraction": [
+          0.009999999776482582
+        ],
+        "MaxMaxTrackPtFraction": [
+          0.9800000190734863
+        ],
+        "JetUncertainty": [
+          0.0
+        ],
+        "TrackEtaCut": [
+          2.4000000953674316
+        ],
+        "MinTrackPtCut": [
+          0.5
+        ],
+        "MaxTrackPtCut": [
+          500.0
+        ],
+        "MaxTrackPtRelativeError": [
+          0.10000000149011612
+        ],
+        "VertexMaxDistance": [
+          3.0
+        ],
+        "CalorimeterSignalLimitPt": [
+          20.0
+        ],
+        "HighPtEtFraction": [
+          0.5
+        ],
+        "Chi2QualityCut": [
+          100000.0
+        ],
+        "MinimumTrackHits": [
+          0.0
+        ],
+        "SubeventCut": [
+          2.0
+        ],
+        "TrackEfficiencyVariation": [
+          0.0
+        ],
+        "JetPtWeight": [
+          0.0
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          1.0
+        ],
+        "ZVertexCut": [
+          15.0
+        ],
+        "LowPtHatCut": [
+          -1.0
+        ],
+        "HighPtHatCut": [
+          1.0
+        ],
+        "MultiplicityMode": [
+          0.0
+        ],
+        "JetRadius": [
+          0.4000000059604645
+        ],
+        "WeightExponent": [
+          1.0
+        ],
+        "JetPtBinEdgesEEC": [
+          40.0,
+          80.0,
+          120.0,
+          160.0,
+          200.0,
+          300.0,
+          500.0,
+          5020.0
+        ],
+        "TrackPtBinEdgesEEC": [
+          0.5,
+          1.0,
+          1.5,
+          2.0,
+          2.5,
+          3.0,
+          3.5,
+          4.0,
+          300.0
+        ],
+        "SkipCovarianceMatrix": [
+          0.0
+        ],
+        "MinJetPtUnfoldingReco": [
+          80.0
+        ],
+        "MinJetPtUnfoldingTruth": [
+          60.0
+        ],
+        "CentralityBinEdges": [
+          -0.75,
+          -0.25,
+          9.75,
+          29.75,
+          49.75,
+          100.25
+        ],
+        "TrackPtBinEdges": [
+          0.5,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          8.0,
+          12.0,
+          300.0
+        ],
+        "PtHatBinEdges": [
+          0.0,
+          30.0,
+          50.0,
+          80.0,
+          120.0,
+          170.0,
+          220.0,
+          280.0,
+          370.0,
+          460.0
+        ],
+        "BackgroundMethods": [
+          3.0
+        ],
+        "MegaSkimMixing": [
+          1.0
+        ],
+        "ProjectionGitHash": "044161ac0d5fbf48457898c0e697e63b01694a5d",
+        "InputFile": "/eos/cms/store/group/phys_heavyions/jvelazqu/eec/eecAnalysis_ppData2024_run3_v7/merged_eecpp2024cones_run3_v7_files.root"
+      }
+    },
+    "mc": {
+      "path": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/merged_eecppMC2024_GenGen_processed.root",
+      "sha256": "d69cb0c5d64e4e2800c6139ee108cb09cf80c887614f8af5ac5fed613754ab67",
+      "card": {
+        "GitHash": "9325db1467560e431cca9336932b517567c52e1d",
+        "DataType": [
+          12.0
+        ],
+        "McCorrelationType": [
+          3.0
+        ],
+        "MatchJets": [
+          0.0
+        ],
+        "TriggerSelection": [
+          8.0
+        ],
+        "JetType": [
+          1.0
+        ],
+        "JetAxis": [
+          1.0
+        ],
+        "JetEtaCut": [
+          1.600000023841858
+        ],
+        "MinJetPtCut": [
+          10.0
+        ],
+        "MaxJetPtCut": [
+          5020.0
+        ],
+        "CutBadPhi": [
+          0.0
+        ],
+        "MinMaxTrackPtFraction": [
+          0.009999999776482582
+        ],
+        "MaxMaxTrackPtFraction": [
+          0.9800000190734863
+        ],
+        "JetUncertainty": [
+          0.0
+        ],
+        "TrackEtaCut": [
+          2.4000000953674316
+        ],
+        "MinTrackPtCut": [
+          0.5
+        ],
+        "MaxTrackPtCut": [
+          500.0
+        ],
+        "MaxTrackPtRelativeError": [
+          0.10000000149011612
+        ],
+        "VertexMaxDistance": [
+          3.0
+        ],
+        "CalorimeterSignalLimitPt": [
+          20.0
+        ],
+        "HighPtEtFraction": [
+          0.5
+        ],
+        "Chi2QualityCut": [
+          100000.0
+        ],
+        "MinimumTrackHits": [
+          0.0
+        ],
+        "SubeventCut": [
+          2.0
+        ],
+        "TrackEfficiencyVariation": [
+          0.0
+        ],
+        "JetPtWeight": [
+          0.0
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          1.0
+        ],
+        "ZVertexCut": [
+          15.0
+        ],
+        "LowPtHatCut": [
+          -15.0
+        ],
+        "HighPtHatCut": [
+          5020.0
+        ],
+        "MultiplicityMode": [
+          0.0
+        ],
+        "JetRadius": [
+          0.4000000059604645
+        ],
+        "WeightExponent": [
+          1.0
+        ],
+        "JetPtBinEdgesEEC": [
+          40.0,
+          80.0,
+          120.0,
+          160.0,
+          200.0,
+          300.0,
+          500.0,
+          5020.0
+        ],
+        "TrackPtBinEdgesEEC": [
+          0.5,
+          1.0,
+          1.5,
+          2.0,
+          2.5,
+          3.0,
+          3.5,
+          4.0,
+          300.0
+        ],
+        "SkipCovarianceMatrix": [
+          0.0
+        ],
+        "MinJetPtUnfoldingReco": [
+          80.0
+        ],
+        "MinJetPtUnfoldingTruth": [
+          60.0
+        ],
+        "CentralityBinEdges": [
+          -0.75,
+          -0.25,
+          9.75,
+          29.75,
+          49.75,
+          100.25
+        ],
+        "TrackPtBinEdges": [
+          0.5,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          8.0,
+          12.0,
+          300.0
+        ],
+        "PtHatBinEdges": [
+          0.0,
+          30.0,
+          50.0,
+          80.0,
+          120.0,
+          170.0,
+          220.0,
+          280.0,
+          370.0,
+          460.0
+        ],
+        "BackgroundMethods": [
+          0.0
+        ],
+        "MegaSkimMixing": [
+          1.0
+        ],
+        "ProjectionGitHash": "f57c6235314086cb530cb95b223c691ba357e49f",
+        "InputFile": "/eos/cms/store/group/phys_heavyions/jvelazqu/eec/eecAnalysis_ppMC2024_GenGen_run3_v7/merged_eecppMC2024_GenGen_run3_v7_files.root"
+      }
+    }
+  },
+  "analyzer_sha256": "685b7a477e7d08b74bab491648b196d2d09dc9f4a5fa9980e463da17e989f17b",
+  "current_parameters_constant_first": [
+    0.901743,
+    -0.0100148,
+    0.00349298,
+    -5.14891e-05,
+    6.59866e-06,
+    7.97589e-08,
+    -5.10072e-08
+  ],
+  "method": "Unit-area data/MC vertex comparison within |vz| < 15 cm, evaluated at 0.5 cm bin centers; error-weighted pol6 fit to normalized data/MC, using the same bins to derive and check the candidate.",
+  "limitations": [
+    "The candidate uses the same sample for derivation and checking; this is not independent closure.",
+    "The MC input is GenGen while the data input is RecoReco; reconstruction-mode dependence requires a corresponding reconstructed MC check.",
+    "Generator-event/cross-section normalization and event-level combinations of weights cannot be validated from processed one-dimensional histograms.",
+    "Bin-center application approximates the unknown distribution within each 0.5 cm bin.",
+    "Fit chi2 uses diagonal ratio errors; normalization correlations and fitted-weight uncertainties are not included.",
+    "Both supplied weighted vertex histograms equal their raw counterparts, so this compares offline predictions rather than a weighted analyzer rerun."
+  ],
+  "distributions": {
+    "vertexZ": {
+      "range": [
+        -15.0,
+        15.0
+      ],
+      "mc_sum_in_range": 11423755.0,
+      "data_sum_in_range": 22133367.0,
+      "mc_entries_all_bins": 11423755.0,
+      "data_entries_all_bins": 22133367.0,
+      "raw": {
+        "data_weighted_relative_rms_percent": 12.643669899478471,
+        "maximum_absolute_relative_residual_percent": 44.2446336464538,
+        "total_variation_percent": 5.083674937194712
+      },
+      "as_supplied_weighted": {
+        "data_weighted_relative_rms_percent": 12.643669899478471,
+        "maximum_absolute_relative_residual_percent": 44.2446336464538,
+        "total_variation_percent": 5.083674937194712
+      },
+      "current_function_prediction": {
+        "data_weighted_relative_rms_percent": 0.5589122370173003,
+        "maximum_absolute_relative_residual_percent": 4.875586945271704,
+        "total_variation_percent": 0.13889201544219063
+      },
+      "candidate_refit_prediction": {
+        "data_weighted_relative_rms_percent": 0.5585463038247346,
+        "maximum_absolute_relative_residual_percent": 4.706184380147049,
+        "total_variation_percent": 0.13980952534778976
+      },
+      "current_minimum_weight_on_dense_grid": 0.8944365133397025,
+      "current_maximum_weight_on_dense_grid": 1.7060289129961095,
+      "candidate_refit": {
+        "parameters_constant_first": [
+          0.9017199410205887,
+          -0.010020294371477879,
+          0.003498987106521976,
+          -5.101765711769934e-05,
+          6.451518051242755e-06,
+          7.564284850281562e-08,
+          -5.030061073613714e-08
+        ],
+        "range": [
+          -15.0,
+          15.0
+        ],
+        "minimum_weight_on_dense_grid": 0.8944191249570703,
+        "maximum_weight_on_dense_grid": 1.7090577509862577,
+        "diagonal_error_chi2": 192.80893335123122,
+        "ndof": 53
+      },
+      "max_supplied_raw_weighted_bin_difference": {
+        "data": 0.0,
+        "mc": 0.0
+      }
+    }
+  }
+}

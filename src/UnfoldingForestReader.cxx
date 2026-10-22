@@ -1,7 +1,50 @@
 // Implementation for UnfoldingForestReader
 
+// ROOT includes
+#include <TMath.h>
+
+// C++ includes
+#include <stdexcept>
+#include <string>
+
 // Own includes
 #include "UnfoldingForestReader.h"
+
+namespace {
+
+// Fail before processing an incompatible Run-3 forest instead of returning empty
+// response histograms. Some legacy MiniAOD track-quality branches are optional in
+// Run-3; their getters still reject attempts to use unavailable quantities.
+template <typename T>
+void BindForestBranch(TTree* tree, const char* name, T address, TBranch** branch, Bool_t required){
+  *branch = nullptr;
+  if(!tree->GetBranch(name)){
+    if(required) throw std::runtime_error(std::string("UnfoldingForestReader: missing branch ") + tree->GetName() + "/" + name);
+    return;
+  }
+  tree->SetBranchStatus(name, 1);
+  const Int_t status = tree->SetBranchAddress(name, address, branch);
+  if(status < 0){
+    *branch = nullptr;
+    if(required) throw std::runtime_error(std::string("UnfoldingForestReader: incompatible branch ") + tree->GetName() + "/" + name);
+  }
+}
+
+template <typename T>
+void CheckVectorSize(const std::vector<T>* values, size_t expectedSize, const char* name){
+  if(!values || values->size() != expectedSize){
+    throw std::runtime_error(std::string("UnfoldingForestReader: inconsistent particle vector ") + name);
+  }
+}
+
+TTree* RequireForestTree(TFile* file, const char* name){
+  TTree* tree = nullptr;
+  file->GetObject(name, tree);
+  if(!tree) throw std::runtime_error(std::string("UnfoldingForestReader: missing tree ") + name + " in " + file->GetName());
+  return tree;
+}
+
+} // namespace
 
 /*
  * Default constructor
@@ -528,15 +571,15 @@ void UnfoldingForestReader::Initialize(){
   
   // Connect the branches of the heavy ion tree
   fHeavyIonTree->SetBranchStatus("*",0);
-  fHeavyIonTree->SetBranchStatus("vz",1);
-  fHeavyIonTree->SetBranchAddress("vz",&fVertexZ,&fHiVzBranch);
-  fHeavyIonTree->SetBranchStatus("hiBin",1);
-  fHeavyIonTree->SetBranchAddress("hiBin",&fHiBin,&fHiBinBranch);
-  if(fDataType == kPpMC || fDataType == kPbPbMC){
-    fHeavyIonTree->SetBranchStatus("pthat",1);
-    fHeavyIonTree->SetBranchAddress("pthat",&fPtHat,&fPtHatBranch); // pT hat only for MC
-    fHeavyIonTree->SetBranchStatus("weight",1);
-    fHeavyIonTree->SetBranchAddress("weight",&fEventWeight,&fEventWeightBranch); // event weight only for MC
+  BindForestBranch(fHeavyIonTree, "vz", &fVertexZ, &fHiVzBranch, IsRun3());
+  if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
+    fHiBin = -1; // pp has no centrality definition.
+  } else {
+    BindForestBranch(fHeavyIonTree, "hiBin", &fHiBin, &fHiBinBranch, IsRun3());
+  }
+  if(IsMC()){
+    BindForestBranch(fHeavyIonTree, "pthat", &fPtHat, &fPtHatBranch, IsRun3()); // pT hat only for MC
+    BindForestBranch(fHeavyIonTree, "weight", &fEventWeight, &fEventWeightBranch, IsRun3()); // event weight only for MC
   } else {
     fPtHat = 0; // We do not have pT hat information for real data
     fEventWeight = 1;
@@ -544,55 +587,38 @@ void UnfoldingForestReader::Initialize(){
   
   // Connect the branches to the jet tree  
   fJetTree->SetBranchStatus("*",0);
-  fJetTree->SetBranchStatus("jtpt",1);
-  fJetTree->SetBranchAddress("jtpt",&fJetPtArray,&fJetPtBranch);
+  BindForestBranch(fJetTree, "jtpt", &fJetPtArray, &fJetPtBranch, IsRun3());
   
   // Load jet phi with E-scheme and WTA axes
-  fJetTree->SetBranchStatus("jtphi",1);
-  fJetTree->SetBranchAddress("jtphi",&fJetPhiArray,&fJetPhiBranch);
-  fJetTree->SetBranchStatus("WTAphi",1);
-  fJetTree->SetBranchAddress("WTAphi",&fJetWTAPhiArray,&fJetWTAPhiBranch);
+  BindForestBranch(fJetTree, "jtphi", &fJetPhiArray, &fJetPhiBranch, IsRun3());
+  BindForestBranch(fJetTree, "WTAphi", &fJetWTAPhiArray, &fJetWTAPhiBranch, IsRun3() && fJetAxis == 1);
   
   // Load jet eta with E-scheme and WTA axes
-  fJetTree->SetBranchStatus("jteta",1);
-  fJetTree->SetBranchAddress("jteta",&fJetEtaArray,&fJetEtaBranch);
-  fJetTree->SetBranchStatus("WTAeta",1);
-  fJetTree->SetBranchAddress("WTAeta",&fJetWTAEtaArray,&fJetWTAEtaBranch);
+  BindForestBranch(fJetTree, "jteta", &fJetEtaArray, &fJetEtaBranch, IsRun3());
+  BindForestBranch(fJetTree, "WTAeta", &fJetWTAEtaArray, &fJetWTAEtaBranch, IsRun3() && fJetAxis == 1);
   
-  fJetTree->SetBranchStatus("nref",1);
-  fJetTree->SetBranchAddress("nref",&fnJets,&fnJetsBranch);
-  fJetTree->SetBranchStatus("rawpt",1);
-  fJetTree->SetBranchAddress("rawpt",&fJetRawPtArray,&fJetRawPtBranch);
-  fJetTree->SetBranchStatus("trackMax",1);
-  fJetTree->SetBranchAddress("trackMax",&fJetMaxTrackPtArray,&fJetMaxTrackPtBranch);
+  BindForestBranch(fJetTree, "nref", &fnJets, &fnJetsBranch, IsRun3());
+  BindForestBranch(fJetTree, "rawpt", &fJetRawPtArray, &fJetRawPtBranch, IsRun3());
+  BindForestBranch(fJetTree, "trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch, IsRun3());
 
   // If we are looking at Monte Carlo, connect the reference jet and gen jet arrays
-  if(fDataType > kPbPb){
+  if(IsMC()){
 
-    fJetTree->SetBranchStatus("refpt",1);
-    fJetTree->SetBranchAddress("refpt",&fJetRefPtArray,&fJetRefPtBranch);
-    fJetTree->SetBranchStatus("refeta",1);
-    fJetTree->SetBranchAddress("refeta",&fJetRefEtaArray,&fJetRefEtaBranch);
-    fJetTree->SetBranchStatus("refphi",1);
-    fJetTree->SetBranchAddress("refphi",&fJetRefPhiArray,&fJetRefPhiBranch);
+    BindForestBranch(fJetTree, "refpt", &fJetRefPtArray, &fJetRefPtBranch, IsRun3());
+    BindForestBranch(fJetTree, "refeta", &fJetRefEtaArray, &fJetRefEtaBranch, IsRun3());
+    BindForestBranch(fJetTree, "refphi", &fJetRefPhiArray, &fJetRefPhiBranch, IsRun3());
 
-    fJetTree->SetBranchStatus("genpt",1);
-    fJetTree->SetBranchAddress("genpt",&fGenJetPtArray,&fGenJetPtBranch);
+    BindForestBranch(fJetTree, "genpt", &fGenJetPtArray, &fGenJetPtBranch, IsRun3());
     
     // Load jet phi with E-scheme and WTA axes
-    fJetTree->SetBranchStatus("genphi",1);
-    fJetTree->SetBranchAddress("genphi",&fGenJetPhiArray,&fGenJetPhiBranch);
-    fJetTree->SetBranchStatus("WTAgenphi",1);
-    fJetTree->SetBranchAddress("WTAgenphi",&fGenJetWTAPhiArray,&fGenJetWTAPhiBranch);
+    BindForestBranch(fJetTree, "genphi", &fGenJetPhiArray, &fGenJetPhiBranch, IsRun3());
+    BindForestBranch(fJetTree, "WTAgenphi", &fGenJetWTAPhiArray, &fGenJetWTAPhiBranch, IsRun3() && fJetAxis == 1);
     
     // Load jet eta with E-scheme and WTA axes
-    fJetTree->SetBranchStatus("geneta",1);
-    fJetTree->SetBranchAddress("geneta",&fGenJetEtaArray,&fGenJetEtaBranch);
-    fJetTree->SetBranchStatus("WTAgeneta",1);
-    fJetTree->SetBranchAddress("WTAgeneta",&fGenJetWTAEtaArray,&fGenJetWTAEtaBranch);
+    BindForestBranch(fJetTree, "geneta", &fGenJetEtaArray, &fGenJetEtaBranch, IsRun3());
+    BindForestBranch(fJetTree, "WTAgeneta", &fGenJetWTAEtaArray, &fGenJetWTAEtaBranch, IsRun3() && fJetAxis == 1);
     
-    fJetTree->SetBranchStatus("ngen",1);
-    fJetTree->SetBranchAddress("ngen",&fnGenJets,&fnGenJetsBranch);
+    BindForestBranch(fJetTree, "ngen", &fnGenJets, &fnGenJetsBranch, IsRun3());
   }
   
   // Connect the branches to the track tree
@@ -602,90 +628,52 @@ void UnfoldingForestReader::Initialize(){
   // We need to read the forest to vectors for MiniAODs and to arrays for AODs
   if(fIsMiniAOD){
     
-    fTrackTree->SetBranchStatus("trkPt",1);
-    fTrackTree->SetBranchAddress("trkPt",&fTrackPtVector,&fTrackPtBranch);
-    fTrackTree->SetBranchStatus("trkPtError",1);
-    fTrackTree->SetBranchAddress("trkPtError",&fTrackPtErrorVector,&fTrackPtErrorBranch);
-    fTrackTree->SetBranchStatus("trkPhi",1);
-    fTrackTree->SetBranchAddress("trkPhi",&fTrackPhiVector,&fTrackPhiBranch);
-    fTrackTree->SetBranchStatus("trkEta",1);
-    fTrackTree->SetBranchAddress("trkEta",&fTrackEtaVector,&fTrackEtaBranch);
-    fTrackTree->SetBranchStatus("nTrk",1);
-    fTrackTree->SetBranchAddress("nTrk",&fnTracks,&fnTracksBranch);
-    fTrackTree->SetBranchStatus("highPurity",1);
-    fTrackTree->SetBranchAddress("highPurity",&fHighPurityTrackVector,&fHighPurityTrackBranch);
-    fTrackTree->SetBranchStatus("trkDzFirstVtx",1);
-    fTrackTree->SetBranchAddress("trkDzFirstVtx",&fTrackVertexDistanceZVector,&fTrackVertexDistanceZBranch);
-    fTrackTree->SetBranchStatus("trkDzErrFirstVtx",1);
-    fTrackTree->SetBranchAddress("trkDzErrFirstVtx",&fTrackVertexDistanceZErrorVector,&fTrackVertexDistanceZErrorBranch);
-    fTrackTree->SetBranchStatus("trkDxyFirstVtx",1);
-    fTrackTree->SetBranchAddress("trkDxyFirstVtx",&fTrackVertexDistanceXYVector,&fTrackVertexDistanceXYBranch);
-    fTrackTree->SetBranchStatus("trkDxyErrFirstVtx",1);
-    fTrackTree->SetBranchAddress("trkDxyErrFirstVtx",&fTrackVertexDistanceXYErrorVector,&fTrackVertexDistanceXYErrorBranch);
-    fTrackTree->SetBranchStatus("trkNormChi2",1);
-    fTrackTree->SetBranchAddress("trkNormChi2",&fTrackNormalizedChi2Vector,&fTrackChi2Branch);
-    fTrackTree->SetBranchStatus("trkNLayers",1);
-    fTrackTree->SetBranchAddress("trkNLayers",&fnHitsTrackerLayerVector,&fnHitsTrackerLayerBranch);
-    fTrackTree->SetBranchStatus("trkNHits",1);
-    fTrackTree->SetBranchAddress("trkNHits",&fnHitsTrackVector,&fnHitsTrackBranch);
-    fTrackTree->SetBranchStatus("pfEcal",1);
-    fTrackTree->SetBranchAddress("pfEcal",&fTrackEnergyEcalVector,&fTrackEnergyEcalBranch);
-    fTrackTree->SetBranchStatus("pfHcal",1);
-    fTrackTree->SetBranchAddress("pfHcal",&fTrackEnergyHcalVector,&fTrackEnergyHcalBranch);
-    fTrackTree->SetBranchStatus("trkCharge",1);
-    fTrackTree->SetBranchAddress("trkCharge",&fTrackChargeVector,&fTrackChargeBranch);
+    BindForestBranch(fTrackTree, "trkPt", &fTrackPtVector, &fTrackPtBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkPtError", &fTrackPtErrorVector, &fTrackPtErrorBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkPhi", &fTrackPhiVector, &fTrackPhiBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkEta", &fTrackEtaVector, &fTrackEtaBranch, IsRun3());
+    BindForestBranch(fTrackTree, "nTrk", &fnTracks, &fnTracksBranch, false); // Vector size defines the multiplicity.
+    BindForestBranch(fTrackTree, "highPurity", &fHighPurityTrackVector, &fHighPurityTrackBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkDzFirstVtx", &fTrackVertexDistanceZVector, &fTrackVertexDistanceZBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkDzErrFirstVtx", &fTrackVertexDistanceZErrorVector, &fTrackVertexDistanceZErrorBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkDxyFirstVtx", &fTrackVertexDistanceXYVector, &fTrackVertexDistanceXYBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkDxyErrFirstVtx", &fTrackVertexDistanceXYErrorVector, &fTrackVertexDistanceXYErrorBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkNormChi2", &fTrackNormalizedChi2Vector, &fTrackChi2Branch, false);
+    BindForestBranch(fTrackTree, "trkNLayers", &fnHitsTrackerLayerVector, &fnHitsTrackerLayerBranch, false);
+    BindForestBranch(fTrackTree, "trkNHits", &fnHitsTrackVector, &fnHitsTrackBranch, false);
+    BindForestBranch(fTrackTree, "pfEcal", &fTrackEnergyEcalVector, &fTrackEnergyEcalBranch, false);
+    BindForestBranch(fTrackTree, "pfHcal", &fTrackEnergyHcalVector, &fTrackEnergyHcalBranch, false);
+    BindForestBranch(fTrackTree, "trkCharge", &fTrackChargeVector, &fTrackChargeBranch, IsRun3());
     
   } else { // Read the tree from AOD files
     
-    fTrackTree->SetBranchStatus("trkPt",1);
-    fTrackTree->SetBranchAddress("trkPt",&fTrackPtArray,&fTrackPtBranch);
-    fTrackTree->SetBranchStatus("trkPtError",1);
-    fTrackTree->SetBranchAddress("trkPtError",&fTrackPtErrorArray,&fTrackPtErrorBranch);
-    fTrackTree->SetBranchStatus("trkPhi",1);
-    fTrackTree->SetBranchAddress("trkPhi",&fTrackPhiArray,&fTrackPhiBranch);
-    fTrackTree->SetBranchStatus("trkEta",1);
-    fTrackTree->SetBranchAddress("trkEta",&fTrackEtaArray,&fTrackEtaBranch);
-    fTrackTree->SetBranchStatus("nTrk",1);
-    fTrackTree->SetBranchAddress("nTrk",&fnTracks,&fnTracksBranch);
-    fTrackTree->SetBranchStatus("highPurity",1);
-    fTrackTree->SetBranchAddress("highPurity",&fHighPurityTrackArray,&fHighPurityTrackBranch);
-    fTrackTree->SetBranchStatus("trkDz1",1);
-    fTrackTree->SetBranchAddress("trkDz1",&fTrackVertexDistanceZArray,&fTrackVertexDistanceZBranch);
-    fTrackTree->SetBranchStatus("trkDzError1",1);
-    fTrackTree->SetBranchAddress("trkDzError1",&fTrackVertexDistanceZErrorArray,&fTrackVertexDistanceZErrorBranch);
-    fTrackTree->SetBranchStatus("trkDxy1",1);
-    fTrackTree->SetBranchAddress("trkDxy1",&fTrackVertexDistanceXYArray,&fTrackVertexDistanceXYBranch);
-    fTrackTree->SetBranchStatus("trkDxyError1",1);
-    fTrackTree->SetBranchAddress("trkDxyError1",&fTrackVertexDistanceXYErrorArray,&fTrackVertexDistanceXYErrorBranch);
-    fTrackTree->SetBranchStatus("trkChi2",1);
-    fTrackTree->SetBranchAddress("trkChi2",&fTrackChi2Array,&fTrackChi2Branch);
-    fTrackTree->SetBranchStatus("trkNdof",1);
-    fTrackTree->SetBranchAddress("trkNdof",&fnTrackDegreesOfFreedomArray,&fnTrackDegreesOfFreedomBranch);
-    fTrackTree->SetBranchStatus("trkNlayer",1);
-    fTrackTree->SetBranchAddress("trkNlayer",&fnHitsTrackerLayerArray,&fnHitsTrackerLayerBranch);
-    fTrackTree->SetBranchStatus("trkNHit",1);
-    fTrackTree->SetBranchAddress("trkNHit",&fnHitsTrackArray,&fnHitsTrackBranch);
-    fTrackTree->SetBranchStatus("pfEcal",1);
-    fTrackTree->SetBranchAddress("pfEcal",&fTrackEnergyEcalArray,&fTrackEnergyEcalBranch);
-    fTrackTree->SetBranchStatus("pfHcal",1);
-    fTrackTree->SetBranchAddress("pfHcal",&fTrackEnergyHcalArray,&fTrackEnergyHcalBranch);
-    fTrackTree->SetBranchStatus("trkCharge",1);
-    fTrackTree->SetBranchAddress("trkCharge",&fTrackChargeArray,&fTrackChargeBranch);
+    BindForestBranch(fTrackTree, "trkPt", &fTrackPtArray, &fTrackPtBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkPtError", &fTrackPtErrorArray, &fTrackPtErrorBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkPhi", &fTrackPhiArray, &fTrackPhiBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkEta", &fTrackEtaArray, &fTrackEtaBranch, IsRun3());
+    BindForestBranch(fTrackTree, "nTrk", &fnTracks, &fnTracksBranch, IsRun3());
+    BindForestBranch(fTrackTree, "highPurity", &fHighPurityTrackArray, &fHighPurityTrackBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkDz1", &fTrackVertexDistanceZArray, &fTrackVertexDistanceZBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkDzError1", &fTrackVertexDistanceZErrorArray, &fTrackVertexDistanceZErrorBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkDxy1", &fTrackVertexDistanceXYArray, &fTrackVertexDistanceXYBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkDxyError1", &fTrackVertexDistanceXYErrorArray, &fTrackVertexDistanceXYErrorBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkChi2", &fTrackChi2Array, &fTrackChi2Branch, IsRun3());
+    BindForestBranch(fTrackTree, "trkNdof", &fnTrackDegreesOfFreedomArray, &fnTrackDegreesOfFreedomBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkNlayer", &fnHitsTrackerLayerArray, &fnHitsTrackerLayerBranch, IsRun3());
+    BindForestBranch(fTrackTree, "trkNHit", &fnHitsTrackArray, &fnHitsTrackBranch, IsRun3());
+    BindForestBranch(fTrackTree, "pfEcal", &fTrackEnergyEcalArray, &fTrackEnergyEcalBranch, false);
+    BindForestBranch(fTrackTree, "pfHcal", &fTrackEnergyHcalArray, &fTrackEnergyHcalBranch, false);
+    BindForestBranch(fTrackTree, "trkCharge", &fTrackChargeArray, &fTrackChargeBranch, IsRun3());
   }
   
   // Connect the branches to the generator level particle tree
-  if(fDataType == kPpMC || fDataType == kPbPbMC){
+  if(IsMC()){
     fGenParticleTree->SetBranchStatus("*",0);
-    fGenParticleTree->SetBranchStatus("pt",1);
-    fGenParticleTree->SetBranchAddress("pt",&fGenParticlePtArray,&fGenParticlePtBranch);
-    fGenParticleTree->SetBranchStatus("phi",1);
-    fGenParticleTree->SetBranchAddress("phi",&fGenParticlePhiArray,&fGenParticlePhiBranch);
-    fGenParticleTree->SetBranchStatus("eta",1);
-    fGenParticleTree->SetBranchAddress("eta",&fGenParticleEtaArray,&fGenParticleEtaBranch);
-    fGenParticleTree->SetBranchStatus("chg",1);
-    fGenParticleTree->SetBranchAddress("chg",&fGenParticleChargeArray,&fGenParticleChargeBranch);
-    fGenParticleTree->SetBranchStatus("sube",1);
-    fGenParticleTree->SetBranchAddress("sube",&fGenParticleSubeventArray,&fGenParticleSubeventBranch);
+    BindForestBranch(fGenParticleTree, "pt", &fGenParticlePtArray, &fGenParticlePtBranch, IsRun3());
+    BindForestBranch(fGenParticleTree, "phi", &fGenParticlePhiArray, &fGenParticlePhiBranch, IsRun3());
+    BindForestBranch(fGenParticleTree, "eta", &fGenParticleEtaArray, &fGenParticleEtaBranch, IsRun3());
+    BindForestBranch(fGenParticleTree, "chg", &fGenParticleChargeArray, &fGenParticleChargeBranch, IsRun3());
+    BindForestBranch(fGenParticleTree, "sube", &fGenParticleSubeventArray, &fGenParticleSubeventBranch, IsRun3());
   } // Reading track trees
   
 }
@@ -695,61 +683,85 @@ void UnfoldingForestReader::Initialize(){
  * Setter for fDataType
  */
 void UnfoldingForestReader::SetDataType(Int_t dataType){
-  
-  //Sanity check for given data type
-  if(dataType < 0 || dataType > knDataTypes-1){
-    cout << "ERROR: Data type input " << dataType << " is invalid in UnfoldingForestReader.cxx!" << endl;
-    cout << "Please give integer between 0 and " << knDataTypes-1 << "." << endl;
-    cout << "Setting data type to 0 (pp)." << endl;
-    fDataType = 0;
-  } else {
-    
-    // If the sanity check passes, set the given data type
-    fDataType = dataType;
+
+  switch(dataType){
+    case kPp: case kPbPb: case kPpMC: case kPbPbMC:
+    case kOO: case kOOMC: case kPpRef5p36TeV: case kPpRef5p36TeVMC:
+      fDataType = dataType;
+      return;
+    default:
+      throw std::invalid_argument("UnfoldingForestReader: unsupported data type " + std::to_string(dataType));
   }
+}
+
+Bool_t UnfoldingForestReader::IsMC() const{
+  return fDataType == kPpMC || fDataType == kPbPbMC || fDataType == kOOMC || fDataType == kPpRef5p36TeVMC;
+}
+
+Bool_t UnfoldingForestReader::IsRun3() const{
+  return fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC;
 }
 
 /*
  * Connect a new tree to the reader
  */
 void UnfoldingForestReader::ReadForestFromFile(TFile* inputFile){
-  
-  // When reading a forest, we need to check if it is AOD or MiniAOD forest as there are some differences
-  // The HiForest tree is renamed to HiForestInfo in MiniAODs, so we can determine the forest type from this.
-  TTree* miniAODcheck = (TTree*)inputFile->Get("HiForestInfo/HiForest");
-  fIsMiniAOD = !(miniAODcheck == NULL);
-  
+  if(!inputFile || inputFile->IsZombie()){
+    throw std::runtime_error("UnfoldingForestReader: cannot open input forest");
+  }
+  if(fJetType < 0 || fJetType > 3 || fJetAxis < 0 || fJetAxis > 1){
+    throw std::invalid_argument("UnfoldingForestReader: invalid jet type or axis");
+  }
+
+  const Bool_t isHeavyIon = fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC;
+  const char* miniAODTrackTree = isHeavyIon ? "PbPbTracks/trackTree" : "ppTracks/trackTree";
+  // Inspect the actual track tree, as in HighForestReader; metadata names differ
+  // between productions and cannot establish the track branch representation.
+  fIsMiniAOD = inputFile->Get(miniAODTrackTree) != nullptr;
+
   // Helper variable for finding the correct tree
   const char *treeName[4] = {"none","none","none","none"};
   
   // Connect a trees from the file to the reader
-  fHeavyIonTree = (TTree*)inputFile->Get("hiEvtAnalyzer/HiTree");
+  fHeavyIonTree = RequireForestTree(inputFile, "hiEvtAnalyzer/HiTree");
   
   // The jet tree has different name in different datasets
-  if(fDataType == kPp || fDataType == kPpMC){
+  if(fDataType == kPp || fDataType == kPpMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
     treeName[0] = "ak4CaloJetAnalyzer/t"; // Tree for calo jets
     treeName[1] = "ak4PFJetAnalyzer/t";   // Tree for PF jets
+    treeName[2] = "akCs4PFJetAnalyzer/t"; // Tree for constituent-subtracted PF jets
   } else if (fDataType == kPbPb || fDataType == kPbPbMC){
     treeName[0] = "akPu4CaloJetAnalyzer/t";     // Tree for calo jets
     treeName[1] = "akCs4PFJetAnalyzer/t";       // Tree for csPF jets
     treeName[2] = "akPu4PFJetAnalyzer/t";       // Tree for puPF jets
     treeName[3] = "akFlowPuCs4PFJetAnalyzer/t"; // Tree for flow subtracted csPF jets
+  } else if(fDataType == kOO || fDataType == kOOMC){
+    treeName[0] = "akCs2PFJetAnalyzer/t";
+    treeName[1] = "akCs4PFJetAnalyzer/t";
+    treeName[2] = "akCs6PFJetAnalyzer/t";
+    treeName[3] = "akCs8PFJetAnalyzer/t";
   }
-  
-  fJetTree = (TTree*)inputFile->Get(treeName[fJetType]);
-  
-  // The track tree has different name for pp and PbPb
-  if(fIsMiniAOD && (fDataType == kPbPb || fDataType == kPbPbMC)){
-    fTrackTree = (TTree*)inputFile->Get("PbPbTracks/trackTree");
-  } else {
-    fTrackTree = (TTree*)inputFile->Get("ppTrack/trackTree");
+  if(TString(treeName[fJetType]) == "none"){
+    throw std::invalid_argument("UnfoldingForestReader: jet type is unavailable for this collision system");
   }
-  
+  fJetTree = RequireForestTree(inputFile, treeName[fJetType]);
+  fTrackTree = RequireForestTree(inputFile, fIsMiniAOD ? miniAODTrackTree : "ppTrack/trackTree");
+
   // Read the generator level particle tree if we are analyzing simulation
-  if(fDataType == kPpMC || fDataType == kPbPbMC){
-    fGenParticleTree = (TTree*)inputFile->Get("HiGenParticleAna/hi");
+  if(IsMC()){
+    fGenParticleTree = RequireForestTree(inputFile, "HiGenParticleAna/hi");
+  } else {
+    fGenParticleTree = nullptr;
   }
-  
+
+  if(IsRun3()){
+    const Long64_t nEvents = fHeavyIonTree->GetEntries();
+    if(fJetTree->GetEntries() != nEvents || fTrackTree->GetEntries() != nEvents ||
+       (IsMC() && fGenParticleTree->GetEntries() != nEvents)){
+      throw std::runtime_error("UnfoldingForestReader: event counts differ between required trees");
+    }
+  }
+
   Initialize();
 }
 
@@ -757,6 +769,10 @@ void UnfoldingForestReader::ReadForestFromFile(TFile* inputFile){
  * Connect a new tree to the reader
  */
 void UnfoldingForestReader::ReadForestFromFileList(std::vector<TString> fileList){
+  if(fileList.empty()) throw std::invalid_argument("UnfoldingForestReader: empty input file list");
+  // This reader is opened once per input file by EECAnalyzer, unlike the chained
+  // analysis readers. Reject a longer list instead of silently dropping files.
+  if(fileList.size() != 1) throw std::invalid_argument("UnfoldingForestReader: provide one forest at a time");
   TFile *inputFile = TFile::Open(fileList.at(0));
   ReadForestFromFile(inputFile);
 }
@@ -765,30 +781,69 @@ void UnfoldingForestReader::ReadForestFromFileList(std::vector<TString> fileList
  * Burn the current forest.
  */
 void UnfoldingForestReader::BurnForest(){
-  fHeavyIonTree->Delete();
-  fJetTree->Delete();
-  fTrackTree->Delete();
-  if(fDataType == kPpMC || fDataType == kPbPbMC) fGenParticleTree->Delete();
+  if(fHeavyIonTree) fHeavyIonTree->Delete();
+  if(fJetTree) fJetTree->Delete();
+  if(fTrackTree) fTrackTree->Delete();
+  if(fGenParticleTree) fGenParticleTree->Delete();
+  fHeavyIonTree = fJetTree = fTrackTree = fGenParticleTree = nullptr;
+  fnJets = fnGenJets = fnTracks = fnGenParticles = 0;
 }
 
 /*
  * Load an event to memory
  */
 void UnfoldingForestReader::GetEvent(Int_t nEvent){
+  if(!fHeavyIonTree || !fJetTree || !fTrackTree || nEvent < 0 || nEvent >= GetNEvents()){
+    throw std::out_of_range("UnfoldingForestReader: event is outside the open forest");
+  }
+  // Read multiplicities first so a larger production cannot overwrite the fixed
+  // jet/legacy-track buffers before the incompatibility is detected.
+  if(fnJetsBranch) fnJetsBranch->GetEntry(nEvent);
+  if(IsMC() && fnGenJetsBranch) fnGenJetsBranch->GetEntry(nEvent);
+  if(fnJets < 0 || fnJets > fnMaxJet || fnGenJets < 0 || fnGenJets > fnMaxJet){
+    throw std::runtime_error("UnfoldingForestReader: jet multiplicity exceeds the reader buffer");
+  }
+  if(!fIsMiniAOD && fnTracksBranch){
+    fnTracksBranch->GetEntry(nEvent);
+    if(fnTracks < 0 || fnTracks > fnMaxTrack){
+      throw std::runtime_error("UnfoldingForestReader: track multiplicity exceeds the reader buffer");
+    }
+  }
   fHeavyIonTree->GetEntry(nEvent);
   fJetTree->GetEntry(nEvent);
   fTrackTree->GetEntry(nEvent);
-  if(fDataType == kPpMC || fDataType == kPbPbMC) {
+  if(fIsMiniAOD){
+    if(!fTrackPtVector) throw std::runtime_error("UnfoldingForestReader: track pT vector was not read");
+    fnTracks = fTrackPtVector->size();
+    if(IsRun3()){
+      CheckVectorSize(fTrackPtErrorVector, fnTracks, "trkPtError");
+      CheckVectorSize(fTrackPhiVector, fnTracks, "trkPhi");
+      CheckVectorSize(fTrackEtaVector, fnTracks, "trkEta");
+      CheckVectorSize(fHighPurityTrackVector, fnTracks, "highPurity");
+      CheckVectorSize(fTrackVertexDistanceZVector, fnTracks, "trkDzFirstVtx");
+      CheckVectorSize(fTrackVertexDistanceZErrorVector, fnTracks, "trkDzErrFirstVtx");
+      CheckVectorSize(fTrackVertexDistanceXYVector, fnTracks, "trkDxyFirstVtx");
+      CheckVectorSize(fTrackVertexDistanceXYErrorVector, fnTracks, "trkDxyErrFirstVtx");
+      CheckVectorSize(fTrackChargeVector, fnTracks, "trkCharge");
+    }
+  }
+  if(IsMC()) {
     fGenParticleTree->GetEntry(nEvent);
    
     // Read the numbers of generator level particles for this event
     fnGenParticles = fGenParticlePtArray->size();
+    if(IsRun3()){
+      CheckVectorSize(fGenParticlePhiArray, fnGenParticles, "phi");
+      CheckVectorSize(fGenParticleEtaArray, fnGenParticles, "eta");
+      CheckVectorSize(fGenParticleChargeArray, fnGenParticles, "chg");
+      CheckVectorSize(fGenParticleSubeventArray, fnGenParticles, "sube");
+    }
   }
 }
 
 // Getter for number of events in the tree
 Int_t UnfoldingForestReader::GetNEvents() const{
-  return fJetPtBranch->GetEntries();
+  return fJetTree ? fJetTree->GetEntries() : 0;
 }
 
 // Getter for number of jets in an event
@@ -832,7 +887,7 @@ Float_t UnfoldingForestReader::GetJetMaxTrackPt(Int_t iJet) const{
 Bool_t UnfoldingForestReader::HasMatchingGenJet(Int_t iJet) const{
   
   // This is meaningless for data, just return true
-  if(fDataType <= kPbPb) return true;
+  if(!IsMC()) return true;
   
   // For each reconstructed jet there is a reference pT, which tells the the pT of a matched generator level jet
   // If this number is -999, it means that there are no generator level jets matching the reconstructed jet
@@ -842,6 +897,7 @@ Bool_t UnfoldingForestReader::HasMatchingGenJet(Int_t iJet) const{
 
 // Get the matching generator level jet index for the given reconstructed jet
 Int_t UnfoldingForestReader::GetMatchingGenIndex(Int_t iJet) const{
+  if(!IsMC()) return -1;
   
   // Ref pT array has pT for all the generator level jets that are matched with reconstructed jets
   // If our generator level pT is found from this array, it is matched to the given reconstructed jet
@@ -862,7 +918,7 @@ Int_t UnfoldingForestReader::GetMatchingGenIndex(Int_t iJet) const{
 Float_t UnfoldingForestReader::GetMatchedGenPt(Int_t iJet) const{
   
   // This value has no meaning in real data
-  if(fDataType <= kPbPb) return 0;
+  if(!IsMC()) return 0;
   
   // Find the index of the matching generator level jet
   Int_t matchedIndex = GetMatchingGenIndex(iJet);
@@ -878,7 +934,7 @@ Float_t UnfoldingForestReader::GetMatchedGenPt(Int_t iJet) const{
 Float_t UnfoldingForestReader::GetMatchedGenEta(Int_t iJet) const{
   
   // This value has no meaning in real data
-  if(fDataType <= kPbPb) return 0;
+  if(!IsMC()) return 0;
   
   // Find the index of the matching generator level jet
   Int_t matchedIndex = GetMatchingGenIndex(iJet);
@@ -896,7 +952,7 @@ Float_t UnfoldingForestReader::GetMatchedGenEta(Int_t iJet) const{
 Float_t UnfoldingForestReader::GetMatchedGenPhi(Int_t iJet) const{
   
   // This value has no meaning in real data
-  if(fDataType <= kPbPb) return 0;
+  if(!IsMC()) return 0;
   
   // Find the index of the matching generator level jet
   Int_t matchedIndex = GetMatchingGenIndex(iJet);
@@ -931,7 +987,7 @@ Float_t UnfoldingForestReader::GetGeneratorJetEta(Int_t iJet) const{
 Bool_t UnfoldingForestReader::HasMatchingRecoJet(Int_t iJet) const{
   
   // This is meaningless for data, just return true
-  if(fDataType <= kPbPb) return true;
+  if(!IsMC()) return true;
   
   // Ref pT array has pT for all the generator level jets that are matched with reconstructed jets
   // If our generator level pT is found from this array, check also eta and phi
@@ -952,6 +1008,7 @@ Bool_t UnfoldingForestReader::HasMatchingRecoJet(Int_t iJet) const{
 
 // Get the index of the matched reconstructed jet
 Int_t UnfoldingForestReader::GetMatchingRecoIndex(Int_t iJet) const{
+  if(!IsMC()) return -1;
   
   // Ref pT array has pT for all the generator level jets that are matched with reconstructed jets
   // If our generator level pT is found from this array, check also eta and phi
@@ -975,7 +1032,7 @@ Int_t UnfoldingForestReader::GetMatchingRecoIndex(Int_t iJet) const{
 Float_t UnfoldingForestReader::GetMatchedRecoPt(Int_t iJet) const{
   
   // This value has no meaning in real data
-  if(fDataType <= kPbPb) return 0;
+  if(!IsMC()) return 0;
   
   // Find the index of the matching reconstructed jet
   Int_t matchingIndex = GetMatchingRecoIndex(iJet);
@@ -992,7 +1049,7 @@ Float_t UnfoldingForestReader::GetMatchedRecoPt(Int_t iJet) const{
 Float_t UnfoldingForestReader::GetMatchedRecoPhi(Int_t iJet) const{
   
   // This value has no meaning in real data
-  if(fDataType <= kPbPb) return 0;
+  if(!IsMC()) return 0;
   
   // Find the index of the matching reconstructed jet
   Int_t matchingIndex = GetMatchingRecoIndex(iJet);
@@ -1009,7 +1066,7 @@ Float_t UnfoldingForestReader::GetMatchedRecoPhi(Int_t iJet) const{
 Float_t UnfoldingForestReader::GetMatchedRecoEta(Int_t iJet) const{
   
   // This value has no meaning in real data
-  if(fDataType <= kPbPb) return 0;
+  if(!IsMC()) return 0;
   
   // Find the index of the matching reconstructed jet
   Int_t matchingIndex = GetMatchingRecoIndex(iJet);
@@ -1109,6 +1166,7 @@ Float_t UnfoldingForestReader::GetTrackVertexDistanceXYError(Int_t iTrack) const
 
 // Getter for normalized track chi2 value from reconstruction fit
 Float_t UnfoldingForestReader::GetTrackNormalizedChi2(Int_t iTrack) const{
+  if(fIsMiniAOD && !fTrackChi2Branch) throw std::runtime_error("UnfoldingForestReader: trkNormChi2 is unavailable");
   if(fIsMiniAOD) return fTrackNormalizedChi2Vector->at(iTrack);
   return GetTrackChi2(iTrack) / (1.0*GetNTrackDegreesOfFreedom(iTrack));
 }
@@ -1127,24 +1185,28 @@ Int_t UnfoldingForestReader::GetNTrackDegreesOfFreedom(Int_t iTrack) const{
 
 // Getter for number of hits in tracker layers
 Int_t UnfoldingForestReader::GetNHitsTrackerLayer(Int_t iTrack) const{
+  if(fIsMiniAOD && !fnHitsTrackerLayerBranch) throw std::runtime_error("UnfoldingForestReader: trkNLayers is unavailable");
   if(fIsMiniAOD) return fnHitsTrackerLayerVector->at(iTrack);
   return fnHitsTrackerLayerArray[iTrack];
 }
 
 // Getter for number of hits for the track
 Int_t UnfoldingForestReader::GetNHitsTrack(Int_t iTrack) const{
+  if(fIsMiniAOD && !fnHitsTrackBranch) throw std::runtime_error("UnfoldingForestReader: trkNHits is unavailable");
   if(fIsMiniAOD) return fnHitsTrackVector->at(iTrack);
   return fnHitsTrackArray[iTrack];
 }
 
 // Getter for track energy in ECal
 Float_t UnfoldingForestReader::GetTrackEnergyEcal(Int_t iTrack) const{
+  if(fIsMiniAOD && !fTrackEnergyEcalBranch) throw std::runtime_error("UnfoldingForestReader: pfEcal is unavailable");
   if(fIsMiniAOD) return fTrackEnergyEcalVector->at(iTrack);
   return fTrackEnergyEcalArray[iTrack];
 }
 
 // Getter for track energy in HCal
 Float_t UnfoldingForestReader::GetTrackEnergyHcal(Int_t iTrack) const{
+  if(fIsMiniAOD && !fTrackEnergyHcalBranch) throw std::runtime_error("UnfoldingForestReader: pfHcal is unavailable");
   if(fIsMiniAOD) return fTrackEnergyHcalVector->at(iTrack);
   return fTrackEnergyHcalArray[iTrack];
 }

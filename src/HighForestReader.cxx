@@ -7,6 +7,9 @@
 // including the new jet trigger, branches and filters for OO and the centrality definition for OO. 
 // 
 //===========================================================
+// ROOT includes
+#include <TMath.h>
+
 // Own includes
 #include "HighForestReader.h"
 

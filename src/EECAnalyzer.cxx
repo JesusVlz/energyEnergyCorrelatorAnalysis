@@ -4,6 +4,9 @@
 #include <TFile.h>
 #include <TMath.h>
 
+// C++ includes
+#include <stdexcept>
+
 // Own includes
 #include "EECAnalyzer.h"
 
@@ -272,14 +275,28 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
     }
     fTrackEfficiencyCorrector = new TrkEff2025OO( false, "trackCorrectionTables/OO2025/Eff_OO_2025_Hijing_MB_Centrality_fromHihfpf_NoPU_3D_Nominal_Official_18Nov2025.root");
 
+    // Derived from eecAnalysis_OOMC_eventWeights_merged_processed.root and
+    // merged_eecOO2025_processed_121026.root; fit details and marginal checks:
+    // validation/ooEventWeights/summary.json. Generator weights remain unity.
     fVzWeightFunction = new TF1("fvzOO", "pol6", -15, 15);
-    fVzWeightFunction->SetParameters(0.906064, -0.0132366, 0.00361657, -4.99943e-05, 7.33997e-06, 5.57207e-08, -4.63876e-08);
+    fVzWeightFunction->SetParameters(
+      0.838856911780552, -0.00776989024519781, 0.0058636391429985266,
+      -5.766156566253836e-05, 1.8438424060809344e-05,
+      -1.8301250990940377e-08, -1.75751097521435e-08);
 
+    // Fit the discrete event coordinate hiBin/2.0, rather than bin centers.
+    // Both pieces are constrained to share the same value at 30%.
     fCentralityWeightFunctionCentral = new TF1("fCentralWeight","pol6",0,30);
-    fCentralityWeightFunctionCentral->SetParameters(0.0999326, 0.446336, -0.0920313, 0.00960203, -0.000517518, 1.37051e-05, -1.41088e-07);
-    
+    fCentralityWeightFunctionCentral->SetParameters(
+      0.21673748247199076, 0.42798452395858855, -0.08577950095294451,
+      0.00876238763403549, -0.0004640687718153862,
+      1.2091163533760215e-05, -1.2250901514355144e-07);
+
     fCentralityWeightFunctionPeripheral = new TF1("fPeripheralWeight","pol6",30,90);
-    fCentralityWeightFunctionPeripheral->SetParameters(30.8387, -3.65511, 0.183064, -0.00480757, 6.96826e-05, -5.30443e-07, 1.66781e-09);
+    fCentralityWeightFunctionPeripheral->SetParameters(
+      24.64385154550333, -3.0807890354515104, 0.1643162333925263,
+      -0.004560385561319567, 6.926614096592005e-05,
+      -5.486498310258901e-07, 1.7859004865978195e-09);
     
     fMultiplicityWeightFunction = new TF1("fMultiWeight", totalMultiplicityWeight, 0, 5000, 0);
 
@@ -307,10 +324,11 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   // Run-3 ppRef tracking efficiency.
   fTrackEfficiencyCorrector = new TrkEff2024ppRef(false, "trackCorrectionTables/pp2024/Eff_ppref_2024_Pythia_QCD_pThat15_NopU_2D_Nominal_Official.root");
 
-  // A dedicated ppRef vz weight has not been installed yet.
-  // Use an explicit unity function rather than the 2017 pp polynomial.
-  // This function is required for DataType 12 because GetVzWeight()
-  // evaluates fVzWeightFunction for MC.
+  // Validated with merged_eecpp2024_run3_v7_processed.root and
+  // merged_eecppMC2024_GenGen_processed.root. The existing coefficients
+  // reproduce the vertex marginal to 0.56% RMS; retain them rather than
+  // replacing them with the statistically equivalent same-sample refit.
+  // Full comparison: validation/ppEventWeights/summary.json.
   fVzWeightFunction = new TF1("fvzPpRef5p36TeV", "pol6", -15, 15);
   fVzWeightFunction->SetParameters( 0.901743, -0.0100148, 0.00349298, -5.14891e-05, 6.59866e-06, 7.97589e-08, -5.10072e-08); 
 
@@ -330,32 +348,8 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   fDeltaRSmearer = NULL;
   fEnergyWeightSmearer = NULL;
 
-  // Protect against accidentally applying the Run-2 pp jet-spectrum
-  // weight to DataType 12.
-  if(fJetPtWeightConfiguration != 0){
-    cerr
-      << "ERROR: JetPtWeight is not configured for Run-3 ppRef. "
-      << "Use JetPtWeight 0 until a dedicated ppRef weight is derived."
-      << endl;
-    assert(0);
-  }
-
-  // Protect against entering the 2017 pp or PbPb JER-smearing paths.
-  if(fJetUncertaintyMode != 0){
-    cerr
-      << "ERROR: JetUncertainty/JER variations are not configured "
-      << "for Run-3 ppRef. Use JetUncertainty 0."
-      << endl;
-    assert(0);
-  }
-
-  if(fSmearDeltaR || fSmearEnergyWeight){
-    cerr
-      << "ERROR: EEC response smearing is not configured for "
-      << "Run-3 ppRef. Use SmearDeltaR 0 and SmearEnergyWeight 0."
-      << endl;
-    assert(0);
-  }
+  // Unsupported Run-3 variations are rejected when reading the card,
+  // before correction files or response helpers are initialized.
 
 } else if(fIsPPbData){
     
@@ -937,6 +931,25 @@ void EECAnalyzer::ReadConfigurationFromCard(){
   fFillJetPtClosure = bitChecker.test(kFillJetPtClosure);
   fFillJetPtUnfoldingResponse = bitChecker.test(kFillJetPtUnfoldingResponse);
   fFillTrackParticleMatchingHistograms = bitChecker.test(kFillTrackParticleMatchingHistograms);
+
+  if(fIsOOData || fIsPp2024Data){
+    if(fJetPtWeightConfiguration != 0){
+      throw std::invalid_argument(
+        "Run-3 OO/ppRef jet-spectrum weights are not configured. Use JetPtWeight 0.");
+    }
+    if(fJetUncertaintyMode != 0){
+      throw std::invalid_argument(
+        "Run-3 OO/ppRef JES/JER variations require dedicated calibration inputs. Use JetUncertainty 0.");
+    }
+    if(fSmearDeltaR || fSmearEnergyWeight){
+      throw std::invalid_argument(
+        "Run-3 OO/ppRef EEC smearing requires dedicated response inputs. Use SmearDeltaR 0 and SmearEnergyWeight 0.");
+    }
+    if(fIsRealData && (fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)){
+      throw std::invalid_argument(
+        "Run-3 response and track-particle matching histograms require MC (DataType 10 or 12).");
+    }
+  }
   
   //************************************************
   //              Debug messages
@@ -1571,26 +1584,28 @@ void EECAnalyzer::RunAnalysis(){
       // limit from which the weights are calculated, which could cause the code to crash.
       if(ptHat < fMinimumPtHat || ptHat >= fMaximumPtHat) continue;
 
-      // Diagnostic Run-3 MC baseline: use unit weights until each factor is validated.
-      const bool diagnosticRun3MC = (fDataType == ForestReader::kOOMC || fDataType == ForestReader::kPpRef5p36TeVMC);
+      // Run-3 generator/cross-section normalization is not established by the
+      // processed marginal histograms. Keep that factor at unity while
+      // applying the validated OO/ppRef vertex and OO centrality fits.
+      const bool run3MC = (fDataType == ForestReader::kOOMC || fDataType == ForestReader::kPpRef5p36TeVMC);
       
       // Get the weighting for the event
-      fVzWeight = (fDataType == ForestReader::kOOMC)? GetVzWeight(vz) : (diagnosticRun3MC ? 1.0 : GetVzWeight(vz));
+      fVzWeight = GetVzWeight(vz);
       if(fMultiplicityMode){
         // Multiplicity based weight
         trackMultiplicity = GetMultiplicity();
-        fCentralityWeight = diagnosticRun3MC ? 1.0 : GetMultiplicityWeight(trackMultiplicity);
+        fCentralityWeight = run3MC ? 1.0 : GetMultiplicityWeight(trackMultiplicity);
         centrality = GetCentralityFromMultiplicity(trackMultiplicity);
       } else {
         // Regular centrality based weight
-        fCentralityWeight = (fDataType == ForestReader::kOOMC)?GetCentralityWeight(hiBin): (diagnosticRun3MC ? 1.0 : GetCentralityWeight(hiBin));
+        fCentralityWeight = GetCentralityWeight(hiBin);
       }
 
       // Event weight for 2018 MC
       if(!(fDataType == ForestReader::kPPbMC_pToMinusEta) && !(fDataType == ForestReader::kPPbMC_pToPlusEta)){
 
         // Event-by-event weight for pp and PbPb MC
-        fPtHatWeight = diagnosticRun3MC ? 1.0 : fJetReader->GetEventWeight();
+        fPtHatWeight = run3MC ? 1.0 : fJetReader->GetEventWeight();
 
       } 
       fTotalEventWeight = fVzWeight*fCentralityWeight*fPtHatWeight;
@@ -3014,7 +3029,7 @@ void EECAnalyzer::CalculateEnergyEnergyCorrelatorForUnfolding(const vector<doubl
       if(trackPt2 < trackPt1) lowerTrackPt = trackPt2;
 
       // Realistic smearing for DeltaR between two particles if selected
-      if(fSmearEnergyWeight){
+      if(fSmearDeltaR){
         trackDeltaR = fDeltaRSmearer->GetSmearedValue(trackDeltaR, centrality, jetPt, lowerTrackPt);
       }
 
@@ -3412,9 +3427,9 @@ Double_t EECAnalyzer::GetVzWeight(const Double_t vz) const{
  */
 Double_t EECAnalyzer::GetCentralityWeight(const Int_t hiBin) const{
   if(fDataType == ForestReader::kOOMC){
-  if(hiBin < 0 || hiBin >= 180) return 1.0; // OO fit covers 0–90%
-  if(hiBin < 60) return fCentralityWeightFunctionCentral->Eval(hiBin/2.0);
-  return fCentralityWeightFunctionPeripheral->Eval(hiBin/2.0);
+    if(hiBin < 0 || hiBin >= 180) return 1.0; // OO fit covers 0–90%
+    if(hiBin < 60) return fCentralityWeightFunctionCentral->Eval(hiBin/2.0);
+    return fCentralityWeightFunctionPeripheral->Eval(hiBin/2.0);
   }
 
   if(fDataType != ForestReader::kPbPbMC) return 1;
@@ -3598,7 +3613,6 @@ Bool_t EECAnalyzer::PassTrackCuts(ForestReader* trackReader, const Int_t iTrack,
   
   Double_t trackPt = trackReader->GetTrackPt(iTrack);
   Double_t trackEta = trackReader->GetTrackEta(iTrack);
-  Double_t trackEt = (trackReader->GetTrackEnergyEcal(iTrack)+trackReader->GetTrackEnergyHcal(iTrack))/TMath::CosH(trackEta);
   
   //  ==== Apply cuts for tracks and collect information on how much track are cut in each step ====
   
@@ -3642,6 +3656,7 @@ Bool_t EECAnalyzer::PassTrackCuts(ForestReader* trackReader, const Int_t iTrack,
   }
   
   // Cut for energy deposition in calorimeters for high pT tracks
+  const Double_t trackEt = (trackReader->GetTrackEnergyEcal(iTrack)+trackReader->GetTrackEnergyHcal(iTrack))/TMath::CosH(trackEta);
   if(!(trackPt < fCalorimeterSignalLimitPt || (trackEt >= fHighPtEtFraction*trackPt))) return false;  // For high pT tracks, require signal also in calorimeters
   if(fFillTrackHistograms && !bypassFill) trackCutHistogram->Fill(EECHistograms::kCaloSignal);
   
@@ -3668,7 +3683,8 @@ Bool_t EECAnalyzer::PassTrackCuts(UnfoldingForestReader* trackReader, const Int_
   
   Double_t trackPt = trackReader->GetTrackPt(iTrack);
   Double_t trackEta = trackReader->GetTrackEta(iTrack);
-  Double_t trackEt = (trackReader->GetTrackEnergyEcal(iTrack)+trackReader->GetTrackEnergyHcal(iTrack))/TMath::CosH(trackEta);
+
+  if((fIsOOData || fIsPp2024Data) && trackReader->GetTrackCharge(iTrack) == 0) return false;
   
   //  ==== Apply cuts for tracks and collect information on how much track are cut in each step ====
   
@@ -3688,8 +3704,14 @@ Bool_t EECAnalyzer::PassTrackCuts(UnfoldingForestReader* trackReader, const Int_
   // Cut for track distance from primary vertex
   if(TMath::Abs(trackReader->GetTrackVertexDistanceZ(iTrack)/trackReader->GetTrackVertexDistanceZError(iTrack)) >= fMaxTrackDistanceToVertex) return false; // Mysterious cut about track proximity to vertex in z-direction
   if(TMath::Abs(trackReader->GetTrackVertexDistanceXY(iTrack)/trackReader->GetTrackVertexDistanceXYError(iTrack)) >= fMaxTrackDistanceToVertex) return false; // Mysterious cut about track proximity to vertex in xy-direction
+
+  // Use the same reconstructed-track selection as the ordinary Run-3 path.
+  // The calorimeter and reconstruction-quality cuts below belong to the
+  // legacy response selection, and their branches may be absent in Run-3.
+  if(fIsOOData || fIsPp2024Data) return true;
   
   // Cut for energy deposition in calorimeters for high pT tracks
+  const Double_t trackEt = (trackReader->GetTrackEnergyEcal(iTrack)+trackReader->GetTrackEnergyHcal(iTrack))/TMath::CosH(trackEta);
   if(!(trackPt < fCalorimeterSignalLimitPt || (trackEt >= fHighPtEtFraction*trackPt))) return false;  // For high pT tracks, require signal also in calorimeters
   
   // Cuts for track reconstruction quality

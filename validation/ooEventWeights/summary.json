@@ -1,0 +1,552 @@
+{
+  "inputs": {
+    "mc": {
+      "path": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/eecAnalysis_OOMC_eventWeights_merged_processed.root",
+      "sha256": "52784512304cd776c54dceaf0e647a3e832f7e460d691c25a2605052be467762",
+      "card": {
+        "GitHash": "f57c6235314086cb530cb95b223c691ba357e49f",
+        "DataType": [
+          10.0
+        ],
+        "McCorrelationType": [
+          0.0
+        ],
+        "MatchJets": [
+          0.0
+        ],
+        "TriggerSelection": [
+          0.0
+        ],
+        "JetType": [
+          1.0
+        ],
+        "JetAxis": [
+          1.0
+        ],
+        "JetEtaCut": [
+          1.600000023841858
+        ],
+        "MinJetPtCut": [
+          10.0
+        ],
+        "MaxJetPtCut": [
+          5020.0
+        ],
+        "CutBadPhi": [
+          0.0
+        ],
+        "MinMaxTrackPtFraction": [
+          0.009999999776482582
+        ],
+        "MaxMaxTrackPtFraction": [
+          0.9800000190734863
+        ],
+        "JetUncertainty": [
+          0.0
+        ],
+        "TrackEtaCut": [
+          2.4000000953674316
+        ],
+        "MinTrackPtCut": [
+          0.5
+        ],
+        "MaxTrackPtCut": [
+          500.0
+        ],
+        "MaxTrackPtRelativeError": [
+          0.10000000149011612
+        ],
+        "VertexMaxDistance": [
+          3.0
+        ],
+        "CalorimeterSignalLimitPt": [
+          20.0
+        ],
+        "HighPtEtFraction": [
+          0.5
+        ],
+        "Chi2QualityCut": [
+          100000.0
+        ],
+        "MinimumTrackHits": [
+          0.0
+        ],
+        "SubeventCut": [
+          2.0
+        ],
+        "TrackEfficiencyVariation": [
+          0.024000000208616257
+        ],
+        "JetPtWeight": [
+          0.0
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          1.0
+        ],
+        "ZVertexCut": [
+          15.0
+        ],
+        "LowPtHatCut": [
+          -15.0
+        ],
+        "HighPtHatCut": [
+          5020.0
+        ],
+        "MultiplicityMode": [
+          0.0
+        ],
+        "JetRadius": [
+          0.4000000059604645
+        ],
+        "WeightExponent": [
+          1.0
+        ],
+        "JetPtBinEdgesEEC": [
+          40.0,
+          80.0,
+          120.0,
+          160.0,
+          200.0,
+          300.0,
+          500.0,
+          5020.0
+        ],
+        "TrackPtBinEdgesEEC": [
+          0.5,
+          1.0,
+          1.5,
+          2.0,
+          2.5,
+          3.0,
+          3.5,
+          4.0,
+          300.0
+        ],
+        "SkipCovarianceMatrix": [
+          1.0
+        ],
+        "MinJetPtUnfoldingReco": [
+          40.0
+        ],
+        "MinJetPtUnfoldingTruth": [
+          40.0
+        ],
+        "CentralityBinEdges": [
+          0.0,
+          30.0,
+          50.0,
+          90.0
+        ],
+        "TrackPtBinEdges": [
+          0.5,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          8.0,
+          12.0,
+          300.0
+        ],
+        "PtHatBinEdges": [
+          0.0,
+          30.0,
+          50.0,
+          80.0,
+          120.0,
+          170.0,
+          220.0,
+          280.0,
+          370.0,
+          460.0
+        ],
+        "BackgroundMethods": [
+          0.0
+        ],
+        "MegaSkimMixing": [
+          0.0
+        ],
+        "ProjectionGitHash": "f57c6235314086cb530cb95b223c691ba357e49f",
+        "InputFile": "/eos/cms/store/group/phys_heavyions/jvelazqu/eec/eecAnalysis_OOMC_eventWeights_run3_v1/eecOOMC2025Histograms/crab_eecAnalysis_OOMC_eventWeights_run3_v1/261021_013222/0000/eecAnalysis_OOMC_eventWeights_merged.root"
+      }
+    },
+    "data": {
+      "path": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/merged_eecOO2025_processed_121026.root",
+      "sha256": "de89f7150aeafba28b3153f7898985721bcdd05e7dbc2826d86b9abac37d9021",
+      "card": {
+        "GitHash": "9325db1467560e431cca9336932b517567c52e1d",
+        "DataType": [
+          9.0
+        ],
+        "McCorrelationType": [
+          0.0
+        ],
+        "MatchJets": [
+          0.0
+        ],
+        "TriggerSelection": [
+          8.0
+        ],
+        "JetType": [
+          1.0
+        ],
+        "JetAxis": [
+          1.0
+        ],
+        "JetEtaCut": [
+          1.600000023841858
+        ],
+        "MinJetPtCut": [
+          10.0
+        ],
+        "MaxJetPtCut": [
+          5020.0
+        ],
+        "CutBadPhi": [
+          0.0
+        ],
+        "MinMaxTrackPtFraction": [
+          0.009999999776482582
+        ],
+        "MaxMaxTrackPtFraction": [
+          0.9800000190734863
+        ],
+        "JetUncertainty": [
+          0.0
+        ],
+        "TrackEtaCut": [
+          2.4000000953674316
+        ],
+        "MinTrackPtCut": [
+          0.5
+        ],
+        "MaxTrackPtCut": [
+          500.0
+        ],
+        "MaxTrackPtRelativeError": [
+          0.10000000149011612
+        ],
+        "VertexMaxDistance": [
+          3.0
+        ],
+        "CalorimeterSignalLimitPt": [
+          20.0
+        ],
+        "HighPtEtFraction": [
+          0.5
+        ],
+        "Chi2QualityCut": [
+          100000.0
+        ],
+        "MinimumTrackHits": [
+          0.0
+        ],
+        "SubeventCut": [
+          2.0
+        ],
+        "TrackEfficiencyVariation": [
+          0.024000000208616257
+        ],
+        "JetPtWeight": [
+          0.0
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          1.0
+        ],
+        "ZVertexCut": [
+          15.0
+        ],
+        "LowPtHatCut": [
+          -1.0
+        ],
+        "HighPtHatCut": [
+          1.0
+        ],
+        "MultiplicityMode": [
+          0.0
+        ],
+        "JetRadius": [
+          0.4000000059604645
+        ],
+        "WeightExponent": [
+          1.0
+        ],
+        "JetPtBinEdgesEEC": [
+          40.0,
+          80.0,
+          120.0,
+          160.0,
+          200.0,
+          300.0,
+          500.0,
+          5020.0
+        ],
+        "TrackPtBinEdgesEEC": [
+          0.5,
+          1.0,
+          1.5,
+          2.0,
+          2.5,
+          3.0,
+          3.5,
+          4.0,
+          300.0
+        ],
+        "SkipCovarianceMatrix": [
+          1.0
+        ],
+        "MinJetPtUnfoldingReco": [
+          80.0
+        ],
+        "MinJetPtUnfoldingTruth": [
+          60.0
+        ],
+        "CentralityBinEdges": [
+          0.0,
+          30.0,
+          50.0,
+          90.0
+        ],
+        "TrackPtBinEdges": [
+          0.5,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          8.0,
+          12.0,
+          300.0
+        ],
+        "PtHatBinEdges": [
+          0.0,
+          30.0,
+          50.0,
+          80.0,
+          120.0,
+          170.0,
+          220.0,
+          280.0,
+          370.0,
+          460.0
+        ],
+        "BackgroundMethods": [
+          3.0
+        ],
+        "MegaSkimMixing": [
+          0.0
+        ],
+        "ProjectionGitHash": "f57c6235314086cb530cb95b223c691ba357e49f",
+        "InputFile": "/eos/cms/store/group/phys_heavyions/jvelazqu/eec/eecAnalysis_OO_run3_v7/merged_eecOOcones_run3_v7_files.root"
+      }
+    }
+  },
+  "analyzer_sha256": "ff45328d8ed5878c82b150e68a880c0f7181021da90fdc3b091836fa2e16e91b",
+  "current_parameters_constant_first": {
+    "vertexZ": [
+      0.906064,
+      -0.0132366,
+      0.00361657,
+      -4.99943e-05,
+      7.33997e-06,
+      5.57207e-08,
+      -4.63876e-08
+    ],
+    "central": [
+      0.0999326,
+      0.446336,
+      -0.0920313,
+      0.00960203,
+      -0.000517518,
+      1.37051e-05,
+      -1.41088e-07
+    ],
+    "peripheral": [
+      30.8387,
+      -3.65511,
+      0.183064,
+      -0.00480757,
+      6.96826e-05,
+      -5.30443e-07,
+      1.66781e-09
+    ]
+  },
+  "method": "Unit-area data/MC comparison in each stated range; fixed binwise application of the current functions; pol6 refits to the same marginal inputs, with continuity enforced between the centrality pieces.",
+  "limitations": [
+    "No event-level vz-by-centrality distribution is available: the product of both corrections cannot be validated from these marginals.",
+    "Generator-event/cross-section weights cannot be recovered or validated from the processed one-dimensional histograms.",
+    "The candidate refit uses the same sample for derivation and checking; it is not independent closure.",
+    "Vertex weights are evaluated at bin centers, approximating the unknown distribution within each 0.5 cm bin.",
+    "Fit chi2 uses diagonal ratio errors; normalization correlations and fitted-weight uncertainties are not included."
+  ],
+  "distributions": {
+    "vertexZ": {
+      "range": [
+        -15,
+        15
+      ],
+      "mc_sum_in_range": 7833129.0,
+      "data_sum_in_range": 2507754125.0,
+      "mc_entries_all_bins": 7833129.0,
+      "data_entries_all_bins": 2507754132.0,
+      "max_supplied_raw_weighted_bin_difference": 0.0,
+      "raw": {
+        "data_weighted_relative_rms_percent": 20.429850362910745,
+        "maximum_absolute_relative_residual_percent": 66.9100042060955,
+        "total_variation_percent": 8.305270771509072
+      },
+      "as_supplied_weighted": {
+        "data_weighted_relative_rms_percent": 20.429850362910745,
+        "maximum_absolute_relative_residual_percent": 66.9100042060955,
+        "total_variation_percent": 8.305270771509072
+      },
+      "current_function_prediction": {
+        "data_weighted_relative_rms_percent": 10.931287528802569,
+        "maximum_absolute_relative_residual_percent": 49.18357082192071,
+        "total_variation_percent": 4.154548466120856
+      },
+      "candidate_refit_prediction": {
+        "data_weighted_relative_rms_percent": 0.8215765783082394,
+        "maximum_absolute_relative_residual_percent": 5.336690277150913,
+        "total_variation_percent": 0.2808341314283054
+      },
+      "current_weight_range_at_event_coordinates": [
+        0.8937761804761687,
+        1.8793928658430445
+      ],
+      "candidate_refit": {
+        "vertex": {
+          "parameters_constant_first": [
+            0.838856911780552,
+            -0.00776989024519781,
+            0.0058636391429985266,
+            -5.766156566253836e-05,
+            1.8438424060809344e-05,
+            -1.8301250990940377e-08,
+            -1.75751097521435e-08
+          ],
+          "range": [
+            -15,
+            15
+          ],
+          "minimum_weight_on_dense_grid": 0.8362696071754255,
+          "maximum_weight_on_dense_grid": 3.2164831027734637,
+          "diagonal_error_chi2": 378.62060662267044,
+          "ndof": 53
+        }
+      }
+    },
+    "centrality": {
+      "range": [
+        0,
+        90
+      ],
+      "mc_sum_in_range": 7780130.0,
+      "data_sum_in_range": 2310311719.0,
+      "mc_entries_all_bins": 7833129.0,
+      "data_entries_all_bins": 2507754132.0,
+      "max_supplied_raw_weighted_bin_difference": 0.0,
+      "raw": {
+        "data_weighted_relative_rms_percent": 45.33589320763537,
+        "maximum_absolute_relative_residual_percent": 373.4667025145484,
+        "total_variation_percent": 15.056151649494263
+      },
+      "as_supplied_weighted": {
+        "data_weighted_relative_rms_percent": 45.33589320763537,
+        "maximum_absolute_relative_residual_percent": 373.4667025145484,
+        "total_variation_percent": 15.056151649494263
+      },
+      "current_function_prediction": {
+        "data_weighted_relative_rms_percent": 7.577008643850331,
+        "maximum_absolute_relative_residual_percent": 43.432506318156705,
+        "total_variation_percent": 2.9144040816449794
+      },
+      "candidate_refit_prediction": {
+        "data_weighted_relative_rms_percent": 2.023790690979777,
+        "maximum_absolute_relative_residual_percent": 14.97398816559693,
+        "total_variation_percent": 0.6189283476243861
+      },
+      "current_weight_range_at_event_coordinates": [
+        0.0999326,
+        5.622806999119064
+      ],
+      "candidate_refit": {
+        "central": {
+          "parameters_constant_first": [
+            0.21673748247199076,
+            0.42798452395858855,
+            -0.08577950095294451,
+            0.00876238763403549,
+            -0.0004640687718153862,
+            1.2091163533760215e-05,
+            -1.2250901514355144e-07
+          ],
+          "range": [
+            0,
+            30
+          ],
+          "minimum_weight_on_dense_grid": 0.21673748247199076,
+          "maximum_weight_on_dense_grid": 1.2056316431392793
+        },
+        "peripheral": {
+          "parameters_constant_first": [
+            24.64385154550333,
+            -3.0807890354515104,
+            0.1643162333925263,
+            -0.004560385561319567,
+            6.926614096592005e-05,
+            -5.486498310258901e-07,
+            1.7859004865978195e-09
+          ],
+          "range": [
+            30,
+            90
+          ],
+          "minimum_weight_on_dense_grid": 0.6558273054533217,
+          "maximum_weight_on_dense_grid": 7.743116679633012
+        },
+        "constraint": "Both pol6 functions share the same value at centrality 30%; slopes are unconstrained.",
+        "diagonal_error_chi2": 3911.855545002302,
+        "ndof": 167,
+        "current_junction_30_percent": [
+          0.9078505999999559,
+          0.9075845900000168
+        ],
+        "candidate_junction_30_percent": [
+          1.049685122799228,
+          1.0496851227992892
+        ]
+      },
+      "region_fractions_percent": [
+        {
+          "range": [
+            0,
+            30
+          ],
+          "data": 32.89550560428074,
+          "raw_mc": 32.96577306548863,
+          "current_prediction": 35.131908173962096,
+          "candidate_prediction": 32.93268566813486
+        },
+        {
+          "range": [
+            30,
+            50
+          ],
+          "data": 22.35658949189618,
+          "raw_mc": 25.155016689952483,
+          "current_prediction": 22.39290539530599,
+          "candidate_prediction": 22.351884455216624
+        },
+        {
+          "range": [
+            50,
+            90
+          ],
+          "data": 44.74790490382306,
+          "raw_mc": 41.8792102445589,
+          "current_prediction": 42.475186430731924,
+          "candidate_prediction": 44.715429876648514
+        }
+      ]
+    }
+  }
+}

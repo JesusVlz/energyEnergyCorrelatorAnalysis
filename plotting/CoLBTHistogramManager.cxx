@@ -5,6 +5,8 @@
 // Own includes
 #include "CoLBTHistogramManager.h"
 
+#include <TMath.h>
+
 /*
  * Default constructor
  */

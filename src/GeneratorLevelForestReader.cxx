@@ -1,5 +1,8 @@
 // Implementation for GeneratorLevelForestReader
 
+// ROOT includes
+#include <TMath.h>
+
 // Own includes
 #include "GeneratorLevelForestReader.h"
 

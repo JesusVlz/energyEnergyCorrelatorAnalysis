@@ -42,7 +42,7 @@ clean:
 cl:  clean $(PROGRAM)
 
 # Dictionary is needed for all classes inheriting TObject from root
-nanoDict.cc: $(HDRSDICT)
+nanoDict.cc: $(HDRSDICT) LinkDef.h
 		@echo "Generating dictionary ..."
 		@rm -f nanoDict.cc nanoDict.hh nanoDict.h
-		@rootcling nanoDict.cc -c -D$(version) $(HDRSDICT)
+		@rootcling -f nanoDict.cc -c -D$(version) $(HDRSDICT) LinkDef.h

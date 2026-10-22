@@ -5,6 +5,8 @@
 // Own includes
 #include "HybridModelHistogramManager.h"
 
+#include <TMath.h>
+
 /*
  * Default constructor
  */

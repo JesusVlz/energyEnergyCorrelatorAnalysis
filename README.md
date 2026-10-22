@@ -158,7 +158,7 @@ The current input lists are:
 | ppRef data | `ppData2024ForestFiles.txt` | 5 |
 | ppRef MC | `ppMC2024ForestFiles.txt` | 2 |
 
-For the first MC smoke test, use a dedicated card with `TriggerSelection 0`, `BackgroundMethods 0`, and `DisableTrackPairEfficiencyCorrection 1`. Restore the MC trigger only after its branches and acceptance have been checked.
+Use `TriggerSelection 0` for O–O and ppRef MC; no trigger selection is required. For the first MC smoke test, also use `BackgroundMethods 0` and `DisableTrackPairEfficiencyCorrection 1`.
 
 ### 4. Submit one pilot job
 
@@ -260,6 +260,69 @@ Repeat the same commands for ppRef. Do not use the default `-b 0` unless the fil
 
 Before calculating the O–O/ppRef ratio, verify that both files use the same jet radius, WTA axis, jet and track bins, energy-weight exponent, normalization interval, and processing level.
 
+## Run-3 response and unfolding pilot
+
+`UnfoldingForestReader` supports OO MC (`DataType 10`) and ppRef MC
+(`DataType 12`), including reconstructed/generated jet matching and the MiniAOD
+track vectors. Required trees, branch types, vector sizes, and event counts are
+checked. These paths pass synthetic ROOT regression and response-filling checks;
+a production MC forest still needs a one-file validation.
+
+For an initial response pilot, copy the corresponding MC card and set:
+
+```text
+McCorrelationType 3
+MatchJets 1
+TriggerSelection 0
+FilledHistograms 223
+BackgroundMethods 0
+JetUncertainty 0
+JetPtWeight 0
+SmearDeltaR 0
+SmearEnergyWeight 0
+DisableTrackPairEfficiencyCorrection 1
+```
+
+Mask `223` fills the regular histograms, jet closure, and unfolding response.
+Use `479` to include track–particle matching as well. Keep the nominal jet,
+track, and centrality bins consistent with the target data. The response uses
+generator particles inside reconstructed/generated jet cones regardless of the
+accompanying MC EEC correlation mode; it is a jet response for particle EECs,
+not a complete correction for single-track and track-pair detector effects.
+
+Run on one MC forest and project the response, for example:
+
+```bash
+./eecAnalysis /path/to/OO_MC.root cardOOResponse.input OO_response.root 1 true
+./projectHistogramsInSteps.sh OO_response.root OO_response_processed.root -c -r -a -w 1
+# Add -m when the pilot card includes track–particle matching.
+```
+
+OO/ppRef unfolding requires an explicit processed response file and a positive
+iteration count selected through independent closure studies. It cannot select
+the legacy pp2017 response automatically. In a ROOT session with RooUnfold
+available, the extended macro call is:
+
+```cpp
+.L plotting/unfoldEEChistograms.C
+unfoldEEChistograms("OO_data_processed.root", "OO_unfolded.root",
+                    0, 0, 0, 1, "OO_response_processed.root", chosenIterations);
+```
+
+The file and count are used explicitly for the requested split/systematic;
+the caller must supply the corresponding studied response. Compatibility checks
+cover collision system, MC metadata, energy exponent, jet type/axis/radius,
+binning, and response content. All OO centralities are retained. For Run-3, the
+macro selects complete native card bins inside its 120–200 GeV study window
+(120–160 and 160–200 GeV for the current cards).
+
+No dedicated Run-3 JER scale factors or EEC smearing files are installed.
+Nonzero Run-3 `JetUncertainty`, `JetPtWeight`, or smearing switches fail before
+initialization. Nominal pilot matrices contain the MC detector resolution;
+the additional data/MC resolution calibration, independent closure, iteration
+study, and a RooUnfold end-to-end check remain necessary. Existing processed
+OO/ppRef MC files in this workspace do not contain response/jet-closure outputs.
+
 ## Current progress
 
 | Component | Status |
@@ -268,14 +331,14 @@ Before calculating the O–O/ppRef ratio, verify that both files use the same je
 | AK4, \(R=0.4\), WTA cards | Configured for O–O and ppRef data/MC |
 | O–O and ppRef JEC | Selected in the analyzer; closure is still required |
 | O–O tracking correction | Implemented with the 2025 nominal table |
-| ppRef tracking correction | Code exists; the referenced correction file must be deployed reproducibly |
+| ppRef tracking correction | Nominal table included with checksum and loader checks |
 | RecoReco production and QA | Current baseline workflow |
 | RecoGen and GenGen | Routing added; branch-by-branch validation is still required |
 | Reflected and perpendicular cones | Available with `BackgroundMethods 3` |
 | Mixed events | O–O pilot only; not part of the nominal baseline |
 | Track-pair efficiency | Disabled/unity until a Run-3 correction is derived |
-| Run-3 JER | Not yet implemented and validated |
-| Response and unfolding | Not ready for Run-3 production |
+| Run-3 JER | Dedicated inputs outstanding; unsupported variations fail clearly |
+| Response and unfolding | Run-3 reader and explicit response configuration implemented; synthetic checks pass; production closure outstanding |
 | Final corrected O–O/ppRef ratio | Not yet final |
 
 ## Next validation steps
@@ -283,14 +346,14 @@ Before calculating the O–O/ppRef ratio, verify that both files use the same je
 Do these approximately in this order:
 
 1. Rebuild the CRAB tarball and run one-file RecoReco tests for all four samples.
-2. Install the ppRef tracking-efficiency file and validate detector-eta use in track corrections.
-3. Validate O–O and ppRef MC event weights one factor at a time.
+2. Validate tracking closure; OO keeps the common PbPb EEC coordinate convention.
+3. Validate the installed O–O/ppRef marginal event weights in an event-level rerun and establish generator normalization.
 4. Validate RecoGen and GenGen trees and branches.
 5. Perform jet matching, JEC closure, and Run-3 JER studies.
 6. Perform single-track efficiency and fake-rate closure.
 7. Derive and validate the residual track-pair efficiency.
 8. Validate reflected/perpendicular background subtraction and its normalization.
-9. Extend the response/unfolding reader to O–O and ppRef and perform closure tests.
+9. Produce dedicated O–O/ppRef response files, select iterations with independent closure, and validate RooUnfold end to end.
 10. Build the Run-3 systematic uncertainties and then produce the corrected O–O/ppRef ratio.
 
 ## Repository structure

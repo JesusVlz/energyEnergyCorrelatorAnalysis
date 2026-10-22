@@ -32,7 +32,10 @@ private:
 public:
   
   // Possible data types to be read with the reader class
-  enum enumDataTypes{kPp, kPbPb, kPpMC, kPbPbMC, knDataTypes};
+  // Keep the values synchronized with ForestReader. pPb is not supported here.
+  enum enumDataTypes{kPp = 0, kPbPb = 1, kPpMC = 2, kPbPbMC = 3,
+                     kOO = 9, kOOMC = 10, kPpRef5p36TeV = 11,
+                     kPpRef5p36TeVMC = 12, knDataTypes = 13};
   
   // Constructors and destructors
   UnfoldingForestReader();                                          // Default constructor
@@ -118,8 +121,10 @@ private:
   
   // Methods
   void Initialize();      // Connect the branches to the tree
+  Bool_t IsMC() const;
+  Bool_t IsRun3() const;
     
-  Int_t fDataType;        // Type of data read with the tree. 0 = pp, 1 = PbPb, 2 = ppMC, 3 = PbPbMC
+  Int_t fDataType;        // Same type identifiers as ForestReader (0-3 and 9-12)
   Int_t fJetType;         // Choose the type of jets usedfor analysis. 0 = Calo jets, 1 = PF jets
   Int_t fJetAxis;         // Jet axis used for the jets. 0 = Anti-kT, 1 = WTA
   Bool_t fIsMiniAOD;      // Flag for type of the forest True = MiniAOD forest, False = AOD forest

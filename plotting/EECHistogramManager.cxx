@@ -137,7 +137,7 @@ EECHistogramManager::EECHistogramManager() :
     
     // Multiplicity and particle density histograms within the jet cone
     for(int iJetPt = 0; iJetPt < kMaxJetPtBinsEEC; iJetPt++){
-      for(int iTrackPt = 0; iTrackPt < kMaxTrackPtBinsEEC; iTrackPt++){
+      for(int iTrackPt = 0; iTrackPt < kMaxTrackPtBins; iTrackPt++){
         for(int iMultiplicityType = 0; iMultiplicityType < knMultiplicityInJetConeTypes; iMultiplicityType++){
           for(int iSubeventType = 0; iSubeventType < EECHistograms::knSubeventTypes+1; iSubeventType++){
             fhMultiplicityInJetCone[iCentrality][iJetPt][iTrackPt][iMultiplicityType][iSubeventType] = NULL;
@@ -150,7 +150,7 @@ EECHistogramManager::EECHistogramManager() :
             } // Subevent loop
           } // Particle density type loop
         } // Jet cone type loop
-      } // Track pT bins for energy-energy correlators
+      } // Track pT bins for multiplicity and particle densities
     } // Jet pT bins for energy-energy correlators
     
     // Maximum particle pT within the jet cone
@@ -491,7 +491,7 @@ EECHistogramManager::EECHistogramManager(const EECHistogramManager& in) :
     
     // Multiplicity and particle density histograms within the jet cone
     for(int iJetPt = 0; iJetPt < kMaxJetPtBinsEEC; iJetPt++){
-      for(int iTrackPt = 0; iTrackPt < kMaxTrackPtBinsEEC; iTrackPt++){
+      for(int iTrackPt = 0; iTrackPt < kMaxTrackPtBins; iTrackPt++){
         for(int iMultiplicityType = 0; iMultiplicityType < knMultiplicityInJetConeTypes; iMultiplicityType++){
           for(int iSubeventType = 0; iSubeventType < EECHistograms::knSubeventTypes+1; iSubeventType++){
             fhMultiplicityInJetCone[iCentrality][iJetPt][iTrackPt][iMultiplicityType][iSubeventType] = in.fhMultiplicityInJetCone[iCentrality][iJetPt][iTrackPt][iMultiplicityType][iSubeventType];
@@ -504,7 +504,7 @@ EECHistogramManager::EECHistogramManager(const EECHistogramManager& in) :
             } // Subevent loop
           } // Particle density type loop
         } // Jet cone type loop
-      } // Track pT bins for energy-energy correlators
+      } // Track pT bins for multiplicity and particle densities
     } // Jet pT bins for energy-energy correlators
     
     // Maximum particle pT within the jet cone
@@ -5608,13 +5608,18 @@ TH1D* EECHistogramManager::GetHistogramEnergyEnergyCorrelator(const int iEnergyE
 // Getter for energy-energy correlator histograms using bin boundaries instead of indices
 TH1D* EECHistogramManager::GetHistogramEnergyEnergyCorrelator(const int iEnergyEnergyCorrelatorType, const std::pair<int,int> centralityBin, const std::pair<int,int> jetPtBin, const double trackPtCut, const int iPairingType, const int iSubevent){
 
-  // There is no centrality selection for pp or pPb, only read the centrality bin for PbPb data/MC
+  // PbPb and OO data/MC have centrality selections. pp and pPb use bin zero.
   int iCentrality = 0;
-  if(fCard->GetDataType().Contains("PbPb")) iCentrality = fCard->FindBinIndexCentrality(centralityBin);
+  const TString collisionSystem = fCard->GetDataType();
+  if(collisionSystem.Contains("PbPb") || collisionSystem.Contains("OO")){
+    iCentrality = fCard->FindBinIndexCentrality(centralityBin);
+    if(iCentrality < 0) return nullptr;
+  }
 
   // Always find the correct jet and track pT bins
   int iJetPt = fCard->FindBinIndexJetPtEEC(jetPtBin);
   int iTrackPt = fCard->GetBinIndexTrackPtEEC(trackPtCut);
+  if(iJetPt < 0 || iTrackPt < 0) return nullptr;
 
   return GetHistogramEnergyEnergyCorrelator(iEnergyEnergyCorrelatorType, iCentrality, iJetPt, iTrackPt, iPairingType, iSubevent);
 
