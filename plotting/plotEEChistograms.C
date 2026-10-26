@@ -25,9 +25,9 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   // Choose which figure sets to draw
   bool drawEventInformation = false;
   bool drawJets = false;
-  bool drawTracks = true;
+  bool drawTracks = false;
   bool drawUncorrectedTracks = false;
-  bool drawEnergyEnergyCorrelators = false;
+  bool drawEnergyEnergyCorrelators = true;
   bool drawEnergyEnergyCorrelatorsEfficiencyVariationPlus = false;
   bool drawEnergyEnergyCorrelatorsEfficiencyVariationMinus = false;
   bool drawEnergyEnergyCorrelatorsPairEfficiencyVariationPlus = false;
@@ -78,11 +78,11 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   int firstDrawnTrackPtBin = 3;
   int lastDrawnTrackPtBin = 3;
   
-  int firstDrawnJetPtBinEEC = 3;
-  int lastDrawnJetPtBinEEC = 3; // Note: Jets integrated over all pT ranges are in nJetPtBinsEEC bin
+  int firstDrawnJetPtBinEEC = 0;
+  int lastDrawnJetPtBinEEC = 0; // Note: Jets integrated over all pT ranges are in nJetPtBinsEEC bin
   
-  int firstDrawnTrackPtBinEEC =3;
-  int lastDrawnTrackPtBinEEC = 5;
+  int firstDrawnTrackPtBinEEC = 3;
+  int lastDrawnTrackPtBinEEC = 3; // Note: Tracks integrated over all pT ranges are in nTrackPtBinsEEC bin
   
   // Remove centrality selection from pp data
   if(collisionSystem.Contains("pp")){
@@ -108,7 +108,7 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   // Figure saving
   const bool saveFigures = true;  // Save figures to file
   const char* figureFormat = "pdf";
-  TString figureNameSuffix = "";
+  TString figureNameSuffix = "_OO_C0-30_GenGen"; // Suffix for figure names
 
   // Comment that can be added to figure legends
   TString legendComment = "";
@@ -129,9 +129,9 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   
   // Select the style of histograms drawn for energy-energy correlators
   const bool drawIndividualEnergyEnergyCorrelators = false;
-  const bool drawEnergyEnergyCorrelatorsForConstantJetPt = true;
+  const bool drawEnergyEnergyCorrelatorsForConstantJetPt = false;
   const bool drawEnergyEnergyCorrelatorsForConstantTrackPt = false;
-  bool drawEnergyEnergyCorrelatorsSubevent = false; // Draw energy-energy correlators with subevent decomposition (only for PbPb and pPb MC)
+  bool drawEnergyEnergyCorrelatorsSubevent = true; // Draw subevent decomposition for PbPb, pPb, and OO MC
   
   // Select which subevents to draw
   bool drawAllSubevents = true;   // Draw histograms without subevent selection
@@ -143,8 +143,8 @@ void plotEEChistograms(TString inputFileName = "veryCoolData_processed.root"){
   bool drawSignalFake = false;        // Draw Pythia+Hydjet correlations from MC
   bool drawFakeFake = false;          // Draw Hydjet+Hydjet correlations from MC
   
-  // If the collision system in not PbPb or pPb MC, we cannot draw subevent decomposition
-  if(!collisionSystem.Contains("Pb MC")){
+  // Subevent decomposition is available for PbPb, pPb, and OO MC.
+  if(!(collisionSystem.Contains("Pb MC") || collisionSystem.Contains("OO MC"))){
     drawEnergyEnergyCorrelatorsSubevent = false;
     
     drawPythiaOnly = false;

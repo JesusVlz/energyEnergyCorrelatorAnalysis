@@ -49,6 +49,10 @@ ConfigurationCard::~ConfigurationCard(){
 }
 
 
+bool ConfigurationCard::HasKey(TString keyword) const{
+  return fKeyTable.FindObject(keyword.Data()) != nullptr;
+}
+
 unsigned int ConfigurationCard::GetTVectorIndex(TString keyword, int tol) const{
   
   // Returns fIndex of a TVector according to its position in std::hash_map

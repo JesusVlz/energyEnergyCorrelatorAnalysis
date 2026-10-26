@@ -281,6 +281,7 @@ void EECHistograms::SetCard(ConfigurationCard* newCard){
  * Create the necessary histograms
  */
 void EECHistograms::CreateHistograms(){
+  const bool matchEECBinning = fCard->HasKey("MatchEECBinning") && fCard->Get("MatchEECBinning") == 1;
   
   // ======== Common binning information for histograms =========
   
@@ -689,9 +690,9 @@ void EECHistograms::CreateHistograms(){
   // ======== THnSparse for all jets ========
   
   // Axis 0 for the inclusive jet histogram: jet pT
-  nBinsJet[0] = nPtBinsJet;         // nBins for inclusive jet pT
-  lowBinBorderJet[0] = minPtJet;    // low bin border for inclusive jet pT
-  highBinBorderJet[0] = maxPtJet;   // high bin border for inclusive jet pT
+  nBinsJet[0] = matchEECBinning ? nJetPtBinsEEC : nPtBinsJet;         // nBins for inclusive jet pT
+  lowBinBorderJet[0] = matchEECBinning ? minJetPtEEC : minPtJet;    // low bin border for inclusive jet pT
+  highBinBorderJet[0] = matchEECBinning ? maxJetPtEEC : maxPtJet;   // high bin border for inclusive jet pT
   
   // Axis 1 for the inclusive jet histogram: jet phi
   nBinsJet[1] = nPhiBins;        // nBins for inclusive jet phi
@@ -722,14 +723,15 @@ void EECHistograms::CreateHistograms(){
   fhInclusiveJet = new THnSparseF("inclusiveJet","inclusiveJet",nAxesJet,nBinsJet,lowBinBorderJet,highBinBorderJet); fhInclusiveJet->Sumw2();
 
   // Set custom centrality bins for histograms
+  if(matchEECBinning) fhInclusiveJet->SetBinEdges(0,jetPtBinsEEC);
   fhInclusiveJet->SetBinEdges(4,wideCentralityBins);
   
   // ======== THnSparses for tracks and uncorrected tracks ========
   
   // Axis 0 for the track histogram: track pT
-  nBinsTrack[0] = nPtBinsTrack;         // nBins for track pT
-  lowBinBorderTrack[0] = minPtTrack;    // low bin border for track pT
-  highBinBorderTrack[0] = maxPtTrack;   // high bin border for track pT
+  nBinsTrack[0] = matchEECBinning ? nTrackPtBinsEEC : nPtBinsTrack;         // nBins for track pT
+  lowBinBorderTrack[0] = matchEECBinning ? minTrackPtEEC : minPtTrack;    // low bin border for track pT
+  highBinBorderTrack[0] = matchEECBinning ? maxTrackPtEEC : maxPtTrack;   // high bin border for track pT
   
   // Axis 1 for the track histogram: track phi
   nBinsTrack[1] = nPhiBins;         // nBins for track phi
@@ -751,6 +753,10 @@ void EECHistograms::CreateHistograms(){
   fhTrackUncorrected = new THnSparseF("trackUncorrected","trackUncorrected",nAxesTrack,nBinsTrack,lowBinBorderTrack,highBinBorderTrack); fhTrackUncorrected->Sumw2();
 
   // Set custom centrality bins for histograms
+  if(matchEECBinning){
+    fhTrack->SetBinEdges(0,trackPtBinsEEC);
+    fhTrackUncorrected->SetBinEdges(0,trackPtBinsEEC);
+  }
   fhTrack->SetBinEdges(3,wideCentralityBins);
   fhTrackUncorrected->SetBinEdges(3,wideCentralityBins);
   
@@ -780,6 +786,7 @@ void EECHistograms::CreateHistograms(){
   fhMaxPtParticleInJet = new THnSparseF("maxParticlePtInJet", "maxParticlePtInJet", nAxesMaxParticlePtInJet, nBinsMaxParticlePtInJet, lowBinBorderMaxParticlePtInJet, highBinBorderMaxParticlePtInJet); fhMaxPtParticleInJet->Sumw2();
   
   // Set custom bin borders for histograms
+  // Keep the fine particle pT axes needed by the fixed max-particle pT cuts.
   fhMaxPtParticleInJet->SetBinEdges(0,jetPtBinsEEC);              // Jet pT bins
   fhMaxPtParticleInJet->SetBinEdges(3,wideCentralityBins);        // Centrality bins
   
@@ -941,6 +948,7 @@ void EECHistograms::CreateHistograms(){
   fhJetPtClosure = new THnSparseF("jetPtClosure", "jetPtClosure", nAxesJetClosure, nBinsJetClosure, lowBinBorderJetClosure, highBinBorderJetClosure); fhJetPtClosure->Sumw2();
   
   // Set custom centrality bins for histograms
+  // Closure projections use fixed 10 GeV pT bins, independently of EEC binning.
   fhJetPtClosure->SetBinEdges(3,wideCentralityBins);
   
   // ======== RooUnfold compatible energy-energy correlator distributions. Assume only jet pT is unfolded ========
@@ -1213,9 +1221,9 @@ void EECHistograms::CreateHistograms(){
   fhJetNumberInReflectedCone->SetBinEdges(1,wideCentralityBins);  // Centrality bins 
 
   // Axis 0 for the jet pT in reflected cone histograms: jet pT
-  nBinsReflectedConeQA[0] = nJetPtInReflectedConeBins;       // nBins for jet pT within the reflected cone
-  lowBinBorderReflectedConeQA[0] = minJetPtReflectedCone;    // low bin border for jet pT within the reflected cone
-  highBinBorderReflectedConeQA[0] = maxJetPtReflectedCone;   // high bin border for jet pT within the reflected cone
+  nBinsReflectedConeQA[0] = matchEECBinning ? nJetPtBinsEEC : nJetPtInReflectedConeBins;       // nBins for jet pT within the reflected cone
+  lowBinBorderReflectedConeQA[0] = matchEECBinning ? minJetPtEEC : minJetPtReflectedCone;    // low bin border for jet pT within the reflected cone
+  highBinBorderReflectedConeQA[0] = matchEECBinning ? maxJetPtEEC : maxJetPtReflectedCone;   // high bin border for jet pT within the reflected cone
 
   // Axis 1 for the number of jets in reflected cone histograms: centrality
   nBinsReflectedConeQA[1] = nWideCentralityBins;     // nBins for centrality
@@ -1226,7 +1234,7 @@ void EECHistograms::CreateHistograms(){
   fhJetPtInReflectedCone = new THnSparseF("jetPtInReflectedCone", "jetPtInReflectedCone", nAxesReflectedConeQA, nBinsReflectedConeQA, lowBinBorderReflectedConeQA, highBinBorderReflectedConeQA); fhJetPtInReflectedCone->Sumw2();
 
   // Set custom bin axes for the histograms
-  fhJetPtInReflectedCone->SetBinEdges(0,jetPtReflectedConeBins);  // Jet pT bins 
+  fhJetPtInReflectedCone->SetBinEdges(0,matchEECBinning ? jetPtBinsEEC : jetPtReflectedConeBins);  // Jet pT bins
   fhJetPtInReflectedCone->SetBinEdges(1,wideCentralityBins);      // Centrality bins 
 
   // Release memory allocated to new arrays

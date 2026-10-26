@@ -101,6 +101,23 @@ The current baseline uses AK4 jets, \(R=0.4\), the winner-take-all axis, \(|\eta
 
 The root-level data cards use `BackgroundMethods 0` for simple local tests. The CRAB data cards use `BackgroundMethods 3` to fill reflected and perpendicular cones. MC baseline cards use `BackgroundMethods 0`.
 
+### Optional QA histogram binning
+
+Add the following setting to an analysis card when the inclusive QA spectra
+should use the same pT boundaries as the EEC selections:
+
+```text
+MatchEECBinning 1
+```
+
+This uses `JetPtBinEdgesEEC` for inclusive-jet pT and reflected-cone jet pT,
+and `TrackPtBinEdgesEEC` for corrected and uncorrected track pT. It makes
+comparisons with the selected EEC bins direct. Omitting the setting, or setting
+it to `0`, keeps the established QA binning; `ConfigurationCard::HasKey` allows
+older cards to omit this optional key. The maximum-particle-pT and jet-closure
+axes retain their existing binning because their consumers apply separate
+particle thresholds and jet-pT selections that require those axes.
+
 ## Running with CRAB
 
 ### 1. Set up CRAB on lxplus
@@ -259,6 +276,135 @@ For files filled with `BackgroundMethods 3`, create explicit background-processi
 Repeat the same commands for ppRef. Do not use the default `-b 0` unless the file contains a validated mixed-cone background.
 
 Before calculating the O–O/ppRef ratio, verify that both files use the same jet radius, WTA axis, jet and track bins, energy-weight exponent, normalization interval, and processing level.
+
+## Plotting and OO diagnostics
+
+Build `plotting/DrawingClasses.so` with `make -C plotting`, then run the macros
+from the repository root in a ROOT environment. Pass the input paths explicitly;
+the filenames in the examples below are placeholders for your projected or raw
+files. Outputs normally go to `figures/`.
+
+The general `plotEEChistograms.C` configuration now selects raw same-jet EECs
+instead of track QA, with centrality bin `0`, jet bin `0`, track threshold bin
+`3`, and the subevent drawing style enabled for OO MC. In the current OO cards,
+these indices mean 0–30%, 40–80 GeV jets, and track pT above 2 GeV. Its default
+figure suffix is `_OO_C0-30_GenGen`; edit the selection switches and suffix when
+using another sample. OO MC legends identify Pythia+Hijing at 5.36 TeV and use
+Hijing labels for the background subevents. Subevent figures use one legend and
+choose their vertical range from all displayed curves and statistical errors,
+so small components are visible without a fixed legacy y-axis range. OO
+filenames include centrality to distinguish plots from different selections.
+
+| Macro/function | Input and purpose | Configurable arguments after the input |
+|---|---|---|
+| `plotEEChistogramsJetPtComparison` | Projected OO MC; compare the first four jet bins at one track threshold using the general drawer. Current cards give 40–80, 80–120, 120–160, and 160–200 GeV. | Track threshold, output directory, centrality minimum/maximum. |
+| `plotEEChistogramsTrackPtComparison` | Projected OO MC; compare the first four track thresholds in the first jet bin. Current cards give 0.5, 1, 1.5, and 2 GeV in 40–80 GeV jets. | Centrality minimum/maximum; output goes to `figures/`. |
+| `plotOOMCJetPtComparison` | Wrapper for `plotEEChistogramsJetPtComparison` with the same drawing style. | Output directory, track threshold, centrality minimum/maximum. |
+| `compareOOMCPerpendicularBackground` | Projected OO MC with subevents and perpendicular-cone pairings; compare the estimated background with the same-jet mixed plus background-background components at 40–80 GeV and track pT above 2 GeV. | Centrality minimum/maximum; output goes to `figures/`. |
+| `compareOOMCPerpendicularSignal` | Projected OO MC with subevents and perpendicular-cone pairings; compare total and background-subtracted EECs with the same-jet Pythia-Pythia component at track pT above 2 GeV. | Jet pT minimum/maximum, centrality minimum/maximum; output goes to `figures/`. |
+| `compareFourOOMCModes` | Directory of projected RecoReco, RecoGen, GenReco, and GenGen files; compare total EEC shapes for track thresholds 0.5, 1, 2, and 3 GeV at 0–30% and 40–80 GeV. | Output directory. |
+| `plotOOMCGenRecoTrackSelections` | Projected GenReco OO MC; draw the total EEC for the same four track thresholds at 0–30% and 40–80 GeV, without assuming reconstructed tracks have truth-origin labels. | Output directory. |
+| `plotOOMCSubeventDecomposition` | Raw seven-dimensional RecoGen/GenGen OO MC EEC sparse histogram; project exponent 1 and plot Pythia-Pythia, Pythia-Hijing, and Hijing-Hijing components at 0–30% and 40–80 GeV. | Output directory, whether to use the verified stored generator range instead of resolving the four low-pT thresholds. |
+| `plotRawOODataComparisons` | Projected OO data; compare four jet bins and four track thresholds for every stored centrality. | Output directory. |
+
+Example calls for all nine macros are:
+
+```bash
+mkdir -p figures
+root -l -b -q 'plotting/plotEEChistogramsJetPtComparison.C("projected/OO_MC_processed.root",2.,"figures",0.,30.)'
+root -l -b -q 'plotting/plotEEChistogramsTrackPtComparison.C("projected/OO_MC_processed.root",0.,30.)'
+root -l -b -q 'plotting/plotOOMCJetPtComparison.C("projected/OO_MC_processed.root","figures",2.,0.,30.)'
+root -l -b -q 'plotting/compareOOMCPerpendicularBackground.C("projected/OO_MC_processed.root",0.,30.)'
+root -l -b -q 'plotting/compareOOMCPerpendicularSignal.C("projected/OO_MC_processed.root",40.,80.,0.,30.)'
+root -l -b -q 'plotting/compareFourOOMCModes.C("projected/fourModes","figures")'
+root -l -b -q 'plotting/plotOOMCGenRecoTrackSelections.C("projected/OO_GenReco_processed.root","figures")'
+root -l -b -q 'plotting/plotOOMCSubeventDecomposition.C("OO_RecoGen_raw.root","figures",false)'
+root -l -b -q 'plotting/plotRawOODataComparisons.C("projected/OO_data_processed.root","figures")'
+```
+
+`compareFourOOMCModes` expects
+`merged_OOMC_<mode>_20261022_processed.root` in its input directory, where
+`<mode>` is `RecoReco`, `RecoGen`, `GenReco`, or `GenGen`. Its labels describe
+the current generator-particle samples, which retain particles only from
+5 GeV upwards; thresholds below that floor select the same stored population.
+Use inputs matching that assumption. The raw subevent macro rejects inputs
+that cannot resolve its requested low-pT cuts. For the existing generator skim,
+pass `true` as its third argument to request a single diagnostic explicitly
+labeled with the verified 5 GeV input floor:
+
+```bash
+root -l -b -q 'plotting/plotOOMCSubeventDecomposition.C("OO_RecoGen_raw.root","figures",true)'
+```
+
+The shape comparisons normalize each total EEC to unit area using the full
+regular-bin width integral. Subevent components share the total normalization,
+so their sum remains the total; the raw subevent macro checks both content and
+variance closure before drawing. Projected mixed-subevent histograms already
+combine both orderings, so use that component once. The perpendicular
+background and signal comparisons instead retain the common raw EEC scale:
+their estimate is the average of jet–perpendicular-cone pairs, minus pairs
+between the two cones, plus the average of pairs within either cone. They do
+not fit or independently renormalize the truth and estimate.
+
+These plots diagnose shapes, available subevents, and background estimates.
+They do not establish detector corrections or independent physics validation.
+Reco-jet and gen-jet selections also contain different jet populations. Missing
+truth-origin labels or particles below an input skim threshold cannot be
+recovered by plotting or by changing the nominal track threshold.
+
+### Framework support and compatibility
+
+OO MC subevents are loaded from raw histograms, written during projection,
+and available when reading projected files, for both individual jet bins and
+the integrated jet selection. The drawer skips track processing when no track
+plots are requested, allowing EEC-only inputs that do not contain the event
+counter used by track QA. Track QA preserves variable EEC pT boundaries;
+when grouping uniform pT bins it rescales the merged density so the width
+integral remains unchanged. The drawer also initializes its maximum-particle
+selection flags using their own array bound.
+
+Shared sparse-projection helpers and track/particle matching readers use
+`THnBase` so both float and double sparse inputs can be projected without
+assuming `THnSparseD` storage. Matching projections also reserve space for the
+optional energy-weight-axis restriction and apply it only when the histogram
+contains that axis. The matching-closure getter keeps an already projected
+histogram and reads from the file only when the cache is empty; this prevents
+a valid raw projection being replaced by a missing processed-file object.
+Multiplicity and particle-density arrays, initialization, and copying all use
+the EEC track-bin capacity, preventing out-of-bounds access when an EEC card
+has more thresholds than the ordinary track QA bins. Boundary-based EEC
+lookups retain OO centrality selections and reject unavailable bin boundaries.
+
+This plotting update preserves the explicit Run-3 response configuration,
+native jet-bin selection, and collision-system/centrality compatibility checks
+described below. Removing them would select legacy pp response files for OO
+or ppRef, request jet-bin boundaries absent from the current cards, and drop
+OO centrality selections. The plotting build retains `LinkDef.h` for the ROOT
+dictionary and direct `TMath.h` includes in the model histogram managers so a
+clean build has the required declarations. The existing
+`plotting/validateOOMonteCarloWeights.py` and
+`plotting/validatePpMonteCarloWeights.py` scripts remain available for marginal
+weight checks; their same-sample one-dimensional comparisons do not establish
+event-level closure.
+
+### Validation of this plotting update
+
+The reviewed commit was checked in an isolated source copy with ROOT 6.40.04:
+
+- The analysis executable and a full rebuild of `DrawingClasses.so` compiled.
+- ROOT loaded all nine new macros and the updated `plotEEChistograms.C`.
+- `validation/checkOOCentralityLookup.cxx` passed, including invalid-boundary
+  rejection and legacy/current histogram naming.
+- `validation/run3Unfolding/testUnfoldConfiguration.cxx` passed, preserving
+  explicit OO/ppRef response selection and legacy defaults.
+- Synthetic QA checks passed with `MatchEECBinning` absent, disabled, and
+  enabled, including axis edges, overflow storage, and preserved closure cuts.
+- A synthetic projection/write/reload check passed 420,864 numerical content
+  and error comparisons across float/double sparse storage, exponents 1/2,
+  OO centralities, subevent sums, matching responses, and matching closure.
+
+These checks verify software behavior; detector-response and production-MC
+closure studies remain part of the validation work described below.
 
 ## Run-3 response and unfolding pilot
 

@@ -40,10 +40,15 @@ EECDrawer::EECDrawer(EECHistogramManager *inputHistograms) :
   
   // Make a string for collision system based on information on the card
   TString collisionEnergy = "5.02 TeV";
-  if(collisionSystem.Contains("OO")) collisionEnergy = "5.36 TeV";
+  if(collisionSystem.Contains("OO") || collisionSystem.Contains("ppRef")) collisionEnergy = "5.36 TeV";
   fSystemAndEnergy = Form("%s %s", collisionSystem.Data(), collisionEnergy.Data());  fCompactSystemAndEnergy = fSystemAndEnergy;
   fCompactSystemAndEnergy.ReplaceAll(" ","");
   fCompactSystemAndEnergy.ReplaceAll(".","v");
+
+  // Keep the established filenames while labeling OO simulation explicitly.
+  if(fHistograms->GetCard()->GetDataType().Contains("OO MC")){
+    fSystemAndEnergy = "Pythia+Hijing 5.36 TeV";
+  }
   
   // Create a new drawer
   fDrawer = new JDrawer();
@@ -58,7 +63,7 @@ EECDrawer::EECDrawer(EECHistogramManager *inputHistograms) :
   for(int iParticleDensityType = 0; iParticleDensityType < EECHistogramManager::knParticleDensityAroundJetAxisTypes; iParticleDensityType++){
     fDrawParticleDensityAroundJets[iParticleDensityType] = false;
   }
-  for(int iMaxParticlePtWithinJetCone = 0; iMaxParticlePtWithinJetCone < EECHistogramManager::knParticleDensityAroundJetAxisTypes; iMaxParticlePtWithinJetCone++){
+  for(int iMaxParticlePtWithinJetCone = 0; iMaxParticlePtWithinJetCone < EECHistogramManager::knMaxParticlePtWithinJetConeTypes; iMaxParticlePtWithinJetCone++){
     fDrawMaxParticlePtWithinJetCone[iMaxParticlePtWithinJetCone] = false;
   }
   for(int iEnergyEnergyCorrelator = 0; iEnergyEnergyCorrelator < EECHistogramManager::knEnergyEnergyCorrelatorTypes; iEnergyEnergyCorrelator++){
@@ -282,6 +287,13 @@ void EECDrawer::DrawJetHistograms(){
  * Draw the track histograms
  */
 void EECDrawer::DrawTrackHistograms(){
+
+  // EEC-only input files need not contain the event counter used by track plots.
+  bool drawAnyTracks = false;
+  for(int iTrackType = 0; iTrackType < EECHistogramManager::knTrackCategories; iTrackType++){
+    if(fDrawTracks[iTrackType]) drawAnyTracks = true;
+  }
+  if(!drawAnyTracks) return;
   
   // Helper variables for histogram drawing
   TH1D* drawnHistogram;
@@ -318,7 +330,11 @@ void EECDrawer::DrawTrackHistograms(){
       
       // === Track pT ===
       drawnHistogram = fHistograms->GetHistogramTrackPt(iTrackType,iCentrality);
-      drawnHistogram->Rebin(2);                   // 500 bins over 0-50 GeV -> 100 bins of 500 MeV
+      // Preserve density normalization and the variable EEC bin boundaries.
+      if(drawnHistogram->GetXaxis()->GetXbins()->GetSize() == 0){
+        drawnHistogram->Rebin(2);
+        drawnHistogram->Scale(0.5);
+      }
       drawnHistogram->Scale(1.0/numberOfEvents);  // Normalize with the number of events
       namerX = Form("%s p_{T}  (GeV)",fHistograms->GetTrackAxisName(iTrackType));
       fDrawer->DrawHistogram(drawnHistogram,namerX.Data(),"#frac{1}{N_{event}} #frac{dN}{dp_{T}}  (1/GeV)"," ");
@@ -772,7 +788,6 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
   TString compactSubeventString;
   TString namerY;
 
-  double legendY1;
   
   int colorAdder = 1;
   
@@ -1025,23 +1040,29 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
                 compactJetPtString = Form("_J=%.0f-%.0f",fHistograms->GetJetPtBinBorderEEC(iJetPt), fHistograms->GetJetPtBinBorderEEC(iJetPt+1));
               }
               
-              // Only one legend for the plot
-              legendY1 = (fLegendComment != "") ? 0.5 : 0.55;
-              legend = new TLegend(0.22,legendY1,0.42,0.8);
-              legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
-              TString sysLabel = fHistograms->GetCard()->GetAlternativeDataType(false);
-              TString eLabel   = sysLabel.Contains("OO") ? "5.36 TeV" : "5.02 TeV";
-              legend->AddEntry((TObject*) 0, Form("%s %s", sysLabel.Data(), eLabel.Data()), "");
-              if(fLegendComment != "") legend->AddEntry((TObject*) 0, fLegendComment.Data(), "");
-              legend->AddEntry((TObject*) 0, centralityString.Data(),"");
-              //legend->AddEntry((TObject*) 0, "Cent: 0-10%","");
-              legend->AddEntry((TObject*) 0, jetPtString.Data(),"");
-              legend->AddEntry((TObject*) 0, trackPtString.Data(),"");
-              
+              // Keep metadata and subevent components in one legend.
+              const bool isOOMC =
+                fHistograms->GetCard()->GetDataType().Contains("OO MC");
+              TString systemLabel =
+                fHistograms->GetCard()->GetAlternativeDataType(false);
+              if(isOOMC) systemLabel = "Pythia+Hijing";
 
-              anotherLegend = new TLegend(0.62,0.2,0.82,0.45);
-              anotherLegend->SetFillStyle(0);anotherLegend->SetBorderSize(0);anotherLegend->SetTextSize(0.05);anotherLegend->SetTextFont(62);
-              
+              // Keep the combined legend inside the plotting frame.
+              legend = new TLegend(0.20,0.14,0.65,0.79);
+              legend->SetFillStyle(0);
+              legend->SetBorderSize(0);
+              legend->SetTextFont(62);
+              legend->SetTextSize(0.043);
+              legend->AddEntry((TObject*) 0,
+                Form("%s %s",systemLabel.Data(),
+                  (systemLabel.Contains("OO") || systemLabel.Contains("ppRef") || isOOMC) ? "5.36 TeV" : "5.02 TeV"),"");
+              if(fLegendComment != "") legend->AddEntry((TObject*) 0,fLegendComment.Data(),"");
+              legend->AddEntry((TObject*) 0,
+                Form("%s%s",isOOMC ? "OO, " : "",centralityString.Data()),"");
+              legend->AddEntry((TObject*) 0,trackPtString.Data(),"");
+              legend->AddEntry((TObject*) 0,jetPtString.Data(),"");
+              anotherLegend = legend;
+
               // First, draw the total distribution to the canvas
               drawnHistogram = fHistograms->GetHistogramEnergyEnergyCorrelator(iEnergyEnergyCorrelator, iCentrality, iJetPt, iTrackPt, iPairingType);
               normalizationFactor = 1.0/drawnHistogram->Integral("width");
@@ -1051,12 +1072,7 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
               drawnHistogram->SetMarkerStyle(style[0]);
               anotherLegend->AddEntry(drawnHistogram, "All combinations", "p");
               
-              // For logarithmic x-axis, cannot go all the way to zero. Drawing range based on weight exponent.
-              if(fHistograms->GetCard()->GetWeightExponent() == 1){
-                drawnHistogram->GetYaxis()->SetRangeUser(0.001, 10);
-              } else {
-                drawnHistogram->GetYaxis()->SetRangeUser(0.00005, 60);
-              }
+              // For logarithmic x-axis, cannot go all the way to zero.
               if(fLogDeltaR){
                 double jetR = fHistograms->GetCard()->GetJetRadius();
                 if(jetR > 0.6){                                              // R = 0.8
@@ -1067,7 +1083,24 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
               }
               //namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetPairingTypeSaveName(iPairingType));
               namerY = "EEC";
-              fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ");
+              // Determine the Y range from every displayed curve and its errors.
+              TH1D* totalHistogram = drawnHistogram;
+              double minimumPositive = 0;
+              double maximumWithError = 0;
+              auto includeInYRange = [&](TH1D* histogram){
+                for(int iBin = totalHistogram->GetXaxis()->GetFirst(); iBin <= totalHistogram->GetXaxis()->GetLast(); iBin++){
+                  const double value = histogram->GetBinContent(iBin);
+                  if(value <= 0) continue;
+                  const double error = histogram->GetBinError(iBin);
+                  double lower = value - error;
+                  // Errors reaching zero have no finite lower endpoint on a log axis.
+                  if(lower <= value*1e-6) lower = value*0.1;
+                  if(minimumPositive == 0 || lower < minimumPositive) minimumPositive = lower;
+                  if(value + error > maximumWithError) maximumWithError = value + error;
+                }
+              };
+              includeInYRange(totalHistogram);
+              fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ","E1");
               
               // Draw the different subevent contributions to the same canvas
               colorAdder = 1;
@@ -1081,14 +1114,22 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
                 drawnHistogram->SetLineColor(color[iSubevent+colorAdder]);
                 drawnHistogram->SetMarkerColor(color[iSubevent+colorAdder]);
                 drawnHistogram->SetMarkerStyle(style[iSubevent+colorAdder]);
-                drawnHistogram->Draw("same");
+                drawnHistogram->Draw("E1 SAME");
+                includeInYRange(drawnHistogram);
                 
-                anotherLegend->AddEntry(drawnHistogram, fHistograms->GetSubeventCombination(iSubevent), "p");
+                TString subeventLabel = fHistograms->GetSubeventCombination(iSubevent);
+                if(isOOMC) subeventLabel.ReplaceAll("Hydjet","Hijing");
+                anotherLegend->AddEntry(drawnHistogram,subeventLabel.Data(),"p");
               } // Subevent type loop
+
+              if(maximumWithError > 0){
+                totalHistogram->GetYaxis()->SetRangeUser(fLogEEC ? minimumPositive*0.5 : 0, maximumWithError*1.5);
+              }
+              gPad->Modified();
+              gPad->Update();
               
               // Draw the legend
               legend->Draw();
-              anotherLegend->Draw();
               
               // Save the figure to a file
               namerY = Form("%s%sSubeventDecomposition",fHistograms->GetEnergyEnergyCorrelatorHistogramName(iEnergyEnergyCorrelator), fHistograms->GetPairingTypeSaveName(iPairingType));
@@ -1397,7 +1438,7 @@ void EECDrawer::DrawCovarianceMatrices(){
 void EECDrawer::SetupLegend(TLegend *legend, TString centralityString, TString jetString, TString trackString, TString extraString, TString anotherString){
   legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62); // Size: 0.05
   legend->AddEntry((TObject*) 0, fSystemAndEnergy.Data(), "");
-  if(fSystemAndEnergy.Contains("PbPb") || fSystemAndEnergy.Contains("Hydjet") || fSystemAndEnergy.Contains("OO")) legend->AddEntry((TObject*) 0,centralityString.Data(),""); 
+  if(fSystemAndEnergy.Contains("PbPb") || fSystemAndEnergy.Contains("Hydjet") || fSystemAndEnergy.Contains("Hijing") || fSystemAndEnergy.Contains("OO")) legend->AddEntry((TObject*) 0,centralityString.Data(),"");
   if(jetString != "") legend->AddEntry((TObject*) 0,jetString.Data(),"");
   if(trackString != "") legend->AddEntry((TObject*) 0,trackString.Data(),"");
   if(extraString != "") legend->AddEntry((TObject*) 0,extraString.Data(),"");
@@ -1420,7 +1461,8 @@ void EECDrawer::SaveFigure(TString figureName, TString centralityString, TString
   
   // Write the figure to a file
   TString figName = Form("figures/%s_%s",figureName.Data(),fCompactSystemAndEnergy.Data());
-  if(fCompactSystemAndEnergy.Contains("PbPb") || fCompactSystemAndEnergy.Contains("Hydjet")) figName.Append(centralityString);
+  if(fCompactSystemAndEnergy.Contains("PbPb") || fCompactSystemAndEnergy.Contains("Hydjet") ||
+     fCompactSystemAndEnergy.Contains("OO")) figName.Append(centralityString);
   figName.Append(trackPtString);
   figName.Append(correlationTypeString);
   figName.Append(deltaPhiString);

@@ -39,6 +39,7 @@ public:
 
   void AddToKeyTable( TString key, int index );
 
+  bool HasKey(TString keyword) const; // Check optional settings without requiring a value
   float  Get(TString keyword, int VectorComponent=0) const; //get TVector component
   TString  GetStr(TString keyword ) const; //get TVector component
   TVector* GetVector( TString keyword ) ;
