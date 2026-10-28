@@ -1,3 +1,4 @@
+#include <TAxis.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <THnBase.h>
@@ -62,6 +63,64 @@ void OOMCCheckSparse(TFile& file, const char* name, bool requireEntries, int& fa
   if (requireEntries) OOMCCheck(entries > 0, std::string(name) + " has no entries", failures);
   std::cout << "OOMC histogram " << name << " entries=" << entries
             << " bins=" << histogram->GetNbins() << std::endl;
+}
+
+void OOMCCheckAxis(TFile& file, const char* name, int dimension, const char* key, int& failures) {
+  auto* histogram = dynamic_cast<THnBase*>(file.Get(name));
+  auto* edges = dynamic_cast<TVectorT<float>*>(file.Get((std::string("JCard/") + key).c_str()));
+  const std::string label = std::string(name) + " axis " + std::to_string(dimension);
+  OOMCCheck(histogram && dimension < histogram->GetNdimensions() && edges && edges->GetNrows() >= 2,
+            label + " or its card bin edges are missing", failures);
+  if (!histogram || dimension >= histogram->GetNdimensions() || !edges || edges->GetNrows() < 2) return;
+  const auto* axis = histogram->GetAxis(dimension);
+  OOMCCheck(axis->GetNbins() == edges->GetNrows() - 1, label + " bin count differs from " + key, failures);
+  if (axis->GetNbins() != edges->GetNrows() - 1) return;
+  for (int edge = 0; edge < edges->GetNrows(); ++edge) {
+    OOMCCheck(axis->GetBinLowEdge(edge + 1) == (*edges)[edges->GetLwb() + edge],
+              label + " edge " + std::to_string(edge) + " differs from " + key, failures);
+  }
+}
+
+void OOMCCheckMatchingBinning(TFile& file, int& failures) {
+  auto* enabled = dynamic_cast<TVectorT<float>*>(file.Get("JCard/MatchEECBinning"));
+  if (!enabled) return;  // Older campaigns retain their existing QA binning.
+  OOMCCheck(enabled->GetNrows() == 1, "invalid MatchEECBinning card entry", failures);
+  if (enabled->GetNrows() != 1 || (*enabled)[enabled->GetLwb()] != 1) return;
+  auto* track = dynamic_cast<TVectorT<float>*>(file.Get("JCard/TrackPtBinEdges"));
+  auto* eec = dynamic_cast<TVectorT<float>*>(file.Get("JCard/TrackPtBinEdgesEEC"));
+  OOMCCheck(track && eec && track->GetNrows() == eec->GetNrows(), "track card bin counts differ", failures);
+  if (track && eec && track->GetNrows() == eec->GetNrows()) {
+    for (int edge = 0; edge < track->GetNrows(); ++edge)
+      OOMCCheck((*track)[track->GetLwb() + edge] == (*eec)[eec->GetLwb() + edge], "track card bin edges differ", failures);
+  }
+  const char* jetKey = "JetPtBinEdgesEEC";
+  const char* trackKey = "TrackPtBinEdgesEEC";
+  OOMCCheckAxis(file, "inclusiveJet", 0, jetKey, failures);
+  for (auto name : {"track", "trackUncorrected"}) OOMCCheckAxis(file, name, 0, trackKey, failures);
+  for (auto name : {"energyEnergyCorrelator", "energyEnergyCorrelatorEfficiencyVariationPlus",
+                    "energyEnergyCorrelatorEfficiencyVariationMinus", "energyEnergyCorrelatorPairEfficiencyVariationPlus",
+                    "energyEnergyCorrelatorPairEfficiencyVariationMinus", "multiplicityInJetCone",
+                    "multiplicityInReflectedCone", "multiplicityInJetConeUncorrected",
+                    "multiplicityInReflectedConeUncorrected", "particleDensity", "particlePtDensity",
+                    "particlesCloseToTracks", "tracksWithMatchedParticle"}) {
+    OOMCCheckAxis(file, name, 1, jetKey, failures);
+    OOMCCheckAxis(file, name, 2, trackKey, failures);
+  }
+  OOMCCheckAxis(file, "hfEnergy", 3, jetKey, failures);
+  OOMCCheckAxis(file, "maxParticlePtInJet", 0, jetKey, failures);
+  for (int axis : {1, 2}) OOMCCheckAxis(file, "maxParticlePtInJet", axis, trackKey, failures);
+  for (int axis : {0, 1}) OOMCCheckAxis(file, "jetPtClosure", axis, jetKey, failures);
+  OOMCCheckAxis(file, "jetPtInReflectedCone", 0, jetKey, failures);
+  for (auto name : {"oneDimensionalJetPtUnfoldingMeasured", "oneDimensionalJetPtUnfoldingTruth", "oneDimensionalJetPtUnfoldingResponse"})
+    OOMCCheckAxis(file, name, 0, jetKey, failures);
+  OOMCCheckAxis(file, "oneDimensionalJetPtUnfoldingResponse", 1, jetKey, failures);
+  for (auto name : {"jetPtUnfoldingMeasured", "jetPtUnfoldingTruth"}) OOMCCheckAxis(file, name, 1, trackKey, failures);
+  OOMCCheckAxis(file, "jetPtUnfoldingResponse", 2, trackKey, failures);
+  for (auto name : {"particleDeltaRResponseMatrix", "particlePtResponseMatrix"}) {
+    OOMCCheckAxis(file, name, 2, jetKey, failures);
+    OOMCCheckAxis(file, name, 3, trackKey, failures);
+  }
+  std::cout << "OOMC matching EEC/sparse pT binning checked" << std::endl;
 }
 
 }  // namespace
@@ -131,6 +190,7 @@ void checkOOMCOutput(const char* filename, const char* mode, int expectedDataTyp
     OOMCCheckSparse(*file, "particlePtResponseMatrix", false, failures);
   }
 
+  OOMCCheckMatchingBinning(*file, failures);
   file->Close();
   std::cout << "OOMC validation " << (failures ? "FAIL" : "PASS")
             << " mode=" << selectedMode << " file=" << filename

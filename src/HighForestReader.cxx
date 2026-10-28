@@ -12,6 +12,7 @@
 
 // Own includes
 #include "HighForestReader.h"
+#include "Run3JetBranchValidation.h"
 
 /*
  * Default constructor
@@ -870,6 +871,12 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
 
   // Open one file to determine if we are dealing with miniAOD or regular AOD
   TFile* inputFile = TFile::Open(fileList.at(0));
+  if(inputFile == nullptr || inputFile->IsZombie()){
+    throw std::runtime_error("HighForestReader: cannot open input forest");
+  }
+  if(fJetType < 0 || fJetType > 3 || fJetAxis < 0 || fJetAxis > 1){
+    throw std::invalid_argument("HighForestReader: invalid jet type or axis");
+  }
   TTree* miniAODcheck;
   // The track tree has different name in miniAOD and AOD
   if(fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC){
@@ -878,7 +885,6 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
     miniAODcheck = (TTree*)inputFile->Get("ppTracks/trackTree");
   }
   fIsMiniAOD = !(miniAODcheck == NULL);
-  inputFile->Close();
 
   // Helper variable for finding the correct tree
   const char *treeName[4] = {"none","none","none","none"};
@@ -903,9 +909,16 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
     treeName[0] = "ak4CaloJetAnalyzer/t"; // Tree for calo jets
     treeName[1] = "ak4PFJetAnalyzer/t";   // Tree for PF jets
     treeName[2] = "akCs4PFJetAnalyzer/t"; // Tree for constituent subtracted PF jets
+    if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC) treeName[3] = "ak8PFJetAnalyzer/t"; // Native AK8.
   }
 
-  if(!fMixingMode) fJetTree = new TChain(treeName[fJetType]);
+  if(!fMixingMode){
+    if(fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
+      EECJetGeometry::RequireRun3JetBranches(dynamic_cast<TTree*>(inputFile->Get(treeName[fJetType])), false, fIsMC, fJetAxis, fMatchJets);
+    }
+    fJetTree = new TChain(treeName[fJetType]);
+  }
+  inputFile->Close();
 
   if(fReadTrackTree){
     if(fIsMiniAOD && (fDataType == kPbPb || fDataType == kPbPbMC || fDataType == kOO || fDataType == kOOMC)){

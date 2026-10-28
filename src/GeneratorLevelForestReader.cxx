@@ -5,6 +5,9 @@
 
 // Own includes
 #include "GeneratorLevelForestReader.h"
+#include "Run3JetBranchValidation.h"
+#include <stdexcept>
+#include <string>
 
 /*
  * Default constructor
@@ -537,9 +540,14 @@ void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fil
 
   // Open one file to determine if we are dealing with miniAOD or regular AOD
   TFile *inputFile = TFile::Open(fileList.at(0));
+  if(inputFile == nullptr || inputFile->IsZombie()){
+    throw std::runtime_error("GeneratorLevelForestReader: cannot open input forest");
+  }
+  if(fJetType < 0 || fJetType > 3 || fJetAxis < 0 || fJetAxis > 1){
+    throw std::invalid_argument("GeneratorLevelForestReader: invalid jet type or axis");
+  }
   TTree* miniAODcheck = (TTree*)inputFile->Get("HiForestInfo/HiForest");
   fIsMiniAOD = !(miniAODcheck == NULL);
-  inputFile->Close();
 
   // Helper variable for finding the correct tree
   const char *treeName[4] = {"none","none","none","none"};
@@ -553,6 +561,12 @@ void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fil
   if(fDataType == kPp || fDataType == kPpMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
     treeName[0] = "ak4CaloJetAnalyzer/t"; // Tree for calo jets
     treeName[1] = "ak4PFJetAnalyzer/t";   // Tree for PF jets
+    if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC) treeName[3] = "ak8PFJetAnalyzer/t"; // Native AK8 only.
+  } else if(fDataType == kOO || fDataType == kOOMC){
+    treeName[0] = "akCs2PFJetAnalyzer/t";
+    treeName[1] = "akCs4PFJetAnalyzer/t";
+    treeName[2] = "akCs6PFJetAnalyzer/t";
+    treeName[3] = "akCs8PFJetAnalyzer/t";
   } else { // PbPb data or MC
     treeName[0] = "akPu4CaloJetAnalyzer/t";     // Tree for calo jets
     treeName[1] = "akCs4PFJetAnalyzer/t";       // Tree for csPF jets
@@ -560,7 +574,18 @@ void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fil
     treeName[3] = "akFlowPuCs4PFJetAnalyzer/t"; // Tree for flow subtracted csPF jets
   }
 
-  if(!fMixingMode) fJetTree = new TChain(treeName[fJetType]);
+  if(!fMixingMode){
+    if(inputFile->Get(treeName[fJetType]) == nullptr){
+      const std::string missingTree = treeName[fJetType];
+      inputFile->Close();
+      throw std::runtime_error("GeneratorLevelForestReader: missing native jet tree " + missingTree);
+    }
+    if(fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
+      EECJetGeometry::RequireRun3JetBranches(dynamic_cast<TTree*>(inputFile->Get(treeName[fJetType])), true, true, fJetAxis, fMatchJets);
+    }
+    fJetTree = new TChain(treeName[fJetType]);
+  }
+  inputFile->Close();
 
   // The track tree is different than in other types of forests
   if(fReadTrackTree) fTrackTree = new TChain("HiGenParticleAna/hi");

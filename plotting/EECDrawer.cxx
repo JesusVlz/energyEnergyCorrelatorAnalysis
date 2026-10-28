@@ -44,6 +44,7 @@ EECDrawer::EECDrawer(EECHistogramManager *inputHistograms) :
   fSystemAndEnergy = Form("%s %s", collisionSystem.Data(), collisionEnergy.Data());  fCompactSystemAndEnergy = fSystemAndEnergy;
   fCompactSystemAndEnergy.ReplaceAll(" ","");
   fCompactSystemAndEnergy.ReplaceAll(".","v");
+  fSystemAndEnergy.ReplaceAll("ppRef","pp");
 
   // Keep the established filenames while labeling OO simulation explicitly.
   if(fHistograms->GetCard()->GetDataType().Contains("OO MC")){
@@ -792,6 +793,9 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
   int colorAdder = 1;
   
   double normalizationFactor;
+  // Use the same scale when comparing track cuts and jet pT selections.
+  const double comparisonYMin = 2e-5;
+  const double comparisonYMax = 100;
   int color[10] = {kBlack, kBlue, kRed, kGreen+2, kCyan, kMagenta, kOrange-1, kAzure-1, kOrange-1, kGray};
   int style[10] = {kFullSquare, kFullCircle, kFullDiamond, kFullCross, kOpenFourTrianglesPlus, kOpenCrossX, kOpenStar, kOpenTriangleUp, kOpenTriangleDown, kOpenDoubleDiamond};
   
@@ -895,7 +899,9 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
             legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
             legend->AddEntry((TObject*) 0, fSystemAndEnergy.Data(), "");
             if(iSubevent < EECHistograms::knSubeventCombinations) legend->AddEntry((TObject*) 0, subeventString.Data(), "");
-            legend->AddEntry((TObject*) 0, centralityString.Data(), "");
+            if(!fHistograms->GetCard()->GetDataType().Contains("pp")){
+              legend->AddEntry((TObject*) 0, centralityString.Data(), "");
+            }
             //legend->AddEntry((TObject*) 0, "Cent: 0-10%", "");
             legend->AddEntry((TObject*) 0, Form("anti-k_{T} R = %.1f", fHistograms->GetCard()->GetJetRadius()), "");
             legend->AddEntry((TObject*) 0, jetPtString.Data(), "");
@@ -925,7 +931,7 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
 
               if(iTrackPt == fFirstDrawnTrackPtBinEEC){
                 namerY = "EEC";
-                drawnHistogram->GetYaxis()->SetRangeUser(2e-5, drawnHistogram->GetMaximum()*5);
+                drawnHistogram->GetYaxis()->SetRangeUser(comparisonYMin, comparisonYMax);
                 fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ","p");
               } else {
                 drawnHistogram->Draw("p,same");
@@ -969,7 +975,9 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
               legend->SetFillStyle(0);legend->SetBorderSize(0);legend->SetTextSize(0.05);legend->SetTextFont(62);
               legend->AddEntry((TObject*) 0, fSystemAndEnergy.Data(), "");
               if(iSubevent < EECHistograms::knSubeventCombinations) legend->AddEntry((TObject*) 0, subeventString.Data(), "");
-              legend->AddEntry((TObject*) 0, centralityString.Data(),"");
+              if(!fHistograms->GetCard()->GetDataType().Contains("pp")){
+                legend->AddEntry((TObject*) 0, centralityString.Data(),"");
+              }
               //legend->AddEntry((TObject*) 0, "Cent: 0-10%","");
               legend->AddEntry((TObject*) 0, Form("anti-k_{T} R = %.1f", fHistograms->GetCard()->GetJetRadius()), "");
               legend->AddEntry((TObject*) 0, trackPtString.Data(),"");
@@ -998,7 +1006,7 @@ void EECDrawer::DrawEnergyEnergyCorrelationHistograms(){
                 if(iJetPt == fFirstDrawnJetPtBinEEC){
                   //namerY = Form("%s %s", fHistograms->GetEnergyEnergyCorrelatorAxisName(iEnergyEnergyCorrelator), fHistograms->GetPairingTypeSaveName(iPairingType));
                   namerY = "EEC";
-                  drawnHistogram->GetYaxis()->SetRangeUser(2e-4, drawnHistogram->GetMaximum()*5);
+                  drawnHistogram->GetYaxis()->SetRangeUser(comparisonYMin, comparisonYMax);
                   fDrawer->DrawHistogram(drawnHistogram,"#Deltar",namerY.Data()," ","p");
                 } else {
                   drawnHistogram->Draw("p,same");

@@ -730,6 +730,7 @@ void UnfoldingForestReader::ReadForestFromFile(TFile* inputFile){
     treeName[0] = "ak4CaloJetAnalyzer/t"; // Tree for calo jets
     treeName[1] = "ak4PFJetAnalyzer/t";   // Tree for PF jets
     treeName[2] = "akCs4PFJetAnalyzer/t"; // Tree for constituent-subtracted PF jets
+    if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC) treeName[3] = "ak8PFJetAnalyzer/t"; // Native AK8.
   } else if (fDataType == kPbPb || fDataType == kPbPbMC){
     treeName[0] = "akPu4CaloJetAnalyzer/t";     // Tree for calo jets
     treeName[1] = "akCs4PFJetAnalyzer/t";       // Tree for csPF jets

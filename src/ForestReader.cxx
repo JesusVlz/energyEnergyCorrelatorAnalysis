@@ -425,6 +425,11 @@ Float_t ForestReader::GetCentrality() const{
   return fHiBin/2.0;
 }
 
+// Preserve the raw stored coordinate for coverage audits; legacy correction access is separate.
+Int_t ForestReader::GetStoredHiBin() const{
+  return fHiBin;
+}
+
 // Getter for hiBin. Return 1 for negative values (for easier handling of tracking efficiency correction)
 Int_t ForestReader::GetHiBin() const{
   if(fHiBin < 0) return 1;

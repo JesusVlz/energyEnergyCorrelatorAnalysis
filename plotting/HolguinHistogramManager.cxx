@@ -5,8 +5,6 @@
 // Own includes
 #include "HolguinHistogramManager.h"
 
-#include <TMath.h>
-
 /*
  * Default constructor
  */

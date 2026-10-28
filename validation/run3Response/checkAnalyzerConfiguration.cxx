@@ -111,6 +111,7 @@ int main(int argc, char** argv){
     const std::string directory = argc > 1 ? argv[1] : "/tmp/eecRun3AnalyzerFixtures";
     gSystem->mkdir(directory.c_str(), true);
     for(const char* card : {"cardEECOO.input", "cardEECOOMC.input", "cardEECpp5v36TeV.input", "cardEECpp5v36TeVMC.input"}){
+      ExpectRejected(card, "DisableTrackPairEfficiencyCorrection", 0, "DisableTrackPairEfficiencyCorrection 1");
       ExpectRejected(card, "JetUncertainty", 1, "JetUncertainty 0");
       ExpectRejected(card, "JetUncertainty", 3, "JetUncertainty 0");
       ExpectRejected(card, "JetPtWeight", 1, "JetPtWeight 0");

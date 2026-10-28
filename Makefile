@@ -22,6 +22,9 @@ OBJS = $(HDRS:.h=.o)
 
 all:            $(PROGRAM)
 
+src/EECAnalyzer.o: src/Run3JetGeometry.h
+src/HighForestReader.o src/GeneratorLevelForestReader.o: src/Run3JetBranchValidation.h
+
 $(PROGRAM):     $(OBJS) $(PROGRAM).cxx
 		@echo "Linking $(PROGRAM) ..."
 		$(CXX) -lEG -L$(PWD) $(PROGRAM).cxx $(CXXFLAGS) $(OBJS) $(LDFLAGS) -o $(PROGRAM)

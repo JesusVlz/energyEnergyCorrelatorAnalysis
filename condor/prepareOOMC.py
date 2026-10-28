@@ -5,6 +5,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -88,7 +89,7 @@ def discover_inputs(input_dir, sample="OOMC"):
     return inputs
 
 
-def card_text(base, mode, background_methods, sample="OOMC"):
+def card_text(base, mode, background_methods, sample="OOMC", match_eec_binning=False):
     overrides = {"DataType": str(SAMPLES[sample]["data_type"]), "McCorrelationType": str(MODES[mode]),
                  "TriggerSelection": "0", "MatchJets": "1" if mode == "Response" else "0",
                  "FilledHistograms": "479" if mode == "Response" else "31",
@@ -97,6 +98,20 @@ def card_text(base, mode, background_methods, sample="OOMC"):
                  "SmearEnergyWeight": "0", "DisableTrackPairEfficiencyCorrection": "1",
                  "SkipCovarianceMatrix": "1", "DebugLevel": "1",
                  "BackgroundMethods": "0" if mode == "Response" else str(background_methods)}
+    if match_eec_binning:
+        settings = {}
+        for line in base.splitlines():
+            fields = line.split("#", 1)[0].split()
+            if fields:
+                if fields[0] in settings:
+                    raise ValueError("Duplicate card setting: {}".format(fields[0]))
+                settings[fields[0]] = fields[1:]
+        for key in ("JetPtBinEdgesEEC", "TrackPtBinEdgesEEC"):
+            edges = [float(value) for value in settings.get(key, [])]
+            if (len(edges) < 2 or not all(math.isfinite(edge) for edge in edges)
+                    or any(not (left < right) for left, right in zip(edges, edges[1:]))):
+                raise ValueError("{} must contain increasing bin edges".format(key))
+        overrides["TrackPtBinEdges"] = " ".join(settings["TrackPtBinEdgesEEC"])
     found = set()
     lines = []
     for line in base.splitlines():
@@ -112,6 +127,10 @@ def card_text(base, mode, background_methods, sample="OOMC"):
     missing = sorted(set(overrides) - found)
     if missing:
         raise ValueError("Base card is missing settings: {}".format(", ".join(missing)))
+    if match_eec_binning:
+        if "MatchEECBinning" in settings:
+            raise ValueError("MatchEECBinning is controlled by --match-eec-binning; remove it from the base card")
+        lines.append("MatchEECBinning 1 # Use EEC jet and track pT edges for sparse pT axes")
     return "# Prepared {} configuration: {}\n{}\n".format(sample, mode, "\n".join(lines))
 
 
@@ -157,13 +176,15 @@ def parse_args():
     parser.add_argument("--tag", default=timestamp().strftime("%Y%m%d_%H%M%S_%Z"))
     parser.add_argument("--background-methods", type=int, choices=(0, 3), default=0,
                         help="Regular modes: 0 = none, 3 = reflected and perpendicular cones; Response always uses 0")
+    parser.add_argument("--match-eec-binning", action="store_true",
+                        help="Use the EEC jet and track pT edges for sparse pT axes in every mode")
     parser.add_argument("--modes", nargs="+", choices=tuple(MODES), default=list(MODES))
     parser.add_argument("--build-jobs", type=int, default=2)
     parser.add_argument("--accounting-group", help="Optional explicitly chosen CERN accounting group")
     parser.add_argument("--list-only", action="store_true", help="Print input and job counts without creating files")
     args = parser.parse_args()
     args.input_dir = args.input_dir or "/eos/user/j/jvelazqu/Foresting/" + args.sample
-    args.submit_dir = args.submit_dir or "/afs/cern.ch/user/j/jvelazqu/condor/" + args.sample
+    args.submit_dir = args.submit_dir or "/afs/cern.ch/user/j/jvelazqu/condor/production/{}/{}".format(args.sample, args.tag)
     args.output_dir = args.output_dir or "/eos/user/j/jvelazqu/HIN/eec-outputs/" + args.sample
     return args
 
@@ -214,7 +235,8 @@ def main():
     dirty = bool(git_status)
     provenance = commit + ("-dirty" if dirty else "")
     base_card = (repo / SAMPLES[args.sample]["card"]).read_text()
-    cards = {mode: card_text(base_card, mode, args.background_methods, args.sample) for mode in modes}
+    cards = {mode: card_text(base_card, mode, args.background_methods, args.sample,
+                             args.match_eec_binning) for mode in modes}
     submit_dir.mkdir(parents=True, exist_ok=True)
     (submit_dir / "logs").mkdir(exist_ok=True)
     (submit_dir / "cards").mkdir(exist_ok=True)
@@ -291,17 +313,12 @@ queue mode,input_url,output_url,stem,memory_mb from {workspace}/jobs.tsv
                "--modes", *modes]
     if args.accounting_group:
         command.extend(["--accounting-group", args.accounting_group])
+    if args.match_eec_binning:
+        command.append("--match-eec-binning")
     prepare_script = """#!/bin/bash
 set -euo pipefail
-# Choose a fresh AFS workspace. A timestamped output tag is generated unless supplied.
-eec_has_submit_dir=false
-for eec_arg in "$@"; do
-    case "$eec_arg" in --submit-dir|--submit-dir=*) eec_has_submit_dir=true ;; esac
-done
-if [[ "$eec_has_submit_dir" != true ]]; then
-    echo 'Usage: ./prepare.sh --submit-dir /afs/cern.ch/user/j/jvelazqu/condor/{sample}_NEW [--tag NEW_TAG]' >&2
-    exit 2
-fi
+# Prepare production/{sample}/<tag>; a timestamped tag is generated unless supplied.
+# Usage: ./prepare.sh [--tag NEW_TAG] [--submit-dir /afs/.../custom_workspace]
 exec {command} "$@"
 """.format(command=" ".join(shlex.quote(value) for value in command), sample=args.sample)
     write_executable(submit_dir / "prepare.sh", prepare_script)
@@ -310,6 +327,7 @@ exec {command} "$@"
                                "base_card": SAMPLES[args.sample]["card"], "repo": str(repo), "input_dir": str(input_dir), "submit_dir": str(submit_dir),
                                "output_base": str(output_dir), "output_dir": str(run_output), "tag": args.tag,
                                "modes": modes, "background_methods": args.background_methods,
+                               "match_eec_binning": args.match_eec_binning,
                                "cmssw_base": str(cmssw_base), "scram_arch": args.scram_arch,
                                "build_jobs": args.build_jobs, "accounting_group": args.accounting_group,
                                "job_flavour": "workday", "regular_memory_mb": 4000,

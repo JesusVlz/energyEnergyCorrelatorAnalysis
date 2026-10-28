@@ -195,7 +195,7 @@ void projectEEChistograms(TString inputFileName = "veryCoolData.root", const cha
   card->AddFileName(EECCard::kInputFileName,inputFileName);
   
   // The git hash here will be replaced by the latest commit hash by projectHistogramsInSteps.sh script
-  const char* gitHash = "GITHASHHERE";
+  const char* gitHash = "9e01da9c46a54d035c9e84be7d0b2f3d82d964f8";
   card->AddProjectionGitHash(gitHash);
   
   // ============================ //

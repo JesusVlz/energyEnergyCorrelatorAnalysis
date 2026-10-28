@@ -6,9 +6,11 @@
 
 // C++ includes
 #include <stdexcept>
+#include <cmath>
 
 // Own includes
 #include "EECAnalyzer.h"
+#include "Run3JetGeometry.h"
 
 using namespace std;
 
@@ -76,6 +78,9 @@ EECAnalyzer::EECAnalyzer() :
   fIsPpData(false),
   fIsOOData(false),
   fIsPp2024Data(false),
+  fInclusiveMode(0),
+  fMaxEventsPerFile(0),
+  fInclusiveEventWeight(1),
   fVzWeight(1),
   fCentralityWeight(1),
   fPtHatWeight(1),
@@ -187,6 +192,9 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   fJetCorrector(),
   fJetUncertainty(),
   fTrackPairEfficiencyCorrector(nullptr),
+  fInclusiveMode(0),
+  fMaxEventsPerFile(0),
+  fInclusiveEventWeight(1),
   fVzWeight(1),
   fCentralityWeight(1),
   fPtHatWeight(1),
@@ -515,6 +523,9 @@ EECAnalyzer::EECAnalyzer(const EECAnalyzer& in) :
   fIsPpData(in.fIsPpData),
   fIsPp2024Data(in.fIsPp2024Data),
   fIsOOData(in.fIsOOData),
+  fInclusiveMode(in.fInclusiveMode),
+  fMaxEventsPerFile(in.fMaxEventsPerFile),
+  fInclusiveEventWeight(in.fInclusiveEventWeight),
   fVzWeight(in.fVzWeight),
   fCentralityWeight(in.fCentralityWeight),
   fPtHatWeight(in.fPtHatWeight),
@@ -631,6 +642,9 @@ EECAnalyzer& EECAnalyzer::operator=(const EECAnalyzer& in){
   fIsPp2024Data = in.fIsPp2024Data;
   fIsOOData = in.fIsOOData;
   fIsPpData = in.fIsPpData;
+  fInclusiveMode = in.fInclusiveMode;
+  fMaxEventsPerFile = in.fMaxEventsPerFile;
+  fInclusiveEventWeight = in.fInclusiveEventWeight;
   fVzWeight = in.fVzWeight;
   fCentralityWeight = in.fCentralityWeight;
   fPtHatWeight = in.fPtHatWeight;
@@ -747,6 +761,18 @@ void EECAnalyzer::ReadConfigurationFromCard(){
   //****************************************
   fDataType = fCard->Get("DataType");
   fTriggerSelection = fCard->Get("TriggerSelection");
+  fInclusiveMode = fCard->HasKey("InclusiveMode") ? fCard->Get("InclusiveMode") : 0;
+  fMaxEventsPerFile = fCard->HasKey("MaxEventsPerFile") ? fCard->Get("MaxEventsPerFile") : 0;
+  if(fInclusiveMode < 0 || fInclusiveMode > 2 || fMaxEventsPerFile < 0){
+    throw std::invalid_argument("InclusiveMode must be 0, 1 or 2 and MaxEventsPerFile must be nonnegative.");
+  }
+  if(fInclusiveMode == 2){
+    throw std::invalid_argument("Corrected inclusive output is BLOCKED: establish activity/calibration applicability, residual-pair and response/background closure first. InclusiveMode 1 is explicitly uncalibrated raw diagnostics, not a nominal replacement.");
+  }
+  if(fInclusiveMode && !(fDataType == ForestReader::kOO || fDataType == ForestReader::kOOMC || fDataType == ForestReader::kPpRef5p36TeV || fDataType == ForestReader::kPpRef5p36TeVMC)){
+    throw std::invalid_argument("InclusiveMode is supported only for Run-3 OO and ppRef.");
+  }
+
 
   // Determine the helper data types.
   //
@@ -842,6 +868,10 @@ void EECAnalyzer::ReadConfigurationFromCard(){
     fMcCorrelationType = fCard->Get("McCorrelationType");         // Correlation type for Monte Carlo
   }
   fMultiplicityMode = (fCard->Get("MultiplicityMode") == 1);
+  if(fInclusiveMode && fMultiplicityMode){
+    throw std::invalid_argument("Inclusive raw diagnostics require MultiplicityMode 0 to preserve the real stored hiBin/activity coordinates.");
+  }
+
 
   //****************************************
   //       Jet selection and matching
@@ -933,6 +963,12 @@ void EECAnalyzer::ReadConfigurationFromCard(){
   fFillTrackParticleMatchingHistograms = bitChecker.test(kFillTrackParticleMatchingHistograms);
 
   if(fIsOOData || fIsPp2024Data){
+    EECJetGeometry::ValidateRun3Collection(fIsOOData, fIsPp2024Data, fJetType, fJetRadius);
+    EECJetGeometry::RequireRun3Calibration(fIsOOData, fIsPp2024Data, fJetType);
+    if(fCard->Get("DisableTrackPairEfficiencyCorrection") != 1){
+      throw std::invalid_argument(
+        "Run-3 residual pair correction has no validated payload/closure. Use DisableTrackPairEfficiencyCorrection 1 for an explicitly uncorrected diagnostic.");
+    }
     if(fJetPtWeightConfiguration != 0){
       throw std::invalid_argument(
         "Run-3 OO/ppRef jet-spectrum weights are not configured. Use JetPtWeight 0.");
@@ -1091,7 +1127,7 @@ void EECAnalyzer::RunAnalysis(){
   // Histograms that should be filled
   Int_t filledHistograms = fCard->Get("FilledHistograms");
   Bool_t readTrackTree = true;
-  if(filledHistograms < 4) {
+  if(filledHistograms < 4 && !fInclusiveMode) {
     useDifferentReaderForJetsAndTracks = false;
     readTrackTree = false;  // Do not read track trees if only jets are used. Makes things much faster in this case.
   }
@@ -1490,6 +1526,17 @@ void EECAnalyzer::RunAnalysis(){
     //************************************************
     
     // If file is good, read the forest from the file
+    if(fInclusiveMode && !fIsRealData){
+      auto* eventTree = dynamic_cast<TTree*>(inputFile->Get("hiEvtAnalyzer/HiTree"));
+      if(!eventTree || !eventTree->GetBranch("weight")){
+        throw std::runtime_error("Inclusive MC raw diagnostics require the actual hiEvtAnalyzer/HiTree/weight branch; missing generator weights cannot default to unity.");
+      }
+      TClass* weightClass = nullptr;
+      EDataType weightType = kOther_t;
+      if(eventTree->GetBranch("weight")->GetExpectedType(weightClass, weightType) != 0 || weightClass || weightType != kFloat_t){
+        throw std::runtime_error("Inclusive MC weight branch is incompatible with the Float_t forest reader; generator weights cannot default to unity.");
+      }
+    }
     fJetReader->ReadForestFromFile(inputFile);  // There might be a memory leak in handling the forest...
     if(useDifferentReaderForJetsAndTracks) fTrackReader->ReadForestFromFile(copyInputFile); // If we mix reco and gen, the reader for jets and tracks is different
     if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms) fUnfoldingForestReader->ReadForestFromFile(unfoldingInputFile);
@@ -1529,6 +1576,12 @@ void EECAnalyzer::RunAnalysis(){
       }
 
     }*/
+
+    if(fHistograms->fhInclusiveInputStatus) fHistograms->fhInclusiveInputStatus->Fill(1);
+    if(fMaxEventsPerFile > 0 && nEvents > fMaxEventsPerFile){
+      fHistograms->MarkInclusiveTruncatedInput();
+      nEvents = fMaxEventsPerFile;
+    }
 
     //************************************************
     //         Main event loop for each file
@@ -1580,9 +1633,12 @@ void EECAnalyzer::RunAnalysis(){
       hfPlus = fJetReader->GetHFPlus();
       hfMinus = fJetReader->GetHFMinus();
       
+      fHistograms->FillInclusiveCoverage(fJetReader->GetStoredHiBin(), 0, fIsOOData);
+
       // We need to apply pT hat cuts before getting pT hat weight. There might be rare events above the upper
       // limit from which the weights are calculated, which could cause the code to crash.
       if(ptHat < fMinimumPtHat || ptHat >= fMaximumPtHat) continue;
+      fHistograms->FillInclusiveCoverage(fJetReader->GetStoredHiBin(), 1, fIsOOData);
 
       // Run-3 generator/cross-section normalization is not established by the
       // processed marginal histograms. Keep that factor at unity while
@@ -1609,6 +1665,13 @@ void EECAnalyzer::RunAnalysis(){
 
       } 
       fTotalEventWeight = fVzWeight*fCentralityWeight*fPtHatWeight;
+      // Separate diagnostic study: no legacy 0-90% centrality factor is applied.
+      // This remains explicitly uncalibrated and cannot promote a corrected result.
+      fInclusiveEventWeight = fInclusiveMode ? GetInclusiveDiagnosticEventWeight() : fVzWeight*fPtHatWeight;
+      if(fInclusiveMode && !std::isfinite(fInclusiveEventWeight)){
+        throw std::runtime_error("Non-finite raw inclusive diagnostic event weight.");
+      }
+
       
       // Fill event counter histogram
       fHistograms->fhEvents->Fill(EECHistograms::kAll);          // All the events looped over
@@ -1663,9 +1726,13 @@ void EECAnalyzer::RunAnalysis(){
 
       // Fill the histogram for triggered events
       fHistograms->fhEvents->Fill(EECHistograms::kTriggered);
+      fHistograms->FillInclusiveCoverage(fJetReader->GetStoredHiBin(), 2, fIsOOData);
 
       // Check event cuts
       if(!PassEventCuts(fJetReader,fFillEventInformation)) continue;
+      fHistograms->FillInclusiveCoverage(fJetReader->GetStoredHiBin(), 3, fIsOOData);
+      fHistograms->FillInclusiveSelectedEvent(fJetReader->GetStoredHiBin(), hfSum, vz, fInclusiveEventWeight);
+
       
       // If combining triggers, need to include event weight for events that only fire the lower trigger
       // The weight used here is the inverse of the average effective prescale in the whole sample
@@ -1936,6 +2003,10 @@ void EECAnalyzer::RunAnalysis(){
 
         // We have a good jet!
         nGoodJets++;
+        if(fHistograms->fhInclusiveJetExposure){
+          fHistograms->fhInclusiveJetExposure->Fill(jetPt, fInclusiveEventWeight);
+        }
+
         
         //************************************************
         //         Fill histograms for all jets
@@ -1966,7 +2037,7 @@ void EECAnalyzer::RunAnalysis(){
         //   Do energy-energy correlation within jets
         //************************************************
         
-        if(fFillEnergyEnergyCorrelators || fFillEnergyEnergyCorrelatorsSystematics || fFillJetConeHistograms){
+        if(fInclusiveMode || fFillEnergyEnergyCorrelators || fFillEnergyEnergyCorrelatorsSystematics || fFillJetConeHistograms){
           
           // Clear the vectors of track kinematics for tracks selected for energy-energy correlators
           for(int iJetConeType = 0; iJetConeType < EECHistograms::knJetConeTypes; iJetConeType++){
@@ -2315,7 +2386,7 @@ void EECAnalyzer::RunAnalysis(){
           //************************************************
           
           // Calculate the energy-energy correlator within this jet
-          if(fFillEnergyEnergyCorrelators || fFillEnergyEnergyCorrelatorsSystematics){
+          if(fInclusiveMode || fFillEnergyEnergyCorrelators || fFillEnergyEnergyCorrelatorsSystematics){
 
             // Before calculating the energy-energy correlators, reset histograms for covariance matrix calculation
             // Covariance matrix calculation only for data, not needed in MC
@@ -2646,6 +2717,16 @@ void EECAnalyzer::CalculateEnergyEnergyCorrelator(const vector<double> selectedT
           fillerEnergyEnergyCorrelator[4] = iPairingType;              // Axis 4: Track pairing type (signal-signal, signal-reflected cone, reflected cone-reflected cone)
           fillerEnergyEnergyCorrelator[5] = subeventCombination;       // Axis 5: Subevent combination type
           fillerEnergyEnergyCorrelator[6] = weightIndex;               // Axis 6: Inxed for the current energy-energy correlator weight
+
+          // The primary track selection is strictly pT > 2 GeV. Keep the
+          // 0.5 GeV reader/QA input, and enforce this before binning so an
+          // exact-2 GeV track cannot enter through a threshold-bin projection.
+          if(fHistograms->fhInclusiveRawEEC && lowerTrackPt > 2.0){
+            const Double_t rawCoordinates[6] = {GetDeltaR(trackEta1, trackPhi1, trackEta2, trackPhi2), jetPt, lowerTrackPt, static_cast<Double_t>(iPairingType), static_cast<Double_t>(subeventCombination), static_cast<Double_t>(weightIndex)};
+            const Double_t rawWeight = fInclusiveEventWeight * TMath::Power(trackPt1*trackPt2, currentExponent);
+            if(!std::isfinite(rawWeight)) throw std::runtime_error("Non-finite raw inclusive pair weight.");
+            fHistograms->fhInclusiveRawEEC->Fill(rawCoordinates, rawWeight);
+          }
 
           if(fFillEnergyEnergyCorrelators){
             fHistograms->fhEnergyEnergyCorrelator->Fill(fillerEnergyEnergyCorrelator, trackEfficiencyCorrection1 * trackEfficiencyCorrection2 * fTotalEventWeight * correlatorWeight * trackPairEfficiencyCorrection * jetPtWeight);  // Fill the energy-energy correlator histogram
@@ -3417,6 +3498,14 @@ Double_t EECAnalyzer::GetVzWeight(const Double_t vz) const{
   return fVzWeightFunction->Eval(vz); // Weight for Monte Carlo
 }
 
+Double_t EECAnalyzer::GetInclusiveDiagnosticEventWeight() const{
+  // This separate study never applies the legacy centrality fit outside or inside
+  // its support. Preserve the actual generator branch, without claiming an
+  // independently validated absolute cross-section normalization.
+  return fVzWeight * (fIsRealData ? 1.0 : fJetReader->GetEventWeight());
+}
+
+
 /*
  * Get the proper centrality weighting depending on analyzed system
  *
@@ -4080,9 +4169,9 @@ Double_t EECAnalyzer::GetPerpendicularPhi(const Double_t phi, const Int_t direct
   Double_t adder[2] = {TMath::Pi()/2.0, -TMath::Pi()/2.0};
   Double_t perpendicularPhi = phi + adder[direction];
 
-  // Make sure that the reflected phi index is in the range [-pi, pi]
-  if(perpendicularPhi < TMath::Pi()) perpendicularPhi += 2*TMath::Pi();
-  if(perpendicularPhi > TMath::Pi()) perpendicularPhi -= 2*TMath::Pi();
+  // Canonical circular coordinate. The old lower-bound check used +pi,
+  // leaving some negative-direction controls below -pi.
+  perpendicularPhi = EECJetGeometry::WrapPhi(perpendicularPhi);
 
   // Return perpendicularized phi
   return perpendicularPhi;

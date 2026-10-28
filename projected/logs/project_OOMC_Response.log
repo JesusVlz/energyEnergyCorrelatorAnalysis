@@ -1,0 +1,9 @@
+
+Processing plotting/projectEEChistograms.C("/eos/user/j/jvelazqu/HIN/eec-outputs/OOMC/cones_response_updatedForest_20261023_065159_CDT/merged_eecAnalysis_OOMC_Response.root","projected/merged_eecAnalysis_OOMC_Response_processed.root",63999,1)...
+Projecting histograms from /eos/user/j/jvelazqu/HIN/eec-outputs/OOMC/cones_response_updatedForest_20261023_065159_CDT/merged_eecAnalysis_OOMC_Response.root
+The bin boundary 50 is not a bin boundary in the original histogram!
+Cannot rebin histogram jetPtClosure_3=1-1 because of a bin edge problem in x-axis!
+The bin boundary 50 is not a bin boundary in the original histogram!
+Cannot rebin histogram jetPtClosure_3=2-2 because of a bin edge problem in x-axis!
+The bin boundary 50 is not a bin boundary in the original histogram!
+Cannot rebin histogram jetPtClosure_3=3-3 because of a bin edge problem in x-axis!

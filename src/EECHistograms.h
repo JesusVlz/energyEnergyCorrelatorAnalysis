@@ -38,6 +38,10 @@ public:
   void Write(TString outputFileName) const;  // Write the histograms to a file
   void SetCard(ConfigurationCard* newCard);  // Set a new configuration card for the histogram class
 
+  void FillInclusiveCoverage(Int_t hiBin, Int_t stage, Bool_t isOO);
+  void FillInclusiveSelectedEvent(Int_t hiBin, Double_t hfSum, Double_t vz, Double_t diagnosticWeight);
+  void MarkInclusiveTruncatedInput();
+
   // Getters
   Int_t GetNDeltaRBinsEEC(); // Get the number of deltaR bins for energy-energy correlators
   Double_t GetDeltaRBinBorderLowEEC(Int_t iBin);  // Getter for the low bin border of the i:th deltaR bin
@@ -95,6 +99,14 @@ public:
   THnSparseF* fhTracksWithMatchedParticle;  // Histogram telling the fraction of particles for which a match is found
   THnSparseF* fhParticleDeltaRResponse;     // Response matrix for particle pair deltaR values
   THnSparseF* fhParticlePtResponse;         // Response matrix for particle pair pT1*pT2 values
+
+  // Opt-in raw diagnostics use no centrality axis and never replace the split products.
+  THnSparseD* fhInclusiveRawEEC; // [deltaR][jetPt][lowerTrackPt][pairing][subevent][powerIndex]
+  TH1D* fhInclusiveJetExposure; // Sum diagnostic event weights once per selected jet
+  TH2D* fhInclusiveEventCoverage; // [stored activity category][selection stage], unweighted
+  TH1D* fhInclusiveSelectedActivityWeighted; // Accepted event diagnostic weights, Sumw2 retained
+  THnSparseD* fhInclusiveEventActivity; // Actual stored [hiBin][hfSum][vz], including flow bins
+  TH1D* fhInclusiveInputStatus; // Read files; files truncated by explicit pilot limit
 
 private:
   

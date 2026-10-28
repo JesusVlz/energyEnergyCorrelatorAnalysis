@@ -5,8 +5,6 @@
 // Own includes
 #include "JewelHistogramManager.h"
 
-#include <TMath.h>
-
 /*
  * Default constructor
  */

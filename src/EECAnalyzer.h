@@ -105,6 +105,7 @@ public:
   Double_t GetTrackEfficiencyCorrection(const Int_t iTrack); // Get the track efficiency correction for a given track
   Double_t  GetTrackEfficiencyCorrection(const Float_t trackPt, const Float_t trackEta, const Int_t hiBin); // Get the track efficiency correction for given track and event information
   Double_t GetVzWeight(const Double_t vz) const;  // Get the proper vz weighting depending on analyzed system
+  Double_t GetInclusiveDiagnosticEventWeight() const; // Stored MC generator factor retained once, no centrality factor
   Double_t GetCentralityWeight(const Int_t hiBin) const; // Get the proper centrality weighting depending on analyzed system
   Double_t GetMultiplicityWeight(const Double_t multiplicity) const; // Get the proper multiplicity weight for MC
   Double_t GetJetPtWeight(const Double_t jetPt) const; // Get the proper jet pT weighting for 2017 and 2018 MC
@@ -162,6 +163,10 @@ public:
   Bool_t fIsPp2024Data;              // Flag for any pp dataset: True = any Run 3 pp dataset, False = anything else
 
   
+  Int_t fInclusiveMode; // 0=legacy, 1=explicit raw diagnostics, 2=corrected request (blocked)
+  Int_t fMaxEventsPerFile; // Optional bounded pilot limit; 0 means unlimited
+  Double_t fInclusiveEventWeight; // Raw diagnostic weight, with no centrality factor
+
   // Weights for filling the MC histograms
   Double_t fVzWeight;                // Weight for vz in MC
   Double_t fCentralityWeight;        // Weight for centrality in MC

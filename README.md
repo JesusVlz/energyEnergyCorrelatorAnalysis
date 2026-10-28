@@ -101,6 +101,50 @@ The current baseline uses AK4 jets, \(R=0.4\), the winner-take-all axis, \(|\eta
 
 The root-level data cards use `BackgroundMethods 0` for simple local tests. The CRAB data cards use `BackgroundMethods 3` to fill reflected and perpendicular cones. MC baseline cards use `BackgroundMethods 0`.
 
+### Dedicated inclusive OO cards and radius choices
+
+The inclusive selected-MB workstream uses separate cards, following the existing
+pp/pPb per-system card convention. The original OO cards retain the provisional
+0–30/30–50/50–90 diagnostic selections.
+
+| Stream | Data | MC |
+|---|---|---|
+| Inclusive OO, native R=0.4 | [cardEECOOInclusiveR04.input](cardEECOOInclusiveR04.input) | [cardEECOOMCInclusiveR04.input](cardEECOOMCInclusiveR04.input) |
+| Inclusive OO, native R=0.8 | [cardEECOOInclusiveR08.input](cardEECOOInclusiveR08.input) | [cardEECOOMCInclusiveR08.input](cardEECOOMCInclusiveR08.input) |
+| Inclusive pp, native R=0.4 | [cardEECpp5v36TeVR04.input](cardEECpp5v36TeVR04.input) | [cardEECpp5v36TeVMCR04.input](cardEECpp5v36TeVMCR04.input) |
+| Inclusive pp, native R=0.8 | [cardEECpp5v36TeVR08.input](cardEECpp5v36TeVR08.input) | [cardEECpp5v36TeVMCR08.input](cardEECpp5v36TeVMCR08.input) |
+
+OO inclusive cards declare `CentralityBinEdges 0 100` and an intended
+`InclusiveCentralityTarget 0 100`. `InclusiveMode 1` fills a separate raw
+selected-event diagnostic under `inclusive/`, including coverage counters for
+peripheral and invalid stored hiBin values. It preserves real event activity;
+changing an axis does not establish 0–100% acceptance or correction validity.
+The dedicated raw EEC requires strict track `pT > 2 GeV` during filling; the
+configured 0.5 GeV input threshold and lower-threshold track QA are retained.
+The dedicated raw weights retain the actual stored MC generator factor once,
+with the existing vz factor, and omit centrality/single-track/pair factors.
+This is an explicit diagnostic study, not an approved nominal MC mixture.
+`InclusiveMode 2` rejects requests for unsupported fully corrected output.
+Legacy split histograms keep their existing provisional treatment.
+
+Both powers and all three primary jet bins are retained in each radius stream.
+`R04` requires native AK4 and `R08` native AK8; unsupported radius/calibration
+choices fail before analysis. R8 analyzer execution is currently blocked on
+applicable calibration, and the audited local pp MC also lacks native AK8.
+
+Root-level dedicated cards have no event cap. For bounded tests use the matching
+100-event cards under `validation/run3Workflow/cards/`. Run
+`python3 validation/run3Workflow/check_cards.py` for the configuration preflight.
+The standalone `validation/run3Workflow/projectInclusiveRaw.C` preserves raw
+angular support through 2R and produces six radius-tagged projections per input;
+it does not normalize or produce a final ratio. See `validation/run3Pairs/`
+for candidate pair tooling and its explicit physics gates.
+
+The existing plotting/unfolding working-tree changes have been preserved. This
+new raw diagnostic path does not approve that legacy unfolding entry point for
+OO/R8: explicit response selection, all three output jet bins, closure and joint
+covariance still need reconciliation and validation before final processing.
+
 ### Optional QA histogram binning
 
 Add the following setting to an analysis card when the inclusive QA spectra
@@ -294,6 +338,14 @@ Hijing labels for the background subevents. Subevent figures use one legend and
 choose their vertical range from all displayed curves and statistical errors,
 so small components are visible without a fixed legacy y-axis range. OO
 filenames include centrality to distinguish plots from different selections.
+
+The constant-jet-pT and constant-track-pT EEC comparison figures use the same
+logarithmic y-axis limits, `2e-5` to `100`, so their shapes can be compared
+directly across OO centralities and the pp reference, including separate
+runs. Both limits are set together in
+`EECDrawer::DrawEnergyEnergyCorrelationHistograms`. For pp inputs the drawing
+range is reset to the inclusive bin and the centrality legend entry is omitted.
+The pp legend reads `pp 5.36 TeV`.
 
 | Macro/function | Input and purpose | Configurable arguments after the input |
 |---|---|---|

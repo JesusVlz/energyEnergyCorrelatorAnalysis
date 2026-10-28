@@ -1,0 +1,14 @@
+RESPONSE_DIRECTORY energyEnergyCorrelator 1
+RESPONSE_DIRECTORY jetPtClosure_inclusiveJet 1431
+RESPONSE_DIRECTORY jetPtResponseMatrix 3
+RESPONSE_DIRECTORY jetPtUnfoldingMeasured 24
+RESPONSE_DIRECTORY jetPtUnfoldingTruth 24
+RESPONSE_DIRECTORY jetPtUnfoldingResponse 24
+RESPONSE_DIRECTORY oneDimensionalJetPtUnfoldingResponse 3
+RESPONSE_DIRECTORY particlesCloseToTracks 168
+RESPONSE_DIRECTORY tracksWithMatchedParticle 168
+RESPONSE_DIRECTORY particleDeltaRResponseMatrix 168
+RESPONSE_DIRECTORY particlePtResponseMatrix 168
+RESPONSE_DIRECTORY particlePairPtClosure 168
+RESPONSE_N1_DIRECT_PASS THnSparseT<TArrayF> C0J0T3 0.0 0.0 bin 27
+RESPONSE_READBACK_PASS n=1 jet_matrix_card_edges size_bytes 10312224

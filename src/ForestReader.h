@@ -79,6 +79,7 @@ public:
   // Getters for leaves in heavy ion tree
   Float_t GetVz() const;              // Getter for vertex z position
   Float_t GetCentrality() const;      // Getter for centrality
+  Int_t GetStoredHiBin() const; // Actual stored coordinate, including invalid/unassigned negatives
   Int_t GetHiBin() const;             // Getter for CMS hiBin
   Float_t GetHFPlus() const;          // Getter for energy in HF plus calorimeters
   Float_t GetHFMinus() const;         // Getter for energy in HF minus calorimeters

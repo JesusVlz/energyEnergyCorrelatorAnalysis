@@ -5,14 +5,6 @@
 // Own includes
 #include "EECUnfoldConfiguration.h"
 
-// C++ includes
-#include <cmath>
-#include <memory>
-#include <stdexcept>
-#include <string>
-
-// ROOT includes
-#include <TMath.h>
 
 /*
  * Contructor
@@ -22,7 +14,6 @@ EECUnfoldConfiguration::EECUnfoldConfiguration():
   fSystematicIndex(0),
   fSplitIndex(0),
   fWeightExponent(1),
-  fExplicitNumberOfIterations(0),
   fResponseMatrixFileName("")
 
 {
@@ -40,14 +31,11 @@ EECUnfoldConfiguration::EECUnfoldConfiguration():
 /*
  * Custom constructor
  */
-EECUnfoldConfiguration::EECUnfoldConfiguration(EECCard* card, const int iSplit, const int iSystematic, const int iWeightExponent, const TString responseFileName, const int numberOfIterations):
+EECUnfoldConfiguration::EECUnfoldConfiguration(EECCard* card, const int iSplit, const int iSystematic, const int iWeightExponent):
   fSystematicIndex(iSystematic),
   fSplitIndex(iSplit),
-  fWeightExponent(iWeightExponent),
-  fExplicitNumberOfIterations(numberOfIterations),
-  fResponseMatrixFileName(responseFileName)
+  fWeightExponent(iWeightExponent)
 {
-  if(card == nullptr) throw std::invalid_argument("EECUnfoldConfiguration requires a data card.");
   TString collisionSystem = card->GetDataType();
   fIsPbPbData = collisionSystem.Contains("PbPb");
   
@@ -74,100 +62,8 @@ EECUnfoldConfiguration::EECUnfoldConfiguration(EECCard* card, const int iSplit, 
     throw std::invalid_argument("iWeightExponent in EECUnfoldConfiguration is out of allowed range!");
   }
 
-  // Run-3 responses and iteration counts must come from a dedicated study.
-  // In particular, neither OO nor ppRef may fall through to pp2017 defaults.
-  const bool isRun3 = collisionSystem.Contains("OO") || collisionSystem.Contains("ppRef");
-  if(isRun3 && fResponseMatrixFileName.IsNull()){
-    throw std::invalid_argument("OO/ppRef unfolding requires an explicit Run-3 response ROOT file and a positive iteration count; legacy pp2017 responses are not valid.");
-  }
-  if(!fResponseMatrixFileName.IsNull()){
-    if(fExplicitNumberOfIterations <= 0){
-      throw std::invalid_argument("An explicit unfolding response requires a positive, explicitly selected iteration count. Determine it with an independent closure study.");
-    }
-    ValidateResponseFile(card);
-    return;
-  }
-  if(fExplicitNumberOfIterations != 0){
-    throw std::invalid_argument("An explicit unfolding iteration count must be accompanied by an explicit response ROOT file.");
-  }
-
-  // Find the actual numbers based on the legacy study
+  // Find the actual numbers based on the study 
   InitializeArrays();
-}
-
-/*
- * Validate a user-supplied processed response before any unfolding is attempted.
- * The selected split/systematic file is supplied by the caller, rather than inferred
- * from legacy filenames. Its iteration count is likewise an explicit study input.
- */
-void EECUnfoldConfiguration::ValidateResponseFile(EECCard* card) const{
-  TDirectory::TContext directoryContext;
-  std::unique_ptr<TFile> responseFile(TFile::Open(fResponseMatrixFileName, "READ"));
-  if(!responseFile || responseFile->IsZombie()){
-    throw std::invalid_argument("Cannot open explicit unfolding response: " + std::string(fResponseMatrixFileName.Data()));
-  }
-
-  // EECCard expects these vectors. Check them before constructing it to avoid
-  // a null dereference when a file contains ordinary EECs but no response card.
-  const char* requiredEntries[] = {"DataType", "McCorrelationType", "JetType", "JetAxis", "JetRadius", "WeightExponent", "CentralityBinEdges", "JetPtBinEdgesEEC", "TrackPtBinEdgesEEC"};
-  for(const char* entry : requiredEntries){
-    auto* values = dynamic_cast<TVectorT<float>*>(responseFile->Get(Form("JCard/%s", entry)));
-    if(!values || values->GetNoElements() == 0 || values->GetLwb() != 1){
-      throw std::invalid_argument("Explicit unfolding response is missing a valid JCard/" + std::string(entry));
-    }
-  }
-
-  const TString collisionSystem = card->GetDataType();
-  const int expectedMCType = collisionSystem.Contains("OO") ? 10 : (collisionSystem.Contains("ppRef") ? 12 : (fIsPbPbData ? 3 : 2));
-  auto* responseType = static_cast<TVectorT<float>*>(responseFile->Get("JCard/DataType"));
-  auto* correlationType = static_cast<TVectorT<float>*>(responseFile->Get("JCard/McCorrelationType"));
-  if((*responseType)[1] != expectedMCType){
-    throw std::invalid_argument("Explicit unfolding response must be MC of the same collision system as the data.");
-  }
-  // FillUnfoldingResponse uses generator particles independently of this mode.
-  // Require valid MC metadata, but allow responses produced alongside any MC EEC mode.
-  const float correlationMode = (*correlationType)[1];
-  if(correlationMode < 0 || correlationMode > 3 || std::floor(correlationMode) != correlationMode){
-    throw std::invalid_argument("Explicit unfolding response has an invalid McCorrelationType (expected 0-3).");
-  }
-
-  EECCard responseCard(responseFile.get());
-  if(responseCard.FindWeightExponentIndex(fWeightExponent) < 1 || card->FindWeightExponentIndex(fWeightExponent) < 1){
-    throw std::invalid_argument("Requested EEC weight exponent is absent from the data or explicit response card.");
-  }
-  const double epsilon = 0.0001;
-  if(responseCard.GetJetType() != card->GetJetType() || card->GetJetAxis() < 0 || responseCard.GetJetAxis() < 0 || responseCard.GetJetAxis() != card->GetJetAxis() || std::abs(responseCard.GetJetRadius() - card->GetJetRadius()) > epsilon){
-    throw std::invalid_argument("Jet type, axis or radius differs between data and the explicit unfolding response.");
-  }
-  if(responseCard.GetNJetPtBinsEEC() != card->GetNJetPtBinsEEC() || responseCard.GetNTrackPtBinsEEC() != card->GetNTrackPtBinsEEC()){
-    throw std::invalid_argument("Jet/track pT binning differs between data and the explicit unfolding response.");
-  }
-  for(int iBin = 0; iBin < card->GetNJetPtBinsEEC(); ++iBin){
-    if(std::abs(responseCard.GetLowBinBorderJetPtEEC(iBin) - card->GetLowBinBorderJetPtEEC(iBin)) > epsilon || std::abs(responseCard.GetHighBinBorderJetPtEEC(iBin) - card->GetHighBinBorderJetPtEEC(iBin)) > epsilon){
-      throw std::invalid_argument("Jet pT bin edges differ between data and the explicit unfolding response.");
-    }
-  }
-  for(int iBin = 0; iBin < card->GetNTrackPtBinsEEC(); ++iBin){
-    if(std::abs(responseCard.GetLowBinBorderTrackPtEEC(iBin) - card->GetLowBinBorderTrackPtEEC(iBin)) > epsilon || std::abs(responseCard.GetHighBinBorderTrackPtEEC(iBin) - card->GetHighBinBorderTrackPtEEC(iBin)) > epsilon){
-      throw std::invalid_argument("Track pT bin edges differ between data and the explicit unfolding response.");
-    }
-  }
-  if(fIsPbPbData || collisionSystem.Contains("OO")){
-    if(responseCard.GetNCentralityBins() != card->GetNCentralityBins()){
-      throw std::invalid_argument("Centrality binning differs between data and the explicit unfolding response.");
-    }
-    for(int iBin = 0; iBin < card->GetNCentralityBins(); ++iBin){
-      if(std::abs(responseCard.GetLowBinBorderCentrality(iBin) - card->GetLowBinBorderCentrality(iBin)) > epsilon || std::abs(responseCard.GetHighBinBorderCentrality(iBin) - card->GetHighBinBorderCentrality(iBin)) > epsilon){
-        throw std::invalid_argument("Centrality bin edges differ between data and the explicit unfolding response.");
-      }
-    }
-  }
-  const char* responseDirectories[] = {"jetPtUnfoldingMeasured", "jetPtUnfoldingTruth", "jetPtUnfoldingResponse"};
-  for(const char* name : responseDirectories){
-    if(!responseFile->GetDirectory(name)){
-      throw std::invalid_argument("Explicit response is missing processed unfolding histograms: " + std::string(name));
-    }
-  }
 }
 
 /*
@@ -944,8 +840,6 @@ void EECUnfoldConfiguration::InitializeArrays(){
  */
 double EECUnfoldConfiguration::GetNumberOfIterations(const std::pair<double,double> centralityBinBorders, double trackPtBorderLow) const{
 
-  if(fExplicitNumberOfIterations > 0) return fExplicitNumberOfIterations;
-
   // For now, just return 4. I will redo the logic later
   if(fSystematicIndex == kNumberOfIterationsDown) return 3;
   if(fSystematicIndex == kNumberOfIterationsUp) return 5;
@@ -1029,25 +923,4 @@ double EECUnfoldConfiguration::GetNumberOfIterations(const std::pair<double,doub
 // Getter for the name of the file containing the response matrices
 TString EECUnfoldConfiguration::GetResponseFileName() const{
   return fResponseMatrixFileName;
-}
-
-// Select complete native Run-3 bins within the existing 120-200 GeV study window.
-std::vector<std::pair<double,double>> EECUnfoldConfiguration::SelectUnfoldedJetPtBins(const EECCard& card){
-  const TString collisionSystem = card.GetDataType();
-  if(!collisionSystem.Contains("OO") && !collisionSystem.Contains("ppRef")){
-    return {{120,140}, {140,160}, {160,180}, {180,200}};
-  }
-
-  std::vector<std::pair<double,double>> selectedBins;
-  const double epsilon = 0.0001;
-  for(int iBin = 0; iBin < card.GetNJetPtBinsEEC(); ++iBin){
-    const auto bin = card.GetBinBordersJetPtEEC(iBin);
-    if(bin.first >= 120 - epsilon && bin.second <= 200 + epsilon && bin.second > bin.first){
-      selectedBins.push_back(bin);
-    }
-  }
-  if(selectedBins.empty()){
-    throw std::invalid_argument("No complete Run-3 jet pT bins lie inside the 120-200 GeV unfolding study window. Configure the input card or study window before unfolding.");
-  }
-  return selectedBins;
 }

@@ -91,11 +91,8 @@ void randomizeWithinUncertainties(TH2D* randomizedHistogram){
  *.  int iWeightExponent = Exponent given for the energy weights for energy-energy correaltors. 
  *                               0: Read the used weight exponent from the input file
  *                               >0: Use manually defined exponent. Currently 1 and 2 are implemented.
- *   TString responseFileName = Explicit processed response file; required for OO/ppRef.
- *   const int numberOfIterations = Explicit positive iteration count for that file, chosen with closure tests.
- *                                 Explicit file/count overrides automatic legacy split/systematic selection.
  */
-void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int iSplit = 0, const int iSystematic = 0, const int iEnergyEnergyCorrelator = EECHistogramManager::kEnergyEnergyCorrelator, int iWeightExponent = 0, TString responseFileName = "", const int numberOfIterations = 0){
+void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int iSplit = 0, const int iSystematic = 0, const int iEnergyEnergyCorrelator = EECHistogramManager::kEnergyEnergyCorrelator, int iWeightExponent = 0){
 
   // **********************************
   //       Open the input files
@@ -104,7 +101,7 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   // First, open the data iput file and obtain the EECCard from the file
   TFile* dataInputFile = TFile::Open(dataFileName);
 
-  if(dataInputFile == NULL || dataInputFile->IsZombie()) {
+  if(dataInputFile == NULL) {
     cout << "Error! The file " << dataFileName.Data() << " does not exist!" << endl;
     cout << "Maybe you forgot the data/ folder path?" << endl;
     cout << "Will not execute the code" << endl;
@@ -113,11 +110,9 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
 
   EECCard* dataCard = new EECCard(dataInputFile);
 
-  // OO, like PbPb, has distinct centrality bins.
+  // Determine if we are dealing with pp or PbPb data
   TString collisionSystem = dataCard->GetDataType();
   bool isPbPbData = collisionSystem.Contains("PbPb");
-  bool isOOData = collisionSystem.Contains("OO");
-  bool hasCentrality = isPbPbData || isOOData;
 
   // Flag for generator level jets. If data file has generator level jets, do not unfold.
   // Running it still through this macro gives consistent histogram naming, which makes some things easier later.
@@ -127,12 +122,12 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   if(iWeightExponent == 0) iWeightExponent = dataCard->GetWeightExponent();
 
   // Use the information from the dataCard to create an unfolding configuration
-  EECUnfoldConfiguration* unfoldConfigurationProvider = new EECUnfoldConfiguration(dataCard, iSplit, iSystematic, iWeightExponent, responseFileName, numberOfIterations);
+  EECUnfoldConfiguration* unfoldConfigurationProvider = new EECUnfoldConfiguration(dataCard, iSplit, iSystematic, iWeightExponent);
 
   // Open the response matric file based on the information on the unfolding configuration
   TFile* responseInputFile = TFile::Open(unfoldConfigurationProvider->GetResponseFileName());
   
-  if(responseInputFile == NULL || responseInputFile->IsZombie()) {
+  if(responseInputFile == NULL) {
     cout << "Error! The file " << unfoldConfigurationProvider->GetResponseFileName().Data() << " does not exist!" << endl;
     cout << "Maybe you forgot the data/ folder path?" << endl;
     cout << "Will not execute the code" << endl;
@@ -147,25 +142,23 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   //       Check that the centrality, jet pT and track pT bins match with the files
   // **********************************************************************************
 
-  if(isPbPbData != responseCard->GetDataType().Contains("PbPb") || isOOData != responseCard->GetDataType().Contains("OO") || collisionSystem.Contains("ppRef") != responseCard->GetDataType().Contains("ppRef")){
-    cout << "Collision systems differ between the data and unfolding histograms!" << endl;
+  if(isPbPbData != (dataCard->GetDataType().Contains("PbPb"))){
+    cout << "You are trying to unfold pp with PbPb unfolding histograms or vice versa!" << endl;
     cout << "Please ensure that the data and unfolding histograms are comparible!" << endl;
-    return;
   }
 
-  // PbPb legacy matrices can use shifted bins; explicit OO responses require matching bins.
-  if(hasCentrality){
-    const double centralityTolerance = isOOData ? 0.0001 : 6;
+  // Only check compatible centrality bins for PbPb
+  if(isPbPbData){
     if(responseCard->GetNCentralityBins() != dataCard->GetNCentralityBins()) {
       cout << "Error! Centrality bins do not match between the two files! Cannot execute the code!" << endl;
       return;
     }
     for(int iCentrality = 0; iCentrality < responseCard->GetNCentralityBins(); iCentrality++){
-      if(TMath::Abs(responseCard->GetLowBinBorderCentrality(iCentrality) - dataCard->GetLowBinBorderCentrality(iCentrality)) > centralityTolerance){
+      if(TMath::Abs(responseCard->GetLowBinBorderCentrality(iCentrality) - dataCard->GetLowBinBorderCentrality(iCentrality)) > 6){
         cout << "Error! Centrality bins do not match between the two files! Cannot execute the code!" << endl;
         return;
       }
-      if(TMath::Abs(responseCard->GetHighBinBorderCentrality(iCentrality) - dataCard->GetHighBinBorderCentrality(iCentrality)) > centralityTolerance){
+      if(TMath::Abs(responseCard->GetHighBinBorderCentrality(iCentrality) - dataCard->GetHighBinBorderCentrality(iCentrality)) > 6){
         cout << "Error! Centrality bins do not match between the two files! Cannot execute the code!" << endl;
         return;
       }
@@ -207,7 +200,7 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   // ********************************************************
   
   // Find the number of bins from the card
-  const int nCentralityBins = hasCentrality ? responseCard->GetNCentralityBins() : 1;
+  const int nCentralityBins = (isPbPbData) ? responseCard->GetNCentralityBins() : 1;
   const int nTrackPtBins = responseCard->GetNTrackPtBinsEEC();
   const int nJetPtBins = dataCard->GetNJetPtBinsEEC();
 
@@ -217,22 +210,23 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   
   int firstStudiedTrackPtBinEEC = 1;
   int lastStudiedTrackPtBinEEC = 5;
-  if(firstStudiedTrackPtBinEEC < 0 || lastStudiedTrackPtBinEEC >= nTrackPtBins){
-    cout << "Error! Configure the studied track pT bin range for the current input cards before unfolding." << endl;
-    return;
-  }
 
-  // Run-3 cards define the jet pT binning; select complete bins inside the
-  // existing 120-200 GeV study window. Preserve the legacy four-bin selection.
-  std::vector<std::pair<double,double>> unfoldedJetPtBins = EECUnfoldConfiguration::SelectUnfoldedJetPtBins(*dataCard);
+  // Select explicitly the jet pT bins that we are going to unfold
+  std::vector<std::pair<double,double>> unfoldedJetPtBins;
+  //unfoldedJetPtBins.push_back(std::make_pair(100,120));
+  unfoldedJetPtBins.push_back(std::make_pair(120,140));
+  unfoldedJetPtBins.push_back(std::make_pair(140,160));
+  unfoldedJetPtBins.push_back(std::make_pair(160,180));
+  unfoldedJetPtBins.push_back(std::make_pair(180,200));
+  //unfoldedJetPtBins.push_back(std::make_pair(200,220));
+  //unfoldedJetPtBins.push_back(std::make_pair(220,240));
+
+  //unfoldedJetPtBins.push_back(std::make_pair(135,155));
+  //unfoldedJetPtBins.push_back(std::make_pair(155,175));
+  //unfoldedJetPtBins.push_back(std::make_pair(175,195));
+  //unfoldedJetPtBins.push_back(std::make_pair(195,215));
 
   const int nUnfoldedJetPtBins = unfoldedJetPtBins.size();
-  for(const auto& bin : unfoldedJetPtBins){
-    if(dataCard->FindBinIndexJetPtEEC(bin) < 0){
-      cout << "Error! Requested unfolded jet pT bin " << bin.first << "-" << bin.second << " is absent from the input card. Configure unfoldedJetPtBins before unfolding." << endl;
-      return;
-    }
-  }
 
   bool includeCovariance = false;
 
@@ -288,15 +282,6 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
       hUnfoldingMeasured[iCentrality][iTrackPt] = responseHistograms->GetHistogramJetPtUnfoldingMeasured(iCentrality, iTrackPt);
       hUnfoldingTruth[iCentrality][iTrackPt] = responseHistograms->GetHistogramJetPtUnfoldingTruth(iCentrality, iTrackPt);
       hUnfoldingResponse[iCentrality][iTrackPt] = responseHistograms->GetHistogramJetPtUnfoldingResponse(iCentrality, iTrackPt);
-
-      if(!hUnfoldingMeasured[iCentrality][iTrackPt] || !hUnfoldingTruth[iCentrality][iTrackPt] || !hUnfoldingResponse[iCentrality][iTrackPt]){
-        cout << "Error! Missing measured/truth/response histogram for centrality bin " << iCentrality << ", track pT bin " << iTrackPt << ". Cannot unfold." << endl;
-        return;
-      }
-      if(hUnfoldingResponse[iCentrality][iTrackPt]->GetNbinsX() != hUnfoldingMeasured[iCentrality][iTrackPt]->GetNbinsX() || hUnfoldingResponse[iCentrality][iTrackPt]->GetNbinsY() != hUnfoldingTruth[iCentrality][iTrackPt]->GetNbinsX()){
-        cout << "Error! Response dimensions differ from measured/truth distributions. Cannot unfold." << endl;
-        return;
-      }
 
       // Revome the overflow and underflow bins from the histograms
       removeOutOfRange(hUnfoldingMeasured[iCentrality][iTrackPt]);

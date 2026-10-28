@@ -125,7 +125,7 @@ if(fDataType < 0 || fDataType > 12){
   // Remember the data type without the MC type
   fDataTypeStringWithoutMCType = alternativeDataTypes[fDataType];
   
-  // Include the correlation mode for legacy and Run-3 MC productions.
+  // Define Monte Carlo types and add them to MC productions, which are data types 2 and 3
   TString monteCarloString[4] = {" RecoReco"," RecoGen"," GenReco"," GenGen"};
   if(fMonteCarloType < 0 || fMonteCarloType > 3){
     fDataTypeString = "Unknown";
@@ -133,8 +133,7 @@ if(fDataType < 0 || fDataType > 12){
     return;
   }
   
-  const int mcDataTypes[] = {2, 3, 10, 12};
-  for(int iDataType : mcDataTypes){
+  for(int iDataType = 2; iDataType <=3; iDataType++){
     dataTypes[iDataType].Append(monteCarloString[fMonteCarloType]);
     alternativeDataTypes[iDataType].Append(monteCarloString[fMonteCarloType]);
   }
@@ -201,12 +200,6 @@ int EECCard::GetSubeventCut() const{
  */
 int EECCard::GetJetType() const{
   return (*fCardEntries[kJetType])[1];
-}
-
-// Getter for the jet axis. Missing metadata cannot establish compatibility.
-int EECCard::GetJetAxis() const{
-  if(fCardEntries[kJetAxis] == nullptr) return -1;
-  return (*fCardEntries[kJetAxis])[1];
 }
 
 // Getter for the minimum jet pT cut
