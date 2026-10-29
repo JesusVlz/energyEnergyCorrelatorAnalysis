@@ -38,9 +38,9 @@ public:
   void Write(TString outputFileName) const;  // Write the histograms to a file
   void SetCard(ConfigurationCard* newCard);  // Set a new configuration card for the histogram class
 
-  void FillInclusiveCoverage(Int_t hiBin, Int_t stage, Bool_t isOO);
-  void FillInclusiveSelectedEvent(Int_t hiBin, Double_t hfSum, Double_t vz, Double_t diagnosticWeight);
-  void MarkInclusiveTruncatedInput();
+  void FillEventCoverage(Int_t hiBin, Int_t stage, Bool_t isOO);
+  void FillSelectedEvent(Int_t hiBin, Double_t hfSum, Double_t vz, Double_t eventWeight);
+  void MarkTruncatedInput();
 
   // Getters
   Int_t GetNDeltaRBinsEEC(); // Get the number of deltaR bins for energy-energy correlators
@@ -52,6 +52,9 @@ public:
   TH1F* fhVertexZ;                 // Vertex z-position
   TH1F* fhVertexZWeighted;         // Weighted vertex z-position (only meaningfull for MC)
   TH1F* fhEvents;                  // Number of events. For binning see enumEventTypes.
+  TH1D* fhJetVetoEventCounts = nullptr;
+  TH2D* fhJetVetoEtaPhiBefore[2] = {nullptr, nullptr}; // signal and mixing; all eligible reco jets
+  TH2D* fhJetVetoEtaPhiAfter[2] = {nullptr, nullptr}; // only events passing the full event veto
   TH1F* fhTriggers;                // Number of events selected for each trigger. For binning, see enumTriggerBits
   TH1F* fhTriggersAfterSelection;  // Same as before, but after trigger selection. For binning, see enumTriggerBits
   TH1F* fhTrackCuts;               // Number of tracks. For binning see enumTrackCuts.
@@ -100,13 +103,12 @@ public:
   THnSparseF* fhParticleDeltaRResponse;     // Response matrix for particle pair deltaR values
   THnSparseF* fhParticlePtResponse;         // Response matrix for particle pair pT1*pT2 values
 
-  // Opt-in raw diagnostics use no centrality axis and never replace the split products.
-  THnSparseD* fhInclusiveRawEEC; // [deltaR][jetPt][lowerTrackPt][pairing][subevent][powerIndex]
-  TH1D* fhInclusiveJetExposure; // Sum diagnostic event weights once per selected jet
-  TH2D* fhInclusiveEventCoverage; // [stored activity category][selection stage], unweighted
-  TH1D* fhInclusiveSelectedActivityWeighted; // Accepted event diagnostic weights, Sumw2 retained
-  THnSparseD* fhInclusiveEventActivity; // Actual stored [hiBin][hfSum][vz], including flow bins
-  TH1D* fhInclusiveInputStatus; // Read files; files truncated by explicit pilot limit
+  // Generic event-coverage QA, independent of the ordinary centrality output binning.
+  TH1D* fhJetExposure; // Sum standard event weights once per selected jet
+  TH2D* fhEventCoverage; // [stored activity category][selection stage], unweighted
+  TH1D* fhSelectedActivityWeighted; // Accepted standard event weights, Sumw2 retained
+  THnSparseD* fhEventActivity; // Actual stored [hiBin][hfSum][vz], including flow bins
+  TH1D* fhInputStatus; // Read files; files truncated by explicit pilot limit
 
 private:
   

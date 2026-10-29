@@ -384,6 +384,9 @@ UnfoldingForestReader::UnfoldingForestReader(const UnfoldingForestReader& in) :
   fGenParticleSubeventArray(in.fGenParticleSubeventArray)
 {
   // Copy constructor
+  fRun3JetSelectionEnabled = in.fRun3JetSelectionEnabled;
+  fRun3JetInputsBound = in.fRun3JetInputsBound;
+  fRun3PFJetInputs = in.fRun3PFJetInputs;
   
   for(Int_t i = 0; i < fnMaxJet; i++){
     fJetPtArray[i] = in.fJetPtArray[i];
@@ -432,6 +435,9 @@ UnfoldingForestReader& UnfoldingForestReader::operator=(const UnfoldingForestRea
   
   if (&in==this) return *this;
   
+  fRun3JetSelectionEnabled = in.fRun3JetSelectionEnabled;
+  fRun3JetInputsBound = in.fRun3JetInputsBound;
+  fRun3PFJetInputs = in.fRun3PFJetInputs;
   fDataType = in.fDataType;
   fJetType = in.fJetType;
   fJetAxis = in.fJetAxis;
@@ -568,6 +574,7 @@ UnfoldingForestReader::~UnfoldingForestReader(){
  * Initialization, meaning that the branches are connected to the tree
  */
 void UnfoldingForestReader::Initialize(){
+  fRun3JetInputsBound = false;
   
   // Connect the branches of the heavy ion tree
   fHeavyIonTree->SetBranchStatus("*",0);
@@ -600,6 +607,27 @@ void UnfoldingForestReader::Initialize(){
   BindForestBranch(fJetTree, "nref", &fnJets, &fnJetsBranch, IsRun3());
   BindForestBranch(fJetTree, "rawpt", &fJetRawPtArray, &fJetRawPtBranch, IsRun3());
   BindForestBranch(fJetTree, "trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch, IsRun3());
+  if(fRun3JetSelectionEnabled){
+    fRun3PFJetInputs.Bind(fJetTree);
+    EECJetSelection::Detail::RequireJetLeaf(fJetTree, "trackMax", "Float_t", "nref");
+    if(fJetAxis == 1){
+      EECJetSelection::Detail::RequireJetLeaf(fJetTree, "WTAeta", "Float_t", "nref");
+      EECJetSelection::Detail::RequireJetLeaf(fJetTree, "WTAphi", "Float_t", "nref");
+    }
+    if(IsMC()){
+      EECJetSelection::Detail::RequireJetLeaf(fJetTree, "ngen", "Int_t");
+      for(const char* name : {"refpt", "refeta", "refphi"})
+        EECJetSelection::Detail::RequireJetLeaf(fJetTree, name, "Float_t", "nref");
+      for(const char* name : {"genpt", "geneta", "genphi"})
+        EECJetSelection::Detail::RequireJetLeaf(fJetTree, name, "Float_t", "ngen");
+      if(fJetAxis == 1){
+        EECJetSelection::Detail::RequireJetLeaf(fJetTree, "WTAgeneta", "Float_t", "ngen");
+        EECJetSelection::Detail::RequireJetLeaf(fJetTree, "WTAgenphi", "Float_t", "ngen");
+      }
+    }
+    fRun3JetInputsBound = true;
+  }
+
 
   // If we are looking at Monte Carlo, connect the reference jet and gen jet arrays
   if(IsMC()){
@@ -787,6 +815,7 @@ void UnfoldingForestReader::BurnForest(){
   if(fTrackTree) fTrackTree->Delete();
   if(fGenParticleTree) fGenParticleTree->Delete();
   fHeavyIonTree = fJetTree = fTrackTree = fGenParticleTree = nullptr;
+  fRun3JetInputsBound = false;
   fnJets = fnGenJets = fnTracks = fnGenParticles = 0;
 }
 
@@ -799,8 +828,16 @@ void UnfoldingForestReader::GetEvent(Int_t nEvent){
   }
   // Read multiplicities first so a larger production cannot overwrite the fixed
   // jet/legacy-track buffers before the incompatibility is detected.
-  if(fnJetsBranch) fnJetsBranch->GetEntry(nEvent);
-  if(IsMC() && fnGenJetsBranch) fnGenJetsBranch->GetEntry(nEvent);
+  if(fnJetsBranch){
+    const Long64_t bytes = fnJetsBranch->GetEntry(nEvent);
+    if(fRun3JetSelectionEnabled && bytes <= 0)
+      throw std::runtime_error("UnfoldingForestReader: failed to read Run-3 native jet count");
+  }
+  if(IsMC() && fnGenJetsBranch){
+    const Long64_t bytes = fnGenJetsBranch->GetEntry(nEvent);
+    if(fRun3JetSelectionEnabled && bytes <= 0)
+      throw std::runtime_error("UnfoldingForestReader: failed to read Run-3 native generator jet count");
+  }
   if(fnJets < 0 || fnJets > fnMaxJet || fnGenJets < 0 || fnGenJets > fnMaxJet){
     throw std::runtime_error("UnfoldingForestReader: jet multiplicity exceeds the reader buffer");
   }
@@ -811,7 +848,9 @@ void UnfoldingForestReader::GetEvent(Int_t nEvent){
     }
   }
   fHeavyIonTree->GetEntry(nEvent);
-  fJetTree->GetEntry(nEvent);
+  const Long64_t jetBytes = fJetTree->GetEntry(nEvent);
+  if(fRun3JetSelectionEnabled && jetBytes <= 0)
+    throw std::runtime_error("UnfoldingForestReader: failed to read Run-3 native jet payload");
   fTrackTree->GetEntry(nEvent);
   if(fIsMiniAOD){
     if(!fTrackPtVector) throw std::runtime_error("UnfoldingForestReader: track pT vector was not read");
@@ -1246,4 +1285,21 @@ Int_t UnfoldingForestReader::GetGenParticleCharge(Int_t iTrack) const{
 // Getter for generator level particle subevent index
 Int_t UnfoldingForestReader::GetGenParticleSubevent(Int_t iTrack) const{
   return fGenParticleSubeventArray->at(iTrack);
+}
+
+void UnfoldingForestReader::EnableRun3JetSelection(Bool_t enabled){
+  if(fHeavyIonTree && enabled != fRun3JetSelectionEnabled)
+    throw std::logic_error("UnfoldingForestReader: enable Run-3 jet selection before opening a forest");
+  if(enabled && !IsRun3())
+    throw std::invalid_argument("UnfoldingForestReader: Run-3 jet selection requires OO/ppRef Run-3 forests");
+  fRun3JetSelectionEnabled = enabled;
+}
+
+EECJetSelection::JetInputs UnfoldingForestReader::GetJetSelectionInputs(Int_t iJet) const{
+  if(!fRun3JetSelectionEnabled || !fRun3JetInputsBound)
+    throw std::logic_error("UnfoldingForestReader: Run-3 jet selection inputs were not enabled before opening the forest");
+  if(iJet < 0 || iJet >= fnJets)
+    throw std::out_of_range("UnfoldingForestReader: invalid Run-3 selection jet index");
+  return fRun3PFJetInputs.Get(iJet, fJetEtaArray[iJet], fJetPhiArray[iJet],
+                             fJetRawPtArray[iJet], fJetPtArray[iJet]);
 }

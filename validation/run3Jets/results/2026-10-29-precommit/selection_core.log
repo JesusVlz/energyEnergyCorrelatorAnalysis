@@ -1,0 +1,2 @@
+Error in <TFile::TFile>: file /tmp/eec-run3-jet-selection-LMGo9a/absent.root does not exist
+PASS: supplied tight/lepton-veto and pinned HIN PbPb/pp Jet ID, eta and threshold boundaries, event-veto selection, explicit detached ROOT map, negative masks, invalid payload and coordinate rejection

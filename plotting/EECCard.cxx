@@ -4,6 +4,7 @@
 
 // Own includes
 #include "EECCard.h"
+#include <stdexcept>
 
 /*
  * Contructor with input file
@@ -146,6 +147,12 @@ if(fDataType < 0 || fDataType > 12){
 /*
  *  Getter for data type string
  */
+const TVectorT<float>* EECCard::GetCardEntry(int entryIndex) const{
+  if(entryIndex < 0 || entryIndex >= knEntries)
+    throw std::out_of_range("EECCard: invalid metadata entry index");
+  return fCardEntries[entryIndex];
+}
+
 TString EECCard::GetDataType() const{
   return fDataTypeString;
 }
@@ -180,12 +187,12 @@ int EECCard::GetLastUnfoldedTrackPtBin() const{
 
 // Getter for the first unfolded jet pT bin index
 int EECCard::GetFirstUnfoldedJetPtBin() const{
-  return (*fCardEntries[kFirstUnfoldedJetPtBin])[1];
+  return fCardEntries[kFirstUnfoldedJetPtBin] ? (*fCardEntries[kFirstUnfoldedJetPtBin])[1] : -1;
 } 
 
 // Getter for the last unfolded jet pT bin index
 int EECCard::GetLastUnfoldedJetPtBin() const{
-  return (*fCardEntries[kLastUnfoldedJetPtBin])[1];
+  return fCardEntries[kLastUnfoldedJetPtBin] ? (*fCardEntries[kLastUnfoldedJetPtBin])[1] : -1;
 } 
 
 /*

@@ -9,6 +9,8 @@
 #ifndef UNFOLDINGFORESTREADER_H
 #define UNFOLDINGFORESTREADER_H
 
+#include "Run3JetSelectionInputs.h"
+
 // C++ includes
 #include <iostream>
 #include <assert.h>
@@ -72,6 +74,9 @@ public:
   Float_t GetMatchedGenPt(Int_t iJet) const;  // Getter for matched generator level jet pT
   Float_t GetMatchedGenEta(Int_t iJet) const; // Getter for matched generator level jet eta
   Float_t GetMatchedGenPhi(Int_t iJet) const; // Getter for matched generator level jet phi
+
+  void EnableRun3JetSelection(Bool_t enabled = true);
+  EECJetSelection::JetInputs GetJetSelectionInputs(Int_t iJet) const;
 
   // Getters for leaves in generator level jet tree
   Int_t GetNGeneratorJets() const;                   // Getter for number of generator level jets
@@ -193,6 +198,10 @@ private:
   Int_t fHiBin;        // HiBin = Centrality percentile * 2
   Float_t fPtHat;      // pT hat
   
+  Bool_t fRun3JetSelectionEnabled = false;
+  Bool_t fRun3JetInputsBound = false;
+  EECJetSelection::Detail::NativePFJetInputs<fnMaxJet> fRun3PFJetInputs;
+
   // Leaves for jet tree
   Int_t fnJets;          // number of jets in an event
   Int_t fnGenJets;       // Number of generator level jets in an event

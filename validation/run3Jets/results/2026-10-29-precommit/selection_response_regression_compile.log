@@ -1,0 +1,3 @@
+validation/run3Response/checkAnalyzerConfiguration.cxx:2:1: warning: multi-line comment [-Wcomment]
+    2 | // g++ $(root-config --cflags) -fno-access-control -I. \
+      | ^

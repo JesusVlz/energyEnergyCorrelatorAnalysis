@@ -1,48 +1,70 @@
 #!/usr/bin/env python3
-"""Inspect actual capped raw outputs; never certify corrections or acceptance."""
+"""Compare actual capped ordinary OO fills against disjoint centrality binning.
+Run standard manager projection/reload on OO and pp; no physics closure claim.
+"""
 import argparse
 import json
+import math
 from pathlib import Path
 import ROOT
+from check_projection import configure
+
+
+def sparse_values(h):
+    return [(h.GetBinContent(i),h.GetBinError(i)) for i in range(h.GetNbins())]
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("directory", type=Path)
-    parser.add_argument("--output", required=True, type=Path)
-    args = parser.parse_args()
-    out = {}
-    for system in ("OO", "pp"):
-        path = args.directory / (system+"_R04_raw.root")
-        f = ROOT.TFile(str(path))
-        coverage = f.Get("inclusive/inclusiveEventCoverage")
-        raw = f.Get("inclusive/inclusiveRawEEC")
-        exposure = f.Get("inclusive/inclusiveJetExposure")
-        if not coverage or not raw or not exposure:
-            raise RuntimeError("Missing real inclusive diagnostic outputs")
-        stages = {coverage.GetYaxis().GetBinLabel(y):sum(coverage.GetBinContent(x,y) for x in range(1,6)) for y in range(1,5)}
-        categories = {coverage.GetXaxis().GetBinLabel(x):coverage.GetBinContent(x,4) for x in range(1,6)}
-        edges = f.Get("JCard/CentralityBinEdges")
-        projected = ROOT.TFile(str(path.with_name(system+"_R04_projected.root")))
-        spectra = {f"J{lo}_{hi}_N{n}":projected.Get(f"INC_R04_J{lo}_{hi}_N{n}_rawSelected").Integral()
-                   for lo,hi in ((40,80),(80,120),(120,160)) for n in (1,2)}
-        out[system] = dict(status="BOUNDED_RAW_DIAGNOSTIC_ONLY", stage_counts=stages,
-                           selected_activity_categories=categories, raw_pair_entries=raw.GetEntries(),
-                           jet_weighted_exposure=exposure.Integral(), projected_raw_integrals=spectra,
-                           centrality_axis_edges=[edges.GetMatrixArray()[i] for i in range(edges.GetNrows())],
-                           correction_state=f.Get("inclusive/CorrectionState").GetTitle(),
-                           truncated_files=f.Get("inclusive/inclusiveInputStatus").GetBinContent(2))
-        if stages["Read from forest"] != 100 or out[system]["truncated_files"] != 1:
-            raise RuntimeError("Pilot cap/coverage incorrect")
-        if raw.GetEntries() <= 0 or exposure.Integral() <= 0:
-            raise RuntimeError("Empty real selected-event diagnostic")
-        projected.Close()
-        f.Close()
-    with args.output.open("x") as stream:
-        json.dump(out, stream, indent=2, allow_nan=False)
-        stream.write("\n")
-    print(json.dumps(out, indent=2))
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('directory',type=Path)
+    parser.add_argument('--output',required=True,type=Path)
+    args=parser.parse_args()
+    ROOT.gROOT.SetBatch(True)
+    repo=Path(__file__).resolve().parents[2]
+    assert ROOT.gSystem.Load(str(args.directory/'projection-fixtures/standardManager.so'))>=0
+    ROOT.gInterpreter.AddIncludePath(str(repo))
+    ROOT.gInterpreter.Declare('#include "plotting/EECHistogramManager.h"')
+    reports={}
+    sources={}
+    for system in ('OO','pp','OO_split'):
+        path=args.directory/(system+'_R04_standard.root')
+        if not path.exists():continue
+        f=ROOT.TFile(str(path));sources[system]=f
+        h=f.Get('energyEnergyCorrelator');q=f.Get('eventQA/eventCoverage')
+        assert h and q and not f.Get('inclusive')
+        reports[system]={'status':'BOUNDED_STANDARD_EEC_SOFTWARE_DIAGNOSTIC',
+                         'selected_events':sum(q.GetBinContent(x,4) for x in range(1,6)),
+                         'read_events':sum(q.GetBinContent(x,1) for x in range(1,6)),
+                         'pair_entries':h.GetEntries(), 'pairs_sumw':sum(v for v,e in sparse_values(h)),
+                         'pairs_sumw2':sum(e*e for v,e in sparse_values(h))}
+        assert reports[system]['read_events']==100
+        if system=='OO_split':continue
+        reports[system]['projected']={}
+        for n in (1,2):
+            m=configure(f,n);m.LoadHistograms()
+            expected=[]
+            for j in range(3):
+                hist=m.GetHistogramEnergyEnergyCorrelator(0,0,j,3,0,4)
+                expected.append(hist.Integral('width'))
+            output=args.directory/f'{system}_R04_N{n}_projected.root'
+            m.Write(str(output),'RECREATE')
+            loaded=ROOT.TFile(str(output));restored=configure(loaded,n,True)
+            restored.LoadProcessedHistograms()
+            for j,total in enumerate(expected):
+                assert math.isclose(restored.GetHistogramEnergyEnergyCorrelator(0,0,j,3,0,4).Integral('width'),total,rel_tol=1e-7,abs_tol=1e-10)
+            reports[system]['projected'][str(n)]=expected
+            del restored
+            loaded.Close()
+            del m
+    if 'OO_split' in reports:
+        for key in ('selected_events','read_events','pair_entries','pairs_sumw','pairs_sumw2'):
+            assert math.isclose(reports['OO'][key],reports['OO_split'][key],rel_tol=1e-7,abs_tol=1e-9),(key,reports['OO'][key],reports['OO_split'][key])
+        for name in ('eventQA/eventActivity',):
+            assert sparse_values(sources['OO'].Get(name))==sparse_values(sources['OO_split'].Get(name)),name
+        reports['binning_invariance']='PASS: identical counts/activity ledger; summed pair yields and Sumw2 agree within 1e-7 relative Float_t accumulation tolerance over same accepted range'
+    args.output.write_text(json.dumps(reports,indent=2)+'\n')
+    print(json.dumps(reports,indent=2))
+    for f in sources.values():f.Close()
 
 
-if __name__ == "__main__":
-    main()
+if __name__=='__main__':main()

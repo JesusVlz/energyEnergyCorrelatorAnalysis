@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import shlex
+import re
 import subprocess
 import sys
 import time
@@ -37,8 +38,17 @@ def main():
     run("build", ["make", "-B", "-j4"])
     run("cards", [sys.executable, "validation/run3Workflow/check_cards.py"])
     run("metadata_statistics", [sys.executable, "-m", "unittest", "discover", "-s", "validation/run3Workflow", "-p", "test_*.py", "-v"])
+    run("inclusive_regression", [sys.executable, "validation/run3Inclusive/run_tests.py"])
     run("projection_synthetic", [sys.executable, "validation/run3Workflow/check_projection.py", str(out/"projection-fixtures")])
     flags = shlex.split(subprocess.check_output(["root-config", "--cflags", "--libs"], text=True))
+    unfolding_binary = out/"testUnfoldConfiguration"
+    run("build_unfolding_regression", ["g++", "-Iplotting",
+         "validation/run3Unfolding/testUnfoldConfiguration.cxx",
+         "plotting/EECCard.cxx", "plotting/EECUnfoldConfiguration.cxx",
+         *flags, "-lEG", "-o", str(unfolding_binary)])
+    unfolding_fixtures = out/"unfolding-fixtures"
+    unfolding_fixtures.mkdir()
+    run("unfolding_regression", [str(unfolding_binary), str(unfolding_fixtures)])
     objects = sorted(str(p.relative_to(repo)) for p in (repo/"src").glob("*.o"))
     binary = out/"checkAnalyzerConfiguration"
     run("build_analyzer_regression", ["g++", "-fno-access-control", "-I.",
@@ -47,12 +57,15 @@ def main():
     for system, path in (("OO", args.oo), ("pp", args.pp)):
         if path is None:
             continue
-        target = out/(system+"_R04_raw.root")
+        target = out/(system+"_R04_standard.root")
         card = "validation/run3Workflow/cards/"+system+"MC_R04_diagnostic.input"
         run(system+"_actual_capped", [str(repo/"eecAnalysis"), str(path.resolve()), card, str(target), "1", "true"], timeout=120)
-        projected = out/(system+"_R04_projected.root")
-        invocation = "validation/run3Workflow/projectInclusiveRaw.C("+json.dumps(str(target))+","+json.dumps(str(projected))+")"
-        run(system+"_actual_projection", ["root", "-l", "-b", "-q", invocation])
+        if system == "OO":
+            split_card = out/"OO_split_bounded.input"
+            split_card.write_text(re.sub(r"^CentralityBinEdges .*$", "CentralityBinEdges -1 0 30 50 90 100", (repo/card).read_text(), flags=re.M))
+            run("OO_split_actual_capped", [str(repo/"eecAnalysis"), str(path.resolve()), str(split_card), str(out/"OO_split_R04_standard.root"), "1", "true"], timeout=120)
+    if args.oo or args.pp:
+        run("actual_standard_roundtrip", [sys.executable, "validation/run3Workflow/check_actual_outputs.py", str(out), "--output", str(out/"actual_summary.json")])
     summary = dict(status="PASS_SOFTWARE_AND_BOUNDED_DIAGNOSTICS_ONLY", physics_closure="NOT_RUN",
                    commands=checks, head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip(),
                    outputs={str(p.relative_to(out)): hashlib.sha256(p.read_bytes()).hexdigest()

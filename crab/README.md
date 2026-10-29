@@ -55,6 +55,15 @@ Configuration file for running over the Pythia+Hydjet or Pythia8 samples.
 
 ## Analysis configuration files
 
+These are the operational copies in `crab/`. Their paths are unchanged by
+the Run-2 archive move. The Run-3 R=0.4 cards enable HIN Jet ID and the
+whole-event veto as described in the [main README](../README.md). The CRAB configurations use local
+card basenames, so resolve them from this directory or a staging directory
+containing these copies. The archived root-level Run-2 local cards in
+[`../cards/archive/run2/`](../cards/archive/run2/README.md) are independent
+configurations; do not redirect the CRAB configurations to that archive.
+See the [repository card inventory](../cards/README.md).
+
 The configuration for the analysis is provided in card.input files. For example the collision system, data vs. MC running, and several analysis cuts can be defined in this file. The files contain comments on what each variable mean, so it should be straightforward to modify to your needs. The most important example files are.
 
 **cardEECPbPb.input** /

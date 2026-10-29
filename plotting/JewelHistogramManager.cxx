@@ -2,6 +2,9 @@
  * Implementation of JewelHistogramManager
  */
 
+// ROOT includes
+#include "TMath.h"
+
 // Own includes
 #include "JewelHistogramManager.h"
 

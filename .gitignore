@@ -33,3 +33,11 @@ plotting/nanoDict_rdict.pcm
 
 # Ignore analysis tar ball
 eec5TeV.tar.gz
+
+# Retain map-content evidence images; candidate ROOT payloads remain untracked.
+!validation/run3Jets/evidence/2026-10-28/*.png
+!validation/run3Jets/evidence/2026-10-28/native-replay/*.png
+
+# Owner-enabled Run-3 R4 veto maps referenced by local and CRAB cards.
+!jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root
+!jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root

@@ -3,6 +3,9 @@
 from pathlib import Path
 
 
+STRING_KEYS = {"MixingFileList", "JetVetoMapFile", "JetVetoMapHistogram", "JetVetoPtConvention"}
+
+
 def parse(path):
     result = {}
     for line in path.read_text().splitlines():
@@ -11,7 +14,7 @@ def parse(path):
             continue
         if fields[0] in result:
             raise ValueError(f"Duplicate key in {path}: {fields[0]}")
-        result[fields[0]] = [float(x) for x in fields[1:]]
+        result[fields[0]] = fields[1:] if fields[0] in STRING_KEYS else [float(x) for x in fields[1:]]
     return result
 
 
@@ -26,10 +29,10 @@ def main():
             expected = dict(DataType=[data_type], JetType=[jet_type], JetRadius=[radius],
                             JetAxis=[1], JetEtaCut=[1.6], TrackEtaCut=[2.4],
                             MinTrackPtCut=[.5], WeightExponent=[1, 2],
-                            InclusiveMode=[1], ChannelRadiusCode=[round(radius*10)],
+                            MinPairTrackPt=[2], ChannelRadiusCode=[round(radius*10)],
                             TriggerSelection=[8 if data_type in (9, 11) else 0])
             if data_type in (9, 10):
-                expected.update(CentralityBinEdges=[0, 100], InclusiveCentralityTarget=[0, 100])
+                expected.update(CentralityBinEdges=[-1, 100], BackgroundMethods=[6])
             for key, value in expected.items():
                 if card.get(key) != value:
                     raise ValueError(f"{path}: {key} is {card.get(key)}, expected {value}")

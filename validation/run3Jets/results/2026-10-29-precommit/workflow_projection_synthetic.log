@@ -1,0 +1,74 @@
+/usr/bin/python3 validation/run3Workflow/check_projection.py /tmp/jvelazqu/eec-run3-precommit-20261029-final-workflow/projection-fixtures
+Reading configuration card from file: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECOOInclusiveR04.input
+
+====== Writing into file =========
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+Reading configuration card from file: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECOOMCInclusiveR04.input
+
+====== Writing into file =========
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+Reading configuration card from file: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECpp5v36TeVR04.input
+
+====== Writing into file =========
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+Reading configuration card from file: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECpp5v36TeVMCR04.input
+
+====== Writing into file =========
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+Reading configuration card from file: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECOOInclusiveR08.input
+
+====== Writing into file =========
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+Reading configuration card from file: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECOOMCInclusiveR08.input
+
+====== Writing into file =========
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+Reading configuration card from file: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECpp5v36TeVR08.input
+
+====== Writing into file =========
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+Reading configuration card from file: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECpp5v36TeVMCR08.input
+
+====== Writing into file =========
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+
+EECHistogramManager::LoadProcessedHistograms is obsolete. It should not be anymore to improve memory usage!
+
+PASS: 16 standard manager OO/pp data/MC radius/power fixtures; three jet bins, mixed/perpendicular categories, negative signal retained, wide support, save/load and unfolding-input schema; software only

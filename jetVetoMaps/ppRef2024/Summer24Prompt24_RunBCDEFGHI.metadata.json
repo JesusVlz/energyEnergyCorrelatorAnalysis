@@ -1,0 +1,43 @@
+{
+  "filename": "Summer24Prompt24_RunBCDEFGHI.root",
+  "source_repository": "https://github.com/cms-jet/JECDatabase",
+  "source_commit": "e825b8378a63df0cc4fb4c65dfe6088cbbb54a09",
+  "source_tag": null,
+  "source_path": "jet_veto_maps/Summer24Prompt24_V1/Summer24Prompt24_RunBCDEFGHI.root",
+  "sha256": "ac1c38cdc92ab27f0362895591481c5e2e6a391dcb46359f385000d5105daedf",
+  "deployment_status": "ENABLED_FOR_PRODUCTION_TESTS",
+  "era": "ppRef2024",
+  "era_run_coverage": {
+    "map_run_intervals": [],
+    "sample_run_intervals": [],
+    "fully_covered": null,
+    "evidence": [
+      "Numeric map IOV and whole-campaign coverage unestablished; see validation/run3Jets/vetoMapCandidates.json"
+    ]
+  },
+  "histogram_key": "jetvetomap_all",
+  "jet_collection": null,
+  "radius": null,
+  "coordinate_convention": {
+    "x": "eta",
+    "y": "phi_radians",
+    "axis": "standard_detector_jet"
+  },
+  "pt_convention": "stored nominal PAT/HiForest jtpt",
+  "data_mc_applicability": {
+    "data": "User-nominated HIN prescription; exact-production coverage pending",
+    "mc": "Same map and predicate as data; exact campaign applicability pending",
+    "same_event_mask": true,
+    "evidence": [
+      "User HIN recommendation and confirmed collision-system ID choice; see vetoMapSources.md"
+    ]
+  },
+  "validation_plots": [
+    "validation/run3Jets/evidence/2026-10-28/Summer24Prompt24_RunBCDEFGHI_key_comparison.png"
+  ],
+  "approval_evidence": [
+    "Owner nominated this map and jetvetomap_all and confirmed the HIN collision-system strategy; numeric map IOV, pT and full producer coverage remain unestablished.",
+    "Owner explicitly requested enabling production cards and EOS MC tests; configured retention bound15 GeV. Exact full-campaign/upstream retention coverage remains to validate."
+  ],
+  "exact_production_applicability_established": false
+}

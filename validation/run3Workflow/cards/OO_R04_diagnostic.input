@@ -1,6 +1,6 @@
 # Dedicated OO inclusive selected-event card, R04.
 # Follows separate-system pPb/pp card convention; split OO cards are retained.
-# InclusiveMode 1 fills separate RAW diagnostics; corrected inclusive is BLOCKED.
+# Standard EEC pipeline; broad ordinary centrality interval, no separate analysis mode.
 # Intended OO 0-100% coverage must pass acceptance/correction validation.
 # Real event hiBin/activity is preserved; no constant or extrapolated weights.
 # R08 requires native AK8 jets and applicable calibration; no AK4 substitution.
@@ -79,7 +79,7 @@ MinJetPtUnfoldingReco 20 # Candidate migration guard; validate before response p
 MinJetPtUnfoldingTruth 10 # Candidate migration guard; validate before response production
 
 # Binning for THnSparses
-CentralityBinEdges 0 100 # Dedicated inclusive OO axis; acceptance/calibration not certified
+CentralityBinEdges -1 100 # Broad ordinary OO output interval; real event activity retained
 TrackPtBinEdges     0.7 1 2 3 4 8 12 300                   # Track pT binning
 PtHatBinEdges       0 30 50 80 120 170 220 280 370 460  # pT hat binning
 
@@ -102,7 +102,8 @@ HFEnergyShift 25 # Shift in HF energy when matching to find mixed events
 # Debug
 DebugLevel 2   # 0 = No debug messages, 1 = Some debug messages, 2 = All debug messages
 
-InclusiveMode 1 # Raw selected-event diagnostic; corrected mode 2 remains blocked
 MaxEventsPerFile 100 # Bounded test only
 ChannelRadiusCode 4 # Persistent R04/R08 namespace
-InclusiveCentralityTarget 0 100 # Intended coverage only, not an acceptance certification
+MinPairTrackPt 2 # Strict EEC pair threshold; track reader/QA input remains 0.5 GeV
+FirstUnfoldedJetPtBin 0 # Standard output starts at 40 GeV
+LastUnfoldedJetPtBin 2 # Standard output ends at 160 GeV; response guards retained

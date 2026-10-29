@@ -214,7 +214,12 @@ HighForestReader::HighForestReader(const HighForestReader& in) :
   fParticleSubeventVector(in.fParticleSubeventVector)
 {
   // Copy constructor
+  fRun3PFJetInputs = in.fRun3PFJetInputs;
+  fRun3JetInputsBound = in.fRun3JetInputsBound;
+  fRun3ValidatedJetTreeNumber = in.fRun3ValidatedJetTreeNumber;
   for(Int_t i = 0; i < fnMaxJet; i++){
+    fDetectorJetEtaArray[i] = in.fDetectorJetEtaArray[i];
+    fDetectorJetPhiArray[i] = in.fDetectorJetPhiArray[i];
     fJetPtArray[i] = in.fJetPtArray[i];
     fJetPhiArray[i] = in.fJetPhiArray[i];
     fJetEtaArray[i] = in.fJetEtaArray[i];
@@ -253,6 +258,9 @@ HighForestReader& HighForestReader::operator=(const HighForestReader& in){
   if (&in==this) return *this;
   
   ForestReader::operator=(in);
+  fRun3PFJetInputs = in.fRun3PFJetInputs;
+  fRun3JetInputsBound = in.fRun3JetInputsBound;
+  fRun3ValidatedJetTreeNumber = in.fRun3ValidatedJetTreeNumber;
   
   fHeavyIonTree = in.fHeavyIonTree;
   fJetTree = in.fJetTree;
@@ -274,6 +282,8 @@ HighForestReader& HighForestReader::operator=(const HighForestReader& in){
   fParticleSubeventBranch = in.fParticleSubeventBranch;
   
   for(Int_t i = 0; i < fnMaxJet; i++){
+    fDetectorJetEtaArray[i] = in.fDetectorJetEtaArray[i];
+    fDetectorJetPhiArray[i] = in.fDetectorJetPhiArray[i];
     fJetPtArray[i] = in.fJetPtArray[i];
     fJetPhiArray[i] = in.fJetPhiArray[i];
     fJetEtaArray[i] = in.fJetEtaArray[i];
@@ -337,6 +347,8 @@ HighForestReader::~HighForestReader(){
  * Initialization, meaning that the branches are connected to the tree
  */
 void HighForestReader::Initialize(){
+  fRun3JetInputsBound = false;
+  fRun3ValidatedJetTreeNumber = -1;
 
   // Connect the branches of the heavy ion tree
   fHeavyIonTree->SetBranchStatus("*", 0);
@@ -378,8 +390,8 @@ void HighForestReader::Initialize(){
   const char* jetAxis[2] = {"jt","WTA"};
   const char* branchName;
 
-  // Jet trees are not needed for mixed events
-  if(fMixingMode){
+  // Event vetoes require the complete reconstructed jet tree in mixing too.
+  if(fMixingMode && !fRun3JetSelectionEnabled){
 
     fnJets = 0;
     fnMatchedJets = 0;
@@ -412,11 +424,26 @@ void HighForestReader::Initialize(){
     fJetTree->SetBranchAddress("rawpt", &fJetRawPtArray, &fJetRawPtBranch);
     fJetTree->SetBranchStatus("trackMax", 1);
     fJetTree->SetBranchAddress("trackMax", &fJetMaxTrackPtArray, &fJetMaxTrackPtBranch);
+
+    if(fRun3JetSelectionEnabled){
+      fRun3PFJetInputs.Bind(fJetTree);
+      // With the standard analysis axis the existing arrays already contain
+      // detector coordinates. Keep separate arrays only for the WTA analysis.
+      if(fJetAxis != 0){
+        fJetTree->SetBranchStatus("jteta", 1);
+        fJetTree->SetBranchStatus("jtphi", 1);
+        if(fJetTree->SetBranchAddress("jteta", fDetectorJetEtaArray) < 0 ||
+           fJetTree->SetBranchAddress("jtphi", fDetectorJetPhiArray) < 0)
+          throw std::runtime_error("HighForestReader: cannot bind standard detector coordinates for Run-3 selection");
+      }
+      fRun3JetInputsBound = true;
+    }
     
     
   
+    // Mixing event vetoes only need reconstructed jets.
     // If we are looking at Monte Carlo, connect the reference pT and parton arrays
-    if(fIsMC){
+    if(fIsMC && !fMixingMode){
       fJetTree->SetBranchStatus("refpt", 1);
       fJetTree->SetBranchAddress("refpt", &fJetRefPtArray, &fJetRefPtBranch);
       fJetTree->SetBranchStatus("refeta", 1);
@@ -434,8 +461,9 @@ void HighForestReader::Initialize(){
       fJetTree->SetBranchStatus("geneta", 1);
       fJetTree->SetBranchAddress("geneta", &fMatchedJetEtaArray, &fJetMatchedEtaBranch);
     
-      // WTA axis is not available in pPb files
-      if(!fIsPPb){
+      // Legacy readers retain both axes; Run-3 selection only binds the
+      // generator WTA coordinates when that axis is actually requested.
+      if(!fIsPPb && (!fRun3JetSelectionEnabled || fJetAxis == 1)){
         fJetTree->SetBranchStatus("WTAgenphi", 1);
         fJetTree->SetBranchAddress("WTAgenphi", &fMatchedJetWTAPhiArray, &fMatchedJetWTAPhiBranch);
         fJetTree->SetBranchStatus("WTAgeneta", 1);
@@ -912,7 +940,7 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
     if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC) treeName[3] = "ak8PFJetAnalyzer/t"; // Native AK8.
   }
 
-  if(!fMixingMode){
+  if(!fMixingMode || fRun3JetSelectionEnabled){
     if(fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
       EECJetGeometry::RequireRun3JetBranches(dynamic_cast<TTree*>(inputFile->Get(treeName[fJetType])), false, fIsMC, fJetAxis, fMatchJets);
     }
@@ -940,7 +968,24 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
     fHeavyIonTree->Add(*listIterator);
     if(!fMegaSkimMode) fSkimTree->Add(*listIterator);
     if(fUseJetTrigger) fHltTree->Add(*listIterator);
-    if(!fMixingMode) fJetTree->Add(*listIterator);
+    if(!fMixingMode || fRun3JetSelectionEnabled){
+      if(fRun3JetSelectionEnabled){
+        TFile* validationFile = TFile::Open(*listIterator);
+        if(!validationFile || validationFile->IsZombie())
+          throw std::runtime_error("HighForestReader: cannot open Run-3 selection input file");
+        TTree* jets = dynamic_cast<TTree*>(validationFile->Get(treeName[fJetType]));
+        TTree* events = dynamic_cast<TTree*>(validationFile->Get("hiEvtAnalyzer/HiTree"));
+        EECJetSelection::Detail::ValidateNativeJetInputs(jets);
+        if(!events || jets->GetEntries() != events->GetEntries()){
+          validationFile->Close();
+          delete validationFile;
+          throw std::runtime_error("HighForestReader: reconstructed jet and event trees have unequal entries for Run-3 selection");
+        }
+        validationFile->Close();
+        delete validationFile;
+      }
+      fJetTree->Add(*listIterator);
+    }
     if(fReadTrackTree) fTrackTree->Add(*listIterator);
     if(fIsMC){
       fParticleTree->Add(*listIterator);
@@ -958,7 +1003,8 @@ void HighForestReader::BurnForest(){
   fHeavyIonTree->Delete();
   fHltTree->Delete();
   fSkimTree->Delete();
-  fJetTree->Delete();
+  if(fJetTree) fJetTree->Delete();
+  fRun3JetInputsBound = false;
   fTrackTree->Delete();
   fParticleTree->Delete();
 }
@@ -999,8 +1045,48 @@ bool HighForestReader::CheckFileProblems(){
  * Load an event to memory
  */
 void HighForestReader::GetEvent(Int_t nEvent){
+  if(fRun3JetSelectionEnabled){
+    if(!fJetTree || !fRun3JetInputsBound || nEvent < 0 || nEvent >= fHeavyIonTree->GetEntries())
+      throw std::out_of_range("HighForestReader: Run-3 jet selection event is outside the open forest");
+    const Long64_t localEntry = fJetTree->LoadTree(nEvent);
+    TTree* nativeTree = fJetTree->GetTree();
+    if(localEntry < 0 || !nativeTree)
+      throw std::runtime_error("HighForestReader: cannot load Run-3 native jet entry");
+    if(fRun3ValidatedJetTreeNumber != fJetTree->GetTreeNumber()){
+      EECJetSelection::Detail::ValidateNativeJetInputs(nativeTree);
+      EECJetSelection::Detail::RequireJetLeaf(nativeTree, "trackMax", "Float_t", "nref");
+      if(fJetAxis != 0){
+        EECJetSelection::Detail::RequireJetLeaf(nativeTree, "WTAeta", "Float_t", "nref");
+        EECJetSelection::Detail::RequireJetLeaf(nativeTree, "WTAphi", "Float_t", "nref");
+      }
+      if(fIsMC && !fMixingMode){
+        EECJetSelection::Detail::RequireJetLeaf(nativeTree, "ngen", "Int_t");
+        for(const char* name : {"refpt", "refeta", "refphi"})
+          EECJetSelection::Detail::RequireJetLeaf(nativeTree, name, "Float_t", "nref");
+        EECJetSelection::Detail::RequireJetLeaf(nativeTree, "refparton_flavorForB", "Int_t", "nref");
+        for(const char* name : {"genpt", "geneta", "genphi"})
+          EECJetSelection::Detail::RequireJetLeaf(nativeTree, name, "Float_t", "ngen");
+        if(fJetAxis == 1){
+          EECJetSelection::Detail::RequireJetLeaf(nativeTree, "WTAgeneta", "Float_t", "ngen");
+          EECJetSelection::Detail::RequireJetLeaf(nativeTree, "WTAgenphi", "Float_t", "ngen");
+        }
+      }
+      fRun3ValidatedJetTreeNumber = fJetTree->GetTreeNumber();
+    }
+    // Read counts first, using the local entry after each TChain transition.
+    // No fixed-array payload may be read until both native counts fit.
+    if(nativeTree->GetBranch("nref")->GetEntry(localEntry) <= 0 || fnJets < 0 || fnJets > fnMaxJet)
+      throw std::runtime_error("HighForestReader: native reconstructed jet multiplicity exceeds the reader buffer");
+    if(fIsMC && !fMixingMode &&
+       (nativeTree->GetBranch("ngen")->GetEntry(localEntry) <= 0 || fnMatchedJets < 0 || fnMatchedJets > fnMaxJet))
+      throw std::runtime_error("HighForestReader: native generator jet multiplicity exceeds the reader buffer");
+  }
   fHeavyIonTree->GetEntry(nEvent);
-  if(!fMixingMode) fJetTree->GetEntry(nEvent);
+  if(!fMixingMode || fRun3JetSelectionEnabled){
+    const Long64_t bytes = fJetTree->GetEntry(nEvent);
+    if(fRun3JetSelectionEnabled && bytes <= 0)
+      throw std::runtime_error("HighForestReader: failed to read Run-3 native jet payload");
+  }
   if(fUseJetTrigger) fHltTree->GetEntry(nEvent);
   if(!fMegaSkimMode) fSkimTree->GetEntry(nEvent);
   if(fReadTrackTree) {
@@ -1293,4 +1379,23 @@ Float_t HighForestReader::GetMatchedPhi(Int_t iJet) const{
   if(fJetAxis == 0) return fMatchedJetPhiArray[matchedIndex];
   return fMatchedJetWTAPhiArray[matchedIndex];
   
+}
+
+void HighForestReader::EnableRun3JetSelection(Bool_t enabled){
+  if(fHeavyIonTree && enabled != fRun3JetSelectionEnabled)
+    throw std::logic_error("HighForestReader: enable Run-3 jet selection before opening a forest");
+  if(enabled && fMegaSkimMode)
+    throw std::invalid_argument("HighForestReader: Run-3 jet selection requires full native jets and cannot use a mega skim");
+  ForestReader::EnableRun3JetSelection(enabled);
+}
+
+EECJetSelection::JetInputs HighForestReader::GetJetSelectionInputs(Int_t iJet) const{
+  if(!fRun3JetSelectionEnabled || !fRun3JetInputsBound)
+    throw std::logic_error("HighForestReader: Run-3 jet selection inputs were not enabled before opening the forest");
+  if(iJet < 0 || iJet >= fnJets)
+    throw std::out_of_range("HighForestReader: invalid Run-3 selection jet index");
+  return fRun3PFJetInputs.Get(iJet,
+      fJetAxis == 0 ? fJetEtaArray[iJet] : fDetectorJetEtaArray[iJet],
+      fJetAxis == 0 ? fJetPhiArray[iJet] : fDetectorJetPhiArray[iJet],
+      fJetRawPtArray[iJet], fJetPtArray[iJet]);
 }

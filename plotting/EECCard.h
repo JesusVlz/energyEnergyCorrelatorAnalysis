@@ -120,6 +120,7 @@ public:
   EECCard(TFile* inFile); // Contructor with input file
   ~EECCard();             // Destructor
   
+  const TVectorT<float>* GetCardEntry(int entryIndex) const; // Read optional metadata without legacy defaults
   TString GetDataType() const;            // Getter for data type string
   TString GetAlternativeDataType(const bool includeMCtype = true) const; // Getter for alternative data type string
   void Write(TDirectory* file);            // Write the contents of the card to a file

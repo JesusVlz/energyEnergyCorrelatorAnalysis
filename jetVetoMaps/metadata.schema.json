@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Run-3 jet-veto map provenance and deployment metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_repository",
+    "source_commit",
+    "source_tag",
+    "source_path",
+    "filename",
+    "sha256",
+    "era",
+    "era_run_coverage",
+    "histogram_key",
+    "jet_collection",
+    "radius",
+    "coordinate_convention",
+    "pt_convention",
+    "data_mc_applicability",
+    "validation_plots",
+    "approval_evidence",
+    "exact_production_applicability_established",
+    "deployment_status"
+  ],
+  "properties": {
+    "source_repository": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "source_tag": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "filename": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "era": {
+      "enum": [
+        "OO2025",
+        "ppRef2024"
+      ]
+    },
+    "era_run_coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "map_run_intervals",
+        "sample_run_intervals",
+        "fully_covered",
+        "evidence"
+      ],
+      "properties": {
+        "map_run_intervals": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 0
+        },
+        "sample_run_intervals": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 0
+        },
+        "fully_covered": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "histogram_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "jet_collection": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "radius": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "coordinate_convention": {
+      "type": "object",
+      "required": [
+        "x",
+        "y",
+        "axis"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "const": "eta"
+        },
+        "y": {
+          "const": "phi_radians"
+        },
+        "axis": {
+          "const": "standard_detector_jet"
+        }
+      }
+    },
+    "pt_convention": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "data_mc_applicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "data",
+        "mc",
+        "same_event_mask",
+        "evidence"
+      ],
+      "properties": {
+        "data": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "same_event_mask": {
+          "const": true
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "validation_plots": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "approval_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "exact_production_applicability_established": {
+      "type": "boolean"
+    },
+    "deployment_status": {
+      "enum": [
+        "CANDIDATE_NOT_ENABLED",
+        "APPROVED_FOR_PRODUCTION",
+        "ENABLED_FOR_PRODUCTION_TESTS"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "deployment_status": {
+            "const": "APPROVED_FOR_PRODUCTION"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "era_run_coverage": {
+            "properties": {
+              "map_run_intervals": {
+                "minItems": 1
+              },
+              "sample_run_intervals": {
+                "minItems": 1
+              },
+              "fully_covered": {
+                "const": true
+              }
+            }
+          },
+          "jet_collection": {
+            "type": "string"
+          },
+          "radius": {
+            "type": "number"
+          },
+          "pt_convention": {
+            "type": "string"
+          },
+          "exact_production_applicability_established": {
+            "const": true
+          }
+        }
+      }
+    }
+  ]
+}

@@ -71,6 +71,45 @@ The arguments are:
 
 For MC, use `cardEECOOMC.input` or `cardEECpp5v36TeVMC.input` with an O–O or ppRef MC forest.
 
+For the bounded Run-3 R=0.4 RecoReco check used on 29 October 2026, run from
+the repository root in a configured ROOT environment. These test cards cap each
+input at 1,000 events and enable the HIN Jet ID and whole-event veto:
+
+```bash
+make -j4
+mkdir -p output/run3-mc
+./eecAnalysis \
+  /eos/user/j/jvelazqu/Foresting/OOMC/unembedded_L1HLT_objects_MC_1.root \
+  validation/run3Jets/cards/OOMC_R04_veto_test.input \
+  output/run3-mc/OO_R04_RecoReco.root 1 true
+./eecAnalysis \
+  /eos/user/j/jvelazqu/Foresting/ppMC/HiForestMiniAOD_MC_1.root \
+  validation/run3Jets/cards/ppRefMC_R04_veto_test.input \
+  output/run3-mc/pp_R04_RecoReco.root 1 true
+python3 validation/run3Jets/check_mc_smoke.py \
+  output/run3-mc/OO_R04_RecoReco.root \
+  --card validation/run3Jets/cards/OOMC_R04_veto_test.input --max-events 1000 \
+  --output output/run3-mc/OO_R04_RecoReco_check.json
+python3 validation/run3Jets/check_mc_smoke.py \
+  output/run3-mc/pp_R04_RecoReco.root \
+  --card validation/run3Jets/cards/ppRefMC_R04_veto_test.input --max-events 1000 \
+  --output output/run3-mc/pp_R04_RecoReco_check.json
+```
+
+Choose fresh output filenames for later runs. To generate scratch cards, logs,
+commands and JSON checks together, use
+`python3 validation/run3Jets/run_mc_smoke.py --events 1000 --output NEW_DIRECTORY`.
+The checker requires populated jet/EEC histograms, finite histogram contents and
+errors, consistent veto counters and the expected persisted configuration.
+
+The installed OO MC correction is `L2Relative_AK4PF_OO_V1.txt`; ppRef MC uses
+`Prompt24HIpp_V1_MC_L2Relative_AK4PF.txt`, both under `jetEnergyCorrections/`.
+The analyzer starts from raw jet pT and preserves the selected WTA lookup axis.
+MC has no data residual correction; Run-3 JES/JER variations remain disabled
+(`JetUncertainty 0`). These checks establish bounded software behavior; full JEC
+closure and campaign-wide veto applicability remain to be validated.
+The [precommit validation record](validation/run3Jets/results/2026-10-29-precommit/verification.json) retains the checks and exact source hashes.
+
 ### 5. Check the output
 
 Open the file and print the configuration saved in it:
@@ -89,6 +128,25 @@ Before starting a large production, confirm that:
 - all event, jet, and track weights are finite.
 
 ## Run-3 cards
+
+Run-3 PF Jet ID and whole-event veto support use the user-confirmed HIN PbPb ID
+for OO and HIN pp ID for ppRef. The R=0.4 local and CRAB cards enable both with
+`JetVetoPtConvention stored`, `JetVetoInputMinPt 15` and `jetvetomap_all`.
+The map sidecars mark this configuration `ENABLED_FOR_PRODUCTION_TESTS`;
+campaign-wide applicability remains to be established.
+See [configuration and validation](validation/run3Jets/IMPLEMENTATION.md) and
+[map provenance](validation/run3Jets/vetoMapSources.md). User-uploaded map hashes
+are verified, and the tarball script includes the maps and metadata.
+
+
+The repository root retains the 12 OO2025 and ppRef2024 5.36 TeV cards,
+including the existing separate R=0.8 workstream. Legacy Run-2 PbPb, pp and
+pPb local cards are now in [cards/archive/run2/](cards/archive/run2/README.md).
+See the [card inventory and layout](cards/README.md) for exact paths and a
+snapshot of every card. Pass the archived path for a legacy local run.
+Operational CRAB cards remain in `crab/`; they are independent copies and can
+have different settings. This reorganization changes no card contents or
+calibration applicability.
 
 | Sample | `DataType` | Local card | CRAB configuration |
 |---|---:|---|---|
@@ -114,36 +172,54 @@ pp/pPb per-system card convention. The original OO cards retain the provisional
 | Inclusive pp, native R=0.4 | [cardEECpp5v36TeVR04.input](cardEECpp5v36TeVR04.input) | [cardEECpp5v36TeVMCR04.input](cardEECpp5v36TeVMCR04.input) |
 | Inclusive pp, native R=0.8 | [cardEECpp5v36TeVR08.input](cardEECpp5v36TeVR08.input) | [cardEECpp5v36TeVMCR08.input](cardEECpp5v36TeVMCR08.input) |
 
-OO inclusive cards declare `CentralityBinEdges 0 100` and an intended
-`InclusiveCentralityTarget 0 100`. `InclusiveMode 1` fills a separate raw
-selected-event diagnostic under `inclusive/`, including coverage counters for
-peripheral and invalid stored hiBin values. It preserves real event activity;
-changing an axis does not establish 0–100% acceptance or correction validity.
-The dedicated raw EEC requires strict track `pT > 2 GeV` during filling; the
-configured 0.5 GeV input threshold and lower-threshold track QA are retained.
-The dedicated raw weights retain the actual stored MC generator factor once,
-with the existing vz factor, and omit centrality/single-track/pair factors.
-This is an explicit diagnostic study, not an approved nominal MC mixture.
-`InclusiveMode 2` rejects requests for unsupported fully corrected output.
-Legacy split histograms keep their existing provisional treatment.
+Integrated OO uses the standard EEC pipeline with a broad centrality
+interval; it is not a separate analysis mode.
 
-Both powers and all three primary jet bins are retained in each radius stream.
-`R04` requires native AK4 and `R08` native AK8; unsupported radius/calibration
-choices fail before analysis. R8 analyzer execution is currently blocked on
-applicable calibration, and the audited local pp MC also lacks native AK8.
+Dedicated OO cards use `CentralityBinEdges -1 100`. The existing split cards
+remain available. OO retains its DataType, real hiBin/HF/vz, selection, native
+jets, tracking inputs and standard event/pair weights. Output binning does not
+change any correction. `eventQA/` records selection stages, weighted activity,
+invalid/peripheral coordinates and capped-input coverage independently of that
+binning. Invalid values remain visible in QA and ordinary histogram flows;
+`-1 100` is an output interval, not a full-acceptance certification.
 
-Root-level dedicated cards have no event cap. For bounded tests use the matching
-100-event cards under `validation/run3Workflow/cards/`. Run
-`python3 validation/run3Workflow/check_cards.py` for the configuration preflight.
-The standalone `validation/run3Workflow/projectInclusiveRaw.C` preserves raw
-angular support through 2R and produces six radius-tagged projections per input;
-it does not normalize or produce a final ratio. See `validation/run3Pairs/`
-for candidate pair tooling and its explicit physics gates.
+`energyEnergyCorrelator` is the ordinary seven-axis spectrum. Use
+`plotting/projectEEChistograms.C` or `EECHistogramManager` for projection and
+save/load, including `CentralityBinEdges` from JCard and each weight exponent.
+There is no inclusive-only EEC or projector. Historical `inclusive/` raw-study
+files retain their original correction meaning; do not relabel them as standard
+corrected outputs. Cards using the retired raw-study flag fail explicitly.
+`MinPairTrackPt 2` applies a generic strict pair threshold while preserving the
+0.5 GeV track input/QA threshold.
 
-The existing plotting/unfolding working-tree changes have been preserved. This
-new raw diagnostic path does not approve that legacy unfolding entry point for
-OO/R8: explicit response selection, all three output jet bins, closure and joint
-covariance still need reconciliation and validation before final processing.
+OO comparison cards request `BackgroundMethods 6`: the existing perpendicular
+and two-distinct-partner mixed pairing categories. `MixingFileList` explicitly
+selects the pool; `EventMatchForMixing`, `BinnedMixing`, `MegaSkimMixing` and the
+matching-bin settings remain independent of output centrality. The data card
+points to the existing **pilot** pool list, which is not physics validated.
+The MC `OO2025_MC_pool_REQUIRED.txt` path is a required analyst-supplied list,
+not a produced or validated pool. Missing/empty lists fail; no signal-file
+fallback is used for Run-3. Match applicability, source filters, partner reuse
+and R8 overlap still need closure. The existing standalone pool preflight and
+pair-efficiency tools remain useful diagnostics, not alternative pipelines.
+
+The standard background interface uses `SubtractBackground(0)` for mixed and
+`SubtractBackground(1)` for perpendicular controls. Component yields retain the
+inherited coefficients; do not normalize components independently. The standard
+unfolding macro accepts an explicit compatible response path and positive
+independently studied iteration count as its last two arguments. Run-3 has no
+legacy response fallback. `FirstUnfoldedJetPtBin 0` / `LastUnfoldedJetPtBin 2`
+select the three primary output intervals; response migration guards remain.
+Run-3 correction applicability, response closure, background transport, final
+normalization and covariance remain physics gates.
+
+Both powers and native R04/R08 are retained. AK8 is never obtained by widening
+an AK4 cone. R8 calibration and audited native pp AK8 availability remain blocked.
+Root cards are uncapped; the bounded cards in `validation/run3Workflow/cards/`
+use standard EEC output with no mixed-event production. Reproduce tests with
+`python3 validation/run3Inclusive/run_tests.py` and
+`python3 validation/run3Workflow/runChecks.py --output NEW_SCRATCH_DIRECTORY`.
+Tests demonstrate software behavior, not production or physics closure.
 
 ### Optional QA histogram binning
 

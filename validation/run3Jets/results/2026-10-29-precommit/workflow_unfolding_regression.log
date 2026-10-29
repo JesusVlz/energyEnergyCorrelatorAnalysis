@@ -1,0 +1,3 @@
+/tmp/jvelazqu/eec-run3-precommit-20261029-final-workflow/testUnfoldConfiguration /tmp/jvelazqu/eec-run3-precommit-20261029-final-workflow/unfolding-fixtures
+Error in <TFile::TFile>: file /tmp/jvelazqu/eec-run3-precommit-20261029-final-workflow/unfolding-fixtures/unfoldConfig_not_present.root does not exist
+PASS: explicit OO/ppRef response selection, metadata rejection, native jet bins and legacy defaults.

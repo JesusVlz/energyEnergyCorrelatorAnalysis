@@ -1,0 +1,8 @@
+{
+  "status": "FAIL",
+  "root_file": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.root",
+  "card": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.input",
+  "scope": "Bounded MC software validation; no campaign coverage or physics closure certification",
+  "card_values": {},
+  "error": "index out of range"
+}

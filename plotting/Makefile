@@ -12,11 +12,11 @@ LDFLAGS  = $(shell root-config --libs)
 CXXFLAGS  += $(INCS)
 
 HDRSDICT = SplitCanvas.h
-HDRS	+= $(HDRSDICT) AlgorithmLibrary.h EECHistogramManager.h EECCard.h EECDrawer.h EECComparingDrawer.h EECBackgroundScale.h EECSignalToBackgroundUnfoldingScale.h EECUnfoldConfiguration.h SystematicUncertaintyOrganizer.h HybridModelHistogramManager.h HolguinHistogramManager.h CoLBTHistogramManager.h JewelHistogramManager.h nanoDict.h
+HDRS	+= $(HDRSDICT) AlgorithmLibrary.h EECHistogramManager.h EECCard.h EECDrawer.h EECComparingDrawer.h EECBackgroundScale.h EECSignalToBackgroundUnfoldingScale.h EECUnfoldConfiguration.h SystematicUncertaintyOrganizer.h HybridModelHistogramManager.h HolguinHistogramManager.h CoLBTHistogramManager.h JewelHistogramManager.h
 
 
 SRCS = $(HDRS:.h=.cxx)
-OBJS = $(HDRS:.h=.o)
+OBJS = $(HDRS:.h=.o) nanoDict.o
 
 all:            $(PROGRAM)
 
@@ -42,7 +42,9 @@ clean:
 cl:  clean $(PROGRAM)
 
 # Dictionary is needed for all classes inheriting TObject from root
-nanoDict.cc: $(HDRSDICT)
+nanoDict.o: nanoDict.cc
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
+
+nanoDict.cc: $(HDRSDICT) LinkDef.h
 		@echo "Generating dictionary ..."
-		@rm -f nanoDict.cc nanoDict.hh nanoDict.h
-		@rootcling nanoDict.cc -c -D$(version) $(HDRSDICT)
+		@rootcling -f $@ -c -D$(version) $(HDRSDICT) LinkDef.h

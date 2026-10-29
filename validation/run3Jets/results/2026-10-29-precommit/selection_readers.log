@@ -1,0 +1,9 @@
+Expected: HighForestReader: invalid Run-3 selection jet index
+Expected: HighForestReader: enable Run-3 jet selection before opening a forest
+Expected: HighForestReader: Run-3 jet selection inputs were not enabled before opening the forest
+Expected: HighForestReader: native reconstructed jet multiplicity exceeds the reader buffer
+Expected: HighForestReader: native reconstructed jet multiplicity exceeds the reader buffer
+Expected: Run-3 jet selection: incompatible or missing t/jtPfCHM; expected Int_t[nref]
+Expected: Run-3 jet selection: incompatible or missing t/jtPfCHF; expected Float_t[nref]
+Expected: Run-3 jet selection: incompatible or missing t/jtPfMUF; expected Float_t[nref]
+PASS: Run-3 native reader inputs, WTA separation, chain transitions, mixing, disabled behavior, missing/type/shape/capacity failures

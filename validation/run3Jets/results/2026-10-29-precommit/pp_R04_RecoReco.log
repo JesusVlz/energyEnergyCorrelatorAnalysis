@@ -1,0 +1,73 @@
+Reading configuration card from file: /tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.input
+
+======== /tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.input =========
+GitHash: GITHASHHERE
+       DataType (dim = 1) 12 
+McCorrelationType (dim = 1) 0 
+      MatchJets (dim = 1) 0 
+TriggerSelection (dim = 1) 0 
+FilledHistograms (dim = 1) 31 
+        JetType (dim = 1) 1 
+        JetAxis (dim = 1) 1 
+      JetEtaCut (dim = 1) 1.6 
+    MinJetPtCut (dim = 1) 10 
+    MaxJetPtCut (dim = 1) 5020 
+      CutBadPhi (dim = 1) 0 
+   CutWithEtaCM (dim = 1) 0 
+MinMaxTrackPtFraction (dim = 1) 0.01 
+MaxMaxTrackPtFraction (dim = 1) 0.98 
+ JetUncertainty (dim = 1) 0 
+      Run3JetID (dim = 1) 1 
+   ApplyJetVeto (dim = 1) 1 
+ JetVetoMapFile (dim = 1) 0 
+JetVetoMapHistogram (dim = 1) 0 
+JetVetoPtConvention (dim = 1) 0 
+JetVetoInputMinPt (dim = 1) 15 
+    TrackEtaCut (dim = 1) 2.4 
+  MinTrackPtCut (dim = 1) 0.5 
+  MaxTrackPtCut (dim = 1) 500 
+MaxTrackPtRelativeError (dim = 1) 0.1 
+VertexMaxDistance (dim = 1) 3 
+CalorimeterSignalLimitPt (dim = 1) 20 
+HighPtEtFraction (dim = 1) 0.5 
+ Chi2QualityCut (dim = 1) 100000 
+MinimumTrackHits (dim = 1) 0 
+    SubeventCut (dim = 1) 2 
+TrackEfficiencyVariation (dim = 1) 0 
+    JetPtWeight (dim = 1) 0 
+DisableTrackPairEfficiencyCorrection (dim = 1) 1 
+     ZVertexCut (dim = 1) 15 
+    LowPtHatCut (dim = 1) -15 
+   HighPtHatCut (dim = 1) 5020 
+MultiplicityMode (dim = 1) 0 
+      JetRadius (dim = 1) 0.4 
+ WeightExponent (dim = 2) 1 2 
+    SmearDeltaR (dim = 1) 0 
+SmearEnergyWeight (dim = 1) 0 
+JetPtBinEdgesEEC (dim = 8) 40 80 120 160 200 300 500 5020 
+TrackPtBinEdgesEEC (dim = 9) 0.5 1 1.5 2 2.5 3 3.5 4 300 
+SkipCovarianceMatrix (dim = 1) 1 
+MinJetPtUnfoldingReco (dim = 1) 80 
+MinJetPtUnfoldingTruth (dim = 1) 60 
+CentralityBinEdges (dim = 6) -0.75 -0.25 9.75 29.75 49.75 100.25 
+TrackPtBinEdges (dim = 8) 0.7 1 2 3 4 8 12 300 
+  PtHatBinEdges (dim = 10) 0 30 50 80 120 170 220 280 370 460 
+BackgroundMethods (dim = 1) 0 
+ MegaSkimMixing (dim = 1) 1 
+EventMatchForMixing (dim = 1) 1 
+   BinnedMixing (dim = 1) 0 
+   VzMixingBins (dim = 2) -0.5 1 
+HiBinMixingBins (dim = 2) -0.5 1 
+HFEnergyMixingBins (dim = 2) 0 1 
+MultiplicityMixingBins (dim = 2) -0.5 1 
+  HFEnergyShift (dim = 1) 25 
+     DebugLevel (dim = 1) 1 
+MaxEventsPerFile (dim = 1) 1000 
+
+Opening Run-3 ppRef tracking correction file: trackCorrectionTables/pp2024/Eff_ppref_2024_Pythia_QCD_pThat15_NopU_2D_Nominal_Official.root
+Initializing jet correction from file: jetEnergyCorrections/Prompt24HIpp_V1_MC_L2Relative_AK4PF.txt
+Reading from file: /eos/user/j/jvelazqu/Foresting/ppMC/HiForestMiniAOD_MC_1.root
+Analysis was compeleted in: 
+Real time 0:00:02, CP time 0.660
+
+====== Writing into file =========

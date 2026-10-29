@@ -2,6 +2,9 @@
  * Implementation of HolguinHistogramManager
  */
 
+// ROOT includes
+#include "TMath.h"
+
 // Own includes
 #include "HolguinHistogramManager.h"
 

@@ -18,8 +18,15 @@
 namespace {
 
 void Set(ConfigurationCard& card, const char* key, float value){
+  if(!card.HasKey(key)) card.ReadInputLine((std::string(key)+" "+std::to_string(value)).c_str());
   TVector* entry = card.GetVector(key);
   (*entry)[entry->GetLwb()] = value;
+}
+
+void DisableJetSelection(ConfigurationCard& card){
+  // This fixture isolates response and track behavior; native PF composition
+  // and event-veto coverage are exercised by the separate jet-selection suite.
+  Set(card,"Run3JetID",0); Set(card,"ApplyJetVeto",0);
 }
 
 void Require(bool condition, const char* message){
@@ -28,6 +35,7 @@ void Require(bool condition, const char* message){
 
 void ExpectRejected(const char* cardName, const char* key, float value, const char* diagnostic){
   ConfigurationCard card(cardName);
+  DisableJetSelection(card);
   Set(card, key, value);
   try {
     EECAnalyzer analyzer({}, &card, 1, -1);
@@ -41,6 +49,7 @@ void ExpectRejected(const char* cardName, const char* key, float value, const ch
 
 void CheckTrackSelection(const char* cardName){
   ConfigurationCard card(cardName);
+  DisableJetSelection(card);
   auto analyzer = std::make_unique<EECAnalyzer>(std::vector<TString>{}, &card, 1, -1);
   auto ordinary = std::make_unique<HighForestReader>();
   auto response = std::make_unique<UnfoldingForestReader>();
@@ -84,6 +93,7 @@ void CheckResponseFilling(const char* cardName, int dataType, const std::string&
   WriteRun3ReaderFixture(path, dataType);
   TFile input(path.c_str(), "READ");
   ConfigurationCard card(cardName);
+  DisableJetSelection(card);
   auto analyzer = std::make_unique<EECAnalyzer>(std::vector<TString>{}, &card, 1, -1);
   // Empty normal input initializes the same JEC and histogram machinery used
   // in production, without requiring unrelated HLT/skim fixture branches.

@@ -1,0 +1,68 @@
+{
+  "purpose": "BOUNDED_MC_SOFTWARE_CHECK; no production coverage/physics closure certification",
+  "max_events_per_file": 1000,
+  "jobs": [
+    {
+      "system": "OO",
+      "input": "/eos/user/j/jvelazqu/Foresting/OOMC/unembedded_L1HLT_objects_MC_1.root",
+      "base_card": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECOOMC.input",
+      "base_card_sha256": "e19fbb22dd302e3fdcc123eb1d5b869d0c6757c9594c12a2a500e80b5d23e1b3",
+      "scratch_card": "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/OO_R04_RecoReco.input",
+      "output": "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/OO_R04_RecoReco.root",
+      "log": "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/OO_R04_RecoReco.log",
+      "command": [
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/eecAnalysis",
+        "/eos/user/j/jvelazqu/Foresting/OOMC/unembedded_L1HLT_objects_MC_1.root",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/OO_R04_RecoReco.input",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/OO_R04_RecoReco.root",
+        "1",
+        "true"
+      ],
+      "check_command": [
+        "/usr/bin/python3",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/check_mc_smoke.py",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/OO_R04_RecoReco.root",
+        "--card",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/OO_R04_RecoReco.input",
+        "--max-events",
+        "1000",
+        "--output",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/OO_R04_RecoReco_check.json"
+      ],
+      "status": "CHECK_COMPLETE",
+      "analyzer_exit_code": 0,
+      "check_exit_code": 0
+    },
+    {
+      "system": "pp",
+      "input": "/eos/user/j/jvelazqu/Foresting/ppMC/HiForestMiniAOD_MC_1.root",
+      "base_card": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECpp5v36TeVMC.input",
+      "base_card_sha256": "32c0c58032d34d9a0e16b50846b11dc6f7bbde16dfaa841b0f662db82be2a746",
+      "scratch_card": "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.input",
+      "output": "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.root",
+      "log": "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.log",
+      "command": [
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/eecAnalysis",
+        "/eos/user/j/jvelazqu/Foresting/ppMC/HiForestMiniAOD_MC_1.root",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.input",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.root",
+        "1",
+        "true"
+      ],
+      "check_command": [
+        "/usr/bin/python3",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/check_mc_smoke.py",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.root",
+        "--card",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco.input",
+        "--max-events",
+        "1000",
+        "--output",
+        "/tmp/jvelazqu/eec-run3-precommit-20261029-mc/pp_R04_RecoReco_check.json"
+      ],
+      "status": "CHECK_COMPLETE",
+      "analyzer_exit_code": 0,
+      "check_exit_code": 0
+    }
+  ]
+}

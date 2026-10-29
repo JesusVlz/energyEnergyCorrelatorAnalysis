@@ -1,0 +1,125 @@
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/ForestReader.o src/ForestReader.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/HighForestReader.o src/HighForestReader.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/GeneratorLevelForestReader.o src/GeneratorLevelForestReader.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/UnfoldingForestReader.o src/UnfoldingForestReader.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/EECHistograms.o src/EECHistograms.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/EECAnalyzer.o src/EECAnalyzer.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/ConfigurationCard.o src/ConfigurationCard.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/JetCorrector.o src/JetCorrector.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/JetUncertainty.o src/JetUncertainty.cxx
+src/JetCorrector.cxx: In member function ‘void SingleJetCorrector::Initialize(std::string)’:
+src/JetCorrector.cxx:73:23: warning: comparison of integer expressions of different signedness: ‘std::vector<std::__cxx11::basic_string<char> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   73 |       if(Parts.size() <= nvar + 1)
+      |          ~~~~~~~~~~~~~^~~~~~~~~~~
+src/JetCorrector.cxx:76:23: warning: comparison of integer expressions of different signedness: ‘std::vector<std::__cxx11::basic_string<char> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   76 |       if(Parts.size() <= nvar + 1 + npar + 1)
+      |          ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+src/JetCorrector.cxx:93:23: warning: comparison of integer expressions of different signedness: ‘std::vector<std::__cxx11::basic_string<char> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   93 |       if(Parts.size() < nvar * 2 + npar * 2 + 1)
+      |          ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+src/JetCorrector.cxx: In member function ‘double SingleJetCorrector::GetCorrection()’:
+src/JetCorrector.cxx:226:34: warning: comparison of integer expressions of different signedness: ‘std::vector<SingleJetCorrector::Type>::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+  226 |       if(Dependencies[iE].size() <= i)
+      |          ~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/trackingEfficiency2018PbPb.o src/trackingEfficiency2018PbPb.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/trackingEfficiency2017pp.o src/trackingEfficiency2017pp.cxx
+src/JetUncertainty.cxx: In member function ‘void JetUncertainty::Initialize(std::string)’:
+src/JetUncertainty.cxx:34:23: warning: comparison of integer expressions of different signedness: ‘std::vector<std::__cxx11::basic_string<char> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   34 |       if(Parts.size() <= nvar + 1)
+      |          ~~~~~~~~~~~~~^~~~~~~~~~~
+src/JetUncertainty.cxx:37:23: warning: comparison of integer expressions of different signedness: ‘std::vector<std::__cxx11::basic_string<char> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   37 |       if(Parts.size() <= nvar + 1 + npar + 1)
+      |          ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+src/JetUncertainty.cxx:54:23: warning: comparison of integer expressions of different signedness: ‘std::vector<std::__cxx11::basic_string<char> >::size_type’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   54 |       if(Parts.size() < nvar * 2 + 1)
+      |          ~~~~~~~~~~~~~^~~~~~~~~~~~~~
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/trackingEfficiency2016pPb.o src/trackingEfficiency2016pPb.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/trackingEfficiency2024pp.o src/trackingEfficiency2024pp.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/trackingEfficiency2025OO.o src/trackingEfficiency2025OO.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/TrackingEfficiencyInterface.o src/TrackingEfficiencyInterface.cxx
+src/EECAnalyzer.cxx: In constructor ‘EECAnalyzer::EECAnalyzer(std::vector<TString>, ConfigurationCard*, Int_t, Int_t)’:
+src/EECAnalyzer.cxx:472:49: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<double>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+  472 |   for(auto iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); iWeightExponent++){
+      |                                 ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+In file included from src/EECAnalyzer.cxx:12:
+src/EECAnalyzer.h: In copy constructor ‘EECAnalyzer::EECAnalyzer(const EECAnalyzer&)’:
+src/EECAnalyzer.h:168:10: warning: ‘EECAnalyzer::fIsPp2024Data’ will be initialized after [-Wreorder]
+  168 |   Bool_t fIsPp2024Data;              // Flag for any pp dataset: True = any Run 3 pp dataset, False = anything else
+      |          ^~~~~~~~~~~~~
+src/EECAnalyzer.h:167:10: warning:   ‘Bool_t EECAnalyzer::fIsOOData’ [-Wreorder]
+  167 |   Bool_t fIsOOData;                  // Flag for any OO dataset: True = any OO dataset, False = anything else
+      |          ^~~~~~~~~
+src/EECAnalyzer.cxx:497:1: warning:   when initialized here [-Wreorder]
+  497 | EECAnalyzer::EECAnalyzer(const EECAnalyzer& in) :
+      | ^~~~~~~~~~~
+src/EECAnalyzer.cxx: In member function ‘void EECAnalyzer::RunAnalysis()’:
+src/EECAnalyzer.cxx:1309:30: warning: enum constant in boolean context [-Wint-in-bool-context]
+ 1309 |     } else if (ForestReader::kPPb_pToMinusEta) {
+      |                ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:1481:44: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<int>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 1481 |       for(int iMixedEvent = 0; iMixedEvent < fMixedEventVzBin.size(); iMixedEvent++){
+      |                                ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:1522:44: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<double>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 1522 |       for(int iMixedEvent = 0; iMixedEvent < fMixedEventVz.size(); iMixedEvent++){
+      |                                ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:2438:61: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<double>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 2438 |               for(auto iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); iWeightExponent++){
+      |                                             ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:2452:61: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<double>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 2452 |               for(auto iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); iWeightExponent++){
+      |                                             ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx: In member function ‘void EECAnalyzer::ConstructParticleResponses()’:
+src/EECAnalyzer.cxx:3402:34: warning: comparison of integer expressions of different signedness: ‘Int_t’ {aka ‘int’} and ‘std::vector<std::tuple<double, double, double, double, int, int> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 3402 |     for(Int_t iTrack = 0; iTrack < selectedTrackInformation.size(); iTrack++){
+      |                           ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:3404:42: warning: comparison of integer expressions of different signedness: ‘Int_t’ {aka ‘int’} and ‘std::vector<std::tuple<double, double, double, double, int, int> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 3404 |       for(Int_t iParticle = 0; iParticle < selectedParticleInformation.size(); iParticle++){
+      |                                ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:3423:34: warning: comparison of integer expressions of different signedness: ‘Int_t’ {aka ‘int’} and ‘std::vector<std::tuple<double, double, double, double, int, int> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 3423 |     for(Int_t iTrack = 0; iTrack < selectedTrackInformation.size(); iTrack++){
+      |                           ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:3425:42: warning: comparison of integer expressions of different signedness: ‘Int_t’ {aka ‘int’} and ‘std::vector<std::tuple<double, double, double, double, int, int> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 3425 |       for(Int_t iParticle = 0; iParticle < selectedParticleInformation.size(); iParticle++){
+      |                                ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:3461:34: warning: comparison of integer expressions of different signedness: ‘Int_t’ {aka ‘int’} and ‘std::vector<std::tuple<double, double, double, double, int, int> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 3461 |     for(Int_t iTrack = 0; iTrack < selectedTrackInformation.size(); iTrack++){
+      |                           ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:3468:34: warning: comparison of integer expressions of different signedness: ‘Int_t’ {aka ‘int’} and ‘std::vector<std::tuple<double, double, double, double, int, int> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 3468 |     for(Int_t iTrack = 0; iTrack < selectedTrackInformation.size(); iTrack++){
+      |                           ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx:3474:43: warning: comparison of integer expressions of different signedness: ‘Int_t’ {aka ‘int’} and ‘std::vector<std::tuple<double, double, double, double, int, int> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+ 3474 |       for(Int_t jTrack = iTrack+1; jTrack < selectedTrackInformation.size(); jTrack++){
+      |                                    ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/EECAnalyzer.cxx: In member function ‘void EECAnalyzer::FindMultiplicityMatchedEvents(std::vector<int>&, Int_t, Double_t, Int_t, Int_t, Int_t, Bool_t)’:
+src/EECAnalyzer.cxx:4585:51: warning: comparison of integer expressions of different signedness: ‘__gnu_cxx::__alloc_traits<std::allocator<long long unsigned int>, long long unsigned int>::value_type’ {aka ‘long long unsigned int’} and ‘const Int_t’ {aka ‘const int’} [-Wsign-compare]
+ 4585 |     if(fMixedEventEventNumber.at(mixedEventIndex) == eventNumber) continue;
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+src/EECAnalyzer.cxx: In member function ‘void EECAnalyzer::FindHiBinMatchedEvents(std::vector<int>&, Int_t, Double_t, Int_t, Int_t, Int_t, Bool_t)’:
+src/EECAnalyzer.cxx:4677:51: warning: comparison of integer expressions of different signedness: ‘__gnu_cxx::__alloc_traits<std::allocator<long long unsigned int>, long long unsigned int>::value_type’ {aka ‘long long unsigned int’} and ‘const Int_t’ {aka ‘const int’} [-Wsign-compare]
+ 4677 |     if(fMixedEventEventNumber.at(mixedEventIndex) == eventNumber) continue;
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+src/EECAnalyzer.cxx: In member function ‘void EECAnalyzer::FindHFEnergyMatchedEvents(std::vector<int>&, Int_t, Double_t, Double_t, Int_t, Int_t, Bool_t)’:
+src/EECAnalyzer.cxx:4784:51: warning: comparison of integer expressions of different signedness: ‘__gnu_cxx::__alloc_traits<std::allocator<long long unsigned int>, long long unsigned int>::value_type’ {aka ‘long long unsigned int’} and ‘const Int_t’ {aka ‘const int’} [-Wsign-compare]
+ 4784 |     if(fMixedEventEventNumber.at(mixedEventIndex) == eventNumber) continue;
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+src/EECAnalyzer.cxx: In member function ‘void EECAnalyzer::FindBinnedMultiplicityMatchedEvents(std::vector<int>&, Int_t, Double_t, Int_t, Int_t, Int_t)’:
+src/EECAnalyzer.cxx:4873:51: warning: comparison of integer expressions of different signedness: ‘__gnu_cxx::__alloc_traits<std::allocator<long long unsigned int>, long long unsigned int>::value_type’ {aka ‘long long unsigned int’} and ‘const Int_t’ {aka ‘const int’} [-Wsign-compare]
+ 4873 |     if(fMixedEventEventNumber.at(mixedEventIndex) == eventNumber) continue;
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+src/EECAnalyzer.cxx: In member function ‘void EECAnalyzer::FindBinnedHiBinMatchedEvents(std::vector<int>&, Int_t, Double_t, Int_t, Int_t, Int_t)’:
+src/EECAnalyzer.cxx:4961:51: warning: comparison of integer expressions of different signedness: ‘__gnu_cxx::__alloc_traits<std::allocator<long long unsigned int>, long long unsigned int>::value_type’ {aka ‘long long unsigned int’} and ‘const Int_t’ {aka ‘const int’} [-Wsign-compare]
+ 4961 |     if(fMixedEventEventNumber.at(mixedEventIndex) == eventNumber) continue;
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+src/EECAnalyzer.cxx: In member function ‘void EECAnalyzer::FindBinnedHFEnergyMatchedEvents(std::vector<int>&, Int_t, Double_t, Double_t, Int_t, Int_t)’:
+src/EECAnalyzer.cxx:5050:51: warning: comparison of integer expressions of different signedness: ‘__gnu_cxx::__alloc_traits<std::allocator<long long unsigned int>, long long unsigned int>::value_type’ {aka ‘long long unsigned int’} and ‘const Int_t’ {aka ‘const int’} [-Wsign-compare]
+ 5050 |     if(fMixedEventEventNumber.at(mixedEventIndex) == eventNumber) continue;
+      |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/BinningCard.o src/BinningCard.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/TrackPairEfficiencyCorrector.o src/TrackPairEfficiencyCorrector.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/SmearingProvider.o src/SmearingProvider.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/JetMetScalingFactorManager.o src/JetMetScalingFactorManager.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/CovarianceHelper.o src/CovarianceHelper.cxx
+g++ -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root   -c -o src/Run3JetSelection.o src/Run3JetSelection.cxx
+Linking eecAnalysis ...
+g++ -lEG -L/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis eecAnalysis.cxx -g -Wall -Ddevelopment -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root src/ForestReader.o src/HighForestReader.o src/GeneratorLevelForestReader.o src/UnfoldingForestReader.o src/EECHistograms.o src/EECAnalyzer.o src/ConfigurationCard.o src/JetCorrector.o src/JetUncertainty.o src/trackingEfficiency2018PbPb.o src/trackingEfficiency2017pp.o src/trackingEfficiency2016pPb.o src/trackingEfficiency2024pp.o src/trackingEfficiency2025OO.o src/TrackingEfficiencyInterface.o src/BinningCard.o src/TrackPairEfficiencyCorrector.o src/SmearingProvider.o src/JetMetScalingFactorManager.o src/CovarianceHelper.o src/Run3JetSelection.o -O2 -L/usr/lib64/root -lCore -lImt -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lROOTVecOps -lTree -lTreePlayer -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lROOTNTuple -lROOTNTupleUtil -lMultiProc -lROOTDataFrame -Wl,-rpath,/usr/lib64/root -pthread -lm -ldl -rdynamic -o eecAnalysis
+done

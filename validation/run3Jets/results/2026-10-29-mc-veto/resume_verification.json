@@ -1,0 +1,83 @@
+{
+  "status": "PASS_PERSISTED_ARTIFACT_VERIFICATION",
+  "analyzer_rerun": false,
+  "executable_sha256": "3bf006d1687e608a59cd5aba0b0bde746c2d0728089818612d5c0dead014d706",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "validation/run3Jets/check_mc_smoke.py",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/OO_R04_RecoReco.root",
+        "--card",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/OO_R04_RecoReco.input",
+        "--max-events",
+        "1000",
+        "--output",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/OO_persisted_check.json"
+      ],
+      "exit_code": 0,
+      "log": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/OO_persisted_check.log",
+      "report": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/OO_persisted_check.json"
+    },
+    {
+      "command": [
+        "python3",
+        "validation/run3Jets/check_mc_smoke.py",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/pp_R04_RecoReco.root",
+        "--card",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/pp_R04_RecoReco.input",
+        "--max-events",
+        "1000",
+        "--output",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/pp_persisted_check.json"
+      ],
+      "exit_code": 0,
+      "log": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/pp_persisted_check.log",
+      "report": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/pp_persisted_check.json"
+    }
+  ],
+  "statistics": {
+    "OO": {
+      "status": "PASS_BOUNDED_MC_SOFTWARE_CHECK",
+      "veto_counts": {
+        "signal": {
+          "checked": 995.0,
+          "kept": 962.0,
+          "vetoed": 33.0
+        },
+        "mixing": {
+          "checked": 0.0,
+          "kept": 0.0,
+          "vetoed": 0.0
+        }
+      },
+      "statistics": {
+        "processed_events": 1000.0,
+        "selected_events": 962.0,
+        "jet_entries": 386.0,
+        "eec_entries": 15448.0
+      }
+    },
+    "pp": {
+      "status": "PASS_BOUNDED_MC_SOFTWARE_CHECK",
+      "veto_counts": {
+        "signal": {
+          "checked": 993.0,
+          "kept": 843.0,
+          "vetoed": 150.0
+        },
+        "mixing": {
+          "checked": 0.0,
+          "kept": 0.0,
+          "vetoed": 0.0
+        }
+      },
+      "statistics": {
+        "processed_events": 1000.0,
+        "selected_events": 843.0,
+        "jet_entries": 1536.0,
+        "eec_entries": 107520.0
+      }
+    }
+  }
+}

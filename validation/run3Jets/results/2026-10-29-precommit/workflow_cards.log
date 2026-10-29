@@ -1,0 +1,10 @@
+/usr/bin/python3 validation/run3Workflow/check_cards.py
+PASS card metadata: cardEECOOInclusiveR04.input
+PASS card metadata: cardEECOOInclusiveR08.input
+PASS card metadata: cardEECOOMCInclusiveR04.input
+PASS card metadata: cardEECOOMCInclusiveR08.input
+PASS card metadata: cardEECpp5v36TeVR04.input
+PASS card metadata: cardEECpp5v36TeVR08.input
+PASS card metadata: cardEECpp5v36TeVMCR04.input
+PASS card metadata: cardEECpp5v36TeVMCR08.input
+R08 analyzer execution remains BLOCKED on applicable AK8 calibration; pp AK8 input is also required.

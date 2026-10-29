@@ -2,6 +2,9 @@
  * Implementation of HybridModelHistogramManager
  */
 
+// ROOT includes
+#include "TMath.h"
+
 // Own includes
 #include "HybridModelHistogramManager.h"
 

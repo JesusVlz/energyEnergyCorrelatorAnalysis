@@ -92,7 +92,8 @@ void randomizeWithinUncertainties(TH2D* randomizedHistogram){
  *                               0: Read the used weight exponent from the input file
  *                               >0: Use manually defined exponent. Currently 1 and 2 are implemented.
  */
-void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int iSplit = 0, const int iSystematic = 0, const int iEnergyEnergyCorrelator = EECHistogramManager::kEnergyEnergyCorrelator, int iWeightExponent = 0){
+// responseFile/iterations: explicit independently validated Run-3 inputs; no integrated-specific mode.
+void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int iSplit = 0, const int iSystematic = 0, const int iEnergyEnergyCorrelator = EECHistogramManager::kEnergyEnergyCorrelator, int iWeightExponent = 0, TString responseFile = "", const int iterations = 0){
 
   // **********************************
   //       Open the input files
@@ -113,6 +114,8 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   // Determine if we are dealing with pp or PbPb data
   TString collisionSystem = dataCard->GetDataType();
   bool isPbPbData = collisionSystem.Contains("PbPb");
+  bool isOOData = collisionSystem.Contains("OO");
+  bool hasCentrality = isPbPbData || isOOData;
 
   // Flag for generator level jets. If data file has generator level jets, do not unfold.
   // Running it still through this macro gives consistent histogram naming, which makes some things easier later.
@@ -122,12 +125,12 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   if(iWeightExponent == 0) iWeightExponent = dataCard->GetWeightExponent();
 
   // Use the information from the dataCard to create an unfolding configuration
-  EECUnfoldConfiguration* unfoldConfigurationProvider = new EECUnfoldConfiguration(dataCard, iSplit, iSystematic, iWeightExponent);
+  EECUnfoldConfiguration* unfoldConfigurationProvider = new EECUnfoldConfiguration(dataCard, iSplit, iSystematic, iWeightExponent, responseFile, iterations);
 
   // Open the response matric file based on the information on the unfolding configuration
   TFile* responseInputFile = TFile::Open(unfoldConfigurationProvider->GetResponseFileName());
   
-  if(responseInputFile == NULL) {
+  if(responseInputFile == NULL || responseInputFile->IsZombie()) {
     cout << "Error! The file " << unfoldConfigurationProvider->GetResponseFileName().Data() << " does not exist!" << endl;
     cout << "Maybe you forgot the data/ folder path?" << endl;
     cout << "Will not execute the code" << endl;
@@ -136,29 +139,36 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
 
   // Get the EECCard also from the response matrix file
   EECCard* responseCard = new EECCard(responseInputFile);
+  if(!responseCard->GetDataType().Contains("MC") || responseCard->FindWeightExponentIndex(iWeightExponent) < 1)
+    throw std::invalid_argument("Response must contain same-system MC and requested energy power");
   
   
   // **********************************************************************************
   //       Check that the centrality, jet pT and track pT bins match with the files
   // **********************************************************************************
 
-  if(isPbPbData != (dataCard->GetDataType().Contains("PbPb"))){
+  if(isPbPbData != responseCard->GetDataType().Contains("PbPb") ||
+     isOOData != responseCard->GetDataType().Contains("OO") ||
+     collisionSystem.Contains("ppRef") != responseCard->GetDataType().Contains("ppRef") ||
+     std::abs(dataCard->GetJetRadius()-responseCard->GetJetRadius()) > 1e-5){
     cout << "You are trying to unfold pp with PbPb unfolding histograms or vice versa!" << endl;
     cout << "Please ensure that the data and unfolding histograms are comparible!" << endl;
+    return;
   }
 
   // Only check compatible centrality bins for PbPb
-  if(isPbPbData){
+  if(hasCentrality){
+    const double centralityTolerance = isOOData ? 1e-4 : 6.;
     if(responseCard->GetNCentralityBins() != dataCard->GetNCentralityBins()) {
       cout << "Error! Centrality bins do not match between the two files! Cannot execute the code!" << endl;
       return;
     }
     for(int iCentrality = 0; iCentrality < responseCard->GetNCentralityBins(); iCentrality++){
-      if(TMath::Abs(responseCard->GetLowBinBorderCentrality(iCentrality) - dataCard->GetLowBinBorderCentrality(iCentrality)) > 6){
+      if(TMath::Abs(responseCard->GetLowBinBorderCentrality(iCentrality) - dataCard->GetLowBinBorderCentrality(iCentrality)) > centralityTolerance){
         cout << "Error! Centrality bins do not match between the two files! Cannot execute the code!" << endl;
         return;
       }
-      if(TMath::Abs(responseCard->GetHighBinBorderCentrality(iCentrality) - dataCard->GetHighBinBorderCentrality(iCentrality)) > 6){
+      if(TMath::Abs(responseCard->GetHighBinBorderCentrality(iCentrality) - dataCard->GetHighBinBorderCentrality(iCentrality)) > centralityTolerance){
         cout << "Error! Centrality bins do not match between the two files! Cannot execute the code!" << endl;
         return;
       }
@@ -200,7 +210,7 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   // ********************************************************
   
   // Find the number of bins from the card
-  const int nCentralityBins = (isPbPbData) ? responseCard->GetNCentralityBins() : 1;
+  const int nCentralityBins = (hasCentrality) ? responseCard->GetNCentralityBins() : 1;
   const int nTrackPtBins = responseCard->GetNTrackPtBinsEEC();
   const int nJetPtBins = dataCard->GetNJetPtBinsEEC();
 
@@ -211,20 +221,9 @@ void unfoldEEChistograms(TString dataFileName, TString outputFileName, const int
   int firstStudiedTrackPtBinEEC = 1;
   int lastStudiedTrackPtBinEEC = 5;
 
-  // Select explicitly the jet pT bins that we are going to unfold
-  std::vector<std::pair<double,double>> unfoldedJetPtBins;
-  //unfoldedJetPtBins.push_back(std::make_pair(100,120));
-  unfoldedJetPtBins.push_back(std::make_pair(120,140));
-  unfoldedJetPtBins.push_back(std::make_pair(140,160));
-  unfoldedJetPtBins.push_back(std::make_pair(160,180));
-  unfoldedJetPtBins.push_back(std::make_pair(180,200));
-  //unfoldedJetPtBins.push_back(std::make_pair(200,220));
-  //unfoldedJetPtBins.push_back(std::make_pair(220,240));
-
-  //unfoldedJetPtBins.push_back(std::make_pair(135,155));
-  //unfoldedJetPtBins.push_back(std::make_pair(155,175));
-  //unfoldedJetPtBins.push_back(std::make_pair(175,195));
-  //unfoldedJetPtBins.push_back(std::make_pair(195,215));
+  // Use explicit card bins, native Run-3 fallback, or legacy study intervals.
+  const std::vector<std::pair<double,double>> unfoldedJetPtBins =
+    EECUnfoldConfiguration::SelectUnfoldedJetPtBins(*dataCard);
 
   const int nUnfoldedJetPtBins = unfoldedJetPtBins.size();
 

@@ -1,0 +1,74 @@
+Reading configuration card from file: /tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.input
+
+======== /tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.input =========
+GitHash: GITHASHHERE
+       DataType (dim = 1) 10 
+McCorrelationType (dim = 1) 0 
+      MatchJets (dim = 1) 0 
+TriggerSelection (dim = 1) 0 
+FilledHistograms (dim = 1) 31 
+        JetType (dim = 1) 1 
+        JetAxis (dim = 1) 1 
+      JetEtaCut (dim = 1) 1.6 
+    MinJetPtCut (dim = 1) 10 
+    MaxJetPtCut (dim = 1) 5020 
+      CutBadPhi (dim = 1) 0 
+   CutWithEtaCM (dim = 1) 0 
+MinMaxTrackPtFraction (dim = 1) 0.01 
+MaxMaxTrackPtFraction (dim = 1) 0.98 
+ JetUncertainty (dim = 1) 0 
+      Run3JetID (dim = 1) 1 
+   ApplyJetVeto (dim = 1) 1 
+ JetVetoMapFile (dim = 1) 0 
+JetVetoMapHistogram (dim = 1) 0 
+JetVetoPtConvention (dim = 1) 0 
+JetVetoInputMinPt (dim = 1) 15 
+    TrackEtaCut (dim = 1) 2.4 
+  MinTrackPtCut (dim = 1) 0.5 
+  MaxTrackPtCut (dim = 1) 500 
+MaxTrackPtRelativeError (dim = 1) 0.1 
+VertexMaxDistance (dim = 1) 3 
+CalorimeterSignalLimitPt (dim = 1) 20 
+HighPtEtFraction (dim = 1) 0.5 
+ Chi2QualityCut (dim = 1) 100000 
+MinimumTrackHits (dim = 1) 0 
+    SubeventCut (dim = 1) 2 
+TrackEfficiencyVariation (dim = 1) 0.024 
+    JetPtWeight (dim = 1) 0 
+DisableTrackPairEfficiencyCorrection (dim = 1) 1 
+     ZVertexCut (dim = 1) 15 
+    LowPtHatCut (dim = 1) -15 
+   HighPtHatCut (dim = 1) 5020 
+MultiplicityMode (dim = 1) 0 
+      JetRadius (dim = 1) 0.4 
+ WeightExponent (dim = 2) 1 2 
+    SmearDeltaR (dim = 1) 0 
+SmearEnergyWeight (dim = 1) 0 
+JetPtBinEdgesEEC (dim = 8) 40 80 120 160 200 300 500 5020 
+TrackPtBinEdgesEEC (dim = 9) 0.5 1 1.5 2 2.5 3 3.5 4 300 
+SkipCovarianceMatrix (dim = 1) 1 
+MinJetPtUnfoldingReco (dim = 1) 80 
+MinJetPtUnfoldingTruth (dim = 1) 60 
+CentralityBinEdges (dim = 4) 0 30 50 90 
+TrackPtBinEdges (dim = 8) 0.7 1 2 3 4 8 12 300 
+  PtHatBinEdges (dim = 10) 0 30 50 80 120 170 220 280 370 460 
+BackgroundMethods (dim = 1) 0 
+ MegaSkimMixing (dim = 1) 1 
+EventMatchForMixing (dim = 1) 2 
+   BinnedMixing (dim = 1) 0 
+   VzMixingBins (dim = 2) -0.5 1 
+HiBinMixingBins (dim = 2) -0.5 1 
+HFEnergyMixingBins (dim = 2) 0 1 
+MultiplicityMixingBins (dim = 2) -0.5 5 
+  HFEnergyShift (dim = 1) 25 
+     DebugLevel (dim = 1) 1 
+MaxEventsPerFile (dim = 1) 1000 
+
+TrkEff2025OO: using nominal OO tracking correction table: trackCorrectionTables/OO2025/Eff_OO_2025_Hijing_MB_Centrality_fromHihfpf_NoPU_3D_Nominal_Official_18Nov2025.root
+TrkEff2025OO: pT lookups above 6.1 GeV are capped at 6.1 GeV.
+Initializing jet correction from file: jetEnergyCorrections/L2Relative_AK4PF_OO_V1.txt
+Reading from file: /eos/user/j/jvelazqu/Foresting/OOMC/unembedded_L1HLT_objects_MC_1.root
+Analysis was compeleted in: 
+Real time 0:00:11, CP time 0.700
+
+====== Writing into file =========

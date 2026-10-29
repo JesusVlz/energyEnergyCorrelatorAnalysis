@@ -1,6 +1,6 @@
 # Dedicated pp inclusive selected-event card, R04.
 # Follows separate-system pPb/pp card convention; split OO cards are retained.
-# InclusiveMode 1 fills separate RAW diagnostics; corrected inclusive is BLOCKED.
+# Standard EEC pipeline; broad ordinary centrality interval, no separate analysis mode.
 # Intended OO 0-100% coverage must pass acceptance/correction validation.
 # Real event hiBin/activity is preserved; no constant or extrapolated weights.
 # R08 requires native AK8 jets and applicable calibration; no AK4 substitution.
@@ -102,6 +102,8 @@ HFEnergyShift 25 # Shift in HF energy when matching to find mixed events
 # Debug
 DebugLevel 2   # 0 = No debug messages, 1 = Some debug messages, 2 = All debug messages
 
-InclusiveMode 1 # Raw selected-event diagnostic; corrected mode 2 remains blocked
 MaxEventsPerFile 100 # Bounded test only
 ChannelRadiusCode 4 # Persistent R04/R08 namespace
+MinPairTrackPt 2 # Strict EEC pair threshold; track reader/QA input remains 0.5 GeV
+FirstUnfoldedJetPtBin 0 # Standard output starts at 40 GeV
+LastUnfoldedJetPtBin 2 # Standard output ends at 160 GeV; response guards retained

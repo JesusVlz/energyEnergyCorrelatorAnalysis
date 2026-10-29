@@ -58,12 +58,11 @@ EECHistograms::EECHistograms() :
   fhTracksWithMatchedParticle(0),
   fhParticleDeltaRResponse(0),
   fhParticlePtResponse(0),
-  fhInclusiveRawEEC(0),
-  fhInclusiveJetExposure(0),
-  fhInclusiveEventCoverage(0),
-  fhInclusiveSelectedActivityWeighted(0),
-  fhInclusiveEventActivity(0),
-  fhInclusiveInputStatus(0),
+  fhJetExposure(0),
+  fhEventCoverage(0),
+  fhSelectedActivityWeighted(0),
+  fhEventActivity(0),
+  fhInputStatus(0),
   fCard(0)
 {
   // Default constructor
@@ -116,12 +115,11 @@ EECHistograms::EECHistograms(ConfigurationCard* newCard) :
   fhTracksWithMatchedParticle(0),
   fhParticleDeltaRResponse(0),
   fhParticlePtResponse(0),
-  fhInclusiveRawEEC(0),
-  fhInclusiveJetExposure(0),
-  fhInclusiveEventCoverage(0),
-  fhInclusiveSelectedActivityWeighted(0),
-  fhInclusiveEventActivity(0),
-  fhInclusiveInputStatus(0),
+  fhJetExposure(0),
+  fhEventCoverage(0),
+  fhSelectedActivityWeighted(0),
+  fhEventActivity(0),
+  fhInputStatus(0),
   fCard(newCard)
 {
   // Custom constructor
@@ -135,6 +133,9 @@ EECHistograms::EECHistograms(const EECHistograms& in) :
   fhVertexZ(in.fhVertexZ),
   fhVertexZWeighted(in.fhVertexZWeighted),
   fhEvents(in.fhEvents),
+  fhJetVetoEventCounts(in.fhJetVetoEventCounts),
+  fhJetVetoEtaPhiBefore{in.fhJetVetoEtaPhiBefore[0],in.fhJetVetoEtaPhiBefore[1]},
+  fhJetVetoEtaPhiAfter{in.fhJetVetoEtaPhiAfter[0],in.fhJetVetoEtaPhiAfter[1]},
   fhTriggers(in.fhTriggers),
   fhTriggersAfterSelection(in.fhTriggersAfterSelection),
   fhTrackCuts(in.fhTrackCuts),
@@ -174,12 +175,11 @@ EECHistograms::EECHistograms(const EECHistograms& in) :
   fhTracksWithMatchedParticle(in.fhTracksWithMatchedParticle),
   fhParticleDeltaRResponse(in.fhParticleDeltaRResponse),
   fhParticlePtResponse(in.fhParticlePtResponse),
-  fhInclusiveRawEEC(in.fhInclusiveRawEEC),
-  fhInclusiveJetExposure(in.fhInclusiveJetExposure),
-  fhInclusiveEventCoverage(in.fhInclusiveEventCoverage),
-  fhInclusiveSelectedActivityWeighted(in.fhInclusiveSelectedActivityWeighted),
-  fhInclusiveEventActivity(in.fhInclusiveEventActivity),
-  fhInclusiveInputStatus(in.fhInclusiveInputStatus),
+  fhJetExposure(in.fhJetExposure),
+  fhEventCoverage(in.fhEventCoverage),
+  fhSelectedActivityWeighted(in.fhSelectedActivityWeighted),
+  fhEventActivity(in.fhEventActivity),
+  fhInputStatus(in.fhInputStatus),
   fCard(in.fCard)
 {
   // Copy constructor
@@ -197,6 +197,11 @@ EECHistograms& EECHistograms::operator=(const EECHistograms& in){
   fhVertexZ = in.fhVertexZ;
   fhVertexZWeighted = in.fhVertexZWeighted;
   fhEvents = in.fhEvents;
+  fhJetVetoEventCounts = in.fhJetVetoEventCounts;
+  for(int stream=0;stream<2;++stream){
+    fhJetVetoEtaPhiBefore[stream] = in.fhJetVetoEtaPhiBefore[stream];
+    fhJetVetoEtaPhiAfter[stream] = in.fhJetVetoEtaPhiAfter[stream];
+  }
   fhTriggers = in.fhTriggers;
   fhTriggersAfterSelection = in.fhTriggersAfterSelection;
   fhTrackCuts = in.fhTrackCuts;
@@ -236,12 +241,11 @@ EECHistograms& EECHistograms::operator=(const EECHistograms& in){
   fhTracksWithMatchedParticle = in.fhTracksWithMatchedParticle;
   fhParticleDeltaRResponse = in.fhParticleDeltaRResponse;
   fhParticlePtResponse = in.fhParticlePtResponse;
-  fhInclusiveRawEEC = in.fhInclusiveRawEEC;
-  fhInclusiveJetExposure = in.fhInclusiveJetExposure;
-  fhInclusiveEventCoverage = in.fhInclusiveEventCoverage;
-  fhInclusiveSelectedActivityWeighted = in.fhInclusiveSelectedActivityWeighted;
-  fhInclusiveEventActivity = in.fhInclusiveEventActivity;
-  fhInclusiveInputStatus = in.fhInclusiveInputStatus;
+  fhJetExposure = in.fhJetExposure;
+  fhEventCoverage = in.fhEventCoverage;
+  fhSelectedActivityWeighted = in.fhSelectedActivityWeighted;
+  fhEventActivity = in.fhEventActivity;
+  fhInputStatus = in.fhInputStatus;
   fCard = in.fCard;
   
   return *this;
@@ -252,15 +256,19 @@ EECHistograms& EECHistograms::operator=(const EECHistograms& in){
  */
 EECHistograms::~EECHistograms(){
   // destructor
-  delete fhInclusiveRawEEC;
-  delete fhInclusiveJetExposure;
-  delete fhInclusiveEventCoverage;
-  delete fhInclusiveSelectedActivityWeighted;
-  delete fhInclusiveEventActivity;
-  delete fhInclusiveInputStatus;
+  delete fhJetExposure;
+  delete fhEventCoverage;
+  delete fhSelectedActivityWeighted;
+  delete fhEventActivity;
+  delete fhInputStatus;
   delete fhVertexZ;
   delete fhVertexZWeighted;
   delete fhEvents;
+  delete fhJetVetoEventCounts;
+  for(int stream=0;stream<2;++stream){
+    delete fhJetVetoEtaPhiBefore[stream];
+    delete fhJetVetoEtaPhiAfter[stream];
+  }
   delete fhTriggers;
   delete fhTriggersAfterSelection;
   delete fhTrackCuts;
@@ -502,38 +510,29 @@ void EECHistograms::CreateHistograms(){
   }
   fullUnfoldingBinning[nUnfoldingBins] = maxUnfoldingBin;
 
-  // Dedicated selected-event raw diagnostics. These retain the real activity elsewhere,
-  // so changing disjoint split-bin edges cannot change the inclusive weighted sum.
-  if(fCard->HasKey("InclusiveMode") && fCard->Get("InclusiveMode") == 1){
-    const Int_t bins[6] = {nDeltaRBinsEEC, nJetPtBinsEEC, nTrackPtBinsEEC, knPairingTypes, knSubeventCombinations, nEnergyWeightsEEC};
-    const Double_t low[6] = {minDeltaREEC, minJetPtEEC, minTrackPtEEC, -0.5, -0.5, minEnergyWeightEEC};
-    const Double_t high[6] = {maxDeltaREEC, maxJetPtEEC, maxTrackPtEEC, knPairingTypes-0.5, knSubeventCombinations-0.5, maxEnergyWeightEEC};
-    fhInclusiveRawEEC = new THnSparseD("inclusiveRawEEC", "Uncorrected selected-event EEC diagnostic", 6, bins, low, high);
-    fhInclusiveRawEEC->Sumw2();
-    fhInclusiveRawEEC->SetBinEdges(0, deltaRBinsEEC);
-    fhInclusiveRawEEC->SetBinEdges(1, jetPtBinsEEC);
-    fhInclusiveRawEEC->SetBinEdges(2, trackPtBinsEEC);
-    fhInclusiveJetExposure = new TH1D("inclusiveJetExposure", "Selected jet diagnostic exposure", nJetPtBinsEEC, jetPtBinsEEC);
-    fhInclusiveJetExposure->Sumw2();
-    fhInclusiveEventCoverage = new TH2D("inclusiveEventCoverage", "Stored activity and analyzer selection coverage", 5, -0.5, 4.5, 4, -0.5, 3.5);
-    fhInclusiveEventCoverage->Sumw2();
-    fhInclusiveSelectedActivityWeighted = new TH1D("inclusiveSelectedActivityWeighted", "Selected event diagnostic weights", 5, -0.5, 4.5);
-    fhInclusiveSelectedActivityWeighted->Sumw2();
+  // Event-coverage QA is independent of the output centrality binning.
+  {
+    fhJetExposure = new TH1D("jetExposure", "Selected jet diagnostic exposure", nJetPtBinsEEC, jetPtBinsEEC);
+    fhJetExposure->Sumw2();
+    fhEventCoverage = new TH2D("eventCoverage", "Stored activity and analyzer selection coverage", 5, -0.5, 4.5, 4, -0.5, 3.5);
+    fhEventCoverage->Sumw2();
+    fhSelectedActivityWeighted = new TH1D("selectedActivityWeighted", "Selected event diagnostic weights", 5, -0.5, 4.5);
+    fhSelectedActivityWeighted->Sumw2();
     const char* categories[5] = {"OO hiBin 0-179", "OO hiBin 180-199", "OO negative hiBin", "OO hiBin >=200", "pp selected"};
     for(Int_t i=0; i<5; ++i){
-      fhInclusiveEventCoverage->GetXaxis()->SetBinLabel(i+1,categories[i]);
-      fhInclusiveSelectedActivityWeighted->GetXaxis()->SetBinLabel(i+1,categories[i]);
+      fhEventCoverage->GetXaxis()->SetBinLabel(i+1,categories[i]);
+      fhSelectedActivityWeighted->GetXaxis()->SetBinLabel(i+1,categories[i]);
     }
     const char* stages[4] = {"Read from forest", "Pass pThat", "Pass trigger", "Pass event cuts"};
-    for(Int_t i=0; i<4; ++i) fhInclusiveEventCoverage->GetYaxis()->SetBinLabel(i+1,stages[i]);
+    for(Int_t i=0; i<4; ++i) fhEventCoverage->GetYaxis()->SetBinLabel(i+1,stages[i]);
     const Int_t activityBins[3] = {202, 200, 60};
     const Double_t activityLow[3] = {-1.5, 0, -15};
     const Double_t activityHigh[3] = {200.5, 10000, 15};
-    fhInclusiveEventActivity = new THnSparseD("inclusiveEventActivity", "Actual stored hiBin, HF sum, vz; flows retained", 3, activityBins, activityLow, activityHigh);
-    fhInclusiveEventActivity->Sumw2();
-    fhInclusiveInputStatus = new TH1D("inclusiveInputStatus", "Input coverage; analyzer cannot recover upstream source losses", 2, 0.5, 2.5);
-    fhInclusiveInputStatus->GetXaxis()->SetBinLabel(1,"Files opened");
-    fhInclusiveInputStatus->GetXaxis()->SetBinLabel(2,"Files truncated by MaxEventsPerFile");
+    fhEventActivity = new THnSparseD("eventActivity", "Actual stored hiBin, HF sum, vz; flows retained", 3, activityBins, activityLow, activityHigh);
+    fhEventActivity->Sumw2();
+    fhInputStatus = new TH1D("inputStatus", "Input coverage; analyzer cannot recover upstream source losses", 2, 0.5, 2.5);
+    fhInputStatus->GetXaxis()->SetBinLabel(1,"Files opened");
+    fhInputStatus->GetXaxis()->SetBinLabel(2,"Files truncated by MaxEventsPerFile");
   }
 
   // Arrays for creating THnSparses
@@ -627,6 +626,19 @@ void EECHistograms::CreateHistograms(){
   fhVertexZ = new TH1F("vertexZ","vertexZ",nVzBins,minVz,maxVz); fhVertexZ->Sumw2();
   fhVertexZWeighted = new TH1F("vertexZweighted","vertexZweighted",nVzBins,minVz,maxVz); fhVertexZWeighted->Sumw2();
   fhEvents = new TH1F("nEvents","nEvents",knEventTypes,-0.5,knEventTypes-0.5); fhEvents->Sumw2();
+  if(fCard && fCard->HasKey("ApplyJetVeto") && fCard->Get("ApplyJetVeto") == 1){
+    fhJetVetoEventCounts = new TH1D("jetVetoEventCounts", "Unweighted events after standard event cuts;selection;events", 6, -.5, 5.5);
+    const char* labels[] = {"signal checked", "signal kept", "signal vetoed", "mixing checked", "mixing kept", "mixing vetoed"};
+    for(int bin=0;bin<6;++bin) fhJetVetoEventCounts->GetXaxis()->SetBinLabel(bin+1,labels[bin]);
+    for(int stream=0;stream<2;++stream){
+      const TString prefix = stream ? "mixing" : "signal";
+      fhJetVetoEtaPhiBefore[stream] = new TH2D(prefix+"EligibleJetEtaPhiBeforeVeto", "Eligible reconstructed jets before event veto;detector #eta;detector #phi", 104,-5.2,5.2,72,-TMath::Pi(),TMath::Pi());
+      fhJetVetoEtaPhiAfter[stream] = new TH2D(prefix+"EligibleJetEtaPhiAfterVeto", "Eligible reconstructed jets in kept events;detector #eta;detector #phi", 104,-5.2,5.2,72,-TMath::Pi(),TMath::Pi());
+      fhJetVetoEtaPhiBefore[stream]->Sumw2();
+      fhJetVetoEtaPhiAfter[stream]->Sumw2();
+    }
+  }
+
   fhTriggers = new TH1F("triggers","triggers",knTriggerCombinations,-0.5,knTriggerCombinations-0.5); fhTriggers->Sumw2();
   fhTriggersAfterSelection = new TH1F("triggersAfterSelection","triggersAfterSelection",knTriggerCombinations,-0.5,knTriggerCombinations-0.5); fhTriggersAfterSelection->Sumw2();
   fhTrackCuts = new TH1F("trackCuts","trackCuts",knTrackCuts,-0.5,knTrackCuts-0.5); fhTrackCuts->Sumw2();
@@ -1316,24 +1328,27 @@ void EECHistograms::CreateHistograms(){
  * Write the histograms to file
  */
 void EECHistograms::Write() const{
-  
-  if(fhInclusiveRawEEC){
+
+  {
     TDirectory* parent = gDirectory;
-    TDirectory* inclusive = parent->GetDirectory("inclusive");
-    if(!inclusive) inclusive = parent->mkdir("inclusive");
-    inclusive->cd();
-    fhInclusiveRawEEC->Write();
-    fhInclusiveJetExposure->Write();
-    fhInclusiveEventCoverage->Write();
-    fhInclusiveSelectedActivityWeighted->Write();
-    fhInclusiveEventActivity->Write();
-    fhInclusiveInputStatus->Write();
-    TNamed("CorrectionState", "RAW_DIAGNOSTIC; no centrality reweighting, single-track or residual-pair correction; event weight=vzWeight*stored generator weight for MC (actual branch retained exactly once), unity data event factor; absolute generator/cross-section normalization applicability BLOCKED; legacy split outputs remain provisional; fully corrected inclusive BLOCKED on calibration applicability and independent pair/response/background closure").Write();
-    TNamed("EventClass", "Inclusive selected events passing configured trigger, event and pThat cuts; stored hiBin retained; no full-hadronic or 0-100% acceptance certification; upstream skim losses NOT_MEASURED").Write();
-    TNamed("StatisticalState", "Raw pair and jet Sumw2 retained; full event, cross-radius, cross-power, mixed-reuse and normalization covariance BLOCKED / NOT_IMPLEMENTED here").Write();
-    TNamed("TrackSelection", "strict pT > 2 GeV; input threshold remains configured separately").Write();
-    TNamed("AngularState", "Raw diagnostic support 0 <= deltaR < 2*JetRadius; final reporting/normalization interval NOT_FROZEN").Write();
-    TNamed("PilotLimit", Form("MaxEventsPerFile=%g; zero means unlimited; see inclusiveInputStatus for actual truncation", fCard->HasKey("MaxEventsPerFile") ? fCard->Get("MaxEventsPerFile") : 0.)).Write();
+    TDirectory* qa = parent->GetDirectory("eventQA");
+    if(!qa) qa = parent->mkdir("eventQA");
+    qa->cd();
+    fhJetExposure->Write();
+    fhEventCoverage->Write();
+    fhSelectedActivityWeighted->Write();
+    fhEventActivity->Write();
+    fhInputStatus->Write();
+    TNamed("JetVetoState", fhJetVetoEventCounts ? "Enabled with explicit analyst-supplied inputs; production applicability/coverage must be established externally" : "NOT_APPLIED: Run-3 mandatory veto requirement not certified by this diagnostic output").Write();
+    if(fhJetVetoEventCounts){
+      fhJetVetoEventCounts->Write();
+      for(int stream=0;stream<2;++stream){
+        fhJetVetoEtaPhiBefore[stream]->Write();
+        fhJetVetoEtaPhiAfter[stream]->Write();
+      }
+    }
+    TNamed("WeightState", "Standard fTotalEventWeight; no weight changes from centrality output binning; correction applicability/physics closure must be validated separately").Write();
+    TNamed("EventClass", "Selected events; stored activity coordinates and invalid-coordinate counts retained; upstream losses and full acceptance not certified").Write();
     parent->cd();
   }
 
@@ -1416,22 +1431,21 @@ Double_t EECHistograms::GetDeltaRBinBorderHighEEC(Int_t iBin){
 }
 
 // Categories describe stored coordinates, not a newly certified percentile calibration.
-void EECHistograms::FillInclusiveCoverage(Int_t hiBin, Int_t stage, Bool_t isOO){
-  if(!fhInclusiveEventCoverage) return;
+void EECHistograms::FillEventCoverage(Int_t hiBin, Int_t stage, Bool_t isOO){
+  if(!fhEventCoverage) return;
   const Int_t category = !isOO ? 4 : (hiBin < 0 ? 2 : (hiBin >= 200 ? 3 : (hiBin >= 180 ? 1 : 0)));
-  fhInclusiveEventCoverage->Fill(category, stage);
+  fhEventCoverage->Fill(category, stage);
 }
 
-void EECHistograms::FillInclusiveSelectedEvent(Int_t hiBin, Double_t hfSum, Double_t vz, Double_t diagnosticWeight){
-  if(!fhInclusiveRawEEC) return;
+void EECHistograms::FillSelectedEvent(Int_t hiBin, Double_t hfSum, Double_t vz, Double_t eventWeight){
   const Int_t dataType = fCard->Get("DataType");
   const Bool_t isOO = dataType == 9 || dataType == 10;
   const Int_t category = !isOO ? 4 : (hiBin < 0 ? 2 : (hiBin >= 200 ? 3 : (hiBin >= 180 ? 1 : 0)));
-  fhInclusiveSelectedActivityWeighted->Fill(category, diagnosticWeight);
+  fhSelectedActivityWeighted->Fill(category, eventWeight);
   const Double_t activity[3] = {static_cast<Double_t>(hiBin), hfSum, vz};
-  fhInclusiveEventActivity->Fill(activity, diagnosticWeight);
+  fhEventActivity->Fill(activity, eventWeight);
 }
 
-void EECHistograms::MarkInclusiveTruncatedInput(){
-  if(fhInclusiveInputStatus) fhInclusiveInputStatus->Fill(2);
+void EECHistograms::MarkTruncatedInput(){
+  if(fhInputStatus) fhInputStatus->Fill(2);
 }

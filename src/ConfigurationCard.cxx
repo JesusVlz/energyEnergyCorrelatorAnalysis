@@ -303,5 +303,9 @@ void ConfigurationCard::WriteCard(TDirectory *file) const{
   fGitHash.Write("GitHash");
   for(unsigned int i=0;i<fValuesVector.size();i++){
     fValuesVector[i].Write(fKeyWordVector[i]);
+    if(fKeyWordVector[i] == "MixingFileList") TObjString(fValueString[i]).Write("MixingFileListPath");
+    if(fKeyWordVector[i] == "JetVetoMapFile" || fKeyWordVector[i] == "JetVetoMapHistogram" ||
+       fKeyWordVector[i] == "JetVetoPtConvention")
+      TObjString(fValueString[i]).Write(fKeyWordVector[i]+"String");
   }
 }

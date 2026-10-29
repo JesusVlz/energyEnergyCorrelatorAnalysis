@@ -43,6 +43,9 @@ public:
   Float_t GetJetRawPt(Int_t iJet) const;      // Getter for jet raw pT
   Float_t GetJetMaxTrackPt(Int_t iJet) const; // Getter for maximum track pT inside a jet
   
+  void EnableRun3JetSelection(Bool_t enabled = true) override;
+  EECJetSelection::JetInputs GetJetSelectionInputs(Int_t iJet) const override;
+
   // Getters for leaves in the track tree
   Float_t GetTrackPt(Int_t iTrack) const;                    // Getter for track pT
   Float_t GetTrackPtError(Int_t iTrack) const;               // Getter for track pT error
@@ -114,6 +117,12 @@ private:
   TBranch* fParticleChargeBranch;         // Branch for particle charges
   TBranch* fParticleSubeventBranch;       // Branch for particle subevent indices (0 = PYTHIA, (>0) = HYDJET)
   
+  EECJetSelection::Detail::NativePFJetInputs<fnMaxJet> fRun3PFJetInputs;
+  Bool_t fRun3JetInputsBound = false;
+  Int_t fRun3ValidatedJetTreeNumber = -1;
+  Float_t fDetectorJetEtaArray[fnMaxJet] = {0};
+  Float_t fDetectorJetPhiArray[fnMaxJet] = {0};
+
   // Leaves for jet tree
   Float_t fJetPtArray[fnMaxJet] = {0};            // pT:s of all the jets in an event
   Float_t fJetPhiArray[fnMaxJet] = {0};           // phis of all the jets in an event

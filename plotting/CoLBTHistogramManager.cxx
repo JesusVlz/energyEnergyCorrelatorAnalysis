@@ -2,6 +2,9 @@
  * Implementation of CoLBTHistogramManager
  */
 
+// ROOT includes
+#include "TMath.h"
+
 // Own includes
 #include "CoLBTHistogramManager.h"
 

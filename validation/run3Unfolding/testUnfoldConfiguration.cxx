@@ -4,6 +4,7 @@
 #include <TVectorT.h>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -68,6 +69,9 @@ int main(int argc, char** argv){
   WriteFixture(prefix + "wrongRadius.root", 10, 3, 1, 1, 30, true, true, 0.3);
   WriteFixture(prefix + "wrongTrack.root", 10, 3, 1, 1, 30, true, true, 0.4, 1.5);
   WriteFixture(prefix + "wrongJet.root", 10, 3, 1, 1, 30, true, true, 0.4, 1, 125);
+  WriteFixture(prefix + "nonfiniteRadius.root", 10, 3, 1, 1, 30, true, true, std::numeric_limits<float>::quiet_NaN());
+  WriteFixture(prefix + "RecoReco.root", 10, 0);
+  WriteFixture(prefix + "GenReco.root", 10, 2);
   TFile ooFile((prefix + "OOdata.root").c_str()); EECCard oo(&ooFile);
   TFile ppRefFile((prefix + "ppRefdata.root").c_str()); EECCard ppRef(&ppRefFile);
   TFile ppFile((prefix + "ppdata.root").c_str()); EECCard pp(&ppFile);
@@ -80,9 +84,10 @@ int main(int argc, char** argv){
   Reject([&]{ EECUnfoldConfiguration c(&oo, 0, 0, 1, ooResponse, -2); }, "Negative iterations accepted");
   Reject([&]{ EECUnfoldConfiguration c(&oo, 0, 0, 1, (prefix + "ppRefresponse.root").c_str(), 6); }, "Wrong MC species accepted");
   Reject([&]{ EECUnfoldConfiguration c(&oo, 0, 0, 1, (prefix + "OOdata.root").c_str(), 6); }, "Data response accepted");
-  for(const char* name : {"wrongMode", "wrongAxis", "wrongExponent", "wrongCentrality", "missingResponse", "missingMetadata", "wrongRadius", "wrongTrack", "wrongJet"}){
+  for(const char* name : {"wrongMode", "wrongAxis", "wrongExponent", "wrongCentrality", "missingResponse", "missingMetadata", "wrongRadius", "wrongTrack", "wrongJet", "nonfiniteRadius"}){
     Reject([&]{ EECUnfoldConfiguration c(&oo, 0, 0, 1, (prefix + name + ".root").c_str(), 6); }, name);
   }
+  Reject([&]{ EECUnfoldConfiguration c(&oo, 0, 0, 1, (prefix + "not_present.root").c_str(), 6); }, "Nonexistent response accepted");
   EECUnfoldConfiguration explicitOO(&oo, 1, 0, 1, ooResponse, 6);
   Require(explicitOO.GetResponseFileName() == ooResponse, "Explicit response path changed");
   Require(explicitOO.GetNumberOfIterations({30,90}, 0.7) == 6, "Explicit iterations replaced by a legacy count");
@@ -90,6 +95,10 @@ int main(int argc, char** argv){
   Require(explicitPP.GetNumberOfIterations({0,10}, 0.7) == 9, "ppRef explicit iterations lost");
   EECUnfoldConfiguration recoGen(&oo, 0, 0, 1, (prefix + "RecoGen.root").c_str(), 6);
   Require(recoGen.GetNumberOfIterations({0,10}, 0.7) == 6, "Valid RecoGen-produced particle response rejected");
+  for(const char* name : {"RecoReco", "GenReco"}){
+    EECUnfoldConfiguration validMode(&oo, 0, 0, 1, (prefix + name + ".root").c_str(), 6);
+    Require(validMode.GetNumberOfIterations({0,10}, 0.7) == 6, "Valid accompanying MC mode rejected");
+  }
   EECUnfoldConfiguration legacyPP(&pp);
   EECUnfoldConfiguration legacyPbPb(&pbpb);
   Require(legacyPP.GetResponseFileName().Contains("ppMC2017"), "Legacy pp response changed");
@@ -111,5 +120,21 @@ int main(int argc, char** argv){
   double emptyEdges[] = {100,250};
   oo.AddVector(EECCard::kJetPtBinEdgesEEC, 2, emptyEdges);
   Reject([&]{ EECUnfoldConfiguration::SelectUnfoldedJetPtBins(oo); }, "Empty Run-3 jet pT range accepted");
+  double integratedEdges[] = {40,80,120,160,200};
+  oo.AddVector(EECCard::kJetPtBinEdgesEEC, 5, integratedEdges);
+  oo.AddOneDimensionalVector(EECCard::kFirstUnfoldedJetPtBin, 0);
+  oo.AddOneDimensionalVector(EECCard::kLastUnfoldedJetPtBin, 2);
+  Require(EECUnfoldConfiguration::SelectUnfoldedJetPtBins(oo) == std::vector<std::pair<double,double>>{{40,80},{80,120},{120,160}}, "Explicit integrated bins lost precedence over native fallback");
+  oo.AddOneDimensionalVector(EECCard::kFirstUnfoldedJetPtBin, -1);
+  Reject([&]{ EECUnfoldConfiguration::SelectUnfoldedJetPtBins(oo); }, "Partially configured range accepted");
+  oo.AddOneDimensionalVector(EECCard::kFirstUnfoldedJetPtBin, 3);
+  Reject([&]{ EECUnfoldConfiguration::SelectUnfoldedJetPtBins(oo); }, "Reversed range accepted");
+  oo.AddOneDimensionalVector(EECCard::kFirstUnfoldedJetPtBin, 0);
+  oo.AddOneDimensionalVector(EECCard::kLastUnfoldedJetPtBin, 4);
+  Reject([&]{ EECUnfoldConfiguration::SelectUnfoldedJetPtBins(oo); }, "Out-of-bounds range accepted");
+  oo.AddOneDimensionalVector(EECCard::kLastUnfoldedJetPtBin, 1.5);
+  Reject([&]{ EECUnfoldConfiguration::SelectUnfoldedJetPtBins(oo); }, "Fractional range accepted");
+  oo.AddOneDimensionalVector(EECCard::kLastUnfoldedJetPtBin, std::numeric_limits<float>::quiet_NaN());
+  Reject([&]{ EECUnfoldConfiguration::SelectUnfoldedJetPtBins(oo); }, "Nonfinite range accepted");
   std::cout << "PASS: explicit OO/ppRef response selection, metadata rejection, native jet bins and legacy defaults.\n";
 }

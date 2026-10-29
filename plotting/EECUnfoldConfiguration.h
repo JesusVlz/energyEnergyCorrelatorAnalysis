@@ -3,6 +3,7 @@
 
 // Own includes
 #include "EECCard.h"
+#include <vector>
 
 /*
  * EECUnfoldConfiguration class
@@ -22,12 +23,13 @@ public:
   static const int kNTrackPtBins = 8;         // Number of track pT bins for which the background scale is determined
   
   EECUnfoldConfiguration();               // Constructor
-  EECUnfoldConfiguration(EECCard* card, const int iSplit = 0, const int iSystematic = 0, const int iWeightExponent = 1);  // Custom constructor with a card
+  EECUnfoldConfiguration(EECCard* card, const int iSplit = 0, const int iSystematic = 0, const int iWeightExponent = 1, const TString responseFile = "", const int iterations = 0);  // Custom constructor with a card
   ~EECUnfoldConfiguration();              // Destructor
 
   // Getter for unfolding configuration
   double GetNumberOfIterations(const std::pair<double,double> centralityBinBorders, double trackPtBorderLow) const; // Getter for the number of iterations
   TString GetResponseFileName() const; // Getter for the name of the file containing the response matrices
+  static std::vector<std::pair<double,double>> SelectUnfoldedJetPtBins(const EECCard& card); // Explicit card range, native Run-3 fallback, or legacy defaults
   
 private:
   
@@ -36,6 +38,7 @@ private:
   int fSystematicIndex;            // Index for systematic uncertainty study
   int fSplitIndex;                 // Index for the MC split. 0 = Whole dataset. 1 = Split 1, 2 = Split 2
   int fWeightExponent;             // Exponent used for the energy weights for energy-energy correlators
+  int fExplicitIterations = 0; // Explicit independent-study setting; zero selects legacy configuration
   TString fResponseMatrixFileName; // Response matrix file name for which the configuration is determined
 
   // Binning information for the scaling tables

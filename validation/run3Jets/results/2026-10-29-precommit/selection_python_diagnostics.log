@@ -1,0 +1,10 @@
+test_event_veto_exact_boundaries_and_nonzero (test_diagnostics.DiagnosticTests) ... ok
+test_match_preserves_native_order_and_tolerances (test_diagnostics.DiagnosticTests) ... ok
+test_output_boundaries (test_diagnostics.DiagnosticTests) ... ok
+test_profile_exposes_empty_and_signed_weight_support (test_diagnostics.DiagnosticTests) ... ok
+test_veto_no_invalid_map_fallback (test_diagnostics.DiagnosticTests) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK

@@ -44,9 +44,9 @@ make clean
 
 # Create the new tar ball
 if $SMEARING; then
-  tar -cvzf $OUTPUTTAR Makefile eecAnalysis.cxx jetEnergyCorrections src trackCorrectionTables smearingFiles mixingFileList
+  tar -cvzf $OUTPUTTAR Makefile eecAnalysis.cxx jetEnergyCorrections jetVetoMaps src trackCorrectionTables smearingFiles mixingFileList
 else
-  tar -cvzf $OUTPUTTAR Makefile eecAnalysis.cxx jetEnergyCorrections src trackCorrectionTables mixingFileList
+  tar -cvzf $OUTPUTTAR Makefile eecAnalysis.cxx jetEnergyCorrections jetVetoMaps src trackCorrectionTables mixingFileList
 fi
 
 # Put placeholder string back to the main analysis file

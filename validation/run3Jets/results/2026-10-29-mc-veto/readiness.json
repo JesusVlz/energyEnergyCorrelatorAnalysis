@@ -1,0 +1,70 @@
+{
+  "executable": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/eecAnalysis",
+  "executable_sha256": "3bf006d1687e608a59cd5aba0b0bde746c2d0728089818612d5c0dead014d706",
+  "build": {
+    "command": [
+      "make",
+      "-B",
+      "-j4"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 5.245492219924927
+  },
+  "test_output": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc",
+  "test_cards": {
+    "validation/run3Jets/cards/OOMC_R04_veto_test.input": "43d52d993e185dd45ccd2a754e106759a9117a0a20205d8323da39f37145d4f8",
+    "validation/run3Jets/cards/ppRefMC_R04_veto_test.input": "89027c9c38f1427419ac34a60762f6512f4ed1bbe924a826324fec4b8a971f17"
+  },
+  "maps": {
+    "jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root": "a9b8f15da1bb417a784b647ac0199838642fba6ff6e324051b7309e759d68246",
+    "jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root": "ac1c38cdc92ab27f0362895591481c5e2e6a391dcb46359f385000d5105daedf"
+  },
+  "status": "PASS_REBUILT_AND_BOUNDED_MC_VALIDATED",
+  "checks": {
+    "OO": {
+      "status": "PASS_BOUNDED_MC_SOFTWARE_CHECK",
+      "veto_counts": {
+        "signal": {
+          "checked": 995.0,
+          "kept": 962.0,
+          "vetoed": 33.0
+        },
+        "mixing": {
+          "checked": 0.0,
+          "kept": 0.0,
+          "vetoed": 0.0
+        }
+      },
+      "statistics": {
+        "processed_events": 1000.0,
+        "selected_events": 962.0,
+        "jet_entries": 386.0,
+        "eec_entries": 15448.0
+      }
+    },
+    "pp": {
+      "status": "PASS_BOUNDED_MC_SOFTWARE_CHECK",
+      "veto_counts": {
+        "signal": {
+          "checked": 993.0,
+          "kept": 843.0,
+          "vetoed": 150.0
+        },
+        "mixing": {
+          "checked": 0.0,
+          "kept": 0.0,
+          "vetoed": 0.0
+        }
+      },
+      "statistics": {
+        "processed_events": 1000.0,
+        "selected_events": 843.0,
+        "jet_entries": 1536.0,
+        "eec_entries": 107520.0
+      }
+    }
+  },
+  "checker_sha256": "ad71093af531d5e30b5208ff05d8fc622ee9c702cdc3ec245369dbf20c519dcc",
+  "head": "767066a7f493130f23e988d20f518686dbfe3434",
+  "persisted_results": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto"
+}

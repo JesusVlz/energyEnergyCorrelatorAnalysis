@@ -4,6 +4,91 @@
 
 // Own includes
 #include "EECUnfoldConfiguration.h"
+#include <TDirectory.h>
+#include <TFile.h>
+#include <cmath>
+#include <memory>
+#include <stdexcept>
+#include <string>
+
+namespace {
+const double kMetadataTolerance = 1e-4;
+
+const TVectorT<float>& RequireVector(const TVectorT<float>* value, const char* name, bool edges = false){
+  if(!value || value->GetLwb() != 1 || value->GetNoElements() < (edges ? 2 : 1))
+    throw std::invalid_argument(std::string("Unfolding metadata: missing or malformed ")+name);
+  for(int i=1; i<=value->GetNoElements(); ++i){
+    if(!std::isfinite((*value)[i]) || (edges && i>1 && !((*value)[i] > (*value)[i-1])))
+      throw std::invalid_argument(std::string("Unfolding metadata: nonfinite or unordered ")+name);
+  }
+  return *value;
+}
+
+double Scalar(const TVectorT<float>* value, const char* name){
+  const auto& vector = RequireVector(value, name);
+  if(vector.GetNoElements() != 1)
+    throw std::invalid_argument(std::string("Unfolding metadata: expected scalar ")+name);
+  return vector[1];
+}
+
+int Integer(const TVectorT<float>* value, const char* name, int low, int high){
+  const double result = Scalar(value, name);
+  if(result != std::floor(result) || result < low || result > high)
+    throw std::invalid_argument(std::string("Unfolding metadata: invalid ")+name);
+  return static_cast<int>(result);
+}
+
+void ValidateResponse(const EECCard& data, const TString& path, int power){
+  TDirectory::TContext context;
+  std::unique_ptr<TFile> file(TFile::Open(path, "READ"));
+  if(!file || file->IsZombie())
+    throw std::invalid_argument("Explicit unfolding response cannot be opened: "+std::string(path.Data()));
+  const auto responseEntry = [&](const char* name){
+    return dynamic_cast<TVectorT<float>*>(file->Get((std::string("JCard/")+name).c_str()));
+  };
+  const int dataType = Integer(data.GetCardEntry(EECCard::kDataType), "data DataType", 0, 12);
+  const int responseType = Integer(responseEntry("DataType"), "response DataType", 0, 12);
+  const int matchingMC[] = {2,3,2,3,7,8,7,7,8,10,10,12,12};
+  if(responseType != matchingMC[dataType])
+    throw std::invalid_argument("Explicit unfolding response must be MC from the same collision system");
+  // Response filling uses generator particles independently of the accompanying
+  // EEC correlation mode. Every defined mode is valid metadata; unknown modes fail.
+  Integer(responseEntry("McCorrelationType"), "response McCorrelationType", 0, 3);
+  for(const auto& setting : {std::make_pair(EECCard::kJetType, "JetType"),
+                            std::make_pair(EECCard::kJetAxis, "JetAxis")}){
+    const int maximum = setting.first == EECCard::kJetAxis ? 1 : 3;
+    if(Integer(data.GetCardEntry(setting.first), setting.second, 0, maximum) !=
+       Integer(responseEntry(setting.second), setting.second, 0, maximum))
+      throw std::invalid_argument(std::string("Explicit unfolding response has incompatible ")+setting.second);
+  }
+  const double dataRadius = Scalar(data.GetCardEntry(EECCard::kJetRadius), "data JetRadius");
+  const double responseRadius = Scalar(responseEntry("JetRadius"), "response JetRadius");
+  if(dataRadius <= 0 || responseRadius <= 0 || std::abs(dataRadius-responseRadius) > kMetadataTolerance)
+    throw std::invalid_argument("Explicit unfolding response has incompatible JetRadius");
+  for(const auto* powers : {data.GetCardEntry(EECCard::kWeightExponent),
+                            static_cast<const TVectorT<float>*>(responseEntry("WeightExponent"))}){
+    const auto& values = RequireVector(powers, "WeightExponent");
+    bool found = false;
+    for(int i=1; i<=values.GetNoElements(); ++i) found |= std::abs(values[i]-power) < kMetadataTolerance;
+    if(!found) throw std::invalid_argument("Explicit unfolding response or input lacks the requested WeightExponent");
+  }
+  for(const auto& setting : {std::make_pair(EECCard::kCentralityBinEdges, "CentralityBinEdges"),
+                            std::make_pair(EECCard::kJetPtBinEdgesEEC, "JetPtBinEdgesEEC"),
+                            std::make_pair(EECCard::kTrackPtBinEdgesEEC, "TrackPtBinEdgesEEC")}){
+    const auto& expected = RequireVector(data.GetCardEntry(setting.first), setting.second, true);
+    const auto& actual = RequireVector(responseEntry(setting.second), setting.second, true);
+    if(expected.GetNoElements() != actual.GetNoElements())
+      throw std::invalid_argument(std::string("Explicit unfolding response has incompatible ")+setting.second);
+    for(int i=1; i<=expected.GetNoElements(); ++i)
+      if(std::abs(expected[i]-actual[i]) > kMetadataTolerance)
+        throw std::invalid_argument(std::string("Explicit unfolding response has incompatible ")+setting.second);
+  }
+  for(const char* name : {"jetPtUnfoldingMeasured", "jetPtUnfoldingTruth", "jetPtUnfoldingResponse"})
+    if(!file->GetDirectory(name))
+      throw std::invalid_argument(std::string("Explicit unfolding response lacks ")+name);
+}
+} // namespace
+
 
 
 /*
@@ -31,11 +116,12 @@ EECUnfoldConfiguration::EECUnfoldConfiguration():
 /*
  * Custom constructor
  */
-EECUnfoldConfiguration::EECUnfoldConfiguration(EECCard* card, const int iSplit, const int iSystematic, const int iWeightExponent):
+EECUnfoldConfiguration::EECUnfoldConfiguration(EECCard* card, const int iSplit, const int iSystematic, const int iWeightExponent, const TString responseFile, const int iterations):
   fSystematicIndex(iSystematic),
   fSplitIndex(iSplit),
   fWeightExponent(iWeightExponent)
 {
+  if(!card) throw std::invalid_argument("Unfolding configuration requires an input card");
   TString collisionSystem = card->GetDataType();
   fIsPbPbData = collisionSystem.Contains("PbPb");
   
@@ -61,6 +147,16 @@ EECUnfoldConfiguration::EECUnfoldConfiguration(EECCard* card, const int iSplit, 
     std::cout << "Next the code will crash. Please fix your code." << std::endl;
     throw std::invalid_argument("iWeightExponent in EECUnfoldConfiguration is out of allowed range!");
   }
+
+  if(!responseFile.IsNull()){
+    if(iterations <= 0) throw std::invalid_argument("Explicit response requires a positive independently validated iteration count");
+    ValidateResponse(*card, responseFile, fWeightExponent);
+    fResponseMatrixFileName = responseFile;
+    fExplicitIterations = iterations;
+    return;
+  }
+  if(iterations != 0 || collisionSystem.Contains("OO") || collisionSystem.Contains("ppRef"))
+    throw std::invalid_argument("OO/ppRef unfolding requires an explicit compatible response and independent iteration study; no legacy response fallback");
 
   // Find the actual numbers based on the study 
   InitializeArrays();
@@ -840,6 +936,7 @@ void EECUnfoldConfiguration::InitializeArrays(){
  */
 double EECUnfoldConfiguration::GetNumberOfIterations(const std::pair<double,double> centralityBinBorders, double trackPtBorderLow) const{
 
+  if(fExplicitIterations > 0) return fExplicitIterations;
   // For now, just return 4. I will redo the logic later
   if(fSystematicIndex == kNumberOfIterationsDown) return 3;
   if(fSystematicIndex == kNumberOfIterationsUp) return 5;
@@ -923,4 +1020,26 @@ double EECUnfoldConfiguration::GetNumberOfIterations(const std::pair<double,doub
 // Getter for the name of the file containing the response matrices
 TString EECUnfoldConfiguration::GetResponseFileName() const{
   return fResponseMatrixFileName;
+}
+
+
+std::vector<std::pair<double,double>> EECUnfoldConfiguration::SelectUnfoldedJetPtBins(const EECCard& card){
+  const auto* firstEntry = card.GetCardEntry(EECCard::kFirstUnfoldedJetPtBin);
+  const auto* lastEntry = card.GetCardEntry(EECCard::kLastUnfoldedJetPtBin);
+  const int first = firstEntry ? Integer(firstEntry, "FirstUnfoldedJetPtBin", -1, 1000000) : -1;
+  const int last = lastEntry ? Integer(lastEntry, "LastUnfoldedJetPtBin", -1, 1000000) : -1;
+  const bool explicitRange = first >= 0 || last >= 0;
+  const TString system = card.GetDataType();
+  const bool run3 = system.Contains("OO") || system.Contains("ppRef");
+  if(!explicitRange && !run3) return {{120,140},{140,160},{160,180},{180,200}};
+  const auto& edges = RequireVector(card.GetCardEntry(EECCard::kJetPtBinEdgesEEC), "JetPtBinEdgesEEC", true);
+  if(explicitRange && (first < 0 || last < first || last >= edges.GetNoElements()-1))
+    throw std::invalid_argument("Configured unfolded jet bins exceed or reverse the input card range");
+  std::vector<std::pair<double,double>> bins;
+  for(int i=0; i<edges.GetNoElements()-1; ++i){
+    if(explicitRange ? (i>=first && i<=last) : (edges[i+1]>=120 && edges[i+2]<=200))
+      bins.emplace_back(edges[i+1], edges[i+2]);
+  }
+  if(bins.empty()) throw std::invalid_argument("No complete native jet pT bins in the Run-3 120-200 GeV unfolding range");
+  return bins;
 }

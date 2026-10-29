@@ -15,6 +15,7 @@ ForestReader::ForestReader() :
   fReadTrackTree(true),
   fIsMiniAOD(false),
   fMixingMode(false),
+  fRun3JetSelectionEnabled(false),
   fMegaSkimMode(false),
   fIsMC(false),
   fIsPPb(false),
@@ -111,6 +112,7 @@ ForestReader::ForestReader(Int_t dataType, Int_t useJetTrigger, Int_t jetType, I
   fReadTrackTree(readTrackTree),
   fIsMiniAOD(false),
   fMixingMode(mixingMode),
+  fRun3JetSelectionEnabled(false),
   fMegaSkimMode(megaSkimMode),
   fHiVzBranch(0),
   fHiBinBranch(0),
@@ -202,6 +204,7 @@ ForestReader::ForestReader(const ForestReader& in) :
   fReadTrackTree(in.fReadTrackTree),
   fIsMiniAOD(in.fIsMiniAOD),
   fMixingMode(in.fMixingMode),
+  fRun3JetSelectionEnabled(in.fRun3JetSelectionEnabled),
   fMegaSkimMode(in.fMegaSkimMode),
   fIsMC(in.fIsMC),
   fIsPPb(in.fIsPPb),
@@ -292,6 +295,7 @@ ForestReader& ForestReader::operator=(const ForestReader& in){
   fReadTrackTree = in.fReadTrackTree;
   fIsMiniAOD = in.fIsMiniAOD;
   fMixingMode = in.fMixingMode;
+  fRun3JetSelectionEnabled = in.fRun3JetSelectionEnabled;
   fMegaSkimMode = in.fMegaSkimMode;
   fIsMC = in.fIsMC;
   fIsPPb = in.fIsPPb;
@@ -544,4 +548,16 @@ Int_t ForestReader::GetTrackOriginalAlgorithm(Int_t iTrack) const{
 // Getter for track MVA
 Float_t ForestReader::GetTrackMVA(Int_t iTrack) const{
   return 0;
+}
+
+// Run-3 native composition is opt-in so legacy reader behavior is preserved.
+void ForestReader::EnableRun3JetSelection(Bool_t enabled){
+  if(enabled && fDataType != kOO && fDataType != kOOMC &&
+     fDataType != kPpRef5p36TeV && fDataType != kPpRef5p36TeVMC)
+    throw std::invalid_argument("Run-3 jet selection is only supported for OO/ppRef Run-3 forests");
+  fRun3JetSelectionEnabled = enabled;
+}
+
+EECJetSelection::JetInputs ForestReader::GetJetSelectionInputs(Int_t) const{
+  throw std::runtime_error("This forest reader does not expose reconstructed Run-3 jet selection inputs");
 }

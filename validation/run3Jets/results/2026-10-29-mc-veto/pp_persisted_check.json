@@ -1,0 +1,245 @@
+{
+  "status": "PASS_BOUNDED_MC_SOFTWARE_CHECK",
+  "root_file": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/pp_R04_RecoReco.root",
+  "card": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/results/2026-10-29-mc-veto/pp_R04_RecoReco.input",
+  "scope": "Bounded MC software validation; no campaign coverage or physics closure certification",
+  "card_values": {
+    "Run3JetID": 1.0,
+    "ApplyJetVeto": 1.0,
+    "JetVetoInputMinPt": 15.0,
+    "MaxEventsPerFile": 1000.0,
+    "DataType": 12.0,
+    "McCorrelationType": 0.0,
+    "JetVetoMapFile": "jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root",
+    "JetVetoMapHistogram": "jetvetomap_all",
+    "JetVetoPtConvention": "stored"
+  },
+  "histograms": {
+    "centrality": {
+      "entries": 843.0,
+      "stored_bins_checked": 204
+    },
+    "centralityWeighted": {
+      "entries": 843.0,
+      "stored_bins_checked": 204
+    },
+    "energyEnergyCorrelator": {
+      "entries": 107520.0,
+      "stored_bins_checked": 3384
+    },
+    "energyEnergyCorrelatorEfficiencyVariationMinus": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "energyEnergyCorrelatorEfficiencyVariationPlus": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "energyEnergyCorrelatorPairEfficiencyVariationMinus": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "energyEnergyCorrelatorPairEfficiencyVariationPlus": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "eventQA/eventActivity": {
+      "entries": 843.0,
+      "stored_bins_checked": 53
+    },
+    "eventQA/eventCoverage": {
+      "entries": 3843.0,
+      "stored_bins_checked": 42
+    },
+    "eventQA/inputStatus": {
+      "entries": 2.0,
+      "stored_bins_checked": 4
+    },
+    "eventQA/jetExposure": {
+      "entries": 1536.0,
+      "stored_bins_checked": 9
+    },
+    "eventQA/jetVetoEventCounts": {
+      "entries": 1986.0,
+      "stored_bins_checked": 8
+    },
+    "eventQA/mixingEligibleJetEtaPhiAfterVeto": {
+      "entries": 0.0,
+      "stored_bins_checked": 7844
+    },
+    "eventQA/mixingEligibleJetEtaPhiBeforeVeto": {
+      "entries": 0.0,
+      "stored_bins_checked": 7844
+    },
+    "eventQA/selectedActivityWeighted": {
+      "entries": 843.0,
+      "stored_bins_checked": 7
+    },
+    "eventQA/signalEligibleJetEtaPhiAfterVeto": {
+      "entries": 1933.0,
+      "stored_bins_checked": 7844
+    },
+    "eventQA/signalEligibleJetEtaPhiBeforeVeto": {
+      "entries": 2392.0,
+      "stored_bins_checked": 7844
+    },
+    "hfEnergy": {
+      "entries": 843.0,
+      "stored_bins_checked": 44
+    },
+    "inclusiveJet": {
+      "entries": 1536.0,
+      "stored_bins_checked": 1511
+    },
+    "jetNumberInReflectedCone": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "jetPtClosure": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "jetPtInReflectedCone": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "jetPtUnfoldingCovariance": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "jetPtUnfoldingMeasured": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "jetPtUnfoldingResponse": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "jetPtUnfoldingTruth": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "maxParticlePtInJet": {
+      "entries": 1536.0,
+      "stored_bins_checked": 17
+    },
+    "mixedEventCounts": {
+      "entries": 0.0,
+      "stored_bins_checked": 9
+    },
+    "multiplicity": {
+      "entries": 843.0,
+      "stored_bins_checked": 21
+    },
+    "multiplicityInJetCone": {
+      "entries": 12288.0,
+      "stored_bins_checked": 943
+    },
+    "multiplicityInJetConeUncorrected": {
+      "entries": 12288.0,
+      "stored_bins_checked": 943
+    },
+    "multiplicityInReflectedCone": {
+      "entries": 12288.0,
+      "stored_bins_checked": 64
+    },
+    "multiplicityInReflectedConeUncorrected": {
+      "entries": 12288.0,
+      "stored_bins_checked": 64
+    },
+    "nEvents": {
+      "entries": 9671.0,
+      "stored_bins_checked": 13
+    },
+    "oneDimensionalJetPtUnfoldingMeasured": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "oneDimensionalJetPtUnfoldingResponse": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "oneDimensionalJetPtUnfoldingTruth": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "particleDeltaRResponseMatrix": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "particleDensity": {
+      "entries": 18039.0,
+      "stored_bins_checked": 3694
+    },
+    "particlePtDensity": {
+      "entries": 18039.0,
+      "stored_bins_checked": 3694
+    },
+    "particlePtResponseMatrix": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "particlesCloseToTracks": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "pthat": {
+      "entries": 843.0,
+      "stored_bins_checked": 11
+    },
+    "pthatWeighted": {
+      "entries": 843.0,
+      "stored_bins_checked": 232
+    },
+    "track": {
+      "entries": 35414.0,
+      "stored_bins_checked": 28162
+    },
+    "trackCuts": {
+      "entries": 985469.0,
+      "stored_bins_checked": 14
+    },
+    "trackUncorrected": {
+      "entries": 35414.0,
+      "stored_bins_checked": 28162
+    },
+    "tracksWithMatchedParticle": {
+      "entries": 0.0,
+      "stored_bins_checked": 0
+    },
+    "triggers": {
+      "entries": 1000.0,
+      "stored_bins_checked": 10
+    },
+    "triggersAfterSelection": {
+      "entries": 843.0,
+      "stored_bins_checked": 10
+    },
+    "vertexZ": {
+      "entries": 843.0,
+      "stored_bins_checked": 82
+    },
+    "vertexZweighted": {
+      "entries": 843.0,
+      "stored_bins_checked": 82
+    }
+  },
+  "veto_counts": {
+    "signal": {
+      "checked": 993.0,
+      "kept": 843.0,
+      "vetoed": 150.0
+    },
+    "mixing": {
+      "checked": 0.0,
+      "kept": 0.0,
+      "vetoed": 0.0
+    }
+  },
+  "statistics": {
+    "processed_events": 1000.0,
+    "selected_events": 843.0,
+    "jet_entries": 1536.0,
+    "eec_entries": 107520.0
+  }
+}

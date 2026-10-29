@@ -1,0 +1,42 @@
+make: Entering directory '/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/plotting'
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o SplitCanvas.o SplitCanvas.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o AlgorithmLibrary.o AlgorithmLibrary.cxx
+AlgorithmLibrary.cxx: In member function ‘std::vector<std::pair<TString, TGraph*> > AlgorithmLibrary::GetGraphsFromDatFile(TString)’:
+AlgorithmLibrary.cxx:725:28: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<TString>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+  725 |   for(int iLine = 0; iLine < lineVector.size(); iLine++){
+      |                      ~~~~~~^~~~~~~~~~~~~~~~~~~
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o EECHistogramManager.o EECHistogramManager.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o EECCard.o EECCard.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o EECDrawer.o EECDrawer.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o EECComparingDrawer.o EECComparingDrawer.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o EECBackgroundScale.o EECBackgroundScale.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o EECSignalToBackgroundUnfoldingScale.o EECSignalToBackgroundUnfoldingScale.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o EECUnfoldConfiguration.o EECUnfoldConfiguration.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o SystematicUncertaintyOrganizer.o SystematicUncertaintyOrganizer.cxx
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o HybridModelHistogramManager.o HybridModelHistogramManager.cxx
+HybridModelHistogramManager.cxx: In member function ‘void HybridModelHistogramManager::LoadGraphs(TString)’:
+HybridModelHistogramManager.cxx:156:40: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<TString>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+  156 |             for(int iPoint = 0; iPoint < lineVector.size(); iPoint++){
+      |                                 ~~~~~~~^~~~~~~~~~~~~~~~~~~
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o HolguinHistogramManager.o HolguinHistogramManager.cxx
+HolguinHistogramManager.cxx: In member function ‘std::vector<std::pair<double, TGraph*> > HolguinHistogramManager::GetGraphsFromDatFile(TString)’:
+HolguinHistogramManager.cxx:206:28: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<TString>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+  206 |   for(int iLine = 0; iLine < lineVector.size(); iLine++){
+      |                      ~~~~~~^~~~~~~~~~~~~~~~~~~
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o CoLBTHistogramManager.o CoLBTHistogramManager.cxx
+CoLBTHistogramManager.cxx: In member function ‘void CoLBTHistogramManager::LoadGraphs(TString)’:
+CoLBTHistogramManager.cxx:153:38: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<TString>::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+  153 |             for(int iLine = 1; iLine < lineVector.size(); iLine++){
+      |                                ~~~~~~^~~~~~~~~~~~~~~~~~~
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o JewelHistogramManager.o JewelHistogramManager.cxx
+Generating dictionary ...
+SystematicUncertaintyOrganizer.cxx: In member function ‘void SystematicUncertaintyOrganizer::ReadInputFile(TFile*)’:
+SystematicUncertaintyOrganizer.cxx:166:127: warning: ‘exampleHistogram’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+  166 |             fhEnergyEnergyCorrelatorUncertainty[iCentrality][iJetPt][iTrackPt][iUncertainty] = (TH1D*) exampleHistogram->Clone(Form("zeroErrorHistogram%d%d%d%d", iCentrality, iJetPt, iTrackPt, iUncertainty));
+      |                                                                                                        ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Warning in <SplitCanvas>: The data members of SplitCanvas will not be stored, because it inherits from TObject but does not have its own ClassDef.
+g++ -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root    -c -o nanoDict.o nanoDict.cc
+Linking DrawingClasses ...
+g++ -shared -lEG -L/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis -O -Wall -fPIC -DEEC  -pthread -std=c++17 -m64 -fsized-deallocation -I/usr/include/root  SplitCanvas.o AlgorithmLibrary.o EECHistogramManager.o EECCard.o EECDrawer.o EECComparingDrawer.o EECBackgroundScale.o EECSignalToBackgroundUnfoldingScale.o EECUnfoldConfiguration.o SystematicUncertaintyOrganizer.o HybridModelHistogramManager.o HolguinHistogramManager.o CoLBTHistogramManager.o JewelHistogramManager.o nanoDict.o -L/usr/lib64/root -lCore -lImt -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lROOTVecOps -lTree -lTreePlayer -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lROOTNTuple -lROOTNTupleUtil -lMultiProc -lROOTDataFrame -Wl,-rpath,/usr/lib64/root -pthread -lm -ldl -rdynamic -o DrawingClasses.so
+done
+make: Leaving directory '/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/plotting'

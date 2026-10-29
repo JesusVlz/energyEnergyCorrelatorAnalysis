@@ -11,6 +11,7 @@
 #include <fstream>
 #include <string>
 #include <map>        // To avoid using variable length arrays, that are clang extension
+#include <memory>
 
 // Root includes
 #include <TString.h>
@@ -34,6 +35,7 @@
 #include "TrackPairEfficiencyCorrector.h"
 #include "JetMetScalingFactorManager.h"
 #include "SmearingProvider.h"
+#include "Run3JetSelection.h"
 
 class EECAnalyzer{
   
@@ -102,10 +104,13 @@ public:
   Bool_t PassGenParticleSelection(ForestReader* trackReader, const Int_t iTrack); // Check if a generator particle passes the defined selections
   Bool_t PassGenParticleSelection(UnfoldingForestReader* trackReader, const Int_t iTrack); // Check if a generator particle passes the defined selections
   Bool_t PassEventCuts(ForestReader* eventReader, const Bool_t fillHistograms); // Check if the event passes the event cuts
+  Bool_t PassRun3JetVeto(ForestReader* jetReader, Bool_t mixing); // Scan all reco jets before analysis jet cuts
+  void ReadMixingEvent(Int_t event); // Align generator-track and reco-veto companions
+  EECJetSelection::JetIDPrescription Run3JetIDPrescription() const;
   Double_t GetTrackEfficiencyCorrection(const Int_t iTrack); // Get the track efficiency correction for a given track
   Double_t  GetTrackEfficiencyCorrection(const Float_t trackPt, const Float_t trackEta, const Int_t hiBin); // Get the track efficiency correction for given track and event information
+  void ConfigureJetUncertainty(const Double_t rawPt, const Double_t correctedPt, const Double_t eta, const Double_t phi); // Preserve legacy inputs; future Run-3 JES uses corrected pT
   Double_t GetVzWeight(const Double_t vz) const;  // Get the proper vz weighting depending on analyzed system
-  Double_t GetInclusiveDiagnosticEventWeight() const; // Stored MC generator factor retained once, no centrality factor
   Double_t GetCentralityWeight(const Int_t hiBin) const; // Get the proper centrality weighting depending on analyzed system
   Double_t GetMultiplicityWeight(const Double_t multiplicity) const; // Get the proper multiplicity weight for MC
   Double_t GetJetPtWeight(const Double_t jetPt) const; // Get the proper jet pT weighting for 2017 and 2018 MC
@@ -163,9 +168,13 @@ public:
   Bool_t fIsPp2024Data;              // Flag for any pp dataset: True = any Run 3 pp dataset, False = anything else
 
   
-  Int_t fInclusiveMode; // 0=legacy, 1=explicit raw diagnostics, 2=corrected request (blocked)
+  Int_t fRun3JetID = 0; // 0 inherited quality, 1 pinned HIN PbPb ID for OO / pp ID for ppRef
+  Bool_t fApplyJetVeto = false;
+  TString fJetVetoPtConvention; // Explicit raw, stored, or recomputed; no default
+  std::shared_ptr<EECJetSelection::JetVetoMap> fJetVetoMap;
+  std::shared_ptr<HighForestReader> fMixedVetoJetReader;
+
   Int_t fMaxEventsPerFile; // Optional bounded pilot limit; 0 means unlimited
-  Double_t fInclusiveEventWeight; // Raw diagnostic weight, with no centrality factor
 
   // Weights for filling the MC histograms
   Double_t fVzWeight;                // Weight for vz in MC

@@ -23,6 +23,8 @@
 #include <TChainElement.h>
 #include <TObjArray.h>
 
+#include "Run3JetSelectionInputs.h"
+
 using namespace std;
 
 class ForestReader{
@@ -96,6 +98,10 @@ public:
   virtual Float_t GetJetRawPt(Int_t iJet) const = 0;      // Getter for jet raw pT
   virtual Float_t GetJetMaxTrackPt(Int_t iJet) const = 0; // Getter for maximum track pT inside a jet
   
+  // Enable before opening a forest; unsupported readers fail on input access.
+  virtual void EnableRun3JetSelection(Bool_t enabled = true);
+  virtual EECJetSelection::JetInputs GetJetSelectionInputs(Int_t iJet) const;
+
   // Getters for leaves in HLT tree
   Int_t GetCaloJet15FilterBit() const;           // Getter for calorimeter jet 15 filter bit
   Int_t GetCaloJet30FilterBit() const;           // Getter for calorimeter jet 30 filter bit
@@ -168,6 +174,7 @@ protected:
   Bool_t fReadTrackTree;  // Read the track trees from the forest
   Bool_t fIsMiniAOD;      // Flag for type of the forest True = MiniAOD forest, False = AOD forest
   Bool_t fMixingMode;     // Flag for mixed event mode (false = regular events, true = mixed events)
+  Bool_t fRun3JetSelectionEnabled; // Read native PF composition for Run-3 ID/veto
   Bool_t fMegaSkimMode;   // Flag for mega skim mode (false = regular mixing files, true = mega skimmed mixing files)
 
   // Flags to simplify finding certain data types

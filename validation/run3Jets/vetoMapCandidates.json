@@ -1,0 +1,1462 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-28",
+  "retrieval_timestamp_utc": "2026-10-28T20:20:11.624477+00:00",
+  "scope": "Candidate research and direct ROOT inspection only; no candidate binary deposited or packaged",
+  "deployment_decision": "NO_MAP_SELECTED_OR_INSTALLED",
+  "pinned_references": {
+    "HIN_Jets": {
+      "repository": "thenicholasbarnett/HIN-Jets",
+      "commit": "c64293a132af388af1827044779af36e57f884d2",
+      "main_resolved_commit": "c64293a132af388af1827044779af36e57f884d2"
+    },
+    "JECDatabase": {
+      "repository": "cms-jet/JECDatabase",
+      "commit": "e825b8378a63df0cc4fb4c65dfe6088cbbb54a09"
+    }
+  },
+  "authoritative_document_access": [
+    {
+      "url": "https://cms-jme-jerc.docs.cern.ch/recommendations/jet-veto-maps/#application",
+      "status": "HTTP_401_UNAUTHENTICATED; web open also inaccessible",
+      "body_not_retrieved": true
+    },
+    {
+      "url": "https://cms-hin-jet.docs.cern.ch/analysis/jetid",
+      "status": "HTTP_401_UNAUTHENTICATED; web open also inaccessible",
+      "body_not_retrieved": true
+    },
+    {
+      "url": "https://cms-hin-jet.docs.cern.ch/analysis/jetvetomap",
+      "status": "HTTP_401_UNAUTHENTICATED; web open also inaccessible",
+      "body_not_retrieved": true
+    },
+    {
+      "url": "https://cms-jme-jmar.docs.cern.ch/recommendations/jet-identification/#ak4ak8-chs",
+      "status": "HTTP_401_UNAUTHENTICATED; web open also inaccessible",
+      "body_not_retrieved": true
+    }
+  ],
+  "candidate_storage_policy": "Authoritative retrievals used temporary storage only. User subsequently uploaded identical ROOT files into era directories; assistant verified hashes and added candidate-status sidecars. No job package changed.",
+  "candidates": [
+    {
+      "system": "ppRef2024",
+      "status": "USER_NOMINATED_CANDIDATE_NOT_DEPLOYED",
+      "filename": "Summer24Prompt24_RunBCDEFGHI.root",
+      "source_repository": "https://github.com/cms-jet/JECDatabase",
+      "source_path": "jet_veto_maps/Summer24Prompt24_V1/Summer24Prompt24_RunBCDEFGHI.root",
+      "source_commit": "e825b8378a63df0cc4fb4c65dfe6088cbbb54a09",
+      "source_era_directory": "Summer24Prompt24_V1",
+      "source_tag": null,
+      "git_blob_sha1": "b6a911ec640511254b08a254db51e01d90921457",
+      "source_file_addition_commit": "6552021981eb7e0ec0bb25e87823c1e7c5d1338a",
+      "source_file_addition_date_utc": "2025-07-17T13:05:03Z",
+      "immutable_source_url": "https://github.com/cms-jet/JECDatabase/blob/e825b8378a63df0cc4fb4c65dfe6088cbbb54a09/jet_veto_maps/Summer24Prompt24_V1/Summer24Prompt24_RunBCDEFGHI.root",
+      "immutable_download_url": "https://raw.githubusercontent.com/cms-jet/JECDatabase/e825b8378a63df0cc4fb4c65dfe6088cbbb54a09/jet_veto_maps/Summer24Prompt24_V1/Summer24Prompt24_RunBCDEFGHI.root",
+      "sha256": "ac1c38cdc92ab27f0362895591481c5e2e6a391dcb46359f385000d5105daedf",
+      "size_bytes": 484022,
+      "era_name": "Summer24Prompt24_V1",
+      "run_range": null,
+      "run_range_status": "Numeric map validity is not published in the inspected ROOT/companion records",
+      "sample_run_range_fully_covered": null,
+      "sample_run_coverage_status": "NOT_ESTABLISHED: filename era letters and user nomination do not establish special-era or full campaign coverage",
+      "observed_sample": {
+        "path": "/eos/user/j/jvelazqu/HIN/Plan/Evidence/2026-10-28/goal2-native-hiforest-gic_ugf7/ppRef_data_production.events.jsonl",
+        "sha256": "d6edb73fd238a708ae1f195abc51d42cd3a788a54c2381c8cbf9b917013a7682",
+        "events": 100,
+        "min_run": 387474,
+        "max_run": 387474,
+        "scope": "Retained bounded Goal 2 ledger, not the full data campaign"
+      },
+      "intended_jet_collection": null,
+      "intended_jet_radius": null,
+      "collection_radius_status": "Not encoded in the ROOT file; exact-production applicability requires an applicable HIN/JME prescription",
+      "target_analysis_jet_collection": "ak4 PF CHS",
+      "target_analysis_jet_radius": 0.4,
+      "r08_status": "R=0.8 applicability requires separate evidence; not inferred from R=0.4 readiness",
+      "coordinate_convention": {
+        "histogram_axes": "X=jet eta, Y=jet phi in radians",
+        "axis_interpretation_evidence": "OO axis titles #eta/#phi and pp companion correctionlib input names eta/phi; both have matching bin edges",
+        "proposed_analyzer_lookup": "Detector E-scheme jteta/jtphi, independent of WTA EEC analysis geometry",
+        "exact_production_coordinate_prescription_established": false,
+        "phi_interval": "[-pi, pi); canonicalize +pi to -pi for periodic ROOT lookup"
+      },
+      "recommended_histogram_key": "jetvetomap_all",
+      "recommended_key_evidence": [
+        "User instruction in this task",
+        "https://github.com/thenicholasbarnett/HIN-Jets/blob/c64293a132af388af1827044779af36e57f884d2/include/JetSelection_pp.h",
+        "https://github.com/thenicholasbarnett/HIN-Jets/blob/c64293a132af388af1827044779af36e57f884d2/include/JetSelection_PbPb.h"
+      ],
+      "alternative_key_in_same_file": "jetvetomap",
+      "key_recommendation_conflict": "The pp correctionlib companion in Summer24Prompt24_V1 recommends jetvetomap for both data and MC; this differs numerically from the user/HIN-helper key. Resolve era-specific prescription before deployment.",
+      "pt_convention": {
+        "minimum_gev": 15,
+        "comparison": "strictly greater than",
+        "basis": null,
+        "status": "Raw/stored/new-corrected threshold convention requires explicit confirmation"
+      },
+      "data_application_recommendation": "User-supplied HIN prescription: mandatory Run 3 event veto using applicable era map and ID, pT>15 GeV, CEF+NEF<0.9",
+      "mc_application_recommendation": "User-supplied HIN prescription: apply the same map and event-selection prescription to corresponding MC",
+      "same_event_mask_expected": true,
+      "same_event_mask_meaning": "Same detector-region map and event-veto predicate in data and MC and signal/mixing; not identical event IDs or event-loss fractions",
+      "applicability_to_exact_production_established": false,
+      "applicability_status": "Candidate existence and contents established; era/run/collection/radius/producer/threshold applicability is not independently established",
+      "map_deposited": true,
+      "map_packaged": false,
+      "validation_plots": [
+        {
+          "path": "validation/run3Jets/evidence/2026-10-28/Summer24Prompt24_RunBCDEFGHI_key_comparison.png",
+          "sha256": "42c20cb7d0d3c37f6d19fb597649c9f995b80b8ca67ef870070cb640dcc50df8",
+          "scope": "Histogram contents only; no event/physics validation"
+        }
+      ],
+      "physics_validation": {
+        "id_efficiency": "NOT_RUN",
+        "event_loss_fraction": null,
+        "before_after_data_mc": "NOT_RUN",
+        "mixing_closure": "NOT_RUN"
+      },
+      "approval_evidence": {
+        "user_nomination": "Explicitly provided in this task",
+        "independent_CMS_exact_production_approval": null
+      },
+      "root_inspection": {
+        "root_version": "6.40.04",
+        "keys": [
+          {
+            "name": "jetvetomap_hot",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Hot zones. Use for steep jet pT spectra and MET tails",
+            "dimension": 2,
+            "entries": 62.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 62,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5842,
+                "100.0": 62
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_cold",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Cold zones. Mostly ECAL holes. Use for MET tails",
+            "dimension": 2,
+            "entries": 197.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 197,
+              "nonfinite": 0,
+              "min": -100.0,
+              "max": 0.0,
+              "value_counts": {
+                "-100.0": 197,
+                "0.0": 5707
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_hotandcold",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Union of hot and cold zone maps",
+            "dimension": 2,
+            "entries": 259.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 259,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5645,
+                "100.0": 259
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_bpix",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Barrel pixel failure. Reduction of tracking efficiency in 2023D and later",
+            "dimension": 2,
+            "entries": 72.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 72,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5832,
+                "100.0": 72
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_fpix",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Forward pixel failure. Reduction of tracking efficiency in 2024F and later",
+            "dimension": 2,
+            "entries": 8.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 8,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5896,
+                "100.0": 8
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_all",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Union of all maps, used for JEC. Hot+cold+FPIX+BPIX",
+            "dimension": 2,
+            "entries": 339.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 260,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5644,
+                "100.0": 260
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetasymmetrymap",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Dijet asymmetry map, (pTprobe-pTtag)/pTave for |eta,tag|<1.3",
+            "dimension": 2,
+            "entries": 3876300.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -0.8848073604010871,
+              "max": 0.4041524885728783
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetasymmetrymap_norm",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Dijet asymmetry map, (pTprobe-pTtag)/pTave for |eta,tag|<1.3 normalized vs #phi_{probe}",
+            "dimension": 2,
+            "entries": 3882204.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -0.8527717683252146,
+              "max": 0.7072955323505963
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetpullsummap_nom",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Raw nominal pull map. NomPull=(x_i-mu)/sigma. Summed over triggers",
+            "dimension": 2,
+            "entries": 3827331890.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -554.3259715486327,
+              "max": 185.11211027638643
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 157
+            }
+          },
+          {
+            "name": "jetpullsummap_abs",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Raw absolute pull map. AbsPull=|(x_i-mu)/sigma|-1. Summed over triggers",
+            "dimension": 2,
+            "entries": 3827331890.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -86.3729943431201,
+              "max": 1158.278415292982
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 157
+            }
+          },
+          {
+            "name": "jetpullsummap_ref",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Nominal pull map from dijet asymmetry. Used for hot vs cold classification",
+            "dimension": 2,
+            "entries": 303478021.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -328.1158840480899,
+              "max": 59.6431168693721
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 157
+            }
+          },
+          {
+            "name": "jetvetomap",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "JME recommended map. Hot+Cold(+not FPIX +not BPIX)",
+            "dimension": 2,
+            "entries": 389.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 164,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5740,
+                "100.0": 164
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          }
+        ],
+        "axis_definitions": {
+          "axis_1": {
+            "name": "xaxis",
+            "title": "",
+            "bins": 82,
+            "min": -5.191,
+            "max": 5.191,
+            "edges": [
+              -5.191,
+              -4.889,
+              -4.716,
+              -4.538,
+              -4.363,
+              -4.191,
+              -4.013,
+              -3.839,
+              -3.664,
+              -3.489,
+              -3.314,
+              -3.139,
+              -2.964,
+              -2.853,
+              -2.65,
+              -2.5,
+              -2.322,
+              -2.172,
+              -2.043,
+              -1.93,
+              -1.83,
+              -1.74,
+              -1.653,
+              -1.566,
+              -1.479,
+              -1.392,
+              -1.305,
+              -1.218,
+              -1.131,
+              -1.044,
+              -0.957,
+              -0.879,
+              -0.783,
+              -0.696,
+              -0.609,
+              -0.522,
+              -0.435,
+              -0.348,
+              -0.261,
+              -0.174,
+              -0.087,
+              0.0,
+              0.087,
+              0.174,
+              0.261,
+              0.348,
+              0.435,
+              0.522,
+              0.609,
+              0.696,
+              0.783,
+              0.879,
+              0.957,
+              1.044,
+              1.131,
+              1.218,
+              1.305,
+              1.392,
+              1.479,
+              1.566,
+              1.653,
+              1.74,
+              1.83,
+              1.93,
+              2.043,
+              2.172,
+              2.322,
+              2.5,
+              2.65,
+              2.853,
+              2.964,
+              3.139,
+              3.314,
+              3.489,
+              3.664,
+              3.839,
+              4.013,
+              4.191,
+              4.363,
+              4.538,
+              4.716,
+              4.889,
+              5.191
+            ]
+          },
+          "axis_2": {
+            "name": "yaxis",
+            "title": "",
+            "bins": 72,
+            "min": -3.141592653589793,
+            "max": 3.141592653589793,
+            "edges": [
+              -3.141592653589793,
+              -3.0543261909900767,
+              -2.9670597283903604,
+              -2.8797932657906435,
+              -2.792526803190927,
+              -2.705260340591211,
+              -2.6179938779914944,
+              -2.5307274153917776,
+              -2.443460952792061,
+              -2.356194490192345,
+              -2.2689280275926285,
+              -2.181661564992912,
+              -2.0943951023931957,
+              -2.007128639793479,
+              -1.9198621771937625,
+              -1.832595714594046,
+              -1.7453292519943295,
+              -1.6580627893946132,
+              -1.5707963267948966,
+              -1.4835298641951802,
+              -1.3962634015954636,
+              -1.3089969389957472,
+              -1.2217304763960306,
+              -1.1344640137963142,
+              -1.0471975511965979,
+              -0.9599310885968815,
+              -0.8726646259971647,
+              -0.7853981633974483,
+              -0.6981317007977319,
+              -0.6108652381980155,
+              -0.5235987755982987,
+              -0.43633231299858233,
+              -0.34906585039886595,
+              -0.2617993877991496,
+              -0.1745329251994332,
+              -0.08726646259971638,
+              0.0,
+              0.08726646259971638,
+              0.17453292519943275,
+              0.2617993877991496,
+              0.34906585039886595,
+              0.43633231299858233,
+              0.5235987755982987,
+              0.6108652381980151,
+              0.6981317007977319,
+              0.7853981633974483,
+              0.8726646259971647,
+              0.959931088596881,
+              1.0471975511965974,
+              1.1344640137963138,
+              1.2217304763960302,
+              1.3089969389957474,
+              1.3962634015954638,
+              1.4835298641951802,
+              1.5707963267948966,
+              1.658062789394613,
+              1.7453292519943293,
+              1.8325957145940457,
+              1.919862177193762,
+              2.0071286397934784,
+              2.0943951023931957,
+              2.181661564992912,
+              2.2689280275926285,
+              2.356194490192345,
+              2.443460952792061,
+              2.5307274153917776,
+              2.617993877991494,
+              2.7052603405912103,
+              2.7925268031909267,
+              2.879793265790644,
+              2.9670597283903604,
+              3.0543261909900767,
+              3.141592653589793
+            ]
+          }
+        },
+        "key_comparison": {
+          "keys": [
+            "jetvetomap",
+            "jetvetomap_all"
+          ],
+          "different_regular_bins": 96
+        }
+      },
+      "production_era_evidence": {
+        "url": "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CompOpsTier0Policies",
+        "interval": [
+          387122,
+          388260
+        ],
+        "scope": "Combined Run2024J and HIRun2024A Tier-0 agent interval; not a map IOV or an exact RunJ interval",
+        "preceding_normal_era_end_run": 387121
+      },
+      "correctionlib_companion": {
+        "source_path": "jet_veto_maps/Summer24Prompt24_V1/jetvetomaps.json.gz",
+        "source_commit": "e825b8378a63df0cc4fb4c65dfe6088cbbb54a09",
+        "sha256": "849cd1098814175ab58faac4834df0a353de63482f4017e22c0134ee7e840aec",
+        "recommended_key": "jetvetomap",
+        "applies_to": "both data and MC",
+        "inputs": [
+          "type",
+          "eta",
+          "phi"
+        ],
+        "numeric_run_range": null
+      },
+      "jet_id_policy_evidence": {
+        "requested_helper": "include/JetSelection_pp.h",
+        "helper_commit": "c64293a132af388af1827044779af36e57f884d2",
+        "relationship_to_initial_generic_table": "Different thresholds; must remain explicitly distinguished",
+        "helper_scope": "Per-jet ID plus map; no pT argument, EM-sum requirement, or event-level veto",
+        "user_selected_strategy": "Pinned HIN PbPb ID for OO and pp ID for ppRef, explicitly confirmed by user"
+      },
+      "deposited_by": "user",
+      "user_supplied_path": "jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root",
+      "user_supplied_hash_matches_pinned_source": true,
+      "deployment_status": "CANDIDATE_NOT_ENABLED",
+      "bounded_software_replay": {
+        "summary": "validation/run3Jets/evidence/2026-10-28/native-replay/native_replay_summary.json",
+        "scope": "Unweighted retained-entry kinematic replay; every retained jet already above 15 GeV. Not a complete analyzer, trigger or campaign event-loss estimate.",
+        "nominal_pt_convention_selected": false
+      }
+    },
+    {
+      "system": "OO2025",
+      "status": "USER_NOMINATED_CANDIDATE_NOT_DEPLOYED",
+      "filename": "Summer24Prompt25_RunCDEFG.root",
+      "source_repository": "https://github.com/cms-jet/JECDatabase",
+      "source_path": "jet_veto_maps/Summer24Prompt25_V1/Summer24Prompt25_RunCDEFG.root",
+      "source_commit": "e825b8378a63df0cc4fb4c65dfe6088cbbb54a09",
+      "source_era_directory": "Summer24Prompt25_V1",
+      "source_tag": null,
+      "git_blob_sha1": "1fd3b4a970074408483d0c1eb7f35cdc685eebff",
+      "source_file_addition_commit": "17a7192932fd07daf7ad69920ab43f9610855bc7",
+      "source_file_addition_date_utc": "2026-07-01T14:06:27Z",
+      "immutable_source_url": "https://github.com/cms-jet/JECDatabase/blob/e825b8378a63df0cc4fb4c65dfe6088cbbb54a09/jet_veto_maps/Summer24Prompt25_V1/Summer24Prompt25_RunCDEFG.root",
+      "immutable_download_url": "https://raw.githubusercontent.com/cms-jet/JECDatabase/e825b8378a63df0cc4fb4c65dfe6088cbbb54a09/jet_veto_maps/Summer24Prompt25_V1/Summer24Prompt25_RunCDEFG.root",
+      "sha256": "a9b8f15da1bb417a784b647ac0199838642fba6ff6e324051b7309e759d68246",
+      "size_bytes": 481266,
+      "era_name": "Summer24Prompt25_V1",
+      "run_range": null,
+      "run_range_status": "Numeric map validity is not published in the inspected ROOT/companion records",
+      "sample_run_range_fully_covered": null,
+      "sample_run_coverage_status": "NOT_ESTABLISHED: filename era letters and user nomination do not establish special-era or full campaign coverage",
+      "observed_sample": {
+        "path": "/eos/user/j/jvelazqu/HIN/Plan/Evidence/2026-10-28/goal2-native-hiforest-gic_ugf7/OO_data_production.events.jsonl",
+        "sha256": "baa20c78ab3d254ea2aa770215e16859b85775790b400e59489cba07096c97ad",
+        "events": 1000,
+        "min_run": 394183,
+        "max_run": 394183,
+        "scope": "Retained bounded Goal 2 ledger, not the full data campaign"
+      },
+      "intended_jet_collection": null,
+      "intended_jet_radius": null,
+      "collection_radius_status": "Not encoded in the ROOT file; exact-production applicability requires an applicable HIN/JME prescription",
+      "target_analysis_jet_collection": "akCs4 PF constituent-subtracted",
+      "target_analysis_jet_radius": 0.4,
+      "r08_status": "R=0.8 applicability requires separate evidence; not inferred from R=0.4 readiness",
+      "coordinate_convention": {
+        "histogram_axes": "X=jet eta, Y=jet phi in radians",
+        "axis_interpretation_evidence": "OO axis titles #eta/#phi and pp companion correctionlib input names eta/phi; both have matching bin edges",
+        "proposed_analyzer_lookup": "Detector E-scheme jteta/jtphi, independent of WTA EEC analysis geometry",
+        "exact_production_coordinate_prescription_established": false,
+        "phi_interval": "[-pi, pi); canonicalize +pi to -pi for periodic ROOT lookup"
+      },
+      "recommended_histogram_key": "jetvetomap_all",
+      "recommended_key_evidence": [
+        "User instruction in this task",
+        "https://github.com/thenicholasbarnett/HIN-Jets/blob/c64293a132af388af1827044779af36e57f884d2/include/JetSelection_pp.h",
+        "https://github.com/thenicholasbarnett/HIN-Jets/blob/c64293a132af388af1827044779af36e57f884d2/include/JetSelection_PbPb.h"
+      ],
+      "alternative_key_in_same_file": "jetvetomap",
+      "key_recommendation_conflict": "The pp correctionlib companion in Summer24Prompt24_V1 recommends jetvetomap for both data and MC; this differs numerically from the user/HIN-helper key. Resolve era-specific prescription before deployment.",
+      "pt_convention": {
+        "minimum_gev": 15,
+        "comparison": "strictly greater than",
+        "basis": null,
+        "status": "Raw/stored/new-corrected threshold convention requires explicit confirmation"
+      },
+      "data_application_recommendation": "User-supplied HIN prescription: mandatory Run 3 event veto using applicable era map and ID, pT>15 GeV, CEF+NEF<0.9",
+      "mc_application_recommendation": "User-supplied HIN prescription: apply the same map and event-selection prescription to corresponding MC",
+      "same_event_mask_expected": true,
+      "same_event_mask_meaning": "Same detector-region map and event-veto predicate in data and MC and signal/mixing; not identical event IDs or event-loss fractions",
+      "applicability_to_exact_production_established": false,
+      "applicability_status": "Candidate existence and contents established; era/run/collection/radius/producer/threshold applicability is not independently established",
+      "map_deposited": true,
+      "map_packaged": false,
+      "validation_plots": [
+        {
+          "path": "validation/run3Jets/evidence/2026-10-28/Summer24Prompt25_RunCDEFG_key_comparison.png",
+          "sha256": "3e7479af0c51480cba6fece81c97e7bd211053dc4974181310dd2ffbb9635e51",
+          "scope": "Histogram contents only; no event/physics validation"
+        }
+      ],
+      "physics_validation": {
+        "id_efficiency": "NOT_RUN",
+        "event_loss_fraction": null,
+        "before_after_data_mc": "NOT_RUN",
+        "mixing_closure": "NOT_RUN"
+      },
+      "approval_evidence": {
+        "user_nomination": "Explicitly provided in this task",
+        "independent_CMS_exact_production_approval": null,
+        "user_asserted_official_strategy_approval": "Latest user instruction says the OO strategy following JetSelection_PbPb.h is officially approved. This assertion is recorded as owner-provided strategy evidence, not independent numerical map IOV/producer approval."
+      },
+      "root_inspection": {
+        "root_version": "6.40.04",
+        "keys": [
+          {
+            "name": "jetvetomap_hot",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Hot zones. Use for steep jet pT spectra and MET tails",
+            "dimension": 2,
+            "entries": 30.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 30,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5874,
+                "100.0": 30
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_cold",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Cold zones. Mostly ECAL holes. Use for MET tails",
+            "dimension": 2,
+            "entries": 233.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 233,
+              "nonfinite": 0,
+              "min": -100.0,
+              "max": 0.0,
+              "value_counts": {
+                "-100.0": 233,
+                "0.0": 5671
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_hotandcold",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Union of hot and cold zone maps",
+            "dimension": 2,
+            "entries": 263.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 263,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5641,
+                "100.0": 263
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_bpix",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Barrel pixel failure. Reduction of tracking efficiency in 2023D and later",
+            "dimension": 2,
+            "entries": 72.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 72,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5832,
+                "100.0": 72
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap_all",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Union of all maps, used for JEC. Hot+cold+FPIX+BPIX",
+            "dimension": 2,
+            "entries": 343.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 266,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5638,
+                "100.0": 266
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetasymmetrymap",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Dijet asymmetry map, (pTprobe-pTtag)/pTave for |eta,tag|<1.3",
+            "dimension": 2,
+            "entries": 100295.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -0.5819486906130013,
+              "max": 0.27798729857771787
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetasymmetrymap_norm",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Dijet asymmetry map, (pTprobe-pTtag)/pTave for |eta,tag|<1.3 normalized vs #phi_{probe}",
+            "dimension": 2,
+            "entries": 106199.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -0.5134916318066447,
+              "max": 0.3021336184465586
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetpullsummap_nom",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Raw nominal pull map. NomPull=(x_i-mu)/sigma. Summed over triggers",
+            "dimension": 2,
+            "entries": 5871802094.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -575.9719374331542,
+              "max": 132.3643259196366
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 157
+            }
+          },
+          {
+            "name": "jetpullsummap_abs",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Raw absolute pull map. AbsPull=|(x_i-mu)/sigma|-1. Summed over triggers",
+            "dimension": 2,
+            "entries": 5871802094.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -75.29501800457872,
+              "max": 971.7655719890249
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 157
+            }
+          },
+          {
+            "name": "jetpullsummap_ref",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Nominal pull map from dijet asymmetry. Used for hot vs cold classification",
+            "dimension": 2,
+            "entries": 305458158.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 5904,
+              "nonfinite": 0,
+              "min": -319.4000130153408,
+              "max": 45.296472479055886
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 157
+            }
+          },
+          {
+            "name": "jetvetomap_fpix",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "Forward pixel failure. Reduction of tracking efficiency in 2024F and later",
+            "dimension": 2,
+            "entries": 34.0,
+            "axes": {
+              "x": "axis_3",
+              "y": "axis_4"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 26,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5878,
+                "100.0": 26
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          },
+          {
+            "name": "jetvetomap",
+            "cycle": 1,
+            "class": "TH2D",
+            "title": "JME recommended map. Hot+Cold(+not BPIX +not FPIX)",
+            "dimension": 2,
+            "entries": 369.0,
+            "axes": {
+              "x": "axis_1",
+              "y": "axis_2"
+            },
+            "regular_bins": {
+              "total": 5904,
+              "nonzero": 169,
+              "nonfinite": 0,
+              "min": 0.0,
+              "max": 100.0,
+              "value_counts": {
+                "0.0": 5735,
+                "100.0": 169
+              }
+            },
+            "flow_bins": {
+              "total": 312,
+              "nonzero": 0
+            }
+          }
+        ],
+        "axis_definitions": {
+          "axis_1": {
+            "name": "xaxis",
+            "title": "#eta",
+            "bins": 82,
+            "min": -5.191,
+            "max": 5.191,
+            "edges": [
+              -5.191,
+              -4.889,
+              -4.716,
+              -4.538,
+              -4.363,
+              -4.191,
+              -4.013,
+              -3.839,
+              -3.664,
+              -3.489,
+              -3.314,
+              -3.139,
+              -2.964,
+              -2.853,
+              -2.65,
+              -2.5,
+              -2.322,
+              -2.172,
+              -2.043,
+              -1.93,
+              -1.83,
+              -1.74,
+              -1.653,
+              -1.566,
+              -1.479,
+              -1.392,
+              -1.305,
+              -1.218,
+              -1.131,
+              -1.044,
+              -0.957,
+              -0.879,
+              -0.783,
+              -0.696,
+              -0.609,
+              -0.522,
+              -0.435,
+              -0.348,
+              -0.261,
+              -0.174,
+              -0.087,
+              0.0,
+              0.087,
+              0.174,
+              0.261,
+              0.348,
+              0.435,
+              0.522,
+              0.609,
+              0.696,
+              0.783,
+              0.879,
+              0.957,
+              1.044,
+              1.131,
+              1.218,
+              1.305,
+              1.392,
+              1.479,
+              1.566,
+              1.653,
+              1.74,
+              1.83,
+              1.93,
+              2.043,
+              2.172,
+              2.322,
+              2.5,
+              2.65,
+              2.853,
+              2.964,
+              3.139,
+              3.314,
+              3.489,
+              3.664,
+              3.839,
+              4.013,
+              4.191,
+              4.363,
+              4.538,
+              4.716,
+              4.889,
+              5.191
+            ]
+          },
+          "axis_2": {
+            "name": "yaxis",
+            "title": "#phi",
+            "bins": 72,
+            "min": -3.141592653589793,
+            "max": 3.141592653589793,
+            "edges": [
+              -3.141592653589793,
+              -3.0543261909900767,
+              -2.9670597283903604,
+              -2.8797932657906435,
+              -2.792526803190927,
+              -2.705260340591211,
+              -2.6179938779914944,
+              -2.5307274153917776,
+              -2.443460952792061,
+              -2.356194490192345,
+              -2.2689280275926285,
+              -2.181661564992912,
+              -2.0943951023931957,
+              -2.007128639793479,
+              -1.9198621771937625,
+              -1.832595714594046,
+              -1.7453292519943295,
+              -1.6580627893946132,
+              -1.5707963267948966,
+              -1.4835298641951802,
+              -1.3962634015954636,
+              -1.3089969389957472,
+              -1.2217304763960306,
+              -1.1344640137963142,
+              -1.0471975511965979,
+              -0.9599310885968815,
+              -0.8726646259971647,
+              -0.7853981633974483,
+              -0.6981317007977319,
+              -0.6108652381980155,
+              -0.5235987755982987,
+              -0.43633231299858233,
+              -0.34906585039886595,
+              -0.2617993877991496,
+              -0.1745329251994332,
+              -0.08726646259971638,
+              0.0,
+              0.08726646259971638,
+              0.17453292519943275,
+              0.2617993877991496,
+              0.34906585039886595,
+              0.43633231299858233,
+              0.5235987755982987,
+              0.6108652381980151,
+              0.6981317007977319,
+              0.7853981633974483,
+              0.8726646259971647,
+              0.959931088596881,
+              1.0471975511965974,
+              1.1344640137963138,
+              1.2217304763960302,
+              1.3089969389957474,
+              1.3962634015954638,
+              1.4835298641951802,
+              1.5707963267948966,
+              1.658062789394613,
+              1.7453292519943293,
+              1.8325957145940457,
+              1.919862177193762,
+              2.0071286397934784,
+              2.0943951023931957,
+              2.181661564992912,
+              2.2689280275926285,
+              2.356194490192345,
+              2.443460952792061,
+              2.5307274153917776,
+              2.617993877991494,
+              2.7052603405912103,
+              2.7925268031909267,
+              2.879793265790644,
+              2.9670597283903604,
+              3.0543261909900767,
+              3.141592653589793
+            ]
+          },
+          "axis_3": {
+            "name": "xaxis",
+            "title": "",
+            "bins": 82,
+            "min": -5.191,
+            "max": 5.191,
+            "edges": [
+              -5.191,
+              -4.889,
+              -4.716,
+              -4.538,
+              -4.363,
+              -4.191,
+              -4.013,
+              -3.839,
+              -3.664,
+              -3.489,
+              -3.314,
+              -3.139,
+              -2.964,
+              -2.853,
+              -2.65,
+              -2.5,
+              -2.322,
+              -2.172,
+              -2.043,
+              -1.93,
+              -1.83,
+              -1.74,
+              -1.653,
+              -1.566,
+              -1.479,
+              -1.392,
+              -1.305,
+              -1.218,
+              -1.131,
+              -1.044,
+              -0.957,
+              -0.879,
+              -0.783,
+              -0.696,
+              -0.609,
+              -0.522,
+              -0.435,
+              -0.348,
+              -0.261,
+              -0.174,
+              -0.087,
+              0.0,
+              0.087,
+              0.174,
+              0.261,
+              0.348,
+              0.435,
+              0.522,
+              0.609,
+              0.696,
+              0.783,
+              0.879,
+              0.957,
+              1.044,
+              1.131,
+              1.218,
+              1.305,
+              1.392,
+              1.479,
+              1.566,
+              1.653,
+              1.74,
+              1.83,
+              1.93,
+              2.043,
+              2.172,
+              2.322,
+              2.5,
+              2.65,
+              2.853,
+              2.964,
+              3.139,
+              3.314,
+              3.489,
+              3.664,
+              3.839,
+              4.013,
+              4.191,
+              4.363,
+              4.538,
+              4.716,
+              4.889,
+              5.191
+            ]
+          },
+          "axis_4": {
+            "name": "yaxis",
+            "title": "",
+            "bins": 72,
+            "min": -3.141592653589793,
+            "max": 3.141592653589793,
+            "edges": [
+              -3.141592653589793,
+              -3.0543261909900767,
+              -2.9670597283903604,
+              -2.8797932657906435,
+              -2.792526803190927,
+              -2.705260340591211,
+              -2.6179938779914944,
+              -2.5307274153917776,
+              -2.443460952792061,
+              -2.356194490192345,
+              -2.2689280275926285,
+              -2.181661564992912,
+              -2.0943951023931957,
+              -2.007128639793479,
+              -1.9198621771937625,
+              -1.832595714594046,
+              -1.7453292519943295,
+              -1.6580627893946132,
+              -1.5707963267948966,
+              -1.4835298641951802,
+              -1.3962634015954636,
+              -1.3089969389957472,
+              -1.2217304763960306,
+              -1.1344640137963142,
+              -1.0471975511965979,
+              -0.9599310885968815,
+              -0.8726646259971647,
+              -0.7853981633974483,
+              -0.6981317007977319,
+              -0.6108652381980155,
+              -0.5235987755982987,
+              -0.43633231299858233,
+              -0.34906585039886595,
+              -0.2617993877991496,
+              -0.1745329251994332,
+              -0.08726646259971638,
+              0.0,
+              0.08726646259971638,
+              0.17453292519943275,
+              0.2617993877991496,
+              0.34906585039886595,
+              0.43633231299858233,
+              0.5235987755982987,
+              0.6108652381980151,
+              0.6981317007977319,
+              0.7853981633974483,
+              0.8726646259971647,
+              0.959931088596881,
+              1.0471975511965974,
+              1.1344640137963138,
+              1.2217304763960302,
+              1.3089969389957474,
+              1.3962634015954638,
+              1.4835298641951802,
+              1.5707963267948966,
+              1.658062789394613,
+              1.7453292519943293,
+              1.8325957145940457,
+              1.919862177193762,
+              2.0071286397934784,
+              2.0943951023931957,
+              2.181661564992912,
+              2.2689280275926285,
+              2.356194490192345,
+              2.443460952792061,
+              2.5307274153917776,
+              2.617993877991494,
+              2.7052603405912103,
+              2.7925268031909267,
+              2.879793265790644,
+              2.9670597283903604,
+              3.0543261909900767,
+              3.141592653589793
+            ]
+          }
+        },
+        "key_comparison": {
+          "keys": [
+            "jetvetomap",
+            "jetvetomap_all"
+          ],
+          "different_regular_bins": 97
+        }
+      },
+      "production_era_evidence": {
+        "url": "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CompOpsTier0Policies",
+        "interval": [
+          393610,
+          394285
+        ],
+        "scope": "Combined pORun2025/OORun2025/NeNeRun2025 Tier-0 agent interval; not a map IOV or exact OO interval",
+        "preceding_normal_era_end_run": 393609,
+        "next_normal_era_start_run": 394286
+      },
+      "map_origin_evidence": {
+        "url": "https://github.com/cms-jet/JECDatabase/pull/226",
+        "statement": "PR describes this ROOT JVM as cloned directly from Winter25Prompt25_RunCDEFG.root; its general JEC campaign description is 2025 data combined with Summer24 MC. No special OO approval is supplied there."
+      },
+      "jet_id_policy_evidence": {
+        "requested_helper": "include/JetSelection_PbPb.h",
+        "helper_commit": "c64293a132af388af1827044779af36e57f884d2",
+        "relationship_to_initial_generic_table": "Different thresholds; must remain explicitly distinguished",
+        "helper_scope": "Per-jet ID plus map; no pT argument, EM-sum requirement, or event-level veto",
+        "user_selected_strategy": "Pinned HIN PbPb ID for OO and pp ID for ppRef, explicitly confirmed by user"
+      },
+      "deposited_by": "user",
+      "user_supplied_path": "jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root",
+      "user_supplied_hash_matches_pinned_source": true,
+      "deployment_status": "CANDIDATE_NOT_ENABLED",
+      "bounded_software_replay": {
+        "summary": "validation/run3Jets/evidence/2026-10-28/native-replay/native_replay_summary.json",
+        "scope": "Unweighted retained-entry kinematic replay; every retained jet already above 15 GeV. Not a complete analyzer, trigger or campaign event-loss estimate.",
+        "nominal_pt_convention_selected": false
+      }
+    }
+  ],
+  "future_layout": [
+    "jetVetoMaps/OO2025/",
+    "jetVetoMaps/ppRef2024/"
+  ],
+  "future_deposit_required_metadata": [
+    "source repository",
+    "source commit/tag",
+    "SHA-256",
+    "era/run coverage",
+    "histogram key",
+    "jet collection",
+    "radius",
+    "coordinate convention",
+    "pT convention",
+    "data/MC applicability",
+    "validation plots",
+    "approval evidence"
+  ],
+  "reproducibility": {
+    "script": "validation/run3Jets/inspect_veto_maps.py",
+    "command": "python3 validation/run3Jets/inspect_veto_maps.py /tmp/run3-goal3-veto-audit/Summer24Prompt24_RunBCDEFGHI.root /tmp/run3-goal3-veto-audit/Summer24Prompt25_RunCDEFG.root --output /tmp/run3-goal3-veto-audit/direct_inspection.json --plots-dir /tmp/run3-goal3-veto-audit/plots"
+  },
+  "latest_user_steering": {
+    "earlier_record": "Apply the officially approved OO strategy from JetSelection_PbPb.h and the pp strategy from JetSelection_pp.h; helper thresholds differ from the initially supplied generic CHS table",
+    "confirmed_jet_id_choice": "Linked PbPb ID for OO and linked pp ID for ppRef, explicitly confirmed",
+    "uploaded_maps_verified": true,
+    "production_threshold_clarification": "Owner confirmed keeping 15 GeV retention for ppRef data and MC. Stored jets strictly above 15 pass only the veto pT component; ID/EM/map still decide eligibility and event rejection. Exact raw/stored convention and other upstream retention cuts remain to verify."
+  }
+}

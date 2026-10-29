@@ -1,0 +1,8 @@
+{
+  "command": [
+    "python3",
+    "validation/run3Inclusive/run_tests.py"
+  ],
+  "returncode": 0,
+  "seconds": 4.632230520248413
+}

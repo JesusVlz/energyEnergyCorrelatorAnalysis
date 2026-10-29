@@ -1,0 +1,8015 @@
+{
+  "scope": "Goal 1 - Establish the active Run-3 card baseline and archive legacy Run-2 cards",
+  "inventory_timestamp_utc": "2026-10-28T14:36:33.934721+00:00",
+  "git_head": "767066a7f493130f23e988d20f518686dbfe3434",
+  "git_branch": "main",
+  "working_tree": "Existing uncommitted changes retained; hashes describe the pre-reorganization working-tree contents, not necessarily HEAD.",
+  "search_command": [
+    "rg",
+    "--files",
+    "--hidden",
+    "--no-ignore",
+    "-g",
+    "*.input",
+    "-g",
+    "!.git/**"
+  ],
+  "counts_before": {
+    "root": 19,
+    "crab": 10,
+    "validation": 8,
+    "skimmer": 0,
+    "total": 37
+  },
+  "counts_after": {
+    "root": 12,
+    "archive": 7,
+    "crab": 10,
+    "validation": 8,
+    "skimmer": 0,
+    "total": 37
+  },
+  "cards": [
+    {
+      "path_before": "cardEECOO.input",
+      "sha256": "5c4b4226607136f074d965ad8b81d429d428add09d72f1f7418d0752a1e7492f",
+      "git_blob_sha1": "fce83517ba0e05f20ff14d04c75e70eb2271bc6d",
+      "parameters": {
+        "DataType": [
+          "9"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "0",
+          "30",
+          "50",
+          "90"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "0"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECOO.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECOOInclusiveR04.input",
+      "sha256": "c9bc2deab95336dae814b7ff0f866ad89de67910d55a540dbfd1afe4d5d5497b",
+      "git_blob_sha1": "d4c213053cba9c0c47243eb2b396caa22051a06a",
+      "parameters": {
+        "DataType": [
+          "9"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "6"
+        ],
+        "MegaSkimMixing": [
+          "0"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "0"
+        ],
+        "ChannelRadiusCode": [
+          "4"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "MixingFileList": [
+          "mixingFileList/OO2025_MB_pool_pilot.txt"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECOOInclusiveR04.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECOOInclusiveR08.input",
+      "sha256": "90b6f32f5fd31e7969594a1ce570fb4928cc5bce609a5d483ad0301d78a134dd",
+      "git_blob_sha1": "514aeff1e6ef1aec1b99fbee18786be21e2ba9ef",
+      "parameters": {
+        "DataType": [
+          "9"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "6"
+        ],
+        "MegaSkimMixing": [
+          "0"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "0"
+        ],
+        "ChannelRadiusCode": [
+          "8"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "MixingFileList": [
+          "mixingFileList/OO2025_MB_pool_pilot.txt"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECOOInclusiveR08.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECOOMC.input",
+      "sha256": "320e4fecc0d0e753d76e0658fc54b1e562b89482b4319e588eb09c687e2b4420",
+      "git_blob_sha1": "ad5a6230574ca60008313624a3b1feb33db33667",
+      "parameters": {
+        "DataType": [
+          "10"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "0",
+          "30",
+          "50",
+          "90"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "2"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "5"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECOOMC.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECOOMCInclusiveR04.input",
+      "sha256": "7ef1bc65ebddc0cace19c2ea99820798f9a7d6c8084ad559b8826333bdf2d2b5",
+      "git_blob_sha1": "9e23221dd96624bd96d8f6791e629169e7f52a4b",
+      "parameters": {
+        "DataType": [
+          "10"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "6"
+        ],
+        "MegaSkimMixing": [
+          "0"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "5"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "0"
+        ],
+        "ChannelRadiusCode": [
+          "4"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "MixingFileList": [
+          "mixingFileList/OO2025_MC_pool_REQUIRED.txt"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECOOMCInclusiveR04.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECOOMCInclusiveR08.input",
+      "sha256": "c27511de22232b63af3947ff22a5dbd972782ef4908a74f4009c05fc3dbfdbcf",
+      "git_blob_sha1": "ee5703eca9e3aefaa2ae029c549620c57bc8a59f",
+      "parameters": {
+        "DataType": [
+          "10"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "6"
+        ],
+        "MegaSkimMixing": [
+          "0"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "5"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "0"
+        ],
+        "ChannelRadiusCode": [
+          "8"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "MixingFileList": [
+          "mixingFileList/OO2025_MC_pool_REQUIRED.txt"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECOOMCInclusiveR08.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECPbPb.input",
+      "sha256": "10ec0aa3dd19181ecc534a093e387a3cf4325b4fe8ccdc73489c962ac6a4e89b",
+      "git_blob_sha1": "45df756e0f014032ce5bedbd25894e7a41fe67fc",
+      "parameters": {
+        "DataType": [
+          "1"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "2"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "80"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.7"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "0.18"
+        ],
+        "MinimumTrackHits": [
+          "11"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "25",
+          "40",
+          "60",
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "220",
+          "240",
+          "260",
+          "280",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "0",
+          "10",
+          "30",
+          "50",
+          "90"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "3"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cards/archive/run2/cardEECPbPb.input",
+      "operation": "move without content changes"
+    },
+    {
+      "path_before": "cardEECPbPbMC.input",
+      "sha256": "44e55a0b628bd39bd5c2a242a238daadf12735be393f480c13686d1eb355e852",
+      "git_blob_sha1": "56d63ef3276d891b279ffb9963b71e40496d001d",
+      "parameters": {
+        "DataType": [
+          "3"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "80"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.7"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "0.15"
+        ],
+        "MinimumTrackHits": [
+          "11"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "50"
+        ],
+        "HighPtHatCut": [
+          "1000"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "60",
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "4",
+          "14",
+          "34",
+          "54",
+          "94"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "7"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "2"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "5"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cards/archive/run2/cardEECPbPbMC.input",
+      "operation": "move without content changes"
+    },
+    {
+      "path_before": "cardEECpPb.input",
+      "sha256": "cca67f568a4eef901b031c9fca2165d149337fbc3310fc73ac6751ed2628c5e7",
+      "git_blob_sha1": "bafac08c9f4e24dff6e5ed5432cc42cfc02f956a",
+      "parameters": {
+        "DataType": [
+          "4"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "0"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "1"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.022"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "10",
+          "30",
+          "40",
+          "50",
+          "60",
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "7"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cards/archive/run2/cardEECpPb.input",
+      "operation": "move without content changes"
+    },
+    {
+      "path_before": "cardEECpPb5TeV.input",
+      "sha256": "569c6ff155fb432d9ff99e12f8282cde9fb4e87955bbe6852f048a4dfc445a31",
+      "git_blob_sha1": "f01a5a9bc7bd1acf48d1671ef2ebdbfc8fe93bd9",
+      "parameters": {
+        "DataType": [
+          "6"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "0"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "40"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.022"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "50",
+          "60",
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "3"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cards/archive/run2/cardEECpPb5TeV.input",
+      "operation": "move without content changes"
+    },
+    {
+      "path_before": "cardEECpPbMC.input",
+      "sha256": "e1e493581851ba7ae23470fd648990bc3baae266d84a259b5b4e977b79463550",
+      "git_blob_sha1": "2966b9dd0fd61ccc77b2dffb5595139db007d87d",
+      "parameters": {
+        "DataType": [
+          "8"
+        ],
+        "McCorrelationType": [
+          "3"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "0"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "25"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.022"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "25",
+          "30",
+          "40",
+          "50",
+          "60",
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "7"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "5"
+        ],
+        "HFEnergyShift": [
+          "0"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cards/archive/run2/cardEECpPbMC.input",
+      "operation": "move without content changes"
+    },
+    {
+      "path_before": "cardEECpp.input",
+      "sha256": "fc15841857ad68e075cdc860cf03783e0023d4288388fe620b6169fa1a26f8f5",
+      "git_blob_sha1": "9a4074fbd507a38846d704e67c6ca96a4d66e74a",
+      "parameters": {
+        "DataType": [
+          "0"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "15"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "0"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "20"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.022"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "50",
+          "60",
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "7"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cards/archive/run2/cardEECpp.input",
+      "operation": "move without content changes"
+    },
+    {
+      "path_before": "cardEECpp5v36TeV.input",
+      "sha256": "0cbe6168b7d07d4e688f3c1b5b78590262b240915f26476292162082e59f2409",
+      "git_blob_sha1": "eb363a550a70d77c254b29a595547e62ab5a67f0",
+      "parameters": {
+        "DataType": [
+          "11"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECpp5v36TeV.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECpp5v36TeVMC.input",
+      "sha256": "68908896a32ac170b903ed1f59c049de11a53817a6948f765b666ee37776ed6a",
+      "git_blob_sha1": "b1d37deaecd537867dd47309ba32a241b6b8072c",
+      "parameters": {
+        "DataType": [
+          "12"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECpp5v36TeVMC.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECpp5v36TeVMCR04.input",
+      "sha256": "4d37afcb8449c56c5513c2f87060e4e9653097ba67357ef665a57e790ec011c4",
+      "git_blob_sha1": "cb7bfe75165c0106e034a576e2b756e012385101",
+      "parameters": {
+        "DataType": [
+          "12"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "0"
+        ],
+        "ChannelRadiusCode": [
+          "4"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECpp5v36TeVMCR04.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECpp5v36TeVMCR08.input",
+      "sha256": "65beb716ceb07f9acd07c3277b8e73a78bc0e6ad5ad0f7a5bf2ca4ea67e4e6a0",
+      "git_blob_sha1": "fcfa77b945d24f69dec131ce33e1356996194099",
+      "parameters": {
+        "DataType": [
+          "12"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "0"
+        ],
+        "ChannelRadiusCode": [
+          "8"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECpp5v36TeVMCR08.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECpp5v36TeVR04.input",
+      "sha256": "cd8815127117b178a23aa8f8c61e6b08a8d5daedc38089f0d8d5e9c810db49cf",
+      "git_blob_sha1": "6e0e5341b1de5352e259d1ad48be9c983be9fdff",
+      "parameters": {
+        "DataType": [
+          "11"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "0"
+        ],
+        "ChannelRadiusCode": [
+          "4"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECpp5v36TeVR04.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECpp5v36TeVR08.input",
+      "sha256": "e77595351daa9043e74a4bd631f82bfed4415da6192fb726754731e4da2aa32a",
+      "git_blob_sha1": "0aae55750705a7ba168e0d4f4fbbc3cd3b94e733",
+      "parameters": {
+        "DataType": [
+          "11"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "0"
+        ],
+        "ChannelRadiusCode": [
+          "8"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "cardEECpp5v36TeVR08.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "cardEECppMC.input",
+      "sha256": "fc0a8f1a6c5a724f0ae2b7f36950435081d904384d0377b0cc79c6047a1dbb5e",
+      "git_blob_sha1": "3da71e91e9e2f7ee3553fc9653ea9f1267cfbb38",
+      "parameters": {
+        "DataType": [
+          "2"
+        ],
+        "McCorrelationType": [
+          "3"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "80"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.00"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "1.00"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.022"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "50"
+        ],
+        "HighPtHatCut": [
+          "960"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "220",
+          "240",
+          "260",
+          "280",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "3"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "cards/archive/run2/cardEECppMC.input",
+      "operation": "move without content changes"
+    },
+    {
+      "path_before": "crab/cardEECOO.input",
+      "sha256": "a175b1d3f8fcd2c53ea786dc9a148454e7370ed89b58e1be473b6f08726f7e10",
+      "git_blob_sha1": "4aa2febabf542a89847e5c2e2e301ae04eae2fbe",
+      "parameters": {
+        "DataType": [
+          "9"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "0",
+          "30",
+          "50",
+          "90"
+        ],
+        "TrackPtBinEdges": [
+          "0.5",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "3"
+        ],
+        "MegaSkimMixing": [
+          "0"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "crab/cardEECOO.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/cardEECOOMC.input",
+      "sha256": "1176775cece4929fb9f93f088b32d522e8725c619b762d9548a687ff894f00ce",
+      "git_blob_sha1": "17b6e01df4bb649665a9e8998eacbacf94ec9975",
+      "parameters": {
+        "DataType": [
+          "10"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "0",
+          "30",
+          "50",
+          "90"
+        ],
+        "TrackPtBinEdges": [
+          "0.5",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "2"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "5"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "crab/cardEECOOMC.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/cardEECPbPb.input",
+      "sha256": "f36e20a0be851369511bdcd43d890456d14994b4754b6433f93d1ddb2ac3dc59",
+      "git_blob_sha1": "724682497b151097cd40faea0f7c53b44952bfaa",
+      "parameters": {
+        "DataType": [
+          "1"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "3"
+        ],
+        "FilledHistograms": [
+          "63"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "0"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "120"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "1"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.7"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "0.18"
+        ],
+        "MinimumTrackHits": [
+          "11"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "6",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "89.75"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "DoReflectedCone": [
+          "2"
+        ],
+        "AllowJetsInReflectedCone": [
+          "1"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "crab/cardEECPbPb.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/cardEECPbPbMC.input",
+      "sha256": "ffc0a65ea067d173226cfb6cfb2a92e6d38e70778570dd510c38d30e53ed4732",
+      "git_blob_sha1": "d822a67bb90c86443fb051a5ea1184f2fd414237",
+      "parameters": {
+        "DataType": [
+          "3"
+        ],
+        "McCorrelationType": [
+          "1"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "63"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "120"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "1"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.7"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "0.15"
+        ],
+        "MinimumTrackHits": [
+          "11"
+        ],
+        "SubeventCut": [
+          "1"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "50"
+        ],
+        "HighPtHatCut": [
+          "1000"
+        ],
+        "MultiplicityMode": [
+          "1"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "50",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "6",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "89.75"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "DoReflectedCone": [
+          "2"
+        ],
+        "AllowJetsInReflectedCone": [
+          "1"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "crab/cardEECPbPbMC.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/cardEECpp.input",
+      "sha256": "22d6a160f9c21227fdfd8a2bededcd5a1dc7902117bf1d78e644ec522ff255d2",
+      "git_blob_sha1": "97639d06ac68b1284079b5e511eca364de10a638",
+      "parameters": {
+        "DataType": [
+          "0"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "1"
+        ],
+        "FilledHistograms": [
+          "63"
+        ],
+        "JetType": [
+          "0"
+        ],
+        "JetAxis": [
+          "0"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "120"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "1"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.022"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "50",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "6",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "DoReflectedCone": [
+          "1"
+        ],
+        "AllowJetsInReflectedCone": [
+          "1"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "crab/cardEECpp.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/cardEECpp5v36TeV.input",
+      "sha256": "61411eb40506b175023fe9f1526fa5e08ac079bc0198d64abd91901f755d2f8a",
+      "git_blob_sha1": "4e44d0a3f8943df50b1f7ff8f41447f238ffab26",
+      "parameters": {
+        "DataType": [
+          "11"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.5",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "3"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "crab/cardEECpp5v36TeV.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/cardEECpp5v36TeVMC.input",
+      "sha256": "e70d0703cd205855323b3da1d91d7a87f5a1a39854837b7c731253db90ab22c3",
+      "git_blob_sha1": "17440716f32c2e110c96abba04c37479ad016831",
+      "parameters": {
+        "DataType": [
+          "12"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.5",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "crab/cardEECpp5v36TeVMC.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/cardEECppMC.input",
+      "sha256": "730fffa05bc5254722ac01cc06c89a07a4bc42600b61f5792ce06f8fd0cab54a",
+      "git_blob_sha1": "3cd5ee773643c245892548d5ecf1c97d14db0039",
+      "parameters": {
+        "DataType": [
+          "2"
+        ],
+        "McCorrelationType": [
+          "3"
+        ],
+        "MatchJets": [
+          "1"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "63"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "3.0"
+        ],
+        "MinJetPtCut": [
+          "120"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "1"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.00"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "1.00"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.022"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "50"
+        ],
+        "HighPtHatCut": [
+          "960"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "50",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "6",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "80"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "60"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "DoReflectedCone": [
+          "1"
+        ],
+        "AllowJetsInReflectedCone": [
+          "1"
+        ],
+        "DebugLevel": [
+          "2"
+        ]
+      },
+      "path_after": "crab/cardEECppMC.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/responseMatrixVariationCardPbPbMC.input",
+      "sha256": "7a9bef49969a1f0b275569b24c694a2fac67f8d8a70440550863f0bc774cdef4",
+      "git_blob_sha1": "31a6cc6b315063918beeb828798aacc26baa0a5a",
+      "parameters": {
+        "DataType": [
+          "3"
+        ],
+        "McCorrelationType": [
+          "1"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "60"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "1"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "3"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.7"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "0.15"
+        ],
+        "MinimumTrackHits": [
+          "11"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.05"
+        ],
+        "JetPtWeight": [
+          "1"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "50"
+        ],
+        "HighPtHatCut": [
+          "1000"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "60",
+          "70",
+          "80",
+          "90",
+          "100",
+          "110",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "220",
+          "240",
+          "260",
+          "280",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "JetPtBinEdgesUnfoldingReco": [
+          "60",
+          "70",
+          "80",
+          "90",
+          "100",
+          "110",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "220",
+          "240",
+          "260",
+          "280",
+          "300",
+          "500",
+          "5020"
+        ],
+        "JetPtBinEdgesUnfoldingTruth": [
+          "60",
+          "70",
+          "80",
+          "90",
+          "100",
+          "110",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "220",
+          "240",
+          "260",
+          "280",
+          "300",
+          "500",
+          "5020"
+        ],
+        "CentralityBinEdges": [
+          "4",
+          "14",
+          "34",
+          "54",
+          "94"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "DoReflectedCone": [
+          "2"
+        ],
+        "ApplyReflectedConeWeight": [
+          "0"
+        ],
+        "DebugLevel": [
+          "0"
+        ]
+      },
+      "path_after": "crab/responseMatrixVariationCardPbPbMC.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "crab/responseMatrixVariationCardPpMC.input",
+      "sha256": "557038fd45188f4ad2abf630a6014e921c965f91c744b02b80f3f14f5bf0644f",
+      "git_blob_sha1": "e5f080dfc0f216b7f187471b5b1da93b7ab2b8a9",
+      "parameters": {
+        "DataType": [
+          "2"
+        ],
+        "McCorrelationType": [
+          "1"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "80"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.00"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "1.00"
+        ],
+        "JetUncertainty": [
+          "3"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "500"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.022"
+        ],
+        "JetPtWeight": [
+          "1"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "0"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "50"
+        ],
+        "HighPtHatCut": [
+          "960"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "220",
+          "240",
+          "260",
+          "280",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.7",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "JetPtBinEdgesUnfoldingReco": [
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "220",
+          "240",
+          "260",
+          "280",
+          "300",
+          "500",
+          "5020"
+        ],
+        "JetPtBinEdgesUnfoldingTruth": [
+          "80",
+          "100",
+          "120",
+          "140",
+          "160",
+          "180",
+          "200",
+          "220",
+          "240",
+          "260",
+          "280",
+          "300",
+          "500",
+          "5020"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "DoReflectedCone": [
+          "1"
+        ],
+        "ApplyReflectedConeWeight": [
+          "0"
+        ],
+        "DebugLevel": [
+          "0"
+        ]
+      },
+      "path_after": "crab/responseMatrixVariationCardPpMC.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "validation/run3Workflow/cards/OOMC_R04_diagnostic.input",
+      "sha256": "4a990696bf68dc6868fff2954de7c0a715a01581b6cbf4e5bc561c01af07d104",
+      "git_blob_sha1": "4c004ae683d754ef546f846df3c955763a16323a",
+      "parameters": {
+        "DataType": [
+          "10"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "2"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "5"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "100"
+        ],
+        "ChannelRadiusCode": [
+          "4"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "validation/run3Workflow/cards/OOMC_R04_diagnostic.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "validation/run3Workflow/cards/OOMC_R08_diagnostic.input",
+      "sha256": "037f20872ef9067fa556b92ce811f0aa3e37225233db227a17286c066ce1af74",
+      "git_blob_sha1": "428514cc482a00e403151cf165064f7bd42361d3",
+      "parameters": {
+        "DataType": [
+          "10"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "2"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "5"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "100"
+        ],
+        "ChannelRadiusCode": [
+          "8"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "validation/run3Workflow/cards/OOMC_R08_diagnostic.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "validation/run3Workflow/cards/OO_R04_diagnostic.input",
+      "sha256": "b80d7f54e82150e8aac1bf10850b596bbff4c3b04feeed1b298d728faece176b",
+      "git_blob_sha1": "8ca7a14d781061578d72f9bfea9ebeacf2cc8e86",
+      "parameters": {
+        "DataType": [
+          "9"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "0"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "100"
+        ],
+        "ChannelRadiusCode": [
+          "4"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "validation/run3Workflow/cards/OO_R04_diagnostic.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "validation/run3Workflow/cards/OO_R08_diagnostic.input",
+      "sha256": "b0d6e0a0d2abd71c747e5934ce06091f42bba79c8b8a9785b13b3dbdbe41eb3b",
+      "git_blob_sha1": "2082cc851938289f59a327e0afd7ae96f5195624",
+      "parameters": {
+        "DataType": [
+          "9"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.024"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "1"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-1",
+          "100"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "0"
+        ],
+        "EventMatchForMixing": [
+          "0"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "100"
+        ],
+        "ChannelRadiusCode": [
+          "8"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "validation/run3Workflow/cards/OO_R08_diagnostic.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "validation/run3Workflow/cards/ppMC_R04_diagnostic.input",
+      "sha256": "55ca6100db4f1fa5d433ceb7f0e66153bf1fabd04ac77dc8a73bd80085fef6c3",
+      "git_blob_sha1": "973c150928ea119478a344995f5c5d1fcbbb1611",
+      "parameters": {
+        "DataType": [
+          "12"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "100"
+        ],
+        "ChannelRadiusCode": [
+          "4"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "validation/run3Workflow/cards/ppMC_R04_diagnostic.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "validation/run3Workflow/cards/ppMC_R08_diagnostic.input",
+      "sha256": "221a86ccb67e543f372df3076c96388a3116de139807a947dc55182eed1e76b0",
+      "git_blob_sha1": "3baf83d94fc4d6c7e8c81191311d20340ed51751",
+      "parameters": {
+        "DataType": [
+          "12"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "0"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-15"
+        ],
+        "HighPtHatCut": [
+          "5020"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "100"
+        ],
+        "ChannelRadiusCode": [
+          "8"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "validation/run3Workflow/cards/ppMC_R08_diagnostic.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "validation/run3Workflow/cards/pp_R04_diagnostic.input",
+      "sha256": "35c3fe30baa1fb62d661a5358db81422a0726c8e25a8624b431e6bc9c8a136f4",
+      "git_blob_sha1": "cf0a29f6a960253d79da749a919cc88f55811fc2",
+      "parameters": {
+        "DataType": [
+          "11"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "1"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.4"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "100"
+        ],
+        "ChannelRadiusCode": [
+          "4"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "validation/run3Workflow/cards/pp_R04_diagnostic.input",
+      "operation": "retain in place"
+    },
+    {
+      "path_before": "validation/run3Workflow/cards/pp_R08_diagnostic.input",
+      "sha256": "3fc002bbf3a6b0614be38c785274c40967b0983ba36300a2e6d2adb22361662a",
+      "git_blob_sha1": "d1a4a7358f4f16d925681b4c26b49ca633873f67",
+      "parameters": {
+        "DataType": [
+          "11"
+        ],
+        "McCorrelationType": [
+          "0"
+        ],
+        "MatchJets": [
+          "0"
+        ],
+        "TriggerSelection": [
+          "8"
+        ],
+        "FilledHistograms": [
+          "31"
+        ],
+        "JetType": [
+          "3"
+        ],
+        "JetAxis": [
+          "1"
+        ],
+        "JetEtaCut": [
+          "1.6"
+        ],
+        "MinJetPtCut": [
+          "10"
+        ],
+        "MaxJetPtCut": [
+          "5020"
+        ],
+        "CutBadPhi": [
+          "0"
+        ],
+        "CutWithEtaCM": [
+          "0"
+        ],
+        "MinMaxTrackPtFraction": [
+          "0.01"
+        ],
+        "MaxMaxTrackPtFraction": [
+          "0.98"
+        ],
+        "JetUncertainty": [
+          "0"
+        ],
+        "TrackEtaCut": [
+          "2.4"
+        ],
+        "MinTrackPtCut": [
+          "0.5"
+        ],
+        "MaxTrackPtCut": [
+          "500"
+        ],
+        "MaxTrackPtRelativeError": [
+          "0.1"
+        ],
+        "VertexMaxDistance": [
+          "3"
+        ],
+        "CalorimeterSignalLimitPt": [
+          "20"
+        ],
+        "HighPtEtFraction": [
+          "0.5"
+        ],
+        "Chi2QualityCut": [
+          "100000"
+        ],
+        "MinimumTrackHits": [
+          "0"
+        ],
+        "SubeventCut": [
+          "2"
+        ],
+        "TrackEfficiencyVariation": [
+          "0.0"
+        ],
+        "JetPtWeight": [
+          "0"
+        ],
+        "DisableTrackPairEfficiencyCorrection": [
+          "1"
+        ],
+        "ZVertexCut": [
+          "15"
+        ],
+        "LowPtHatCut": [
+          "-1"
+        ],
+        "HighPtHatCut": [
+          "1"
+        ],
+        "MultiplicityMode": [
+          "0"
+        ],
+        "JetRadius": [
+          "0.8"
+        ],
+        "WeightExponent": [
+          "1",
+          "2"
+        ],
+        "SmearDeltaR": [
+          "0"
+        ],
+        "SmearEnergyWeight": [
+          "0"
+        ],
+        "JetPtBinEdgesEEC": [
+          "40",
+          "80",
+          "120",
+          "160",
+          "200",
+          "300",
+          "500",
+          "5020"
+        ],
+        "TrackPtBinEdgesEEC": [
+          "0.5",
+          "1",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "3.5",
+          "4",
+          "300"
+        ],
+        "SkipCovarianceMatrix": [
+          "0"
+        ],
+        "MinJetPtUnfoldingReco": [
+          "20"
+        ],
+        "MinJetPtUnfoldingTruth": [
+          "10"
+        ],
+        "CentralityBinEdges": [
+          "-0.75",
+          "-0.25",
+          "9.75",
+          "29.75",
+          "49.75",
+          "100.25"
+        ],
+        "TrackPtBinEdges": [
+          "0.7",
+          "1",
+          "2",
+          "3",
+          "4",
+          "8",
+          "12",
+          "300"
+        ],
+        "PtHatBinEdges": [
+          "0",
+          "30",
+          "50",
+          "80",
+          "120",
+          "170",
+          "220",
+          "280",
+          "370",
+          "460"
+        ],
+        "BackgroundMethods": [
+          "0"
+        ],
+        "MegaSkimMixing": [
+          "1"
+        ],
+        "EventMatchForMixing": [
+          "1"
+        ],
+        "BinnedMixing": [
+          "0"
+        ],
+        "VzMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HiBinMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyMixingBins": [
+          "0",
+          "1"
+        ],
+        "MultiplicityMixingBins": [
+          "-0.5",
+          "1"
+        ],
+        "HFEnergyShift": [
+          "25"
+        ],
+        "DebugLevel": [
+          "2"
+        ],
+        "MaxEventsPerFile": [
+          "100"
+        ],
+        "ChannelRadiusCode": [
+          "8"
+        ],
+        "MinPairTrackPt": [
+          "2"
+        ],
+        "FirstUnfoldedJetPtBin": [
+          "0"
+        ],
+        "LastUnfoldedJetPtBin": [
+          "2"
+        ]
+      },
+      "path_after": "validation/run3Workflow/cards/pp_R08_diagnostic.input",
+      "operation": "retain in place"
+    }
+  ]
+}

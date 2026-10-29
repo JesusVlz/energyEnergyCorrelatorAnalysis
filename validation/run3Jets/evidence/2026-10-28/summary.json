@@ -1,0 +1,33 @@
+{
+  "status": "PASS_SOFTWARE_AND_BOUNDED_INPUT_REPLAY",
+  "jet_id": "Owner-confirmed pinned HIN PbPb for OO and HIN pp for ppRef",
+  "production_enabled": false,
+  "job_packaged": false,
+  "raw_and_stored_studied_separately": true,
+  "nominal_pt_convention_selected": false,
+  "retained_entry_rejections": {
+    "OO_data": [
+      2,
+      1000
+    ],
+    "OO_local_MC": [
+      1,
+      100
+    ],
+    "ppRef_data": [
+      10,
+      100
+    ],
+    "ppRef_production_MC": [
+      14,
+      100
+    ],
+    "ppRef_local_MC": [
+      22,
+      100
+    ]
+  },
+  "scope": "Unweighted retained-entry kinematic replay; every retained jet already above 15 GeV. Not a complete analyzer, trigger or campaign event-loss estimate.",
+  "physics_closure": "NOT_RUN",
+  "latest_owner_production_clarification": "Owner confirmed keeping 15 GeV retention for ppRef data and MC. Stored jets strictly above 15 pass only the veto pT component; ID/EM/map still decide eligibility and event rejection. Exact raw/stored convention and other upstream retention cuts remain to verify."
+}

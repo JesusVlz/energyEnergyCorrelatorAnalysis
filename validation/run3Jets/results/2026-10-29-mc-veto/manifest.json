@@ -1,0 +1,72 @@
+{
+  "purpose": "BOUNDED_MC_SOFTWARE_CHECK; no production coverage/physics closure certification",
+  "max_events_per_file": 1000,
+  "jobs": [
+    {
+      "system": "OO",
+      "input": "/eos/user/j/jvelazqu/Foresting/OOMC/unembedded_L1HLT_objects_MC_1.root",
+      "base_card": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECOOMC.input",
+      "base_card_sha256": "e19fbb22dd302e3fdcc123eb1d5b869d0c6757c9594c12a2a500e80b5d23e1b3",
+      "scratch_card": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.input",
+      "output": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.root",
+      "log": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.log",
+      "command": [
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/eecAnalysis",
+        "/eos/user/j/jvelazqu/Foresting/OOMC/unembedded_L1HLT_objects_MC_1.root",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.input",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.root",
+        "1",
+        "true"
+      ],
+      "check_command": [
+        "/usr/bin/python3",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/check_mc_smoke.py",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.root",
+        "--card",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco.input",
+        "--max-events",
+        "1000",
+        "--output",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_R04_RecoReco_check.json"
+      ],
+      "status": "CHECK_COMPLETE",
+      "analyzer_exit_code": 0,
+      "check_exit_code": 0,
+      "initial_check_failure": "PyROOT JCard indexing; corrected checker and clean standalone recheck",
+      "verified_report": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/OO_recheck.json"
+    },
+    {
+      "system": "pp",
+      "input": "/eos/user/j/jvelazqu/Foresting/ppMC/HiForestMiniAOD_MC_1.root",
+      "base_card": "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/cardEECpp5v36TeVMC.input",
+      "base_card_sha256": "32c0c58032d34d9a0e16b50846b11dc6f7bbde16dfaa841b0f662db82be2a746",
+      "scratch_card": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco.input",
+      "output": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco.root",
+      "log": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco.log",
+      "command": [
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/eecAnalysis",
+        "/eos/user/j/jvelazqu/Foresting/ppMC/HiForestMiniAOD_MC_1.root",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco.input",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco.root",
+        "1",
+        "true"
+      ],
+      "check_command": [
+        "/usr/bin/python3",
+        "/eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Jets/check_mc_smoke.py",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco.root",
+        "--card",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco.input",
+        "--max-events",
+        "1000",
+        "--output",
+        "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco_check.json"
+      ],
+      "status": "CHECK_COMPLETE",
+      "analyzer_exit_code": 0,
+      "check_exit_code": 0,
+      "verified_report": "/tmp/jvelazqu/eec-mc-veto-ready-20261029-oizcncqh/mc/pp_R04_RecoReco_check.json"
+    }
+  ],
+  "checker_sha256": "ad71093af531d5e30b5208ff05d8fc622ee9c702cdc3ec245369dbf20c519dcc"
+}
