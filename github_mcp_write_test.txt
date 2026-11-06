@@ -1,0 +1,4 @@
+GitHub connector write test
+Repository: JesusVlz/energyEnergyCorrelatorAnalysis
+Branch: main
+Date: 2026-11-06
