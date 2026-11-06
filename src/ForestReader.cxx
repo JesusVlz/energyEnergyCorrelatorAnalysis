@@ -258,6 +258,11 @@ ForestReader::ForestReader(const ForestReader& in) :
   fHFPlus(in.fHFPlus),
   fHFMinus(in.fHFMinus),
   fPtHat(in.fPtHat),
+  fRawHFSum(in.fRawHFSum),
+  fHasRawHFSum(in.fHasRawHFSum),
+  fRunNumber(in.fRunNumber),
+  fLumiNumber(in.fLumiNumber),
+  fHasPhysicalEventIdentity(in.fHasPhysicalEventIdentity),
   fEventNumber(in.fEventNumber),
   fnJets(in.fnJets),
   fnMatchedJets(in.fnMatchedJets),
@@ -349,6 +354,11 @@ ForestReader& ForestReader::operator=(const ForestReader& in){
   fHFPlus = in.fHFPlus;
   fHFMinus = in.fHFMinus;
   fPtHat = in.fPtHat;
+  fRawHFSum = in.fRawHFSum;
+  fHasRawHFSum = in.fHasRawHFSum;
+  fRunNumber = in.fRunNumber;
+  fLumiNumber = in.fLumiNumber;
+  fHasPhysicalEventIdentity = in.fHasPhysicalEventIdentity;
   fEventNumber = in.fEventNumber;
   fnJets = in.fnJets;
   fnMatchedJets = in.fnMatchedJets;
@@ -407,6 +417,12 @@ void ForestReader::SetDataType(Int_t dataType){
              (fDataType == kPPbMC_pToMinusEta) || 
              (fDataType == kPPbMC_pToPlusEta);
   }
+}
+
+// Explicitly ask the TChain for its total across all source files. A branch
+// GetEntries() can report only the first currently loaded source tree.
+Long64_t ForestReader::GetTotalChainEntries() const{
+  throw std::runtime_error("This forest reader does not expose a total-chain entry count");
 }
 
 // Getter for number of events in the tree

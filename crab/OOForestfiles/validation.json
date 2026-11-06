@@ -1,0 +1,33 @@
+{
+  "checks_passed": true,
+  "source_files": 132898,
+  "reserved_mixing_files": 35,
+  "signal_files": 132863,
+  "tasks": 20,
+  "max_jobs_per_task": 10000,
+  "files_per_job": 1,
+  "duplicate_signal_files": 0,
+  "signal_pool_overlap": 0,
+  "original_cohorts_preserved_byte_for_byte": 10,
+  "all_task_configurations_loaded_with": "CRAB v3.260630.00 WMCore.Configuration",
+  "prior_submission_hashes_verified": true,
+  "card_worker_archive_and_pool_unchanged": true,
+  "known_empty_forests_retained": [
+    {
+      "signal_file": "/store/user/jvelazqu/HiForest/OO2025/IonPhysics1/OO_MinimumBias_filtered_IonPhysics1/260925_150020/0000/L1_object_data_15.root",
+      "task": "eecAnalysis_OO_mixedPerp_part01_chunk01_Run3_v2",
+      "file_ordinal": 169
+    },
+    {
+      "signal_file": "/store/user/jvelazqu/HiForest/OO2025/IonPhysics1/OO_MinimumBias_filtered_IonPhysics1/260925_150020/0000/L1_object_data_542.root",
+      "task": "eecAnalysis_OO_mixedPerp_part01_chunk01_Run3_v2",
+      "file_ordinal": 211
+    },
+    {
+      "signal_file": "/store/user/jvelazqu/HiForest/OO2025/IonPhysics18/OO_MinimumBias_filtered_IonPhysics18/260925_150252/0000/L1_object_data_645.root",
+      "task": "eecAnalysis_OO_mixedPerp_part01_chunk01_Run3_v2",
+      "file_ordinal": 2661
+    }
+  ],
+  "submitted": false
+}

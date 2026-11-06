@@ -356,6 +356,14 @@ void HighForestReader::Initialize(){
   fHeavyIonTree->SetBranchAddress("vz", &fVertexZ, &fHiVzBranch);
   fHeavyIonTree->SetBranchStatus("evt", 1);
   fHeavyIonTree->SetBranchAddress("evt", &fEventNumber, &fEventNumberBranch);
+  fHasPhysicalEventIdentity = fHeavyIonTree->GetBranch("run") && fHeavyIonTree->GetBranch("lumi") && fHeavyIonTree->GetBranch("evt");
+  if(fHasPhysicalEventIdentity){
+    fHeavyIonTree->SetBranchStatus("run",1);
+    fHeavyIonTree->SetBranchAddress("run",&fRunNumber);
+    fHeavyIonTree->SetBranchStatus("lumi",1);
+    fHeavyIonTree->SetBranchAddress("lumi",&fLumiNumber);
+  }
+
 
   if(fDataType == kPp || fDataType == kPpMC || fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
     // We do not have HF tower information for pp. In this case find HF like energy from particle flow candidates
@@ -886,6 +894,11 @@ void HighForestReader::Initialize(){
 /*
  * Connect a new tree to the reader
  */
+Long64_t HighForestReader::GetTotalChainEntries() const{
+  if(!fHeavyIonTree) throw std::runtime_error("Total chain entries requested before opening a forest");
+  return fHeavyIonTree->GetEntries();
+}
+
 void HighForestReader::ReadForestFromFile(TFile* inputFile){
   std::vector<TString> fileList;
   fileList.push_back(inputFile->GetName());

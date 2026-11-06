@@ -41,3 +41,28 @@ eec5TeV.tar.gz
 # Owner-enabled Run-3 R4 veto maps referenced by local and CRAB cards.
 !jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root
 !jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root
+
+# Bounded local MC closure artifacts (source/cards/helpers are versioned separately).
+validation/run3Mixing/results/
+
+# Plotting header dependencies and ROOT/compiler environment signature.
+plotting/*.d
+plotting/.root-build-config*
+plotting/.sys.v#..root-build-config/
+
+# Reproducible local pair-correction samples, native files and closure artifacts.
+validation/run3Pairs/results/
+
+# Local production state and reproducible worker payloads.
+/crab.log
+/crab/crab.log
+/crab/eec*.tar.gz
+/crab/eecAnalysis_*/
+/crab/submissionRecords/
+/crab/OOForestfiles/previous_10parts/
+/crab/ppRefForestfiles/previous_10parts/
+/crab/ppRefForestfiles/worker_build.log
+
+# Campaign outputs stay local; reusable cards and test fixtures are versioned.
+/validation/run3Campaign/results/
+/validation/run3Unfolding/results/

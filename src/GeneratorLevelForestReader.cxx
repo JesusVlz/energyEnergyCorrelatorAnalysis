@@ -168,6 +168,20 @@ void GeneratorLevelForestReader::Initialize(){
   fHeavyIonTree->SetBranchAddress("vz",&fVertexZ,&fHiVzBranch);
   fHeavyIonTree->SetBranchStatus("evt",1);
   fHeavyIonTree->SetBranchAddress("evt", &fEventNumber, &fEventNumberBranch);
+  fHasPhysicalEventIdentity = fHeavyIonTree->GetBranch("run") && fHeavyIonTree->GetBranch("lumi") && fHeavyIonTree->GetBranch("evt");
+  if(fHasPhysicalEventIdentity){
+    fHeavyIonTree->SetBranchStatus("run",1);
+    fHeavyIonTree->SetBranchAddress("run",&fRunNumber);
+    fHeavyIonTree->SetBranchStatus("lumi",1);
+    fHeavyIonTree->SetBranchAddress("lumi",&fLumiNumber);
+  }
+
+
+  fHasRawHFSum=fHeavyIonTree->GetBranch("hiHF_pf")!=nullptr;
+  if(fHasRawHFSum){
+    fHeavyIonTree->SetBranchStatus("hiHF_pf",1);
+    fHeavyIonTree->SetBranchAddress("hiHF_pf",&fRawHFSum);
+  }
 
   if(fDataType == kPpMC || fDataType == kOOMC || fDataType == kPpRef5p36TeVMC){
     // We do not have HF tower information for pp. In this case find HF like energy from particle flow candidates
@@ -527,6 +541,11 @@ void GeneratorLevelForestReader::Initialize(){
 /*
  * Connect a new tree to the reader
  */
+Long64_t GeneratorLevelForestReader::GetTotalChainEntries() const{
+  if(!fHeavyIonTree) throw std::runtime_error("Total chain entries requested before opening a forest");
+  return fHeavyIonTree->GetEntries();
+}
+
 void GeneratorLevelForestReader::ReadForestFromFile(TFile *inputFile){
   std::vector<TString> fileList;
   fileList.push_back(inputFile->GetName());

@@ -1,0 +1,190 @@
+{
+  "status": "PASS",
+  "wmcore_module": "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.260630.00/lib/WMCore/Configuration.py",
+  "source_files": 31179,
+  "source_sha256": "ea4f1d4fbb0c92d82dffab9c4f75262bcb476801edb0349cd599793df39cde40",
+  "reserved_mixing_files": 35,
+  "mixing_pool_sha256": "c27e976dc13c78a874da02ecf5447c583e4c6c0cef38b2774b2ed3b9646b04c2",
+  "mixing_pool_unchanged_vs_archive_and_remote_probe": true,
+  "signal_files": 31144,
+  "task_job_counts": [
+    10000,
+    10000,
+    10000,
+    1144
+  ],
+  "tasks": [
+    {
+      "part": 1,
+      "chunk": 1,
+      "files": 10000,
+      "jobs": 10000,
+      "request_name": "eecAnalysis_ppRef_mixedPerp_part01_chunk01_Run3_v2",
+      "list_sha256": "2f201bca50dbc73e4959945f89475dcfc6a32bfdfe51a59b8a684b01fd4a3fda",
+      "real_wmcore_import": "PASS",
+      "config_manifest_agreement": "PASS",
+      "input_files_exist": "PASS"
+    },
+    {
+      "part": 2,
+      "chunk": 1,
+      "files": 10000,
+      "jobs": 10000,
+      "request_name": "eecAnalysis_ppRef_mixedPerp_part02_chunk01_Run3_v2",
+      "list_sha256": "f499e3475c43d6e785f710e1fd4b27f70656f23a9f0faaf18a1c4603ba6b891a",
+      "real_wmcore_import": "PASS",
+      "config_manifest_agreement": "PASS",
+      "input_files_exist": "PASS"
+    },
+    {
+      "part": 3,
+      "chunk": 1,
+      "files": 10000,
+      "jobs": 10000,
+      "request_name": "eecAnalysis_ppRef_mixedPerp_part03_chunk01_Run3_v2",
+      "list_sha256": "83081d12367c6de446d13612f6d4b79b478fec256eb748f1a5ffa50f8b034b5a",
+      "real_wmcore_import": "PASS",
+      "config_manifest_agreement": "PASS",
+      "input_files_exist": "PASS"
+    },
+    {
+      "part": 4,
+      "chunk": 1,
+      "files": 1144,
+      "jobs": 1144,
+      "request_name": "eecAnalysis_ppRef_mixedPerp_part04_chunk01_Run3_v2",
+      "list_sha256": "ce0997cdc15bd617acea5cb156dc295f29899a29dd86c6a3d4911e187a9c7da8",
+      "real_wmcore_import": "PASS",
+      "config_manifest_agreement": "PASS",
+      "input_files_exist": "PASS"
+    }
+  ],
+  "active_list_filenames_match_manifest": true,
+  "signal_unique": true,
+  "signal_donor_disjoint": true,
+  "signal_plus_donor_exact_source_coverage": true,
+  "source_order_preserved": true,
+  "new_signal_multiset_equals_archived_ten_tasks": true,
+  "new_request_names_distinct_from_archived_tasks": true,
+  "invalid_selectors": [
+    {
+      "part": "0",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "5",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "6",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "7",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "8",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "9",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "10",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "11",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "-1",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "1",
+      "chunk": "0",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "1",
+      "chunk": "2",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "1",
+      "chunk": "-1",
+      "status": "REJECTED",
+      "message": "PPREF_CRAB_PART must be 1..4 and PPREF_CRAB_CHUNK must be 1"
+    },
+    {
+      "part": "bad",
+      "chunk": "1",
+      "status": "REJECTED",
+      "message": "invalid literal for int() with base 10: 'bad'"
+    },
+    {
+      "part": "1",
+      "chunk": "bad",
+      "status": "REJECTED",
+      "message": "invalid literal for int() with base 10: 'bad'"
+    }
+  ],
+  "default_task": "eecAnalysis_ppRef_mixedPerp_part01_chunk01_Run3_v2",
+  "no_submission_performed": true,
+  "scope": "Repartitioning and real-WMCore configuration checks; no submission. Prior worker build and donor metadata validation retained for unchanged payloads.",
+  "files_sha256": {
+    "crab/crabEECppref5v36.py": "401ac25968b8e865356091da970ce3befcfd409759d9cb2b6507ee1cbb37e911",
+    "crab/cardEECpp5v36TeV.input": "c5b514789e1af742530c829279db9a5ca9ec07e83b00e876ef18d384993af69e",
+    "crab/splitPPRefForestFiles.py": "c00c3d488b258a33eb2aabb0a1c0e30d4fd25a820fd3328a0511f1f2c20fd0ee",
+    "crab/compileAndRun.sh": "1418a78514d2c7531ad03b5971d7a0bcc63df2dacca9aca12d722fd73f826172",
+    "crab/ppRefForestfiles/manifest.json": "3b39241237f597998195376c08a661be6b11b9c174877fd9a537c1d26cce981d",
+    "mixingFileList/ppRef2024_pool_pilot.txt": "c27e976dc13c78a874da02ecf5447c583e4c6c0cef38b2774b2ed3b9646b04c2"
+  },
+  "idempotent_rerun_preserves_hashes_and_mtimes": true,
+  "previous_setup": "previous_10parts/setup_validation.json",
+  "worker_archive": {
+    "file": "../eecOO.tar.gz",
+    "build_directory": "/tmp/ppref-crab-build-1phb5hk4",
+    "archive_sha256": "30250f77657309094fe455f80c93a24355e870115083c5c98f761756cdac1e0b",
+    "verified_payloads": 166,
+    "cmssw": "CMSSW_15_0_11",
+    "build_exit_code": 0
+  },
+  "worker_regressions": {
+    "command": "python3 -B crab/test_compileAndRun.py",
+    "passed": 5
+  },
+  "pool_metadata_report": "pool_metadata.json",
+  "pool_metadata_summary": {
+    "status": "PASS",
+    "pool_sha256": "c27e976dc13c78a874da02ecf5447c583e4c6c0cef38b2774b2ed3b9646b04c2",
+    "pool_files": 35,
+    "pass_files": 35,
+    "total_event_entries": 1405824,
+    "scope": "Metadata only: full file list, required trees/branches, nonzero aligned entries, exact native jet leaf types. No event loops, selection acceptance, matching, or physics validation."
+  },
+  "retained_validation_payload_hashes_verified": true
+}

@@ -76,7 +76,7 @@ JetPtBinEdgesEEC 40 80 120 160 200 300 500 5020 # Jet pT bin edges for EEC
 TrackPtBinEdgesEEC 0.5 1 1.5 2 2.5 3 3.5 4 300 # Track pT bin edges for EEC
 
 # Configuration for unfolding response matrices
-SkipCovarianceMatrix 0 # 0 = Fill covariance matrix. 1 = Do not fill covariance matrix
+SkipCovarianceMatrix 1 # 0 = Fill covariance matrix. 1 = Do not fill covariance matrix
 MinJetPtUnfoldingReco 80  # Minimum jet pT for reconstructed jets in the response matrix
 MinJetPtUnfoldingTruth 60 # Minimum jet pT for generator level jets in the response matrix
 
@@ -86,12 +86,13 @@ TrackPtBinEdges     0.5 1 2 3 4 8 12 300                # Track pT binning
 PtHatBinEdges       0 30 50 80 120 170 220 280 370 460  # pT hat binning
 
 # Choose which background estimation methods are evaluated and parameters for them
-BackgroundMethods 3  # Bit 0 = Reflected-eta cone       (to set: 1)
+BackgroundMethods 6  # Bit 0 = Reflected-eta cone       (to set: 1)
                      # Bit 1 = Perpendicular cone       (to set: 2)
                      # Bit 2 = Mixed cones              (to set: 4)
                      # Examples: All = 7, Everything but no mixing = 3
-MegaSkimMixing 1 # 0 = If doing mixing, use regular mixing files. 1 = Use megaskimmed mixing files
-EventMatchForMixing 1 # 0 = Match HiBin, 1 = Match HF energy, 2 = Match background multiplicity
+MegaSkimMixing 0 # 0 = If doing mixing, use regular mixing files. 1 = Use megaskimmed mixing files
+MixingFileList mixingFileList/ppRef2024_pool_pilot.txt # 35 reserved HardProbes-filtered ppRef forests; excluded from signal lists
+EventMatchForMixing 0 # Run-3 data: match vz and hiBin; independent of centrality selection
 BinnedMixing 0 # 0 = Match events without bin borders for mixing. 1 = Use binned event matching for mixing
 
 # For the mixing bins, if exactly two values are given, these are interpreted as an example bin border, and bin width. The mixing bins are then automatically contructed using this information with even bin width. If more than two values are given, these are directly interpreted as bin borders.

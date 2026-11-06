@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'run3Pairs'))
 from pair_counts import event_key, fold, physical_key
-from export_forest import digest, select_branches
+from export_forest_legacy import digest, select_branches
 
 
 def match(events, vz_tolerance, hf_tolerance):

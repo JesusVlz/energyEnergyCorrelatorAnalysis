@@ -1,0 +1,29 @@
+MC background work — 29 October 2026
+
+- Generated a separate GenGen sample for Pythia-Pythia, Pythia-Hijing and Hijing-Hijing decomposition; the original RecoReco sample lacked usable truth-origin labels.
+- Ran bounded inclusive OO MC RecoReco/GenGen tests with perpendicular cones. Also tested a 0.5 GeV pair threshold and produced low-pT decomposition plots. The current campaign uses strict pTch >2 GeV.
+- Verified the existing 33-file pure-HIJING pool and audited 10,000 signal / 100,000 donor events. Pure-HIJING particles are classified by source, despite stored sube=0.
+- Found 1,126 identical stored HIJING backgrounds shared across different signal/donor event IDs; added full 64-bit identity and background-content checks.
+- Implemented mixed and perpendicular estimators in the existing R4 WTA GenGen analysis, for n=1,2, with common matched-jet exposure, recorded failures, valid empty cones and partner reuse tracking.
+- Used Bmix = 0.5*(JM1+JM2) + 0.5*(M1M1+M2M2) - M1M2; truth is T=PP+PH+HH, with PH counted once. No independent component normalization or negative-bin clipping.
+- Matching uses charged stable HIJING pT >0.7 GeV, |eta|<2.4; |delta vz|<=0.5 cm and |delta NH|<=max(1,0.01*NHsignal). HF transformations are OFF; seed=20261030. Two distinct A/B partners are assigned once per event across jets/powers.
+- Kept physical generator momenta and unity reconstruction corrections in GenGen. Installed Run-3 jet/tracking payloads and the reconstructed-jet event veto are retained for their applicable uses.
+- Added raw histogram loading to bypass background-shape stabilization, and fixed pilot multi-file counting with an explicit total-chain API.
+- Completed the 10k/100k pilot: 9,486/9,596 selected signals matched. Requested matched-jet counts are 193 (40-80 GeV), 9 (80-120), and 0 (120-160).
+- Produced 193 PDF/PNG plot pairs: decomposition, background/truth ratios, extracted signals, component checks and matching/reuse QA, for split/integrated centrality and both powers.
+- Software validation passed: 30 mixing tests, 18 Condor tests, Run-3 jet regressions, all nine workflow stages, and independent source/ledger checks.
+- Physics closure remains provisional: mixed subtraction is compatible within broad conditional errors; perpendicular subtraction shows an oversubtraction trend. HH truth is zero in this >2 GeV pilot, and higher-pT support is insufficient. Final donor/cross-job covariance and full provenance remain open.
+- Prepared and submitted 666 OO-only GenGen jobs over 333 forests (9.97 million source events per campaign): split centrality cluster 9624972; integrated centrality cluster 9624973. Last check, 29 October at 14:52 CDT: all 666 running, none held.
+- Campaign policy reserves the same 100k donor events across all jobs and excludes overlapping signals. This differs from the bounded test, which reserves its capped signals and excludes overlapping donors.
+- Campaigns freeze source/cards/payloads, stage four donor files locally, and publish ROOT plus identity/contribution ledgers. Require a successful per-input .run.json and checksums before consuming outputs. Keep split/integrated results separate; they repeat physical signals.
+- Updated the background task sheet. Background/Condor changes remain uncommitted; nothing was pushed. Next: validate campaign outputs, compare closure with more statistics, then measured-activity matching, reconstructed closure and final covariance. The estimator is not frozen.
+
+Tracking paths (relative to repository unless absolute):
+- Repository: /eos/user/j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis
+- Pilot/plots/checks: validation/run3Mixing/results/2026-10-30-gengen-pilot/bounded_100k/ and ../checks/
+- Machine summary: validation/run3Mixing/results/2026-10-30-gengen-pilot/campaign_summary.json
+- Earlier tests: figures/test_OOMC_Run3_GenGen_20261029/, figures/OO_inclusive_Run3_20261029/, figures/OO_inclusive_lowPt_Run3_20261029/
+- Campaigns: /afs/cern.ch/user/j/jvelazqu/condor/production/OOMC/GenGen_R04_Run3_NH_20261029_{split,integrated}/
+- Outputs: /eos/user/j/jvelazqu/HIN/eec-outputs/OOMC/GenGen_R04_Run3_NH_20261029_{split,integrated}/GenGen/
+- Task sheet: /eos/user/j/jvelazqu/HIN/Plan/Mixed and perpendicular cones.md
+- Monitor existing jobs: condor_q 9624972 9624973. Do not resubmit blindly.

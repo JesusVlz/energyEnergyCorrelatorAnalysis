@@ -1,0 +1,6 @@
+# Event-ledger partition required: this is not an independent whole-file pool.
+# Authoritative partition: /eos/home-j/jvelazqu/HIN/CMSSW_15_0_11/src/energyEnergyCorrelatorAnalysis/validation/run3Mixing/results/2026-10-30-gengen-pilot/inputs_background_partition/poolB.events.jsonl
+/eos/user/j/jvelazqu/Foresting/OOMC_Hijing/unembedded_L1HLT_objects_MC_1.root
+/eos/user/j/jvelazqu/Foresting/OOMC_Hijing/unembedded_L1HLT_objects_MC_2.root
+/eos/user/j/jvelazqu/Foresting/OOMC_Hijing/unembedded_L1HLT_objects_MC_3.root
+/eos/user/j/jvelazqu/Foresting/OOMC_Hijing/unembedded_L1HLT_objects_MC_4.root

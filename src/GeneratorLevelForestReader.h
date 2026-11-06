@@ -29,6 +29,7 @@ public:
   GeneratorLevelForestReader& operator=(const GeneratorLevelForestReader& obj); // Equal sign operator
   
   // Methods
+  Long64_t GetTotalChainEntries() const override;
   void ReadForestFromFile(TFile *inputFile);   // Read the forest from a file
   void ReadForestFromFileList(std::vector<TString> fileList);  // Read the forest from a file list
   void BurnForest();                           // Burn the forest  

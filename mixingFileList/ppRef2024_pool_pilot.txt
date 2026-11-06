@@ -1,0 +1,40 @@
+# ppRef 2024 mixing pilot: 35 reserved files from crab/ppData2024ForestFiles.txt
+# Source: supplied HardProbes-filtered forests, PPRefHardProbes0 through PPRefHardProbes4.
+# No independent ZeroBias or minimum-bias provenance is established for these donors.
+# TriggerSelection 8 selects signal events; the mixing reader disables donor trigger cuts.
+# Selection: evenly spaced source-list midpoints; see crab/ppRefForestfiles/manifest.json.
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes0/ppRef2024_HardProbes_filtered_PPRefHardProbes0/260925_144732/0000/HiForestMiniAOD_579.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes0/ppRef2024_HardProbes_filtered_PPRefHardProbes0/260925_144732/0003/HiForestMiniAOD_3282.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0000/HiForestMiniAOD_358.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0001/HiForestMiniAOD_1178.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0002/HiForestMiniAOD_2317.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0003/HiForestMiniAOD_3432.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0004/HiForestMiniAOD_4559.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0005/HiForestMiniAOD_5451.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0006/HiForestMiniAOD_6358.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0007/HiForestMiniAOD_7251.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0000/HiForestMiniAOD_66.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0001/HiForestMiniAOD_1525.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0002/HiForestMiniAOD_2420.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0003/HiForestMiniAOD_3311.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0004/HiForestMiniAOD_4202.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0005/HiForestMiniAOD_5092.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0005/HiForestMiniAOD_5983.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0006/HiForestMiniAOD_6875.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0000/HiForestMiniAOD_344.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0001/HiForestMiniAOD_1183.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0002/HiForestMiniAOD_2082.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0002/HiForestMiniAOD_2973.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0003/HiForestMiniAOD_3864.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0004/HiForestMiniAOD_4757.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0005/HiForestMiniAOD_5648.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0006/HiForestMiniAOD_6539.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0007/HiForestMiniAOD_7430.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0000/HiForestMiniAOD_86.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0001/HiForestMiniAOD_1737.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0002/HiForestMiniAOD_2630.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0003/HiForestMiniAOD_3521.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0004/HiForestMiniAOD_4412.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0005/HiForestMiniAOD_5302.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0006/HiForestMiniAOD_6194.root
+root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0007/HiForestMiniAOD_7085.root

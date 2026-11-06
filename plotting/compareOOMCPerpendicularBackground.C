@@ -127,7 +127,7 @@ void compareOOMCPerpendicularBackground(TString inputFileName = "projected/OOMC_
   legend->SetBorderSize(0);
   legend->SetTextSize(0.05);
   legend->SetTextFont(62);
-  legend->AddEntry((TObject*)nullptr,"Pythia+Hijing 5.36 TeV","");
+  legend->AddEntry((TObject*)nullptr,"Pythia+Hijing OO 5.36 TeV","");
   legend->AddEntry((TObject*)nullptr,Form("OO, Cent: %.0f-%.0f%%",minCentrality,maxCentrality),"");
   legend->AddEntry((TObject*)nullptr,"40 < jet p_{T} < 80 GeV","");
   legend->AddEntry((TObject*)nullptr,Form("p_{T}^{ch} > 2 GeV, n=%d",card->GetWeightExponent()),"");
@@ -136,7 +136,7 @@ void compareOOMCPerpendicularBackground(TString inputFileName = "projected/OOMC_
   legend->Draw();
 
   drawer->SetLogY(false);
-  drawer->SetGridY(true);
+  drawer->SetGridY(false);
   ratio->GetXaxis()->SetRangeUser(minDeltaR,maxDeltaR);
   ratio->GetYaxis()->SetRangeUser(ratioMin,ratioMax);
   drawer->DrawHistogramToLowerPad(ratio,"#Deltar","#frac{Perp. cone bkg}{True background}"," ","E1");

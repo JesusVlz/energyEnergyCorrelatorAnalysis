@@ -722,7 +722,7 @@ std::vector<std::pair<TString, TGraph*>> AlgorithmLibrary::GetGraphsFromDatFile(
   int numberOfParameters;
   TObjString* currentParameterObject;
   TString currentParameter;
-  for(int iLine = 0; iLine < lineVector.size(); iLine++){
+  for(std::vector<TString>::size_type iLine = 0; iLine < lineVector.size(); iLine++){
     parameterArray = lineVector.at(iLine).Tokenize(" ");
     numberOfParameters = parameterArray->GetEntries();
     for(int iParameter = 0; iParameter < numberOfParameters; iParameter++){   // Loop over all the files in the array

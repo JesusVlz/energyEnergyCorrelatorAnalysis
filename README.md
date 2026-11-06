@@ -4,6 +4,34 @@ This repository contains the framework used to calculate energy-energy correlato
 
 > **Current status:** the reconstructed-level O–O and ppRef workflow is available for local tests, CRAB production, QA, and reflected/perpendicular-cone studies. Track-pair corrections, Run-3 JER, detector response, unfolding, and the final corrected O–O/ppRef ratio are still under validation.
 
+## Run-3 framework development
+
+The current changes add audited OO GenGen mixed/perpendicular closure,
+source-event track corrections, native pair exports and residual correction
+maps, and independent training/validation response production. Condor helpers
+prepare and validate production/merges; CRAB data lists reserve separate mixing
+donors and keep each task within the configured job cap. Plotting includes raw
+background projections and response diagnostics, with ROOT environment changes
+triggering a library rebuild.
+
+- [Mixing contracts, ledgers and closure](validation/run3Mixing/README.md)
+- [Pair derivation, correction support and validation](validation/run3Pairs/README.md)
+- [Response folds and merge checks](validation/run3Unfolding/batch/README.md)
+- [Condor production and merges](condor/README.md)
+- [CRAB inputs and worker packaging](crab/README.md)
+
+These additions provide software and diagnostic workflows. Baseline Run-3 cards
+keep pair corrections disabled; physics closure, generator normalization and
+full event covariance remain unresolved. A successful build or merge does not
+qualify a correction payload for physics results.
+
+Active CRAB input lists and manifests are versioned. Worker archives, CRAB task
+state, old partition copies and new campaign result directories stay local and
+are ignored by Git. Recreate the worker with
+`python3 crab/makeOOAnalysisTar.py`; historical result paths in validation notes
+refer to local evidence, while reusable contract cards live in
+`validation/run3Unfolding/fixtures/`.
+
 ## Quick start
 
 ### 1. Clone the repository
@@ -157,7 +185,7 @@ calibration applicability.
 
 The current baseline uses AK4 jets, \(R=0.4\), the winner-take-all axis, \(|\eta_{\mathrm{jet}}|<1.6\), and \(|\eta_{\mathrm{track}}|<2.4\). O–O uses the 0–30%, 30–50%, and 50–90% centrality intervals, while ppRef is inclusive.
 
-The root-level data cards use `BackgroundMethods 0` for simple local tests. The CRAB data cards use `BackgroundMethods 3` to fill reflected and perpendicular cones. MC baseline cards use `BackgroundMethods 0`.
+The root-level data cards use `BackgroundMethods 0` for simple local tests. The OO and ppRef CRAB data cards use `BackgroundMethods 6` for the mixed/perpendicular studies, with separate reserved donor pools. MC baseline cards use `BackgroundMethods 0`.
 
 ### Dedicated inclusive OO cards and radius choices
 
@@ -290,10 +318,26 @@ The current input lists are:
 
 | Sample | Input list | Initial files/job |
 |---|---|---:|
-| O–O data | `OOForestFiles.txt` | 14 |
+| O–O data | `OOForestfiles/OOForestFiles_partNN_chunkNN.txt` | 1 |
 | O–O MC | `OOMC2025ForestFiles.txt` | 2 |
-| ppRef data | `ppData2024ForestFiles.txt` | 5 |
+| ppRef data | `ppRefForestfiles/ppRefForestFiles_partNN_chunk01.txt` | 1 |
 | ppRef MC | `ppMC2024ForestFiles.txt` | 2 |
+
+The O–O data lists preserve the original ten 10% partitions as two chunks each,
+with at most 10,000 files/jobs per task. `crabEECOO.py` defaults to part01,
+chunk01; use `OO_CRAB_PART` and `OO_CRAB_CHUNK` to select another chunk.
+See the [OO CRAB instructions](crab/README.md#oo-mixedperpendicular-pilot-one-signal-file-per-job)
+for the task limit, archived lists and submission examples.
+
+The ppRef data setup reserves 35 mixing donors from `ppData2024ForestFiles.txt`
+and fills four consecutive tasks from the remaining 31,144 files in source
+order: 10,000 files/jobs in parts 01–03 and 1,144 in part04. This uses the
+same configured 10,000-job cap as OO. Use `PPREF_CRAB_PART` (1–4) and
+`PPREF_CRAB_CHUNK=1` with `crabEECppref5v36.py`; request names now end in
+`Run3_v2`. The previous ten-part setup is retained locally under
+`crab/ppRefForestfiles/previous_10parts/` (excluded from Git). The pool, card and worker payload
+are unchanged. See the [ppRef CRAB instructions](crab/README.md#ppref-mixedperpendicular-setup-one-signal-file-per-job)
+for donor provenance, validation reports and submission commands.
 
 Use `TriggerSelection 0` for O–O and ppRef MC; no trigger selection is required. For the first MC smoke test, also use `BackgroundMethods 0` and `DisableTrackPairEfficiencyCorrection 1`.
 
@@ -609,8 +653,8 @@ OO/ppRef MC files in this workspace do not contain response/jet-closure outputs.
 | RecoReco production and QA | Current baseline workflow |
 | RecoGen and GenGen | Routing added; branch-by-branch validation is still required |
 | Reflected and perpendicular cones | Available with `BackgroundMethods 3` |
-| Mixed events | O–O pilot only; not part of the nominal baseline |
-| Track-pair efficiency | Disabled/unity until a Run-3 correction is derived |
+| Mixed events | O–O and ppRef CRAB pilot setups; donor provenance and physics closure still require validation |
+| Track-pair efficiency | Native R4 derivation and explicit payload loading available; disabled in baseline cards pending independent closure |
 | Run-3 JER | Dedicated inputs outstanding; unsupported variations fail clearly |
 | Response and unfolding | Run-3 reader and explicit response configuration implemented; synthetic checks pass; production closure outstanding |
 | Final corrected O–O/ppRef ratio | Not yet final |

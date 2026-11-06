@@ -127,7 +127,7 @@ void OOMCCheckMatchingBinning(TFile& file, int& failures) {
 
 // Run with: root -l -b -q 'condor/checkOOMCOutput.C("output.root","RecoReco")'
 // Response entries may be zero in an individual minimum-bias input file.
-void checkOOMCOutput(const char* filename, const char* mode, int expectedDataType = 10) {
+void checkOOMCOutput(const char* filename, const char* mode, int expectedDataType = 10, bool allowEmptyCommonExposure = false) {
   int failures = 0;
   const std::string selectedMode = mode ? mode : "";
   int correlationType = -1;
@@ -151,6 +151,8 @@ void checkOOMCOutput(const char* filename, const char* mode, int expectedDataTyp
     return;
   }
   const bool response = selectedMode == "Response";
+  OOMCCheck(!allowEmptyCommonExposure || (selectedMode == "GenGen" && expectedDataType == 10),
+            "empty common exposure is supported only for explicitly validated OO GenGen closure jobs", failures);
   OOMCCheckCard(*file, "DataType", expectedDataType, failures);
   OOMCCheckCard(*file, "TriggerSelection", 0, failures);
   OOMCCheckCard(*file, "McCorrelationType", correlationType, failures);
@@ -167,19 +169,19 @@ void checkOOMCOutput(const char* filename, const char* mode, int expectedDataTyp
       const double all = events->GetBinContent(1);
       const double triggered = events->GetBinContent(2);
       const double selected = events->GetBinContent(9);
-      OOMCCheck(all > 0 && triggered > 0 && selected > 0,
+      OOMCCheck(all > 0 && triggered > 0 && (selected > 0 || allowEmptyCommonExposure),
                 "no events reached All, Triggered, or the vertex-z cut", failures);
       OOMCCheck(all == triggered, "TriggerSelection 0 must keep every event at the trigger step", failures);
       std::cout << "OOMC events All=" << all << " Triggered=" << triggered
                 << " VzCut=" << selected << std::endl;
     }
   }
-  OOMCCheckHistogram(*file, "vertexZ", true, failures);
-  OOMCCheckHistogram(*file, "pthat", true, failures);
+  OOMCCheckHistogram(*file, "vertexZ", !allowEmptyCommonExposure, failures);
+  OOMCCheckHistogram(*file, "pthat", !allowEmptyCommonExposure, failures);
   for (auto name : {"vertexZweighted", "centrality", "centralityWeighted", "pthatWeighted"})
     OOMCCheckHistogram(*file, name, false, failures);
 
-  OOMCCheckSparse(*file, "inclusiveJet", !response, failures);
+  OOMCCheckSparse(*file, "inclusiveJet", !response && !allowEmptyCommonExposure, failures);
   OOMCCheckSparse(*file, "energyEnergyCorrelator", false, failures);
   if (response) {
     OOMCCheckSparse(*file, "jetPtClosure", false, failures);

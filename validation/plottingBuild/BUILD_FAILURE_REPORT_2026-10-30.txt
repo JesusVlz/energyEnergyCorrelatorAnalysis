@@ -1,0 +1,116 @@
+Plotting build failure review and repair
+Date: 2026-10-30
+Status: fixed; final DrawingClasses.so built and loaded with CMSSW ROOT 6.32.13.
+
+The build stopped because nanoDict.cc was generated using the system ROOT
+installation and then compiled against CMSSW ROOT 6.32.13. The generated
+TGenericClassInfo constructor call included an extra alignof(::SplitCanvas)
+argument that the CMSSW headers do not accept. The four signedness warnings and
+one uninitialized-pointer warning were separate issues; they did not cause the
+reported compilation failure. The -j3 parallelism did not cause this mismatch.
+
+Evidence and why the retry failed
+
+- The supplied compiler command uses the CVMFS ROOT 6.32.13 include directory.
+- The original on-disk nanoDict.cc embeds /usr/include/root in includePaths and
+  passes both sizeof(::SplitCanvas) and alignof(::SplitCanvas).
+- The system root-config reports ROOT 6.40.04. The old dictionary's include path
+  establishes its system-ROOT origin; the exact historical generator invocation
+  was not recorded in the supplied log.
+- I reproduced the same TGenericClassInfo error after initializing CMSSW_15_0_11.
+- Neither supplied make attempt ran the dictionary-generation recipe. The old
+  rule only watched SplitCanvas.h and LinkDef.h, so changing the shell environment
+  with cmsenv did not make nanoDict.cc out of date.
+- The original clean target also retained nanoDict.cc and nanoDict_rdict.pcm.
+  Cleaning only object files would therefore retain the incompatible dictionary.
+
+Changes applied
+
+1. plotting/Makefile now selects rootcling through the selected root-config
+   --bindir, so the generator, include flags, and libraries share one ROOT source.
+   ROOT_CONFIG can be overridden explicitly when selecting an installation.
+
+2. A .root-build-config signature records ROOT version, prefix, tools, compiler
+   identity, and flags. A changed signature invalidates the dictionary and all
+   objects. An unchanged signature keeps its timestamp, so an ordinary second
+   build performs no compilation or linking.
+
+3. nanoDict.cc and nanoDict_rdict.pcm are grouped outputs of one rootcling recipe.
+   Removing either output regenerates both. clean now removes generated source,
+   PCM, objects, dependency files, library, and signature. Parallel cl orders the
+   clean step before its recursive build.
+
+4. The real link target is DrawingClasses.so, with DrawingClasses retained as a
+   compatibility alias. Compiler-generated .d files track included headers.
+   Local dependency/signature files and the EOS signature version-history folder
+   are ignored by Git. Generated dictionary source remains untracked.
+
+5. Vector-loop indices now use std::vector<TString>::size_type in
+   AlgorithmLibrary.cxx, HybridModelHistogramManager.cxx,
+   HolguinHistogramManager.cxx, and CoLBTHistogramManager.cxx.
+
+6. SystematicUncertaintyOrganizer.cxx now initializes its template pointer and
+   throws a descriptive runtime_error when the requested input has no uncertainty
+   histograms. Previously that case could call Clone through an uninitialized
+   pointer. Partially populated inputs retain the existing zero-error fallback
+   for missing sources, including the reference binning and central values.
+
+Verification performed
+
+Real builds, without manually deleting the stale dictionary between environments:
+
+  Environment                         Objects  Dictionaries  Links  Result
+  CMSSW ROOT 6.32.13, first repair         15        1           1    PASS
+  Switch to system ROOT 6.40.04            15        1           1    PASS
+  Switch back to CMSSW ROOT 6.32.13        15        1           1    PASS
+  Repeat build in unchanged CMSSW          0        0           0    PASS
+
+Each real build completed with zero compiler warnings. The library loaded in
+ROOT, SplitCanvas resolved through TClass, and dictionary-based construction and
+destruction succeeded under both ROOT installations. The final library and
+signature were restored to CMSSW ROOT 6.32.13.
+
+Five Makefile behavior tests pass in temporary fake-toolchain fixtures. They
+cover stale dictionary recovery, selecting rootcling despite a decoy on PATH,
+ROOT identity changes at the same configuration path, idle repeated builds,
+missing dictionary outputs, included-header dependencies, and ordered parallel
+clean/rebuild. These complement the real ROOT builds above.
+
+The focused SystematicUncertaintyOrganizer regression passed under both ROOT
+6.32.13 and 6.40.04. It verifies explicit rejection of empty uncertainty input and
+preservation of existing histograms and zero-error fallback behavior for partial
+input. The CMSSW compilation also used -Werror=maybe-uninitialized.
+
+git diff --check passed. A dry run of clean with an unavailable ROOT_CONFIG also
+passed, confirming that cleanup does not require a configured ROOT environment.
+
+Reproduce from the repository root on lxplus
+
+  cmsenv
+  make -C plotting -j3
+  make -C plotting -j3
+  python3 -m unittest discover -s validation/plottingBuild -p 'test_*.py' -v
+
+  g++ $(root-config --cflags) -Wall -Werror=maybe-uninitialized -Iplotting \
+    plotting/tests/testSystematicUncertaintyOrganizer.cxx \
+    plotting/SystematicUncertaintyOrganizer.cxx plotting/EECCard.cxx \
+    $(root-config --libs) -o /tmp/testSystematicUncertaintyOrganizer-cmssw
+  /tmp/testSystematicUncertaintyOrganizer-cmssw
+
+To force a clean rebuild safely with parallel compilation:
+
+  make -C plotting -j3 cl
+
+Compatibility and remaining notice
+
+The grouped-output rule requires GNU make 4.3 or newer; verification used 4.3.
+ROOT still emits the existing dictionary-generation notice that SplitCanvas
+inherits TObject without its own ClassDef, so its data members will not be
+stored. The class already uses a LinkDef entry without automatic streaming.
+The build and dictionary construction checks pass; serialization behavior was
+not changed or validated by this repair.
+
+This review validates compilation and the affected input-handling behavior.
+It does not establish physics closure or validate production analysis outputs.
+The repository's pre-existing analysis, histogram-manager, and Condor changes
+were preserved. No commit or remote publication was performed.

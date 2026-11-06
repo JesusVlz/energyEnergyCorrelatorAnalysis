@@ -72,6 +72,7 @@ public:
   
   // Methods
   virtual void GetEvent(Int_t nEvent) = 0;                 // Get the nth event in tree
+  virtual Long64_t GetTotalChainEntries() const; // Explicit full-chain count; legacy GetNEvents behavior is retained.
   virtual Int_t GetNEvents() const;                        // Get the number of events
   virtual void ReadForestFromFile(TFile *inputFile) = 0;   // Read the forest from a file
   virtual void ReadForestFromFileList(std::vector<TString> fileList) = 0;   // Read the forest from a file list
@@ -87,6 +88,10 @@ public:
   Float_t GetHFMinus() const;         // Getter for energy in HF minus calorimeters
   Float_t GetHFSum() const;           // Getter for energy in HF calorimeters
   Float_t GetPtHat() const;           // Getter for pT hat
+  Float_t GetRawHFSum() const { return fHasRawHFSum ? fRawHFSum : GetHFSum(); }
+  UInt_t GetRunNumber() const { return fRunNumber; }
+  UInt_t GetLumiNumber() const { return fLumiNumber; }
+  bool HasPhysicalEventIdentity() const { return fHasPhysicalEventIdentity; }
   ULong64_t GetEventNumber() const;   // Getter for event number
   Float_t GetEventWeight() const;     // Getter for jet weight in MC
   
@@ -245,6 +250,10 @@ protected:
   Float_t fHFPlus;        // Energy in HF plus calorimeters
   Float_t fHFMinus;       // Energy in HF minus calorimeters
   Float_t fPtHat;         // pT hat
+  Float_t fRawHFSum=0;
+  bool fHasRawHFSum=false;
+  UInt_t fRunNumber=0, fLumiNumber=0;
+  bool fHasPhysicalEventIdentity=false;
   ULong64_t fEventNumber; // Number of the analyzed event
   
   // Leaves for jet tree

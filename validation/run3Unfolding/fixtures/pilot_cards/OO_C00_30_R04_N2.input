@@ -1,0 +1,73 @@
+# Bounded jet-response engineering pilot; NOT a calibrated detector closure.
+# Generator particles in reconstructed cones (RecoGen), strict pT>2, both systems at5.36TeV.
+# Truth10--40 support is a candidate pending upstream retention evidence.
+# Reco below40 is excluded; reported40--80/80--120/120--160; tail through5020 retained.
+# Ordinary centrality histogram selection; other activities go to flow, not event filtering.
+# Covariance is established within-jet second moments only, not full event covariance.
+# No background mixing, pair payload, spectrum weight, angular/energy smear or JER variation.
+# The response itself is generator-particle EEC; detector corrections remain pending.
+DataType 10
+McCorrelationType 1
+MatchJets 0
+TriggerSelection 0
+FilledHistograms 211
+JetType 1
+JetAxis 1
+JetEtaCut 1.6
+MinJetPtCut 40
+MaxJetPtCut 5020
+CutBadPhi 0                # Cut the problematic phi region. 0 = No cut, 1 = crude cut
+CutWithEtaCM 0             # Cut jets that are outside of symmetric eta CM acceptance for pPb collisions within the defined jet eta cut in lab frame
+MinMaxTrackPtFraction 0.01 # Minimum fraction of jet pT taken by the highest pT track in jet
+MaxMaxTrackPtFraction 0.98 # Maximum fraction of jet pT taken by the highest pT track in jet
+JetUncertainty 0
+Run3JetID 1
+ApplyJetVeto 1
+JetVetoMapFile jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root
+JetVetoMapHistogram jetvetomap_all
+JetVetoPtConvention stored # Nominal PAT/HiForest jtpt; no extra JES/JER variation
+JetVetoInputMinPt 15 # Owner-declared retention bound; complete upstream coverage still requires validation
+TrackEtaCut 2.4
+MinTrackPtCut 2
+MaxTrackPtCut 500
+MaxTrackPtRelativeError 0.1 # Maximum relative error allowed for track pT
+VertexMaxDistance 3         # TODO: Understand what this cut means
+CalorimeterSignalLimitPt 20 # Require signal in calorimeters for all track above this pT
+HighPtEtFraction 0.5        # For high pT tracks, require Et to be at least this fraction of pT
+Chi2QualityCut 100000         # Maximum accepted chi2/(nDof*nHits) for tracks
+MinimumTrackHits 0         # Require this many hits for each track
+SubeventCut 2
+TrackEfficiencyVariation 0.024 # For tracking uncertainties, vary the efficiency correction by 2.4%
+JetPtWeight 0
+DisableTrackPairEfficiencyCorrection 1
+ZVertexCut 15       # Maximum vz value for accepted tracks
+LowPtHatCut -15      # Minimum accepted pT hat
+HighPtHatCut 5020      # Maximum accepted pT hat
+MultiplicityMode 0 # 0 = Weight MC centrality to match data. 1 = Weight multiplicity to match
+JetRadius 0.4
+WeightExponent 2
+SmearDeltaR 0
+SmearEnergyWeight 0
+JetPtBinEdgesEEC 10 20 40 80 120 160 200 300 500 5020
+TrackPtBinEdgesEEC 0.5 1 1.5 2 2.5 3 3.5 4 300 # Track pT bin edges for EEC
+SkipCovarianceMatrix 0
+MinJetPtUnfoldingReco 40
+MinJetPtUnfoldingTruth 10
+CentralityBinEdges 0 30
+TrackPtBinEdges     0.7 1 2 3 4 8 12 300         # Track pT binning
+PtHatBinEdges       0 30 50 80 120 170 220 280 370 460  # pT hat binning
+BackgroundMethods 0
+MegaSkimMixing 0 # Explicit regular-forest pool; event cuts are checked
+EventMatchForMixing 0 # Event-by-event stored hiBin and vz matching; provisional applicability
+BinnedMixing 0 # 0 = Match events without bin borders for mixing. 1 = Use binned event matching for mixing
+VzMixingBins -0.5 1 # vz binning for mixing
+HiBinMixingBins -0.5 1 # HiBin binning for mixing
+HFEnergyMixingBins 0 1 # HF energy binning for mixing
+MultiplicityMixingBins -0.5 5 # Multiplicity binning for mixing
+HFEnergyShift 0
+DebugLevel 1
+MaxEventsPerFile 10000
+ChannelRadiusCode 4
+MinPairTrackPt 2
+FirstUnfoldedJetPtBin 2
+LastUnfoldedJetPtBin 4

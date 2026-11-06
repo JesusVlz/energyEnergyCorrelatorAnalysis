@@ -1,0 +1,110 @@
+{
+  "source": "../ppData2024ForestFiles.txt",
+  "source_sha256": "ea4f1d4fbb0c92d82dffab9c4f75262bcb476801edb0349cd599793df39cde40",
+  "source_files": 31179,
+  "source_dataset_counts": {
+    "PPRefHardProbes0": 1940,
+    "PPRefHardProbes1": 6794,
+    "PPRefHardProbes2": 7476,
+    "PPRefHardProbes3": 7443,
+    "PPRefHardProbes4": 7526
+  },
+  "mixing_pool": "../../mixingFileList/ppRef2024_pool_pilot.txt",
+  "mixing_pool_sha256": "c27e976dc13c78a874da02ecf5447c583e4c6c0cef38b2774b2ed3b9646b04c2",
+  "reserved_mixing_files": 35,
+  "mixing_selection": {
+    "strategy": "35 evenly spaced midpoints in the ordered source list",
+    "index_formula": "floor((2 * i + 1) * source_files / (2 * 35)), i = 0..34",
+    "source_indices_zero_based": [
+      445,
+      1336,
+      2227,
+      3117,
+      4008,
+      4899,
+      5790,
+      6681,
+      7572,
+      8462,
+      9353,
+      10244,
+      11135,
+      12026,
+      12917,
+      13807,
+      14698,
+      15589,
+      16480,
+      17371,
+      18261,
+      19152,
+      20043,
+      20934,
+      21825,
+      22716,
+      23606,
+      24497,
+      25388,
+      26279,
+      27170,
+      28061,
+      28951,
+      29842,
+      30733
+    ],
+    "dataset_counts": {
+      "PPRefHardProbes0": 2,
+      "PPRefHardProbes1": 8,
+      "PPRefHardProbes2": 8,
+      "PPRefHardProbes3": 9,
+      "PPRefHardProbes4": 8
+    },
+    "source_provenance": "Supplied HardProbes-filtered forests; independent ZeroBias or minimum-bias provenance is not established",
+    "trigger_policy": "TriggerSelection 8 selects signal events; mixing reader disables donor trigger cuts",
+    "event_content_validated": false
+  },
+  "signal_files": 31144,
+  "units_per_job": 1,
+  "max_jobs_per_task": 10000,
+  "job_limit_source": "https://github.com/dmwm/CRABServer/blob/8069e0cb72445e9a3a13dfb98469a0920210ed12/src/python/TaskWorker/Actions/Splitter.py#L23",
+  "strategy": "Consecutive source-order signal files after donor exclusion, packed into tasks of 10000 jobs with a smaller final task",
+  "empty_file_policy": "Retained; each empty signal forest affects only its own job",
+  "tasks": [
+    {
+      "part": 1,
+      "chunk": 1,
+      "file": "ppRefForestFiles_part01_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "2f201bca50dbc73e4959945f89475dcfc6a32bfdfe51a59b8a684b01fd4a3fda",
+      "request_name": "eecAnalysis_ppRef_mixedPerp_part01_chunk01_Run3_v2"
+    },
+    {
+      "part": 2,
+      "chunk": 1,
+      "file": "ppRefForestFiles_part02_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "f499e3475c43d6e785f710e1fd4b27f70656f23a9f0faaf18a1c4603ba6b891a",
+      "request_name": "eecAnalysis_ppRef_mixedPerp_part02_chunk01_Run3_v2"
+    },
+    {
+      "part": 3,
+      "chunk": 1,
+      "file": "ppRefForestFiles_part03_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "83081d12367c6de446d13612f6d4b79b478fec256eb748f1a5ffa50f8b034b5a",
+      "request_name": "eecAnalysis_ppRef_mixedPerp_part03_chunk01_Run3_v2"
+    },
+    {
+      "part": 4,
+      "chunk": 1,
+      "file": "ppRefForestFiles_part04_chunk01.txt",
+      "files": 1144,
+      "jobs": 1144,
+      "sha256": "ce0997cdc15bd617acea5cb156dc295f29899a29dd86c6a3d4911e187a9c7da8",
+      "request_name": "eecAnalysis_ppRef_mixedPerp_part04_chunk01_Run3_v2"
+    }
+  ]
+}

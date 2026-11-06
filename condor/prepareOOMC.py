@@ -134,6 +134,187 @@ def card_text(base, mode, background_methods, sample="OOMC", match_eec_binning=F
     return "# Prepared {} configuration: {}\n{}\n".format(sample, mode, "\n".join(lines))
 
 
+
+def card_settings(text):
+    settings = {}
+    for line in text.splitlines():
+        fields = line.split("#", 1)[0].split()
+        if not fields:
+            continue
+        if fields[0] in settings:
+            raise ValueError("Duplicate card setting: " + fields[0])
+        settings[fields[0]] = fields[1:]
+    return settings
+
+
+def replace_card_scalar(text, key, value):
+    result, count = re.subn(r"^" + re.escape(key) + r"\s+.*$", key + " " + str(value), text, flags=re.M)
+    if count != 1:
+        raise ValueError("Expected exactly one card setting: " + key)
+    return result
+
+
+def repo_argument_path(repo, value):
+    value = Path(value)
+    return absolute_path(value if value.is_absolute() else repo / value)
+
+
+def mixing_pool_plan(repo, cards, sample, modes, inputs, args):
+    if args.background_methods != 6:
+        if getattr(args, "mixing_pool_list", None):
+            raise ValueError("--mixing-pool-list requires background method 6")
+        return None
+    if sample != "OOMC" or modes != ["GenGen"]:
+        raise ValueError("Background method 6 is restricted to the explicit OO GenGen closure campaign")
+    if args.pool_events != 100000:
+        raise ValueError("This campaign requires the fixed 100000-event reserved donor pool")
+    for name in ("mixing_pool_list", "mixing_pool_manifest", "signal_input_manifest"):
+        if not getattr(args, name, None):
+            raise ValueError("Background method 6 requires --" + name.replace("_", "-"))
+    settings = card_settings(cards["GenGen"])
+    required = {"DataType":10, "McCorrelationType":3, "JetType":1, "JetAxis":1, "JetRadius":.4,
+                "SubeventCut":2, "BackgroundMethods":6, "EventMatchForMixing":2,
+                "BinnedMixing":0, "MegaSkimMixing":0, "HFEnergyShift":0,
+                "SmearDeltaR":0, "SmearEnergyWeight":0, "DisableTrackPairEfficiencyCorrection":1,
+                "MinPairTrackPt":2, "Run3JetID":1, "ApplyJetVeto":1, "OOClosurePilot":1,
+                "OOClosureMaxPoolEvents":100000, "OOClosureSeed":20261030, "OOClosurePartitionPolicy":1}
+    for key, expected in required.items():
+        values = settings.get(key, [])
+        if len(values) != 1 or float(values[0]) != expected:
+            raise ValueError("Full OO mixed campaign requires {} {}".format(key,expected))
+    if list(map(float, settings.get("WeightExponent", []))) != [1.,2.]:
+        raise ValueError("Full OO mixed campaign requires WeightExponent 1 2")
+    if float(settings.get("MaxEventsPerFile", ["0"])[0]) != 0:
+        raise ValueError("Full OO mixed campaign cannot retain a per-file event test cap")
+    for key in ("MixingFileList", "OOClosureOutputPrefix", "OOClosureMaxSignalEvents"):
+        if len(settings.get(key, [])) != 1:
+            raise ValueError("Full OO mixed campaign requires scalar " + key)
+    signal_path = repo_argument_path(repo,args.signal_input_manifest)
+    signal_audit = json.loads(signal_path.read_text())
+    if signal_audit.get("status") != "PASS_REQUIRED_HEADERS_ONLY":
+        raise ValueError("Signal input manifest must pass the complete header/schema audit")
+    signal_files = {str(Path(row["path"]).resolve()):row for row in signal_audit["files"]}
+    counts = []
+    for item in inputs:
+        row = signal_files.get(str(Path(item["path"]).resolve()))
+        if not row or row.get("status") != "PASS_REQUIRED_HEADERS" or row["size_bytes"] != item["size_bytes"]:
+            raise ValueError("Signal input is missing or changed since the schema audit: " + item["path"])
+        counts.append(int(row["source_entries"]))
+    maximum_signal = max(counts)
+    signal_limit = float(settings["OOClosureMaxSignalEvents"][0])
+    if not math.isfinite(signal_limit) or signal_limit != math.floor(signal_limit) or not 1 <= signal_limit <= 2147483647:
+        raise ValueError("OOClosureMaxSignalEvents must be a positive bounded integer")
+    signal_cap = int(signal_limit)
+    if signal_cap < maximum_signal:
+        raise ValueError("OOClosureMaxSignalEvents must cover every complete signal file; required " + str(maximum_signal))
+    pool_list = repo_argument_path(repo,args.mixing_pool_list)
+    pool_paths = [line.strip() for line in pool_list.read_text().splitlines() if line.strip() and not line.lstrip().startswith("#")]
+    if len(pool_paths) != len(set(pool_paths)):
+        raise ValueError("Duplicate source paths in the donor pool list")
+    source_path = repo_argument_path(repo,args.mixing_pool_manifest)
+    source_audit = json.loads(source_path.read_text())
+    if source_audit.get("input_pool_list_sha256") != sha256(pool_list):
+        raise ValueError("Donor pool list changed since the bounded provenance audit")
+    source_files = {str(Path(row["path"]).resolve()):row for row in source_audit["pool_files"]}
+    entries = []; remaining = args.pool_events
+    for path in pool_paths:
+        if remaining <= 0:
+            break
+        row = source_files.get(str(Path(path).resolve()))
+        if not row or not row.get("reco_veto_required_branches_present"):
+            raise ValueError("Donor file lacks the required audited native schema: " + path)
+        count = min(int(row["source_entries"]), remaining)
+        if row.get("audit",{}).get("entry_range_scanned",[0,0])[1] < count:
+            raise ValueError("Donor entries extend beyond the bounded provenance/identity audit: " + path)
+        if not Path(path).is_file() or Path(path).stat().st_size != row["size_bytes"]:
+            raise ValueError("Donor input is missing or changed since the bounded audit: " + path)
+        entries.append({"original_path":path, "input_url":eos_url(Path(path)),
+                        "local_name":"pool_{:04d}.root".format(len(entries)+1),
+                        "source_entries":int(row["source_entries"]), "use_entries":count,
+                        "size_bytes":row["size_bytes"], "root_uuid":row["root_uuid"]})
+        remaining -= count
+    if remaining:
+        raise ValueError("Audited donor prefix does not cover the fixed 100000-event pool")
+    manifest = {"schema_version":1, "global_event_cap":args.pool_events, "seed":20261030,
+                "partition_policy":1, "holdout_policy":"fixed_reserved_donors_exclude_overlapping_signals",
+                "reserved_pool_scope":"all scanned donor physical IDs and nonempty stored-background fingerprints, including ineligible donor rows",
+                "signal_max_entries":maximum_signal, "signal_event_cap":signal_cap,
+                "signal_scope":"all entries of each input forest", "signal_input_count":len(inputs),
+                "signal_total_entries":sum(counts), "entries":entries,
+                "pool_list_sha256":hashlib.sha256(("\n".join(row["original_path"] for row in entries)+"\n").encode()).hexdigest(),
+                "source_pool_list_sha256":sha256(pool_list), "source_audit_sha256":sha256(source_path),
+                "signal_headers_sha256":sha256(signal_path),
+                "frozen_pool_list":"mixingFileList/OO2025_HIJING_MC_pool_campaign.txt",
+                "background_identity":"OOEventIdentity full64-bit physical IDs and observed stored generator background fingerprints; same deterministic pool across all jobs",
+                "limitations":["Unseen underlying HIJING lineage remains unverified beyond physical IDs and exact stored-particle fingerprints.",
+                               "Headers do not establish full-campaign origin-label values, final-state lineage or physical centrality acceptance.",
+                               "Reused fixed donors correlate jobs and methods; exported contribution and identity ledgers are required for covariance."]}
+    return {"manifest":manifest, "source_audit_path":source_path, "signal_audit_path":signal_path,
+            "pool_list_path":pool_list}
+
+
+def freeze_mixing_pool(plan, destination):
+    if plan is None:
+        return
+    folder = destination / "mixing_pool"
+    folder.mkdir(parents=True,exist_ok=True)
+    (folder/"manifest.json").write_text(json.dumps(plan["manifest"],indent=2,sort_keys=True)+"\n")
+    shutil.copy2(str(plan["source_audit_path"]),str(folder/"source_audit.manifest.json"))
+    shutil.copy2(str(plan["signal_audit_path"]),str(folder/"signal_headers.manifest.json"))
+    target = destination/plan["manifest"]["frozen_pool_list"]
+    target.parent.mkdir(parents=True,exist_ok=True)
+    target.write_text("\n".join(row["original_path"] for row in plan["manifest"]["entries"])+"\n")
+
+
+def veto_map_payload_files(repo, cards):
+    """Validate explicitly enabled map bytes/metadata before creating a campaign."""
+    files = set()
+    for mode, text in cards.items():
+        settings = {}
+        for line in text.splitlines():
+            fields = line.split("#", 1)[0].split()
+            if fields and fields[0] in ("ApplyJetVeto", "JetVetoMapFile", "JetVetoMapHistogram"):
+                if fields[0] in settings:
+                    raise ValueError("Duplicate veto setting in {}: {}".format(mode, fields[0]))
+                settings[fields[0]] = fields[1:]
+        enabled = settings.get("ApplyJetVeto", ["0"])
+        if len(enabled) != 1 or enabled[0] not in ("0", "1"):
+            raise ValueError("ApplyJetVeto must be 0 or 1 in " + mode)
+        if enabled[0] == "0":
+            continue
+        values = settings.get("JetVetoMapFile", [])
+        histogram = settings.get("JetVetoMapHistogram", [])
+        if len(values) != 1 or len(histogram) != 1:
+            raise ValueError("Enabled veto requires one map file and histogram in " + mode)
+        relative = Path(values[0])
+        if relative.is_absolute() or ".." in relative.parts or relative.suffix != ".root":
+            raise ValueError("Veto map must be a repository-relative ROOT path: " + str(relative))
+        source = repo / relative
+        sidecar = relative.with_suffix(".metadata.json")
+        if not source.is_file() or source.stat().st_size <= 0:
+            raise ValueError("Missing or empty referenced veto map: " + str(source))
+        if not (repo / sidecar).is_file():
+            raise ValueError("Missing veto map metadata sidecar: " + str(repo / sidecar))
+        metadata = json.loads((repo / sidecar).read_text())
+        if metadata.get("filename") != relative.name or metadata.get("histogram_key") != histogram[0]:
+            raise ValueError("Veto metadata filename/histogram differs from the card: " + str(sidecar))
+        if metadata.get("sha256") != sha256(source):
+            raise ValueError("Veto map checksum differs from metadata: " + str(source))
+        files.update((relative, sidecar))
+    if files:
+        for name in ("jetVetoMaps/metadata.schema.json", "jetVetoMaps/README.md"):
+            if (repo / name).is_file():
+                files.add(Path(name))
+    return sorted(files)
+
+
+def copy_veto_map_payload(repo, snapshot, files):
+    for relative in files:
+        target = snapshot / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(str(repo / relative), str(target))
+
+
 def ignore_build_products(directory, names):
     return [name for name in names if name == "__pycache__" or name == ".git"
             or name.endswith((".o", ".a", ".so", ".d", ".pyc", ".dylib"))
@@ -145,14 +326,19 @@ def write_executable(path, content):
     path.chmod(0o755)
 
 
-def build_snapshot(snapshot, cmssw_base, arch, jobs, log_path):
+def build_snapshot(snapshot, cmssw_base, arch, jobs, log_path, optimize=False):
+    make_command = ["make", "-j{}".format(jobs)]
+    if optimize:
+        make_command.append("CXX=g++ -O2")
     commands = ["set -eo pipefail", "source /cvmfs/cms.cern.ch/cmsset_default.sh",
                 "export SCRAM_ARCH={}".format(shlex.quote(arch)),
                 "cd {}".format(shlex.quote(str(cmssw_base))),
                 'eec_runtime=$(scram runtime -sh)', 'eval "$eec_runtime"',
                 "cd {}".format(shlex.quote(str(snapshot))),
-                "root-config --version", "make -j{}".format(jobs)]
+                "root-config --version", " ".join(shlex.quote(value) for value in make_command)]
     with log_path.open("w") as log:
+        log.write("# Build command\n" + "\n".join(commands) + "\n")
+        log.flush()
         result = subprocess.run(["bash", "--noprofile", "--norc", "-c", "\n".join(commands)],
                                 stdout=log, stderr=subprocess.STDOUT)
     if result.returncode:
@@ -169,13 +355,18 @@ def parse_args():
     parser.add_argument("--repo", default=str(Path(__file__).absolute().parents[1]))
     parser.add_argument("--sample", choices=tuple(SAMPLES), default="OOMC")
     parser.add_argument("--input-dir")
+    parser.add_argument("--mixing-pool-list", help="Explicit existing pure-HIJING source list for method 6")
+    parser.add_argument("--mixing-pool-manifest", help="Bounded donor schema/provenance audit manifest")
+    parser.add_argument("--signal-input-manifest", help="Complete signal campaign header/schema audit")
+    parser.add_argument("--pool-events", type=int, default=100000)
+    parser.add_argument("--base-card", help="Custom production card; relative paths resolve against --repo")
     parser.add_argument("--submit-dir")
     parser.add_argument("--output-dir")
     parser.add_argument("--cmssw-base", default=CMSSW)
     parser.add_argument("--scram-arch", default=ARCH)
     parser.add_argument("--tag", default=timestamp().strftime("%Y%m%d_%H%M%S_%Z"))
-    parser.add_argument("--background-methods", type=int, choices=(0, 3), default=0,
-                        help="Regular modes: 0 = none, 3 = reflected and perpendicular cones; Response always uses 0")
+    parser.add_argument("--background-methods", type=int, choices=(0, 2, 3, 6), default=0,
+                        help="Regular modes: 0 = none, 2 = perpendicular, 3 = reflected and perpendicular, 6 = explicit reserved-pool OO GenGen closure; Response always uses 0")
     parser.add_argument("--match-eec-binning", action="store_true",
                         help="Use the EEC jet and track pT edges for sparse pT axes in every mode")
     parser.add_argument("--modes", nargs="+", choices=tuple(MODES), default=list(MODES))
@@ -196,6 +387,8 @@ def main():
     submit_dir = absolute_path(args.submit_dir)
     output_dir = absolute_path(args.output_dir)
     cmssw_base = absolute_path(args.cmssw_base)
+    base_card_path = Path(args.base_card) if args.base_card else Path(SAMPLES[args.sample]["card"])
+    base_card_path = absolute_path(base_card_path if base_card_path.is_absolute() else repo / base_card_path)
     modes = list(dict.fromkeys(args.modes))
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", args.tag):
         raise ValueError("--tag must contain only letters, numbers, underscores, dots, and hyphens")
@@ -225,8 +418,9 @@ def main():
     if not cmssw_base.is_dir():
         raise ValueError("CMSSW release directory is unavailable: {}".format(cmssw_base))
     required = [repo / name for name in ("Makefile", "eecAnalysis.cxx", "src", "jetEnergyCorrections",
-                                        "trackCorrectionTables", SAMPLES[args.sample]["card"],
+                                        "trackCorrectionTables",
                                         "condor/runOOMCJob.sh", "condor/checkOOMCOutput.C")]
+    required.append(base_card_path)
     for path in required:
         if not path.exists():
             raise ValueError("Required repository file or directory is missing: {}".format(path))
@@ -234,12 +428,25 @@ def main():
     git_status = git_output(repo, "status", "--porcelain")
     dirty = bool(git_status)
     provenance = commit + ("-dirty" if dirty else "")
-    base_card = (repo / SAMPLES[args.sample]["card"]).read_text()
+    base_card_bytes = base_card_path.read_bytes()
+    base_card = base_card_bytes.decode()
+    base_card_sha256 = hashlib.sha256(base_card_bytes).hexdigest()
     cards = {mode: card_text(base_card, mode, args.background_methods, args.sample,
                              args.match_eec_binning) for mode in modes}
+    veto_files = veto_map_payload_files(repo, cards)
+    pool_plan = mixing_pool_plan(repo,cards,args.sample,modes,inputs,args)
+    if pool_plan:
+        worker_helper = repo/"condor/closure_worker.py"
+        if not worker_helper.is_file():
+            raise ValueError("Missing mixed-campaign worker helper: " + str(worker_helper))
+        cards = {mode:replace_card_scalar(replace_card_scalar(text,"MixingFileList",pool_plan["manifest"]["frozen_pool_list"]),"OOClosureOutputPrefix","pilot") for mode,text in cards.items()}
+    request_disk_mb = 16000 if pool_plan else 6000
+    regular_memory_mb = 8000 if pool_plan else 4000
     submit_dir.mkdir(parents=True, exist_ok=True)
     (submit_dir / "logs").mkdir(exist_ok=True)
     (submit_dir / "cards").mkdir(exist_ok=True)
+    (submit_dir / "base_card.input").write_bytes(base_card_bytes)
+    freeze_mixing_pool(pool_plan,submit_dir)
     print("Building the analysis once in local scratch; log: {}".format(submit_dir / "build.log"), flush=True)
     with tempfile.TemporaryDirectory(prefix="eec-{}-build-".format(args.sample.lower()), dir="/tmp") as scratch:
         snapshot = Path(scratch) / "analysis"
@@ -248,8 +455,13 @@ def main():
             shutil.copy2(str(repo / name), str(snapshot / name))
         for name in ("src", "jetEnergyCorrections", "trackCorrectionTables"):
             shutil.copytree(str(repo / name), str(snapshot / name), ignore=ignore_build_products)
+        copy_veto_map_payload(repo, snapshot, veto_files)
+        (snapshot / "base_card.input").write_bytes(base_card_bytes)
+        freeze_mixing_pool(pool_plan,snapshot)
         (snapshot / "condor").mkdir()
         shutil.copy2(str(repo / "condor/checkOOMCOutput.C"), str(snapshot / "condor/checkOOMCOutput.C"))
+        if pool_plan:
+            shutil.copy2(str(repo/"condor/closure_worker.py"),str(snapshot/"condor/closure_worker.py"))
         (snapshot / "cards").mkdir()
         for mode, content in cards.items():
             (snapshot / "cards" / (mode + ".input")).write_text(content)
@@ -260,8 +472,17 @@ def main():
                          "size_bytes": path.stat().st_size}
                         for path in sorted(snapshot.rglob("*")) if path.is_file()]
         source_digest = hashlib.sha256(json.dumps(source_files, sort_keys=True).encode()).hexdigest()
-        build_snapshot(snapshot, cmssw_base, args.scram_arch, args.build_jobs, submit_dir / "build.log")
+        build_snapshot(snapshot, cmssw_base, args.scram_arch, args.build_jobs, submit_dir / "build.log", optimize=bool(pool_plan))
         executable_sha256 = sha256(snapshot / "eecAnalysis")
+        if pool_plan:
+            payload_provenance = {"schema_version":1, "git_commit":commit, "git_dirty":dirty, "compiled_git_hash":provenance,
+                                  "source_manifest_sha256":source_digest, "executable_sha256":executable_sha256,
+                                  "base_card_path":str(base_card_path), "base_card_sha256":base_card_sha256,
+                                  "compiler_command":"g++ -O2", "make_command":["make","-j{}".format(args.build_jobs),"CXX=g++ -O2"],
+                                  "mixing_pool_manifest_sha256":sha256(snapshot/"mixing_pool/manifest.json")}
+            text = json.dumps(payload_provenance,indent=2,sort_keys=True)+"\n"
+            (snapshot/"campaign_provenance.json").write_text(text)
+            (submit_dir/"campaign_provenance.json").write_text(text)
         archive = submit_dir / "analysis_payload.tar.gz"
         with tarfile.open(str(archive), "w:gz") as stream:
             stream.add(str(snapshot), arcname="analysis")
@@ -273,7 +494,7 @@ def main():
     for mode in modes:
         mode_output = run_output / mode
         mode_output.mkdir(parents=True, exist_ok=False)
-        memory = 8000 if mode == "Response" else 4000
+        memory = 8000 if mode == "Response" else regular_memory_mb
         for item in inputs:
             output_url = eos_url(mode_output / (item["stem"] + ".root"))
             rows.append("\t".join((mode, item["url"], output_url, item["stem"], str(memory))))
@@ -295,7 +516,7 @@ transfer_input_files = {workspace}/analysis_payload.tar.gz
 transfer_output_files = ""
 request_cpus = 1
 request_memory = $(memory_mb)
-request_disk = 6000MB
+request_disk = {request_disk_mb}MB
 requirements = (OpSysAndVer =?= "AlmaLinux9") && (Arch =?= "X86_64")
 +JobFlavour = "workday"
 +JobBatchName = "{sample}_{tag}"
@@ -303,7 +524,7 @@ requirements = (OpSysAndVer =?= "AlmaLinux9") && (Arch =?= "X86_64")
 queue mode,input_url,output_url,stem,memory_mb from {workspace}/jobs.tsv
 """.format(tag=args.tag, count=len(inputs), jobs=job_count, workspace=submit_dir, cmssw=cmssw_base,
            arch=args.scram_arch, checksum=archive_sha256, accounting=accounting,
-           sample=args.sample, data_type=SAMPLES[args.sample]["data_type"])
+           sample=args.sample, data_type=SAMPLES[args.sample]["data_type"], request_disk_mb=request_disk_mb)
     (submit_dir / "jobs.sub").write_text(submit_text)
     write_executable(submit_dir / "submit.sh", "#!/bin/bash\nset -euo pipefail\ncd {}\nexec condor_submit jobs.sub\n".format(shlex.quote(str(submit_dir))))
     command = ["python3", str(repo / "condor/prepareOOMC.py"), "--sample", args.sample, "--repo", str(repo),
@@ -311,6 +532,10 @@ queue mode,input_url,output_url,stem,memory_mb from {workspace}/jobs.tsv
                "--cmssw-base", str(cmssw_base), "--scram-arch", args.scram_arch,
                "--background-methods", str(args.background_methods), "--build-jobs", str(args.build_jobs),
                "--modes", *modes]
+    if args.base_card:
+        command.extend(["--base-card", str(base_card_path)])
+    if pool_plan:
+        command.extend(["--mixing-pool-list",str(pool_plan["pool_list_path"]),"--mixing-pool-manifest",str(pool_plan["source_audit_path"]),"--signal-input-manifest",str(pool_plan["signal_audit_path"]),"--pool-events",str(args.pool_events)])
     if args.accounting_group:
         command.extend(["--accounting-group", args.accounting_group])
     if args.match_eec_binning:
@@ -324,14 +549,20 @@ exec {command} "$@"
     write_executable(submit_dir / "prepare.sh", prepare_script)
     manifest = {"schema_version": 1, "created_at": timestamp().isoformat(), "prepared_only": True,
                 "run_config": {"sample": args.sample, "data_type": SAMPLES[args.sample]["data_type"],
-                               "base_card": SAMPLES[args.sample]["card"], "repo": str(repo), "input_dir": str(input_dir), "submit_dir": str(submit_dir),
+                               "base_card": str(base_card_path) if args.base_card else SAMPLES[args.sample]["card"],
+                               "base_card_path": str(base_card_path), "base_card_sha256": base_card_sha256,
+                               "jet_veto_payload_files": [str(path) for path in veto_files], "repo": str(repo), "input_dir": str(input_dir), "submit_dir": str(submit_dir),
                                "output_base": str(output_dir), "output_dir": str(run_output), "tag": args.tag,
                                "modes": modes, "background_methods": args.background_methods,
                                "match_eec_binning": args.match_eec_binning,
                                "cmssw_base": str(cmssw_base), "scram_arch": args.scram_arch,
                                "build_jobs": args.build_jobs, "accounting_group": args.accounting_group,
-                               "job_flavour": "workday", "regular_memory_mb": 4000,
-                               "response_memory_mb": 8000, "request_disk_mb": 6000},
+                               "build_optimization": "-O2" if pool_plan else "Makefile defaults",
+                               "compiler_command": "g++ -O2" if pool_plan else "Makefile default CXX",
+                               "make_command": ["make", "-j{}".format(args.build_jobs)] + (["CXX=g++ -O2"] if pool_plan else []),
+                               "job_flavour": "workday", "regular_memory_mb": regular_memory_mb,
+                               "response_memory_mb": 8000, "request_disk_mb": request_disk_mb,
+                               "mixing_pool": pool_plan["manifest"] if pool_plan else None},
                 "input_count": len(inputs), "job_count": job_count,
                 "inputs": inputs, "job_fields": ["mode", "input_url", "output_url", "stem", "memory_mb"],
                 "provenance": {"git_commit": commit, "git_dirty": dirty,

@@ -1,0 +1,76 @@
+OO GenGen merge campaigns — 29 October 2026 (America/Chicago)
+
+Requested productions:
+  /afs/cern.ch/user/j/jvelazqu/condor/production/OOMC/GenGen_R04_Run3_NH_20261029_split
+  /afs/cern.ch/user/j/jvelazqu/condor/production/OOMC/GenGen_R04_Run3_NH_20261029_integrated
+
+Production review:
+  Each production: 333/333 completed jobs, all final Condor exits 0, all run records PASS.
+  Each production: 9,970,000 source events; 8,543,017 matched signals;
+                   8,496,685 matched jets; 39,517,544 EEC entries.
+  No missing/extra ROOT files; every recorded artifact exists at its expected size.
+  Run records, frozen source/card/pool/provenance checks passed.
+  All CSV checksums agree between split/integrated: keep their ROOT merges separate.
+  Every production stderr contains OOMC_JOB_FAILED line=33 status=1 despite later
+  success and normal termination. Root cause not reproduced; final records/logs
+  establish completion. Merge workers recheck checksums before consuming artifacts.
+
+Created and submitted after user authorization:
+  Split cluster: 9625678 (one job)
+  Campaign: /afs/cern.ch/user/j/jvelazqu/condor/merge/OOMC/GenGen_R04_Run3_NH_20261029_split
+  Integrated cluster: 9625679 (one job)
+  Campaign: /afs/cern.ch/user/j/jvelazqu/condor/merge/OOMC/GenGen_R04_Run3_NH_20261029_integrated
+  Both queued with no holds at initial post-submission check.
+  Monitor: condor_q 9625678 9625679
+  Do not resubmit blindly.
+
+Each campaign freezes manifest/helper checksums, retains the production audit,
+preparation-validation.json, dryrun.ads, submission.json and logs.
+Submission files request 1 CPU, 8,000 MB RAM (site policy adjusted queued jobs
+to 9,000 MB), workday; scratch 31,184 MB split / 26,631 MB integrated.
+
+Separate EOS output directories:
+  /eos/user/j/jvelazqu/HIN/eec-outputs/OOMC/GenGen_R04_Run3_NH_20261029_split/merged/
+  /eos/user/j/jvelazqu/HIN/eec-outputs/OOMC/GenGen_R04_Run3_NH_20261029_integrated/merged/
+Expected files in EACH directory:
+  merged_OOMC_GenGen.root
+  merged_OOMC_GenGen.ledgers.tar.gz
+  merged_OOMC_GenGen.run.json
+
+The worker rechecks all original run-record SHA256 values and every ROOT/CSV
+SHA256 before merging. Original per-job CSVs and records remain separate inside
+the ledger archive, together with the merge manifest. No bad inputs are skipped.
+All histogram bins, stored squared errors, axes/classes, event-cut bins and
+exposures must sum; physics card/metadata are checked and preserved.
+
+Require final status PASS_MERGE_SOFTWARE_AND_EXPOSURE_CHECKS and verify the
+ROOT/archive SHA256 and sizes in merged_OOMC_GenGen.run.json before consuming.
+Only the final record establishes complete publication. Existing artifacts are
+protected against overwrite; partial publication must be reviewed before retry.
+
+Validation passed:
+  9 contract tests (including changed bytes, missing/mixed/duplicate inputs).
+  4 ROOT merge regression tests.
+  Real two-input worker staging/checksum/archive/merge smoke tests for both
+  configurations under CMSSW_15_0_11, ROOT 6.32.13; no publication.
+  Condor dry runs: exactly one job per campaign.
+  git diff --check.
+
+Source helpers:
+  condor/prepareOOMerge.py
+  condor/merge_closure_worker.py
+  condor/merge_root.py
+  condor/test_prepareOOMerge.py
+  condor/test_merge_root.py
+  condor/README.md
+
+Evidence:
+  validation/run3Mixing/results/2026-10-29-gengen-merge/
+    production_audit.{json,txt}
+    split_smoke.{log,json}
+    integrated_smoke.{log,json}
+    merge_queue_snapshot.json
+
+This creates histogram sums and retains covariance inputs. Physics closure,
+donor/cross-job covariance and full generator lineage remain open.
+Existing source changes remain uncommitted; nothing pushed.

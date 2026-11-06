@@ -36,6 +36,7 @@
 #include "JetMetScalingFactorManager.h"
 #include "SmearingProvider.h"
 #include "Run3JetSelection.h"
+#include "OOMixingPilot.h"
 
 class EECAnalyzer{
   
@@ -69,7 +70,7 @@ public:
  private:
   
   // Private methods
-  void CalculateEnergyEnergyCorrelator(const vector<double> selectedTrackPt[EECHistograms::knJetConeTypes], const vector<double> relativeTrackEta[EECHistograms::knJetConeTypes], const vector<double> relativeTrackPhi[EECHistograms::knJetConeTypes], const vector<int> selectedTrackSubevent[EECHistograms::knJetConeTypes], const double jetPt);  // Calculate energy-energy correlators
+  void CalculateEnergyEnergyCorrelator(const vector<double> selectedTrackPt[EECHistograms::knJetConeTypes], const vector<double> relativeTrackEta[EECHistograms::knJetConeTypes], const vector<double> relativeTrackPhi[EECHistograms::knJetConeTypes], const vector<int> selectedTrackSubevent[EECHistograms::knJetConeTypes], const vector<double> selectedTrackCorrection[EECHistograms::knJetConeTypes], const int coneSourceHiBin[EECHistograms::knJetConeTypes], const double jetPt);  // Calculate energy-energy correlators
   void CalculateEnergyEnergyCorrelatorForUnfolding(const vector<double> selectedTrackPt, const vector<double> relativeTrackEta, const vector<double> relativeTrackPhi, const double jetPt, const double genPt); // Calculate energy-energy correlators for unfolding
   void FillOneDimensionalJetPtUnfoldingHistograms(const double jetPt, const double genPt); // Fill histograms for one dimensional jet pT unfolding
   void FillJetPtResponseMatrix(const Int_t jetIndex); // Fill jet pT response matrix
@@ -77,8 +78,14 @@ public:
   void FillUnfoldingResponse(); // Fill the histograms needed for unfolding study
   void ConstructParticleResponses(); // Construct DeltaR and pT1*pT2 response matrices
   void ReadConfigurationFromCard(); // Read all the configuration from the input card
+  void ExportPairTracks(std::ostream& output, bool inJet, double jetEta=0, double jetPhi=0); // Native selected tracks in physical detector coordinates
 
   // Methods for event mixing
+  void PrepareOOClosurePool();
+  void AssignOOClosurePartners(Int_t entry);
+  Int_t GetOOClosureMultiplicity(ForestReader* reader, bool pureHijing) const;
+  oo_eec::PilotEvent ReadOOClosureEvent(ForestReader* reader, Int_t entry, bool pureHijing) const;
+  std::shared_ptr<oo_eec::ClosurePilotState> fOOClosure = std::make_shared<oo_eec::ClosurePilotState>();
   void PrepareMixingVectors(); // Find vz and hiBin values from mixed event in preparation for event mixing
   void PrepareBinnedMixingVectors(); // Prepare variables needed for mixing in a binned manner
   void FindMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Int_t const currentMultiplicity, const Int_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing); // Find the mixed events that are matched with the signal event using multiplicity

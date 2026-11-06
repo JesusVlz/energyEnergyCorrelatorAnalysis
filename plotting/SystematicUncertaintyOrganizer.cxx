@@ -4,6 +4,8 @@
 
 #include "SystematicUncertaintyOrganizer.h"
 
+#include <stdexcept>
+
 /*
  * Default constructor
  */
@@ -141,21 +143,27 @@ void SystematicUncertaintyOrganizer::ReadInputFile(TFile* inputFile){
   // ============================================================================================= //
 
   // First, find at least one histogram that is not NULL
-  TH1D* exampleHistogram;
-  bool exampleFound = false;
-  for(int iCentrality = firstStudiedCentralityBin; iCentrality <= lastStudiedCentralityBin && !exampleFound; iCentrality++){
-    for(int iJetPt = firstStudiedJetPtBinEEC; iJetPt <= lastStudiedJetPtBinEEC && !exampleFound; iJetPt++){
-      for(int iTrackPt = firstStudiedTrackPtBinEEC; iTrackPt <= lastStudiedTrackPtBinEEC && !exampleFound; iTrackPt++){
+  TH1D* exampleHistogram = nullptr;
+  for(int iCentrality = firstStudiedCentralityBin; iCentrality <= lastStudiedCentralityBin && exampleHistogram == nullptr; iCentrality++){
+    for(int iJetPt = firstStudiedJetPtBinEEC; iJetPt <= lastStudiedJetPtBinEEC && exampleHistogram == nullptr; iJetPt++){
+      for(int iTrackPt = firstStudiedTrackPtBinEEC; iTrackPt <= lastStudiedTrackPtBinEEC && exampleHistogram == nullptr; iTrackPt++){
         for(int iUncertainty = 0; iUncertainty < knUncertaintySources; iUncertainty++){
           if(fhEnergyEnergyCorrelatorUncertainty[iCentrality][iJetPt][iTrackPt][iUncertainty] != NULL){
             exampleHistogram = fhEnergyEnergyCorrelatorUncertainty[iCentrality][iJetPt][iTrackPt][iUncertainty];
-            exampleFound = true;
             break;
           }
         } // Uncertainty loop
       } // Track pT loop
     } // Jet pT loop
   } // Centrality loop
+
+  // Without a template histogram there is no binning for the zero-error fallback.
+  if(exampleHistogram == nullptr){
+    throw std::runtime_error(Form("SystematicUncertaintyOrganizer::ReadInputFile: no systematic uncertainty histograms found in '%s' for C[%d,%d], J[%d,%d], T[%d,%d]; cannot infer histogram binning",
+                                  inputFile->GetName(), firstStudiedCentralityBin, lastStudiedCentralityBin,
+                                  firstStudiedJetPtBinEEC, lastStudiedJetPtBinEEC,
+                                  firstStudiedTrackPtBinEEC, lastStudiedTrackPtBinEEC));
+  }
 
   // Find all histograms that are NULL, and set them as error zero histograms
   for(int iCentrality = firstStudiedCentralityBin; iCentrality <= lastStudiedCentralityBin; iCentrality++){

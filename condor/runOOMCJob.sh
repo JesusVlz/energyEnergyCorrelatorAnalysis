@@ -62,6 +62,19 @@ fi
 printf 'OOMC_JOB mode=%s host=%s ROOT=%s\n' "$eec_mode" "$(hostname)" "$(root-config --version)"
 printf 'Input: %s\nOutput: %s\n' "$eec_input_url" "$eec_output_url"
 
+# Closure campaigns carry a frozen reserved-donor manifest. Legacy workers keep
+# their original input/run/validation/publication path below.
+if [[ -f mixing_pool/manifest.json ]] || awk '$1=="OOClosurePilot" && $2==1 {found=1} END {exit !found}' "cards/$eec_mode.input"; then
+    [[ -f condor/closure_worker.py && -f mixing_pool/manifest.json ]]
+    eec_closure_args=(--analysis-dir "$PWD" --work-dir "$eec_work/closure_output" --card "cards/$eec_mode.input"
+        --input-url "$eec_input_url" --output-url "$eec_output_url" --stem "$eec_stem"
+        --archive-sha256 "$eec_archive_sha" --mode "$eec_mode" --data-type "$eec_expected_data_type")
+    if [[ "${EEC_PREFLIGHT_ONLY:-0}" == 1 ]]; then eec_closure_args+=(--preflight-only); fi
+    python3 condor/closure_worker.py "${eec_closure_args[@]}"
+    printf 'OOMC_JOB_SUCCESS mode=%s output=%s closure=reserved_donors\n' "$eec_mode" "$eec_output_url"
+    exit 0
+fi
+
 if [[ "${EEC_PREFLIGHT_ONLY:-0}" == 1 ]]; then
     printf 'PREFLIGHT_PASS mode=%s payload=%s\n' "$eec_mode" "$eec_archive_sha"
     exit 0

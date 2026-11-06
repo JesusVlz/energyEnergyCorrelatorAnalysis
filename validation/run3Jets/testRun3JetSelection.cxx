@@ -268,18 +268,33 @@ void TestHINPrescriptions() {
   jet = baseline; jet.eta = 4; jet.neutralMultiplicity = -1;
   assert(Throws<std::invalid_argument>([&] { PassJetID(jet, pp); }));
 
-  // Actual retained forests contain CHF=1.0000001192092896. Permit
+  // Retained pp file952/event25501526 has CHF=1.0000003576278687.
+  // This three-epsilon value previously aborted pair and response jobs. Permit
   // Float_t endpoint rounding while comparing the unmodified stored fraction.
   const double fractionEpsilon = std::numeric_limits<float>::epsilon();
   jet = baseline; jet.chargedHadronFraction = 1+fractionEpsilon;
   assert(PassJetID(jet, pp));
   assert(PassJetID(jet, pbpb));
+  jet.chargedHadronFraction = 1+3*fractionEpsilon;
+  assert(PassJetID(jet, pp));
+  assert(PassJetID(jet, pbpb));
+  assert(jet.chargedHadronFraction == 1+3*fractionEpsilon); // No clipping.
+  jet.chargedHadronFraction = std::nextafter(1+3*fractionEpsilon, 2.);
+  assert(Throws<std::invalid_argument>([&] { PassJetID(jet, pp); }));
+  jet.chargedHadronFraction = 1+4*fractionEpsilon;
+  assert(Throws<std::invalid_argument>([&] { PassJetID(jet, pp); }));
   jet.chargedHadronFraction = 1+1e-4;
   assert(Throws<std::invalid_argument>([&] { PassJetID(jet, pp); }));
   jet.chargedHadronFraction = nan;
   assert(Throws<std::invalid_argument>([&] { PassJetID(jet, pp); }));
+  jet.chargedHadronFraction = std::numeric_limits<double>::infinity();
+  assert(Throws<std::invalid_argument>([&] { PassJetID(jet, pp); }));
   jet = baseline; jet.muonFraction = -fractionEpsilon;
   assert(PassJetID(jet, pp));
+  jet.muonFraction = -3*fractionEpsilon;
+  assert(PassJetID(jet, pp));
+  jet.muonFraction = std::nextafter(-3*fractionEpsilon, -1.);
+  assert(Throws<std::invalid_argument>([&] { PassJetID(jet, pp); }));
   jet.muonFraction = -1e-4;
   assert(Throws<std::invalid_argument>([&] { PassJetID(jet, pp); }));
   // The domain tolerance does not add a hadronic upper cut to forward

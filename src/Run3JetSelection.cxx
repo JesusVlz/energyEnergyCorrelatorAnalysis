@@ -14,10 +14,10 @@ namespace EECJetSelection {
 namespace {
 const double kPi = std::acos(-1.0);
 const double kAxisTolerance = 1e-6;
-// Native PF energy fractions are Float_t ratios. Values one rounding unit
-// beyond physical endpoints occur in retained forests. Accept only this small
+// Native PF energy fractions are Float_t ratios. Retained pp MC includes
+// CHF=1+3*Float_t epsilon (file952, event25501526). Accept only this small
 // representational neighborhood; never clamp values used by the ID cuts.
-const double kFractionEndpointTolerance = 2*std::numeric_limits<float>::epsilon();
+const double kFractionEndpointTolerance = 3*std::numeric_limits<float>::epsilon();
 // Native forest coordinates are Float_t. An angle rounding across +/-pi by
 // one Float_t rounding unit remains a valid periodic detector coordinate.
 const double kPhiEndpointTolerance = std::numeric_limits<float>::epsilon()*kPi;
@@ -43,7 +43,7 @@ void ValidatePrescription(JetIDPrescription prescription) {
 void RequireFraction(double value, const char* name) {
   if(!std::isfinite(value) || value < -kFractionEndpointTolerance || value > 1+kFractionEndpointTolerance) {
     throw std::invalid_argument(std::string("Run-3 Jet ID: invalid ") + name +
-      "; expected a finite energy fraction in [0,1], allowing 2 Float_t epsilon endpoint rounding");
+      "; expected a finite energy fraction in [0,1], allowing 3 Float_t epsilon endpoint rounding");
   }
 }
 

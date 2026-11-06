@@ -97,7 +97,7 @@ BackgroundMethods 6 # Standard perpendicular and two-partner mixed pairing categ
                      # Bit 2 = Mixed cones              (to set: 4)
                      # Examples: All = 7, Everything but no mixing = 3
 MegaSkimMixing 0 # Explicit regular-forest pool; event cuts are checked
-EventMatchForMixing 0 # Event-by-event stored hiBin and vz matching; provisional applicability
+EventMatchForMixing 0 # Run-3 data: match vz and hiBin; inclusive still has no centrality selection cut
 BinnedMixing 0 # 0 = Match events without bin borders for mixing. 1 = Use binned event matching for mixing
 
 # For the mixing bins, if exactly two values are given, these are interpreted as an example bin border, and bin width. The mixing bins are then automatically contructed using this information with even bin width. If more than two values are given, these are directly interpreted as bin borders.

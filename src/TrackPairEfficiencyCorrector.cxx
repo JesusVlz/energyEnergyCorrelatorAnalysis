@@ -4,6 +4,11 @@
 
 // Own includes
 #include "TrackPairEfficiencyCorrector.h"
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <stdexcept>
+#include <sstream>
 
 /*
  * Contructor
@@ -34,7 +39,7 @@ TrackPairEfficiencyCorrector::TrackPairEfficiencyCorrector() :
  * Custom constructor
  */
 TrackPairEfficiencyCorrector::TrackPairEfficiencyCorrector(TString inputFileName, bool useSmoothedCorrection, bool isPbPbData) :
-  fDisableCorrection(false)
+  TrackPairEfficiencyCorrector()
 {
   fInputFile = TFile::Open(inputFileName);
   fUseSmoothedCorrection = useSmoothedCorrection;
@@ -47,6 +52,12 @@ TrackPairEfficiencyCorrector::TrackPairEfficiencyCorrector(TString inputFileName
  */
 void TrackPairEfficiencyCorrector::ReadCorrectionTables(){
   
+  if(!fInputFile || fInputFile->IsZombie())
+    throw std::runtime_error("Cannot open track-pair correction file");
+  fIsRun3Table = fInputFile->Get("Run3PairCorrectionVersion") != nullptr;
+  if(fIsRun3Table && fUseSmoothedCorrection)
+    throw std::invalid_argument("Run-3 pair table has no smoothed prescription");
+
   // Read card from inputfile
   fCard = new BinningCard(fInputFile);
   
@@ -55,6 +66,11 @@ void TrackPairEfficiencyCorrector::ReadCorrectionTables(){
   fnTrackPtBins = fCard->GetNTrackPairPtBins();
   fnJetPtBins = fCard->GetNJetPtBins();
   
+  if(fnCentralityBins < 1 || fnCentralityBins > kMaxCentralityBins ||
+     fnTrackPtBins < 1 || fnTrackPtBins > kMaxTrackPtBins ||
+     fnJetPtBins < 1 || fnJetPtBins > kMaxJetPtBins)
+    throw std::runtime_error("Invalid track-pair correction table dimensions");
+
   // Read the centrality bin borders from the card
   for(int iCentrality = 0; iCentrality < fnCentralityBins; iCentrality++){
     fCentralityBinBorders[iCentrality] = fCard->GetLowBinBorderCentrality(iCentrality);
@@ -142,6 +158,46 @@ int TrackPairEfficiencyCorrector::FindJetPtBin(const double jetPt) const{
 std::pair<double,double> TrackPairEfficiencyCorrector::GetTrackPairEfficiencyCorrection(const double deltaR, const double centrality, const double triggerPt, const double associatedPt, const double jetPt) const{
   
   if(fDisableCorrection) return std::make_pair(1,0);
+
+  // Run-3 tables use the same AN histogram convention: normalized reco/gen.
+  // Unsupported bins stay unsupported, including outside the stored axes.
+  // A supported all-event (jet-independent) table is the only sparse fallback.
+  if(fIsRun3Table){
+    if(!std::isfinite(triggerPt) || !std::isfinite(associatedPt) || !std::isfinite(jetPt))
+      throw std::out_of_range("Nonfinite Run-3 pair coordinates");
+    const auto boundedBin = [](const double* edges, int n, double x){
+      if(!std::isfinite(x) || x < edges[0] || x >= edges[n]) return -1;
+      return static_cast<int>(std::upper_bound(edges, edges+n+1, x)-edges)-1;
+    };
+    const int c = boundedBin(fCentralityBinBorders, fnCentralityBins, centrality);
+    const int t = boundedBin(fTrackPtBinBorders, fnTrackPtBins, std::max(triggerPt, associatedPt));
+    const int a = boundedBin(fTrackPtBinBorders, fnTrackPtBins, std::min(triggerPt, associatedPt));
+    const int j = boundedBin(fJetPtBinBorders, fnJetPtBins, jetPt);
+    const auto inverse = [deltaR](TH1D* h){
+      if(!h || !std::isfinite(deltaR) || deltaR < h->GetXaxis()->GetXmin() ||
+         deltaR >= h->GetXaxis()->GetXmax()) return std::numeric_limits<double>::quiet_NaN();
+      const double ratio = h->GetBinContent(h->FindFixBin(deltaR));
+      return (std::isfinite(ratio) && ratio > 0) ? 1.0/ratio : std::numeric_limits<double>::quiet_NaN();
+    };
+    if(c >= 0 && t >= 0 && a >= 0){
+      if(j >= 0){
+        const double value = inverse(fCorrectionTableCloseToJet[c][t][a][j]);
+        // Table-statistics uncertainty requires training-event replicas; it is
+        // intentionally not replaced with an independent-pair Poisson error.
+        if(std::isfinite(value)) return std::make_pair(value, 0.0);
+      }
+      // A positive, out-of-domain jet pT is not a request for an inclusive map.
+      if(jetPt < 0 || j >= 0){
+        const double value = inverse(fCorrectionTable[c][t][a]);
+        if(std::isfinite(value)) return std::make_pair(value, 0.0);
+      }
+    }
+    std::ostringstream message;
+    message << "Unsupported Run-3 pair correction: centrality=" << centrality
+            << " pt1=" << triggerPt << " pt2=" << associatedPt
+            << " jetPt=" << jetPt << " deltaR=" << deltaR;
+    throw std::out_of_range(message.str());
+  }
 
   // We do not need to correct anything above 0.4, since that is outside of the analysis range
   if(deltaR > 0.4) return std::make_pair(1,0);

@@ -1,0 +1,258 @@
+{
+  "source": "../OOForestFiles.txt",
+  "source_sha256": "2f9762d5dac2795088f06388b8e9340ad9acc871103e4044af4de119c1f3ce2f",
+  "source_files": 132898,
+  "mixing_pool": "../../mixingFileList/OO2025_MB_pool_pilot.txt",
+  "mixing_pool_sha256": "89c1c3b6b08a7d727a31402a04363754c98d824d19be34d68b677f4eb7745f5f",
+  "reserved_mixing_files": 35,
+  "signal_files": 132863,
+  "units_per_job": 1,
+  "max_jobs_per_task": 10000,
+  "job_limit_source": "https://github.com/dmwm/CRABServer/blob/8069e0cb72445e9a3a13dfb98469a0920210ed12/src/python/TaskWorker/Actions/Splitter.py#L23",
+  "strategy": "Original ten round-robin cohorts, then consecutive chunks of at most 10000 files",
+  "empty_file_policy": "Retained; each empty signal forest affects only its own job",
+  "cohorts": [
+    {
+      "part": 1,
+      "files": 13287,
+      "original_list": "OOForestFiles_part01.txt",
+      "sha256": "337edbafbcd85babb316e47d6b54c222c0814b10503832ed1010a31a4fc01341"
+    },
+    {
+      "part": 2,
+      "files": 13287,
+      "original_list": "OOForestFiles_part02.txt",
+      "sha256": "c73a7dadae2878d340400fb52c8208bf1e57f4ef7ebbc860bffc5c8cc25dadcb"
+    },
+    {
+      "part": 3,
+      "files": 13287,
+      "original_list": "OOForestFiles_part03.txt",
+      "sha256": "ebaa8bedba4fc10963455bcab7f932aa1c0274d9a3fa246f3a0e1272e0f57832"
+    },
+    {
+      "part": 4,
+      "files": 13286,
+      "original_list": "OOForestFiles_part04.txt",
+      "sha256": "89985c9eda82f1db6af0cb23a5c644c3ec668f96af8e78506379beac28b60b7c"
+    },
+    {
+      "part": 5,
+      "files": 13286,
+      "original_list": "OOForestFiles_part05.txt",
+      "sha256": "b03dd60cb0d3280f38659b88929f7a95255799a0ef44b76e03564c9cf242af90"
+    },
+    {
+      "part": 6,
+      "files": 13286,
+      "original_list": "OOForestFiles_part06.txt",
+      "sha256": "c1da5f79656cb07299842d9654e360d98f67b95218901bf6a049b153c925bbdf"
+    },
+    {
+      "part": 7,
+      "files": 13286,
+      "original_list": "OOForestFiles_part07.txt",
+      "sha256": "a2018d5d0f277fd4c0e5383634890bf786f5a3942a8bbc6c74e8c054d6792cac"
+    },
+    {
+      "part": 8,
+      "files": 13286,
+      "original_list": "OOForestFiles_part08.txt",
+      "sha256": "c4b68d5058875d274ab45d8b758a0e2e7c02b3272b5674e1df4e0ae00c7e8d05"
+    },
+    {
+      "part": 9,
+      "files": 13286,
+      "original_list": "OOForestFiles_part09.txt",
+      "sha256": "e12ab48847f3ea455dcc30bc63f00af07d7a20e030fa2ac50234acbf85526113"
+    },
+    {
+      "part": 10,
+      "files": 13286,
+      "original_list": "OOForestFiles_part10.txt",
+      "sha256": "391a397f8b614c8c23f4f5741e5efacfc1a925cf9ecee21d188e6c994e714c5e"
+    }
+  ],
+  "tasks": [
+    {
+      "part": 1,
+      "chunk": 1,
+      "file": "OOForestFiles_part01_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "bdf16039d56666ced31005f88fbdfd569c2d406cc250aaccc08bbb0b3fe69481",
+      "request_name": "eecAnalysis_OO_mixedPerp_part01_chunk01_Run3_v2"
+    },
+    {
+      "part": 1,
+      "chunk": 2,
+      "file": "OOForestFiles_part01_chunk02.txt",
+      "files": 3287,
+      "jobs": 3287,
+      "sha256": "9ddf34f0eccc8c609f3e9723b95480ec3c96f4ad0d1596ce2e7381a0eb267fa1",
+      "request_name": "eecAnalysis_OO_mixedPerp_part01_chunk02_Run3_v2"
+    },
+    {
+      "part": 2,
+      "chunk": 1,
+      "file": "OOForestFiles_part02_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "fc3c20f0f41b53152452c8c8b57e723b165c7fd79f6eb63b92b5fde2384ee055",
+      "request_name": "eecAnalysis_OO_mixedPerp_part02_chunk01_Run3_v2"
+    },
+    {
+      "part": 2,
+      "chunk": 2,
+      "file": "OOForestFiles_part02_chunk02.txt",
+      "files": 3287,
+      "jobs": 3287,
+      "sha256": "6bfe8d4f3bc39e0c49436371919cf412721fdf5163f0951537c44a753cfd1e73",
+      "request_name": "eecAnalysis_OO_mixedPerp_part02_chunk02_Run3_v2"
+    },
+    {
+      "part": 3,
+      "chunk": 1,
+      "file": "OOForestFiles_part03_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "47f94c1ed96bad7cc13e0a2b572a081de14c8eec8c3581118a5783926c1595ae",
+      "request_name": "eecAnalysis_OO_mixedPerp_part03_chunk01_Run3_v2"
+    },
+    {
+      "part": 3,
+      "chunk": 2,
+      "file": "OOForestFiles_part03_chunk02.txt",
+      "files": 3287,
+      "jobs": 3287,
+      "sha256": "b1161c93ca9d9d0a0523a5752147c3f1026d248d4104efa6d3ba032c9efd58c3",
+      "request_name": "eecAnalysis_OO_mixedPerp_part03_chunk02_Run3_v2"
+    },
+    {
+      "part": 4,
+      "chunk": 1,
+      "file": "OOForestFiles_part04_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "7dc453170ecbf5975b5b58164872cfac5f5a7e7af463678cf57e870effb44ccb",
+      "request_name": "eecAnalysis_OO_mixedPerp_part04_chunk01_Run3_v2"
+    },
+    {
+      "part": 4,
+      "chunk": 2,
+      "file": "OOForestFiles_part04_chunk02.txt",
+      "files": 3286,
+      "jobs": 3286,
+      "sha256": "7ce417dfa6c08c8ef177b57bd0a29f22232fb8815ad9b1091267ad16fd9312cf",
+      "request_name": "eecAnalysis_OO_mixedPerp_part04_chunk02_Run3_v2"
+    },
+    {
+      "part": 5,
+      "chunk": 1,
+      "file": "OOForestFiles_part05_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "80c089a8b0920089941eb286cc92c90fd56d5da0a75138ac89e1049348a93c03",
+      "request_name": "eecAnalysis_OO_mixedPerp_part05_chunk01_Run3_v2"
+    },
+    {
+      "part": 5,
+      "chunk": 2,
+      "file": "OOForestFiles_part05_chunk02.txt",
+      "files": 3286,
+      "jobs": 3286,
+      "sha256": "9da9d402fc2f26a3493234a96038db590f62cba9581e91cafb39c0f9d47cc112",
+      "request_name": "eecAnalysis_OO_mixedPerp_part05_chunk02_Run3_v2"
+    },
+    {
+      "part": 6,
+      "chunk": 1,
+      "file": "OOForestFiles_part06_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "d696fcf9c9d186a545436a0848f6c11d125badf59ebf45c52bf04b0bdbf01e09",
+      "request_name": "eecAnalysis_OO_mixedPerp_part06_chunk01_Run3_v2"
+    },
+    {
+      "part": 6,
+      "chunk": 2,
+      "file": "OOForestFiles_part06_chunk02.txt",
+      "files": 3286,
+      "jobs": 3286,
+      "sha256": "c7df6a3c426259fb2ece1672e71426347592275af5a4b6bff066352705984ded",
+      "request_name": "eecAnalysis_OO_mixedPerp_part06_chunk02_Run3_v2"
+    },
+    {
+      "part": 7,
+      "chunk": 1,
+      "file": "OOForestFiles_part07_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "95d486cc961cc3aeace75fd49db7e4028a740681f261d3acc824c43c4f8cd22b",
+      "request_name": "eecAnalysis_OO_mixedPerp_part07_chunk01_Run3_v2"
+    },
+    {
+      "part": 7,
+      "chunk": 2,
+      "file": "OOForestFiles_part07_chunk02.txt",
+      "files": 3286,
+      "jobs": 3286,
+      "sha256": "dbb30819d311454ba1b49ed2d6a33604b55754e540872b1bb6b67b2a5f2429c5",
+      "request_name": "eecAnalysis_OO_mixedPerp_part07_chunk02_Run3_v2"
+    },
+    {
+      "part": 8,
+      "chunk": 1,
+      "file": "OOForestFiles_part08_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "2fabb12f0f96f1f9718252608f7cc70083b97866c922b24bbc459215a8e03a26",
+      "request_name": "eecAnalysis_OO_mixedPerp_part08_chunk01_Run3_v2"
+    },
+    {
+      "part": 8,
+      "chunk": 2,
+      "file": "OOForestFiles_part08_chunk02.txt",
+      "files": 3286,
+      "jobs": 3286,
+      "sha256": "fa0c4e75cadf454cbf297a8f32d3ce735014a215e784866e20704ccd85a547fc",
+      "request_name": "eecAnalysis_OO_mixedPerp_part08_chunk02_Run3_v2"
+    },
+    {
+      "part": 9,
+      "chunk": 1,
+      "file": "OOForestFiles_part09_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "cefb8311b3893e0f6b771bf647b144d2df6f9e9ed0a7d02f1ff02bf38f7ea0cd",
+      "request_name": "eecAnalysis_OO_mixedPerp_part09_chunk01_Run3_v2"
+    },
+    {
+      "part": 9,
+      "chunk": 2,
+      "file": "OOForestFiles_part09_chunk02.txt",
+      "files": 3286,
+      "jobs": 3286,
+      "sha256": "42661706db55382e512888bdd9755e0a96ec5a489aba839183af271f3b53a9ca",
+      "request_name": "eecAnalysis_OO_mixedPerp_part09_chunk02_Run3_v2"
+    },
+    {
+      "part": 10,
+      "chunk": 1,
+      "file": "OOForestFiles_part10_chunk01.txt",
+      "files": 10000,
+      "jobs": 10000,
+      "sha256": "9c3df6f8a953cb6d508bc7b12f029158e86ad4628fed06217662f1e96610462a",
+      "request_name": "eecAnalysis_OO_mixedPerp_part10_chunk01_Run3_v2"
+    },
+    {
+      "part": 10,
+      "chunk": 2,
+      "file": "OOForestFiles_part10_chunk02.txt",
+      "files": 3286,
+      "jobs": 3286,
+      "sha256": "54731a5fd885d9d85c7afe1b89a0f22a3da124524f00c03da90a173f37a05ebb",
+      "request_name": "eecAnalysis_OO_mixedPerp_part10_chunk02_Run3_v2"
+    }
+  ]
+}

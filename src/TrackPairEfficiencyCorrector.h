@@ -30,6 +30,7 @@ public:
 
   void ReadCorrectionTables(); // Initialize the correction tables from file
   
+  bool IsRun3Table() const { return fIsRun3Table; }
   bool GetDisableCorrection(); // Getter for flag to disable the track pair efficiency correction
   void SetDisableCorrection(const bool disable); // Setter for disabling the correction
   
@@ -50,6 +51,7 @@ private:
   int fnJetPtBins;
   
   // Flags for selecting correct corrections
+  bool fIsRun3Table = false; // Explicit support masks; no Run-2 unity/clamping rules
   bool fDisableCorrection;      // Disable the correction and just return 1
   bool fUseSmoothedCorrection;  // True: Use smoothed correction. False: Use raw correction
   bool fIsPbPbData;             // PbPb and pp have different fluctuation reduction settings. Thus we need a flag for data type

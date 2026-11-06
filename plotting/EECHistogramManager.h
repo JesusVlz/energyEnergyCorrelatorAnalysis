@@ -138,6 +138,7 @@ public:
   ~EECHistogramManager();                                   // Destructor
   
   void LoadHistograms();          // Load the histograms from the inputfile
+  void LoadRawEnergyEnergyCorrelators(); // Project EEC categories without stabilization or card mutation (closure diagnostics)
   void Write(const char* fileName, const char* fileOption);          // Write all the loaded histograms into a file
   void WriteProcessed(const char* fileName, const char* fileOption); // Write the processed histograms into a file
   void WriteCombinedMixedConeHistograms(const char* fileName, const char* fileOption); // Write the mixed cone histograms after combining them

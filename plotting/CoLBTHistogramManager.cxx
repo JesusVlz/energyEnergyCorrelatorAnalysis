@@ -150,7 +150,7 @@ void CoLBTHistogramManager::LoadGraphs(TString inputDirectory){
             TString currentParameter;
 
             // Skip the first line in the file. It only contains comments
-            for(int iLine = 1; iLine < lineVector.size(); iLine++){
+            for(std::vector<TString>::size_type iLine = 1; iLine < lineVector.size(); iLine++){
 
               // The different parameters are separated by spaces, so tokenize strings to get individual parameters
               parameterArray = lineVector.at(iLine).Tokenize(" ");

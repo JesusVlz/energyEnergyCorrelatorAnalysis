@@ -1,0 +1,1134 @@
+{
+  "pool": "mixingFileList/ppRef2024_pool_pilot.txt",
+  "pool_sha256": "c27e976dc13c78a874da02ecf5447c583e4c6c0cef38b2774b2ed3b9646b04c2",
+  "pool_files": 35,
+  "max_concurrent_probes": 4,
+  "per_file_timeout_seconds": 45,
+  "scope": "Metadata only: full file list, required trees/branches, nonzero aligned entries, exact native jet leaf types. No event loops, selection acceptance, matching, or physics validation.",
+  "files": [
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes0/ppRef2024_HardProbes_filtered_PPRefHardProbes0/260925_144732/0000/HiForestMiniAOD_579.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 49214,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 49214,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 49214,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 49214,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 49214,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 6.071,
+      "pool_index_zero_based": 0
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes0/ppRef2024_HardProbes_filtered_PPRefHardProbes0/260925_144732/0003/HiForestMiniAOD_3282.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 26531,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 26531,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 26531,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 26531,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 26531,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.762,
+      "pool_index_zero_based": 1
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0000/HiForestMiniAOD_358.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 45413,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 45413,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 45413,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 45413,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 45413,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.53,
+      "pool_index_zero_based": 2
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0001/HiForestMiniAOD_1178.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 40951,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 40951,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 40951,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 40951,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 40951,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.794,
+      "pool_index_zero_based": 3
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0002/HiForestMiniAOD_2317.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 42288,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 42288,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 42288,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 42288,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 42288,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.765,
+      "pool_index_zero_based": 4
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0003/HiForestMiniAOD_3432.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 47456,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 47456,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 47456,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 47456,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 47456,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.539,
+      "pool_index_zero_based": 5
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0004/HiForestMiniAOD_4559.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 44198,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 44198,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 44198,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 44198,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 44198,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.491,
+      "pool_index_zero_based": 6
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0005/HiForestMiniAOD_5451.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 36544,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 36544,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 36544,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 36544,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 36544,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 6.134,
+      "pool_index_zero_based": 7
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0006/HiForestMiniAOD_6358.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 34404,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 34404,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 34404,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 34404,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 34404,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.293,
+      "pool_index_zero_based": 8
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes1/ppRef2024_HardProbes_filtered_PPRefHardProbes1/260925_144742/0007/HiForestMiniAOD_7251.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 26634,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 26634,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 26634,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 26634,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 26634,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 6.447,
+      "pool_index_zero_based": 9
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0000/HiForestMiniAOD_66.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 49656,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 49656,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 49656,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 49656,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 49656,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.297,
+      "pool_index_zero_based": 10
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0001/HiForestMiniAOD_1525.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 39934,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 39934,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 39934,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 39934,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 39934,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.613,
+      "pool_index_zero_based": 11
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0002/HiForestMiniAOD_2420.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 41582,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 41582,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 41582,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 41582,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 41582,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.708,
+      "pool_index_zero_based": 12
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0003/HiForestMiniAOD_3311.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 50958,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 50958,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 50958,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 50958,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 50958,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.339,
+      "pool_index_zero_based": 13
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0004/HiForestMiniAOD_4202.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 37921,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 37921,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 37921,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 37921,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 37921,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.849,
+      "pool_index_zero_based": 14
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0005/HiForestMiniAOD_5092.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 38037,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 38037,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 38037,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 38037,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 38037,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.553,
+      "pool_index_zero_based": 15
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0005/HiForestMiniAOD_5983.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 46927,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 46927,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 46927,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 46927,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 46927,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.28,
+      "pool_index_zero_based": 16
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes2/ppRef2024_HardProbes_filtered_PPRefHardProbes2/260925_144753/0006/HiForestMiniAOD_6875.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 40874,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 40874,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 40874,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 40874,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 40874,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.321,
+      "pool_index_zero_based": 17
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0000/HiForestMiniAOD_344.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 45494,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 45494,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 45494,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 45494,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 45494,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.684,
+      "pool_index_zero_based": 18
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0001/HiForestMiniAOD_1183.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 36415,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 36415,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 36415,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 36415,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 36415,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.485,
+      "pool_index_zero_based": 19
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0002/HiForestMiniAOD_2082.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 47629,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 47629,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 47629,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 47629,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 47629,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.346,
+      "pool_index_zero_based": 20
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0002/HiForestMiniAOD_2973.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 38515,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 38515,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 38515,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 38515,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 38515,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.425,
+      "pool_index_zero_based": 21
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0003/HiForestMiniAOD_3864.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 38009,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 38009,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 38009,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 38009,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 38009,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.603,
+      "pool_index_zero_based": 22
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0004/HiForestMiniAOD_4757.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 43433,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 43433,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 43433,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 43433,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 43433,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.49,
+      "pool_index_zero_based": 23
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0005/HiForestMiniAOD_5648.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 34723,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 34723,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 34723,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 34723,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 34723,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.72,
+      "pool_index_zero_based": 24
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0006/HiForestMiniAOD_6539.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 40316,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 40316,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 40316,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 40316,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 40316,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.224,
+      "pool_index_zero_based": 25
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes3/ppRef2024_HardProbes_filtered_PPRefHardProbes3/260925_144803/0007/HiForestMiniAOD_7430.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 44141,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 44141,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 44141,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 44141,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 44141,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.703,
+      "pool_index_zero_based": 26
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0000/HiForestMiniAOD_86.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 48378,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 48378,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 48378,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 48378,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 48378,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.857,
+      "pool_index_zero_based": 27
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0001/HiForestMiniAOD_1737.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 25270,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 25270,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 25270,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 25270,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 25270,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.268,
+      "pool_index_zero_based": 28
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0002/HiForestMiniAOD_2630.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 38751,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 38751,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 38751,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 38751,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 38751,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.305,
+      "pool_index_zero_based": 29
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0003/HiForestMiniAOD_3521.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 43853,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 43853,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 43853,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 43853,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 43853,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.323,
+      "pool_index_zero_based": 30
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0004/HiForestMiniAOD_4412.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 25624,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 25624,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 25624,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 25624,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 25624,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.259,
+      "pool_index_zero_based": 31
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0005/HiForestMiniAOD_5302.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 40742,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 40742,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 40742,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 40742,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 40742,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.448,
+      "pool_index_zero_based": 32
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0006/HiForestMiniAOD_6194.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 47300,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 47300,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 47300,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 47300,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 47300,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.492,
+      "pool_index_zero_based": 33
+    },
+    {
+      "url": "root://xrootd-vanderbilt.sites.opensciencegrid.org//store/user/jvelazqu/HiForestpp2024/PPRefHardProbes4/ppRef2024_HardProbes_filtered_PPRefHardProbes4/260925_144813/0007/HiForestMiniAOD_7085.root",
+      "root_version": "6.40.04",
+      "trees": {
+        "hiEvtAnalyzer/HiTree": {
+          "entries": 27709,
+          "missing_branches": []
+        },
+        "skimanalysis/HltTree": {
+          "entries": 27709,
+          "missing_branches": []
+        },
+        "hltanalysis/HltTree": {
+          "entries": 27709,
+          "missing_branches": []
+        },
+        "ak4PFJetAnalyzer/t": {
+          "entries": 27709,
+          "missing_branches": []
+        },
+        "ppTracks/trackTree": {
+          "entries": 27709,
+          "missing_branches": []
+        }
+      },
+      "trees_aligned": true,
+      "nonempty": true,
+      "jet_leaf_schema_errors": [],
+      "status": "PASS",
+      "elapsed_seconds": 5.808,
+      "pool_index_zero_based": 34
+    }
+  ],
+  "pass_files": 35,
+  "status": "PASS",
+  "elapsed_seconds": 57.975,
+  "total_event_entries": 1405824
+}

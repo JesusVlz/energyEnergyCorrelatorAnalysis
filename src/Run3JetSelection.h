@@ -23,7 +23,7 @@ enum class JetIDPrescription { Tight = 1, TightLeptonVeto = 2, HINPbPb = 3, HINp
 
 // HIN Run-3 tight AK4/AK8 CHS criteria. leptonVeto additionally applies the
 // charged EM and muon fraction requirements in |eta| <= 2.7. Nonfinite or
-// unphysical inputs throw; fraction-domain validation allows 2 Float_t epsilon
+// unphysical inputs throw; fraction-domain validation allows 3 Float_t epsilon
 // endpoint rounding without changing the raw values used by any ID threshold.
 // Finite jets outside |eta| <= 5 fail the ID. Native
 // five-category counts may omit HF: lower bounds can establish a passing

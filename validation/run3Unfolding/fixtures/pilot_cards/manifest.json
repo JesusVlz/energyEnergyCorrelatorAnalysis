@@ -1,0 +1,125 @@
+{
+  "description": "Fixed pilot selection cards for contract regression tests; no raw inputs or generated campaign state required.",
+  "tasks": [
+    {
+      "id": "OO_MB_R04_N1",
+      "system": "OO",
+      "power": 1,
+      "activity_edges": [
+        -1,
+        100
+      ],
+      "card": "OO_MB_R04_N1.input"
+    },
+    {
+      "id": "OO_MB_R04_N2",
+      "system": "OO",
+      "power": 2,
+      "activity_edges": [
+        -1,
+        100
+      ],
+      "card": "OO_MB_R04_N2.input"
+    },
+    {
+      "id": "OO_C00_30_R04_N1",
+      "system": "OO",
+      "power": 1,
+      "activity_edges": [
+        0,
+        30
+      ],
+      "card": "OO_C00_30_R04_N1.input"
+    },
+    {
+      "id": "OO_C00_30_R04_N2",
+      "system": "OO",
+      "power": 2,
+      "activity_edges": [
+        0,
+        30
+      ],
+      "card": "OO_C00_30_R04_N2.input"
+    },
+    {
+      "id": "OO_C30_50_R04_N1",
+      "system": "OO",
+      "power": 1,
+      "activity_edges": [
+        30,
+        50
+      ],
+      "card": "OO_C30_50_R04_N1.input"
+    },
+    {
+      "id": "OO_C30_50_R04_N2",
+      "system": "OO",
+      "power": 2,
+      "activity_edges": [
+        30,
+        50
+      ],
+      "card": "OO_C30_50_R04_N2.input"
+    },
+    {
+      "id": "OO_C50_90_R04_N1",
+      "system": "OO",
+      "power": 1,
+      "activity_edges": [
+        50,
+        90
+      ],
+      "card": "OO_C50_90_R04_N1.input"
+    },
+    {
+      "id": "OO_C50_90_R04_N2",
+      "system": "OO",
+      "power": 2,
+      "activity_edges": [
+        50,
+        90
+      ],
+      "card": "OO_C50_90_R04_N2.input"
+    },
+    {
+      "id": "OO_C90_100_R04_N1",
+      "system": "OO",
+      "power": 1,
+      "activity_edges": [
+        90,
+        100
+      ],
+      "card": "OO_C90_100_R04_N1.input"
+    },
+    {
+      "id": "OO_C90_100_R04_N2",
+      "system": "OO",
+      "power": 2,
+      "activity_edges": [
+        90,
+        100
+      ],
+      "card": "OO_C90_100_R04_N2.input"
+    },
+    {
+      "id": "pp_ref_R04_N1",
+      "system": "pp",
+      "power": 1,
+      "activity_edges": [
+        -1,
+        100
+      ],
+      "card": "pp_ref_R04_N1.input"
+    },
+    {
+      "id": "pp_ref_R04_N2",
+      "system": "pp",
+      "power": 2,
+      "activity_edges": [
+        -1,
+        100
+      ],
+      "card": "pp_ref_R04_N2.input"
+    }
+  ]
+}

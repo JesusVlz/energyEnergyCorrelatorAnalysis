@@ -22,9 +22,9 @@ OBJS = $(HDRS:.h=.o)
 
 all:            $(PROGRAM)
 
-src/EECAnalyzer.o: src/Run3JetGeometry.h src/Run3JetSelection.h src/Run3JetSelectionInputs.h
+src/EECAnalyzer.o: src/OOMixingPilot.h src/OOEventIdentity.h src/Run3JetGeometry.h src/Run3JetSelection.h src/Run3JetSelectionInputs.h
 src/Run3JetSelection.o: src/Run3JetSelectionInputs.h
-src/ForestReader.o src/HighForestReader.o src/UnfoldingForestReader.o src/GeneratorLevelForestReader.o: src/Run3JetSelectionInputs.h
+src/ForestReader.o src/HighForestReader.o src/UnfoldingForestReader.o src/GeneratorLevelForestReader.o: src/ForestReader.h src/Run3JetSelectionInputs.h
 
 OBJS += src/Run3JetSelection.o
 src/HighForestReader.o src/GeneratorLevelForestReader.o: src/Run3JetBranchValidation.h

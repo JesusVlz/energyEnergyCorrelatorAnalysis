@@ -1064,6 +1064,17 @@ void EECHistogramManager::NormalizeToDeltaRBinArea(TH1D* histogramInNeedOfNormal
 }
 
 /*
+ * Project the existing EEC categories without background-shape stabilization.
+ * Closure comparisons require the original common signal-jet exposure in every
+ * category. Keep LoadHistograms() and its established reconstructed behavior
+ * unchanged, and do not replace multi-power card metadata in this raw view.
+ */
+void EECHistogramManager::LoadRawEnergyEnergyCorrelators(){
+  CheckWeightExponent();
+  LoadEnergyEnergyCorrelatorHistograms();
+}
+
+/*
  * Load all the selected histograms from the inputfile
  */
 void EECHistogramManager::LoadHistograms(){

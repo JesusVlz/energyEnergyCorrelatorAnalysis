@@ -1,84 +1,144 @@
-# Run-3 residual pair diagnostic tools
+# Run-3 R4 track and pair procedure
 
-These standalone tools implement a candidate derivation and independent weighted
-holdout checks. **They do not create a production payload or validate physics.**
-No existing analysis correction, coordinate convention, calibration or estimator
-is changed. Native R4 and R8 are handled in parallel when available; absent native
-R8 trees are recorded as blockers and never replaced by wider AK4 cones.
+This directory applies AN2023_081_v13 Sec. 7.5.1 through the existing analyzer,
+tracking tools, `TrackPairEfficiencyCorrector`, and `JDrawer` conventions.
+Scope: OO selected MB (including stored hiBin 180–199), 0–30/30–50/50–90%,
+ppRef, R4, reconstructed jet pT 40–80/80–120/120–160 GeV, charged tracks
+pT>2 GeV and |eta|<2.4, momentum exponents 1 and 2. The OO activity
+interpretation remains conditional on its established calibration.
 
-`export_forest.py` reads a bounded real MC forest using PyROOT and writes JSONL
-physical events with native reconstructed WTA jets, their original reconstructed
-tracks and generator particles in the **same reconstructed jet cone**. Each row
-retains campaign namespace plus run/lumi/event, track indices, original detector
-eta/phi, generator weight and provisional stored hiBin. It mirrors the current
-Run-3 nominal track cuts (strict measurement pT>2 GeV, |eta|<2.4). Original
-low-pT truth completeness must be checked separately, for example with the
-preserved input audit. The input minimum of 0.5 GeV and the measurement minimum
-of 2 GeV are different requirements.
+## Native selections and one bounded comparison
 
-The exporter explicitly reproduces the inherited EEC single-track lookup using
-track eta relative to the WTA jet axis. It retains the physical eta as separate
-information; this diagnostic does not resolve the coordinate convention or
-single-track calibration applicability. OO lookups retain hiBin and the existing
-6.1 GeV high-pT cap. Invalid lookups fail instead of silently becoming unity.
-The exported event extra weight is one; the stored generator weight is used once.
-No old 0–90% MC matching function is extrapolated. Stored forest `jtpt`, rather
-than a new applicable JEC evaluation, is used for this diagnostic; full event
-filter equivalence to the analyzer and payload applicability remain explicit
-physics blockers. Unsupported OO hiBin events are counted and excluded, so the
-output cannot be labeled a 0–100% measurement.
+`export_forest.py` runs native RecoReco and RecoGen on the same input entries.
+Both use the analyzer's reconstructed-jet selection, WTA geometry, applicable
+R4 JEC, HIN Jet ID, whole-event veto, event cuts and nominal track corrections.
+The wrapper requires exact agreement of selected event identities, jets and
+weights before merging. `--parity` compares the native EEC ROOT sums to exported
+pair sums for both exponents. Source event/track IDs and full selected-event
+track populations are retained. `export_forest_legacy.py` is preserved only to
+reproduce the historical discrepancy; `compare_exporters.py` compares it to the
+new export on identical bounded entries.
 
-`pair_counts.py` uses differential higher/lower pT, reconstructed jet pT,
-provisional hiBin activity and pair separation bins. Training has no EEC energy
-factor: generator/event weights remain once and reconstructed counts include the
-two nominal single-track factors once. For each differential cell, the candidate
-is `C = alpha * Ngen / Nreco_single`, with `alpha` obtained from the large-angle
-control within that same cell. The inherited 0.1–0.4 interval is a starting
-control, **not a validated control or a final reporting range**. Use `--control
-0.15 0.3` to study an alternative aligned to stored bin edges. Both angular
-supports extend through 1.6; no hard-coded 0.4 unity rule is introduced. Sparse,
-nonpositive or missing cells have null corrections and explicit masked yields;
-there is no smoothing, edge clamping or fallback.
+The established Run-3 analyzer uses the fitted vz weights, fitted OO centrality
+weights within 0–90%, and its existing no-centrality-reweighting prescription for
+90–100%. Its generator normalization factor is one; the stored forest weight is
+retained as a separate field. This change does not establish a new cross-section
+weight calibration. The former exporter used the stored generator weight and
+omitted those fitted event weights; it also used stored jet pT and missed event
+selection/Jet ID/veto differences.
 
-Physical events are split by the same namespace/run/lumi/event FNV1a64 key as
-`src/OOEventIdentity.h`; folds 0/1 are training/holdout. File, entry, radius and
-power never enter this split. Duplicate physical events are rejected. On the
-holdout, `(pT1*pT2)^n` is evaluated independently for n=1 and n=2. Single-track,
-pair, event and generator factors are each used once; the map is never squared.
-Raw, single-track, supported pair-corrected and truth yields are saved separately
-from diagnostic full-support unit-area shapes. Any missing map contribution
-makes the corrected bin null instead of presenting a partially corrected result.
+Single-track factors now use physical detector eta and source-event hiBin
+before any cone transformation. The installed OO tool retains its 6.1 GeV pT
+lookup cap. For mixing, donor tracks keep their own factors/activity. Signal
+self-pairs use the jet-dependent residual table; perpendicular/mixed-cone
+self-pairs use the jet-independent table and source activity. Pairs formed
+between distinct detector events or separated translated cones do not acquire
+a close-pair correction from the artificial translated separation. This work
+keeps the existing Run-2 correction path unchanged.
 
-Common holdout event contribution vectors retain all radii and powers for later
-joint replicas. They are sufficient statistics for holdout counting covariance;
-finite-MC uncertainty in the derived map additionally requires rederivation in
-shared training-event replicas. The supplied sums of squared pair weights do not
-claim independent-Poisson pair errors. No covariance or uncertainty is invented.
+## AN residual maps and independent closure
 
-Run from the repository root; choose an explicit namespace that is identical
-across radius streams from the same campaign and distinct for independent MC. The example namespace below identifies the audited
-single-file local test only; no campaign provenance has been established for
-this local copy, and it must not be assumed to define a full production sample:
+`pair_counts.py` fills generator and single-track-corrected reconstructed pair
+counts with event weights and **no EEC momentum weights**. The differential map
+uses higher/lower track pT, source-event activity, reconstructed jet pT and
+physical pair DeltaR. Both populations occupy the same reconstructed jets.
+The AN jet-independent method uses full selected-event tracks, with its
+higher-pT trigger inside |eta|<1.6 and associated track inside |eta|<2.4;
+it is not an average of near-jet maps.
+
+Within each differential cell, the control integrals use the strict, fixed
+interval 0.1<DeltaR<0.4. If alpha = sum(reco_single)/sum(gen) there,
+the multiplicative residual is C = alpha*gen/reco_single. ROOT tables use the
+legacy normalized reco/gen histogram convention, so the existing consumer
+applies its inverse. The minimum raw gen/reco counts is 10 in both cell and
+control. Counts/control integrals and support masks are saved. This support
+criterion is not a substitute for a finite-training-statistics uncertainty.
+There is no smoothing, clamping, extrapolation or sparse-bin unity replacement.
+Unsupported differential cells may use only a supported AN jet-independent
+cell; otherwise the corrected value is unavailable. Invalid auxiliary full-event
+single-track lookups are explicitly flagged and mask any affected independent
+cell/control; an invalid lookup inside a selected jet stops the export.
+
+The namespace/run/lumi/64-bit-event FNV1a64 modulo-2 split is unchanged:
+fold 0 trains both tables, fold 1 validates. Physical duplicate events are
+rejected across input files. Momentum factors `(pT1*pT2)^n`, each single-track
+factor, residual factor and event weight appear once; detector corrections
+are not raised to n. Results include raw, single, pair, jet-independent and
+truth spectra, event vectors, table support and actual fallback use.
+
+`plot_closure.py` writes compatible per-system correction ROOT files, closure
+ROOT/PDF plots and representative AN angular/momentum-weight matching checks.
+The latter reuse the established charge/dR/pT greedy matching on common selected
+reconstructed jets. They do not establish negligible resolution effects or
+replace the AN's subsequent smearing study. Closure statistical bars use common
+physical-event contributions, conditional on the fitted table; finite-training
+map uncertainty is not included. Unsupported whole-bin corrected yields remain
+NaN; open points explicitly show only the supported partial contribution.
+
+## Commands
+
+From the repository root (ROOT/PyROOT required):
 
 ```bash
+make -j4
 python3 -m unittest discover -s validation/run3Pairs -p 'test_*.py' -v
-python3 validation/run3Pairs/export_forest.py \
-  /eos/user/j/jvelazqu/Foresting/OOMC/unembedded_L1HLT_objects_MC_1.root \
-  /tmp/OO_pairs.jsonl --system OO \
-  --sample-namespace OO_local_unembedded_L1HLT_MC_1 --max-events 1000 \
-  --payload trackCorrectionTables/OO2025/Eff_OO_2025_Hijing_MB_Centrality_fromHihfpf_NoPU_3D_Nominal_Official_18Nov2025.root
-python3 validation/run3Pairs/pair_counts.py /tmp/OO_pairs.jsonl /tmp/OO_pair_candidate.json --min-pairs 10
+python3 validation/run3Pairs/export_forest.py INPUT.root bounded/OO.jsonl \
+  --system OO --sample-namespace CAMPAIGN_NAMESPACE --max-events 10000 --parity
+python3 validation/run3Pairs/compare_exporters.py \
+  bounded/OO_legacy.jsonl bounded/OO.jsonl bounded/OO_reconciliation.json
+python3 validation/run3Pairs/run_sample.py RESULTS/expanded \
+  --oo-files 34 --pp-files 10 --events-per-file 30000 --workers 4
+python3 validation/run3Pairs/pair_counts.py RESULTS/expanded/OO_inputs.txt \
+  RESULTS/expanded/OO_pairs.json --input-list --min-pairs 10
+python3 validation/run3Pairs/pair_counts.py RESULTS/expanded/pp_inputs.txt \
+  RESULTS/expanded/pp_pairs.json --input-list --min-pairs 10
+python3 validation/run3Pairs/plot_closure.py RESULTS/expanded/OO_pairs.json \
+  RESULTS/final/OO --events RESULTS/bounded/OO.jsonl
+python3 validation/run3Pairs/plot_closure.py RESULTS/expanded/pp_pairs.json \
+  RESULTS/final/pp --events RESULTS/bounded/pp.jsonl
+python3 validation/run3Pairs/summarize_results.py \
+  --oo-pairs RESULTS/expanded/OO_pairs.json --pp-pairs RESULTS/expanded/pp_pairs.json \
+  --plots RESULTS/final --output RESULTS/final
 ```
 
-The exporter saves SHA256 hashes of input, single-track payload and exported
-JSONL in an adjacent `.metadata.json`; derivation saves its input/tool hashes.
-Event ranges and counts are explicit. The bound is 1–10,000 events and is not a
-production launcher. Actual read-only input audit and bounded pilot evidence for
-this task are under `/tmp/jvelazqu/oo-eec-audit/`; these temporary artifacts are not
-repository data or validation certificates.
+The fixed local sample runner records commands, full input SHA256 hashes,
+source/executable hashes and per-file receipts. `--resume` reuses an export only
+when its command, source hashes, input bytes, output bytes and metadata still agree. `--input-list` streams JSONL files without building
+a combined event file. The per-system manifests are subsets of `expanded/inputs.txt`.
+Process systems separately to bound memory. For the compact resolution check, pass `--events` with
+the representative bounded OO/pp JSONL files; the same physical fold is used.
 
-Production integration remains gated on applicable era/reconstruction/cuts and
-jet calibration, OO expert guidance, sufficient independent statistics across
-all twelve channels in each system, normalization/binning/mixture sensitivity,
-R8 range selection, detector topology/background interaction and joint finite-MC
-covariance. Candidate output is always marked `BLOCKED_NOT_A_PRODUCTION_PAYLOAD`.
+Opt-in application in the normal analyzer uses `Run3TrackPairCorrectionFile`
+and `DisableTrackPairEfficiencyCorrection 0`. The file must contain the
+`Run3PairCorrectionVersion` marker and standard JCard/histogram names. The
+Run-3 consumer fails on unsupported cells instead of silently accepting unity.
+Default analysis cards stay disabled while delivered tables have unsupported
+regions or observed nonclosure; generator-level correlations remain disabled.
+
+Actual commands, first 40–80 plots, expanded tables/grid, source snapshots and
+observed limitations are under `results/2026-11-02-an751-v1/`. See its
+`RESULTS.txt` and the plan's Track pair efficiency Result/next entry.
+
+The completed run contains 979,631 selected OO and 255,902 selected ppRef events.
+All 30 channels are plotted. All six ppRef channels have complete holdout support,
+with integrated pair/truth ratios 0.9932–1.0484 over [.008,.4); the smallest-angle
+40–80 GeV bin still shows nonclosure. All 24 OO channels have incomplete support.
+`final/channel_summary.csv` distinguishes full ratios from partial contributions;
+`unsupported_cells.csv` and `control_support.csv` give exact cells and counts.
+`audit_event_identity.py` verified all 1,320,000 raw input entries against the native
+ledgers with no duplicate namespaced identities or mismatches.
+
+## Preparing all local MC
+
+`all_mc_campaign.py prepare OUTPUT` discovers actual filenames, reads full-file
+ROOT entry counts with PyROOT and freezes sources, cards, calibrations and inputs.
+It does not run MC. `run OUTPUT --workers 4 --resume --system all` executes the
+frozen exports; `status OUTPUT` exits zero only when the full campaign is complete.
+Successful receipts and native artifacts are verified before reuse; failures are
+preserved. A new destination or changed source requires a fresh preparation.
+
+The 3 November plan and staged commands are in the Track pair efficiency sheet
+and `results/2026-11-03-an751-all-mc-v1/campaign_commands.sh`. Execution remains
+pending: the measured home quota cannot hold the projected outputs, and the full
+pp JSON/vector pipeline needs substantially more memory than the interactive node.
+See `resource_readiness.json`; input streaming does not bound retained result memory.
