@@ -1,4 +1,7 @@
 GitHub connector write test
 Repository: JesusVlz/energyEnergyCorrelatorAnalysis
 Branch: main
+Authenticated account: JesusVlz
 Date: 2026-11-06
+Purpose: verify repository read/review plus direct commit-and-push access from ChatGPT.
+Review scope: README, main analysis entry point, Run-3 OO/ppRef cards, mixing, pair-correction, jet-selection/veto, and unfolding validation documentation.
