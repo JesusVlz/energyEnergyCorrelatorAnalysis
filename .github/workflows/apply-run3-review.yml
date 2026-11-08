@@ -29,16 +29,12 @@ jobs:
           assert len(patch)==75356
           assert hashlib.sha256(patch).hexdigest()=='63964011e9efd2014055685684b443892252f9c030826825244e1071c2efac9c'
           Path('/tmp/run3-review-evidence/source.patch').write_bytes(patch)
+          Path('/tmp/run3-review-evidence/fixes.patch').write_bytes((directory/'fixes.patch').read_bytes())
           PY
           git apply --check --unidiff-zero /tmp/run3-review-evidence/source.patch
           git apply --unidiff-zero /tmp/run3-review-evidence/source.patch
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('src/Run3JetQA.h')
-          text=p.read_text();old='fCalibration->Fill(stages[0],0,centrality,weight);'
-          assert text.count(old)==1
-          p.write_text(text.replace(old,'fCalibration->Fill(stages[0],0.0,centrality,weight);'))
-          PY
+          git apply --check --unidiff-zero /tmp/run3-review-evidence/fixes.patch
+          git apply --unidiff-zero /tmp/run3-review-evidence/fixes.patch
           git diff --check
           git diff --binary > /tmp/run3-review-evidence/applied-source.patch
       - name: Install ROOT and diagnostic dependencies
@@ -79,8 +75,10 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import subprocess
-          paths=[line[6:] for line in Path('/tmp/run3-review-evidence/source.patch').read_text().splitlines() if line.startswith('+++ b/')]
-          subprocess.run(['git','add','--',*paths],check=True)
+          paths=set()
+          for filename in ['source.patch','fixes.patch']:
+              paths.update(line[6:] for line in Path('/tmp/run3-review-evidence',filename).read_text().splitlines() if line.startswith('+++ b/'))
+          subprocess.run(['git','add','--',*sorted(paths)],check=True)
           PY
           git rm -r validation/run3Jets/review_transport
           git rm .github/workflows/import-run3-review-payloads.yml .github/workflows/review-run3-snapshot.yml .github/workflows/apply-run3-review.yml
