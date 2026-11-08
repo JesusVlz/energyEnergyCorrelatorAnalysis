@@ -792,6 +792,8 @@ void UnfoldingForestReader::ReadForestFromFile(TFile* inputFile){
   }
 
   Initialize();
+  if(fRun3L1Inputs) fRun3L1Inputs->Bind({TString(inputFile->GetName())},treeName[fJetType]);
+
 }
 
 /*
@@ -879,6 +881,8 @@ void UnfoldingForestReader::GetEvent(Int_t nEvent){
       CheckVectorSize(fGenParticleSubeventArray, fnGenParticles, "sube");
     }
   }
+  if(fRun3L1Inputs) fRun3L1Inputs->Read(nEvent,fnJets);
+
 }
 
 // Getter for number of events in the tree

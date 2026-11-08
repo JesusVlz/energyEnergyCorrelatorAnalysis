@@ -55,6 +55,7 @@ void WriteMap(const std::string& path){
   map.Write();
 }
 void Configure(ConfigurationCard& card,const std::string& map){
+  Set(card,"Run3JetQA",0);
   Set(card,"Run3JetID",1); Set(card,"ApplyJetVeto",1);
   SetString(card,"JetVetoMapFile",map); SetString(card,"JetVetoMapHistogram","explicit_test_key");
   SetString(card,"JetVetoPtConvention","stored"); Set(card,"JetVetoInputMinPt",15);
@@ -145,7 +146,7 @@ int main(int argc,char** argv){
     ExpectBadConfig(map,true); ExpectBadConfig(map,false);
     CheckMegaSkimScope(map);
     ConfigurationCard disabled("cardEECOO.input");
-    Set(disabled,"Run3JetID",0); Set(disabled,"ApplyJetVeto",0);
+    Set(disabled,"Run3JetID",0); Set(disabled,"ApplyJetVeto",0); Set(disabled,"Run3JetQA",0);
     EECAnalyzer baseline({},&disabled,1,-1);
     Require(!baseline.fApplyJetVeto && !baseline.fHistograms->fhJetVetoEventCounts,"Disabled veto fabricated measured loss QA");
     std::cout<<"PASS: all four systems, whole-event/15 GeV/EM/ID boundaries, gen companion, same mixing mask, QA, explicit config and persisted strings\n";

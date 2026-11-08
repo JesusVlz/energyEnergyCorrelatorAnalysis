@@ -1,3 +1,5 @@
+> Update 2026-11-08: `Run3JetIDTable MiniPOG20261108` now selects the owner-supplied website table (OO follows PbPb); `HINc64293a` reproduces only the older helper cut table. The earlier evidence below describes the older implementation, not the updated selection. See [RUN3_UPDATE.md](RUN3_UPDATE.md).
+
 # Run-3 analyzer Jet ID and event veto
 
 The user confirmed the pinned HIN PbPb Jet ID for OO2025 and pinned HIN pp Jet ID
@@ -6,8 +8,8 @@ The exact cut table and differences from the earlier generic tight table are in
 [vetoMapSources.md](vetoMapSources.md). The same functions apply to data and MC.
 
 `Run3JetID 1` selects the collision-system HIN ID for reconstructed analysis,
-reflected-cone QA and response jets. It replaces the inherited max-track/raw-pT
-quality cut in these paths. Generator jets have no reconstructed PF ID applied.
+reflected-cone QA and response jets. It supplements the inherited max-track/raw-pT
+quality cut in all four reconstructed-jet paths. The two requirements are ANDed. Generator jets have no reconstructed PF ID applied.
 Omitting the optional switch or setting it to zero preserves existing cards.
 This disabled compatibility path does not certify the mandatory Run-3 veto.
 

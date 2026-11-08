@@ -10,6 +10,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <limits>
 
 #include "TF1.h"
 #include "TF2.h"
@@ -21,7 +22,11 @@ private:
    enum Type { TypeNone, TypeJetPT, TypeJetEta, TypeJetPhi, TypeJetArea, TypeRho };
    bool Initialized;
    //bool IsFunction; // Edit: Removed this because compiler complains that it is not used
-   double JetPT, JetEta, JetPhi, JetArea, Rho;
+   double JetPT = std::numeric_limits<double>::quiet_NaN();
+   double JetEta = std::numeric_limits<double>::quiet_NaN();
+   double JetPhi = std::numeric_limits<double>::quiet_NaN();
+   double JetArea = std::numeric_limits<double>::quiet_NaN();
+   double Rho = std::numeric_limits<double>::quiet_NaN();
    std::vector<std::string> Formulas;
    std::vector<std::vector<double>> Parameters;
    std::vector<std::vector<Type>> BinTypes;
@@ -54,7 +59,11 @@ class JetCorrector
 {
 private:
    std::vector<SingleJetCorrector> JEC;
-   double JetPT, JetEta, JetPhi, JetArea, Rho;
+   double JetPT = std::numeric_limits<double>::quiet_NaN();
+   double JetEta = std::numeric_limits<double>::quiet_NaN();
+   double JetPhi = std::numeric_limits<double>::quiet_NaN();
+   double JetArea = std::numeric_limits<double>::quiet_NaN();
+   double Rho = std::numeric_limits<double>::quiet_NaN();
 public:
    JetCorrector()                               {}
    JetCorrector(std::string File)               { Initialize(File); }
@@ -68,4 +77,5 @@ public:
    void SetRho(double value)       { Rho = value; }
    double GetCorrection();
    double GetCorrectedPT();
+   std::vector<double> GetCorrectedPTStages(); // raw followed by each actual sequential level
 };

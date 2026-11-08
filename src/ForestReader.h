@@ -106,6 +106,12 @@ public:
   // Enable before opening a forest; unsupported readers fail on input access.
   virtual void EnableRun3JetSelection(Bool_t enabled = true);
   virtual EECJetSelection::JetInputs GetJetSelectionInputs(Int_t iJet) const;
+  virtual void EnableRun3L1Inputs(const std::string&, const std::string&, const std::string&) {
+    throw std::logic_error("This reader does not provide Run-3 L1 inputs");
+  }
+  virtual std::pair<double,double> GetJetL1Inputs(Int_t) const {
+    throw std::logic_error("Run-3 L1 rho/area inputs were not enabled");
+  }
 
   // Getters for leaves in HLT tree
   Int_t GetCaloJet15FilterBit() const;           // Getter for calorimeter jet 15 filter bit
