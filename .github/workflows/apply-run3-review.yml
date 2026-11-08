@@ -1,0 +1,90 @@
+name: Validate Run-3 calibration and selection review
+on:
+  push:
+    branches: ['review/run3-jec-id-qa-20261108']
+    paths: ['.github/workflows/apply-run3-review.yml']
+permissions:
+  contents: write
+jobs:
+  review:
+    if: github.repository == 'JesusVlz/energyEnergyCorrelatorAnalysis'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: review/run3-jec-id-qa-20261108
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify and apply bounded source patch
+        run: |
+          mkdir -p /tmp/run3-review-evidence
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, lzma
+          directory=Path('validation/run3Jets/review_transport')
+          encoded=''.join((directory/f'{i}.b64').read_text().strip() for i in range(3))
+          patch=lzma.decompress(base64.b64decode(encoded, validate=True))
+          assert len(patch)==75356
+          assert hashlib.sha256(patch).hexdigest()=='63964011e9efd2014055685684b443892252f9c030826825244e1071c2efac9c'
+          Path('/tmp/run3-review-evidence/source.patch').write_bytes(patch)
+          PY
+          git apply --check --unidiff-zero /tmp/run3-review-evidence/source.patch
+          git apply --unidiff-zero /tmp/run3-review-evidence/source.patch
+          git diff --check
+      - name: Install ROOT for synthetic validation
+        run: |
+          python -m pip install ROOT 2>&1 | tee /tmp/run3-review-evidence/root-install.log
+          python - <<'PY'
+          import ROOT, pathlib, os
+          root=pathlib.Path(ROOT.__file__).parent
+          print('ROOT', ROOT.gROOT.GetVersion(), root)
+          with open(os.environ['GITHUB_PATH'],'a') as f: f.write(str(root/'bin')+'\n')
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('ROOTSYS='+str(root)+'\n')
+              f.write('LD_LIBRARY_PATH='+str(root/'lib')+'\n')
+          mock=root/'mock_site_packages'
+          mock.mkdir(exist_ok=True)
+          if not (mock/'ROOT').exists(): (mock/'ROOT').symlink_to(root, target_is_directory=True)
+          PY
+      - name: Compile and run synthetic selection and correction tests
+        run: |
+          set -o pipefail
+          python3 validation/run3Jets/sync_review_payloads.py | tee /tmp/run3-review-evidence/payload-verification.log
+          root-config --version --cflags --libs | tee /tmp/run3-review-evidence/root-config.log
+          python3 validation/run3Jets/run_selection_tests.py --output /tmp/run3-selection-tests 2>&1 | tee /tmp/run3-review-evidence/tests.log
+      - name: Exercise plotting on real masks and labelled synthetic spectra
+        run: |
+          mkdir -p /tmp/run3-review-evidence/plots
+          root -l -b -q 'plotting/plotRun3VetoMap.C("jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root","/tmp/run3-review-evidence/plots/OO_veto_map.png")' 2>&1 | tee /tmp/run3-review-evidence/plot-oo.log
+          root -l -b -q 'plotting/plotRun3VetoMap.C("jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root","/tmp/run3-review-evidence/plots/pp_veto_map.png")' 2>&1 | tee /tmp/run3-review-evidence/plot-pp.log
+          root -l -b -q 'plotting/plotRun3JetQA.C("/tmp/run3-selection-tests/update20261108_fixtures/synthetic_stages.root","/tmp/run3-review-evidence/plots/SYNTHETIC_TEST_ONLY",50,80)' 2>&1 | tee /tmp/run3-review-evidence/plot-stages.log
+          test -s /tmp/run3-review-evidence/plots/OO_veto_map.png
+          test -s /tmp/run3-review-evidence/plots/pp_veto_map.png
+      - name: Commit validated sources to review branch only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          paths=[line[6:] for line in Path('/tmp/run3-review-evidence/source.patch').read_text().splitlines() if line.startswith('+++ b/')]
+          subprocess.run(['git','add','--',*paths],check=True)
+          PY
+          git rm -r validation/run3Jets/review_transport
+          git rm .github/workflows/import-run3-review-payloads.yml .github/workflows/review-run3-snapshot.yml .github/workflows/apply-run3-review.yml
+          git diff --cached --stat | tee /tmp/run3-review-evidence/committed-files.log
+          git commit -m 'Add current Run-3 JEC chain, additive miniPOG ID and pre-veto jet diagnostics'
+          git push origin HEAD:refs/heads/review/run3-jec-id-qa-20261108
+          git rev-parse HEAD > /tmp/run3-review-evidence/tested-source-commit.txt
+      - name: Preserve test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run3-review-validation
+          path: |
+            /tmp/run3-review-evidence/
+            /tmp/run3-selection-tests/*.log
+            /tmp/run3-selection-tests/commands.json
+          retention-days: 7
