@@ -41,9 +41,9 @@ jobs:
           PY
           git diff --check
           git diff --binary > /tmp/run3-review-evidence/applied-source.patch
-      - name: Install ROOT for synthetic validation
+      - name: Install ROOT and diagnostic dependencies
         run: |
-          python -m pip install ROOT 2>&1 | tee /tmp/run3-review-evidence/root-install.log
+          python -m pip install ROOT matplotlib 2>&1 | tee /tmp/run3-review-evidence/root-install.log
           python - <<'PY'
           import ROOT, pathlib, os
           root=pathlib.Path(ROOT.__file__).parent
@@ -64,6 +64,7 @@ jobs:
           python3 validation/run3Jets/run_selection_tests.py --output /tmp/run3-selection-tests 2>&1 | tee /tmp/run3-review-evidence/tests.log
       - name: Exercise plotting on real masks and labelled synthetic spectra
         run: |
+          set -o pipefail
           mkdir -p /tmp/run3-review-evidence/plots
           root -l -b -q 'plotting/plotRun3VetoMap.C("jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root","/tmp/run3-review-evidence/plots/OO_veto_map.png")' 2>&1 | tee /tmp/run3-review-evidence/plot-oo.log
           root -l -b -q 'plotting/plotRun3VetoMap.C("jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root","/tmp/run3-review-evidence/plots/pp_veto_map.png")' 2>&1 | tee /tmp/run3-review-evidence/plot-pp.log
