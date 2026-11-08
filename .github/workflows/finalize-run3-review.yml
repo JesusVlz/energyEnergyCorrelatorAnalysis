@@ -1,0 +1,105 @@
+name: Finalize Run-3 review outputs
+on:
+  push:
+    branches: ['review/run3-jec-id-qa-20261108']
+    paths: ['.github/workflows/finalize-run3-review.yml']
+permissions:
+  contents: write
+jobs:
+  review:
+    if: github.repository == 'JesusVlz/energyEnergyCorrelatorAnalysis'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: review/run3-jec-id-qa-20261108
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Apply bounded output refinements
+        run: |
+          mkdir -p /tmp/final-review-evidence/plots
+          python3 - <<'PY'
+          from pathlib import Path
+          def replace(path,old,new):
+              p=Path(path);text=p.read_text()
+              assert text.count(old)==1, path
+              p.write_text(text.replace(old,new))
+          replace('src/ConfigurationCard.cxx',
+            '       fKeyWordVector[i] == "JetVetoPtConvention")',
+            '       fKeyWordVector[i] == "JetVetoPtConvention" ||\n'
+            '       fKeyWordVector[i] == "Run3JetIDTable" || fKeyWordVector[i] == "Run3RhoTree" ||\n'
+            '       fKeyWordVector[i] == "Run3RhoBranch" || fKeyWordVector[i] == "Run3JetAreaBranch")')
+          replace('validation/run3Jets/testRun3Update.cxx',
+            '    EECAnalyzer a({},&c,1,-1);a.RunAnalysis();',
+            '    const std::string savedCard=dir+"/saved_card_"+std::to_string(int(c.Get("DataType")))+".root";\n'
+            '    {TFile output(savedCard.c_str(),"RECREATE");c.WriteCard(&output);}\n'
+            '    {TFile input(savedCard.c_str(),"READ");\n'
+            '      for(const char* key:{"Run3JetIDTable","Run3RhoTree","Run3RhoBranch","Run3JetAreaBranch"}) {\n'
+            '        auto* value=dynamic_cast<TObjString*>(input.Get((std::string("JCard/")+key+"String").c_str()));\n'
+            '        Need(value && value->GetString()==c.GetStr(key),"New calibration/ID string metadata was lost");\n'
+            '      }\n'
+            '    }\n'
+            '    EECAnalyzer a({},&c,1,-1);a.RunAnalysis();')
+          replace('plotting/plotRun3VetoMap.C','  canvas.SetRightMargin(.16);',
+            '  canvas.SetLeftMargin(.14); canvas.SetRightMargin(.24);\n'
+            '  canvas.SetBottomMargin(.14); canvas.SetTopMargin(.06);\n'
+            '  for(auto* axis:{map->GetXaxis(),map->GetYaxis(),map->GetZaxis()}) {\n'
+            '    axis->SetTitleFont(42); axis->SetLabelFont(42);\n'
+            '    axis->SetTitleSize(.035); axis->SetLabelSize(.032);\n'
+            '    axis->SetLabelOffset(.008); axis->CenterTitle(false);\n'
+            '  }\n'
+            '  map->GetXaxis()->SetTitleOffset(1.15);\n'
+            '  map->GetYaxis()->SetTitleOffset(1.35);\n'
+            '  map->GetZaxis()->SetTitleOffset(1.45);')
+          replace('validation/run3Jets/RUN3_UPDATE.md',
+            'This matters to the event veto even when EEC jets are central.',
+            'This matters to the event veto even when EEC jets are central.\n\n'
+            'The selected ID table and configured rho tree, rho branch and measured-area\n'
+            'branch are persisted under `JCard/*String` for input provenance. A regression\n'
+            'checks their roundtrip for pp data and MC.')
+          PY
+          git diff --check
+          git diff > /tmp/final-review-evidence/output-refinements.patch
+      - name: Install test dependencies
+        run: |
+          python -m pip install ROOT matplotlib > /tmp/final-review-evidence/install.log 2>&1
+          python - <<'PY'
+          import ROOT, pathlib, os
+          root=pathlib.Path(ROOT.__file__).parent
+          with open(os.environ['GITHUB_PATH'],'a') as f:f.write(str(root/'bin')+'\n')
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('ROOTSYS='+str(root)+'\nLD_LIBRARY_PATH='+str(root/'lib')+'\n')
+          mock=root/'mock_site_packages';mock.mkdir(exist_ok=True)
+          if not (mock/'ROOT').exists():(mock/'ROOT').symlink_to(root,target_is_directory=True)
+          PY
+      - name: Run full regression and render plots
+        run: |
+          set -o pipefail
+          python3 validation/run3Jets/sync_review_payloads.py | tee /tmp/final-review-evidence/payload-verification.log
+          python3 validation/run3Jets/run_selection_tests.py --output /tmp/final-review-tests 2>&1 | tee /tmp/final-review-evidence/tests.log
+          root -l -b -q 'plotting/plotRun3VetoMap.C("jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root","/tmp/final-review-evidence/plots/OO_veto_map.png")' 2>&1 | tee /tmp/final-review-evidence/plot-oo.log
+          root -l -b -q 'plotting/plotRun3VetoMap.C("jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root","/tmp/final-review-evidence/plots/pp_veto_map.png")' 2>&1 | tee /tmp/final-review-evidence/plot-pp.log
+          root -l -b -q 'plotting/plotRun3JetQA.C("/tmp/final-review-tests/update20261108_fixtures/synthetic_stages.root","/tmp/final-review-evidence/plots/SYNTHETIC_TEST_ONLY",50,80)' 2>&1 | tee /tmp/final-review-evidence/plot-stages.log
+          test -s /tmp/final-review-evidence/plots/OO_veto_map.png
+          test -s /tmp/final-review-evidence/plots/pp_veto_map.png
+          test -s /tmp/final-review-evidence/plots/SYNTHETIC_TEST_ONLY_selection_cumulative.png
+      - name: Commit validated refinements and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/ConfigurationCard.cxx validation/run3Jets/testRun3Update.cxx plotting/plotRun3VetoMap.C validation/run3Jets/RUN3_UPDATE.md
+          git rm .github/workflows/finalize-run3-review.yml
+          git commit -m 'Preserve Run-3 input provenance and finalize veto-map plot layout'
+          git push origin HEAD:refs/heads/review/run3-jec-id-qa-20261108
+          git rev-parse HEAD > /tmp/final-review-evidence/tested-source-commit.txt
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-run3-review-validation
+          path: |
+            /tmp/final-review-evidence/
+            /tmp/final-review-tests/*.log
+            /tmp/final-review-tests/commands.json
+          retention-days: 7
