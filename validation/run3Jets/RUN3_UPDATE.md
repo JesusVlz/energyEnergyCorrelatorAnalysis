@@ -72,6 +72,10 @@ an unresolved threshold raises a visible error. Full forward multiplicity
 support must be confirmed; do not silently replace the new table by the old one.
 This matters to the event veto even when EEC jets are central.
 
+The selected ID table and configured rho tree, rho branch and measured-area
+branch are persisted under `JCard/*String` for input provenance. A regression
+checks their roundtrip for pp data and MC.
+
 ## Diagnostic output
 
 `Run3JetQA 1` saves these objects in the ordinary `./eecAnalysis` ROOT output:

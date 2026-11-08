@@ -88,6 +88,14 @@ void L1AndCalibration(const std::string& dir) {
   for(const char* cardName:{"cardEECpp5v36TeVR04.input","cardEECpp5v36TeVMCR04.input"}) {
     ConfigurationCard c(cardName);Set(c,"Run3JEC",1);Set(c,"BackgroundMethods",0);
     Str(c,"Run3RhoTree","rhoProducer/t");Str(c,"Run3RhoBranch","measuredRho");Str(c,"Run3JetAreaBranch","measuredArea");
+    const std::string savedCard=dir+"/saved_card_"+std::to_string(int(c.Get("DataType")))+".root";
+    {TFile output(savedCard.c_str(),"RECREATE");c.WriteCard(&output);}
+    {TFile input(savedCard.c_str(),"READ");
+      for(const char* key:{"Run3JetIDTable","Run3RhoTree","Run3RhoBranch","Run3JetAreaBranch"}) {
+        auto* value=dynamic_cast<TObjString*>(input.Get((std::string("JCard/")+key+"String").c_str()));
+        Need(value && value->GetString()==c.GetStr(key),"New calibration/ID string metadata was lost");
+      }
+    }
     EECAnalyzer a({},&c,1,-1);a.RunAnalysis();
     Need(a.fJetCorrector->JEC.size()==(c.Get("DataType")==11?3:2),"pp active chain has missing L1 or wrong residual data/MC routing");
   }

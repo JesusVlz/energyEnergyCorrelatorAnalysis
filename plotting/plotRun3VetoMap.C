@@ -23,7 +23,16 @@ void plotRun3VetoMap(const char* fileName, const char* output="jetVetoMap.png", 
   }
   gStyle->SetOptStat(0);
   TCanvas canvas("veto_map_canvas","Veto payload",1000,760);
-  canvas.SetRightMargin(.16);
+  canvas.SetLeftMargin(.14); canvas.SetRightMargin(.24);
+  canvas.SetBottomMargin(.14); canvas.SetTopMargin(.06);
+  for(auto* axis:{map->GetXaxis(),map->GetYaxis(),map->GetZaxis()}) {
+    axis->SetTitleFont(42); axis->SetLabelFont(42);
+    axis->SetTitleSize(.035); axis->SetLabelSize(.032);
+    axis->SetLabelOffset(.008); axis->CenterTitle(false);
+  }
+  map->GetXaxis()->SetTitleOffset(1.15);
+  map->GetYaxis()->SetTitleOffset(1.35);
+  map->GetZaxis()->SetTitleOffset(1.45);
   map->SetTitle(""); map->GetXaxis()->SetTitle("Detector jet #eta"); map->GetYaxis()->SetTitle("Detector jet #phi (rad)");
   map->GetZaxis()->SetTitle("Veto-map value (nonzero rejects)");
   map->SetMinimum(-maximum); map->SetMaximum(maximum); map->Draw("COLZ");
