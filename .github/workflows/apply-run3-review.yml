@@ -32,7 +32,15 @@ jobs:
           PY
           git apply --check --unidiff-zero /tmp/run3-review-evidence/source.patch
           git apply --unidiff-zero /tmp/run3-review-evidence/source.patch
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/Run3JetQA.h')
+          text=p.read_text();old='fCalibration->Fill(stages[0],0,centrality,weight);'
+          assert text.count(old)==1
+          p.write_text(text.replace(old,'fCalibration->Fill(stages[0],0.0,centrality,weight);'))
+          PY
           git diff --check
+          git diff --binary > /tmp/run3-review-evidence/applied-source.patch
       - name: Install ROOT for synthetic validation
         run: |
           python -m pip install ROOT 2>&1 | tee /tmp/run3-review-evidence/root-install.log
@@ -62,6 +70,7 @@ jobs:
           root -l -b -q 'plotting/plotRun3JetQA.C("/tmp/run3-selection-tests/update20261108_fixtures/synthetic_stages.root","/tmp/run3-review-evidence/plots/SYNTHETIC_TEST_ONLY",50,80)' 2>&1 | tee /tmp/run3-review-evidence/plot-stages.log
           test -s /tmp/run3-review-evidence/plots/OO_veto_map.png
           test -s /tmp/run3-review-evidence/plots/pp_veto_map.png
+          test -s /tmp/run3-review-evidence/plots/SYNTHETIC_TEST_ONLY_selection_cumulative.png
       - name: Commit validated sources to review branch only
         run: |
           git config user.name 'github-actions[bot]'
