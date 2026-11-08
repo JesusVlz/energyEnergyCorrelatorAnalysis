@@ -1,0 +1,63 @@
+--- a/src/Run3JetQA.h
++++ b/src/Run3JetQA.h
+@@ -57 +57 @@
+-    fCalibration->Fill(stages[0],0,centrality,weight);
++    fCalibration->Fill(stages[0],0.0,centrality,weight);
+--- a/validation/run3Jets/compare_calibrations.py
++++ b/validation/run3Jets/compare_calibrations.py
+@@ -28 +28,13 @@
+-from export_forest import digest, select_branches
++from export_forest import digest
++
++
++def select_branches(tree, names):
++    """Local checked branch selection; the native pair exporter no longer exposes it."""
++    if not tree:
++        raise ValueError('Missing input tree for calibration diagnostics')
++    missing = [name for name in names if not tree.GetBranch(name)]
++    if missing:
++        raise ValueError('Missing diagnostic branches: ' + ', '.join(missing))
++    tree.SetBranchStatus('*', 0)
++    for name in names:
++        tree.SetBranchStatus(name, 1)
+--- a/plotting/plotRun3JetQA.C
++++ b/plotting/plotRun3JetQA.C
+@@ -4,0 +5 @@
++#include <TGraph.h>
+@@ -28,2 +29,4 @@
+-  TLegend legend(.43,.64,.88,.89); legend.SetBorderSize(0);
+-  std::vector<std::unique_ptr<TH1D>> histograms,ratioHistograms;
++  TLegend legend(.34,.65,.88,.89); legend.SetBorderSize(0); legend.SetTextSize(.025);
++  std::vector<std::unique_ptr<TH1D>> histograms;
++  std::vector<std::unique_ptr<TGraph>> ratioGraphs;
++  std::unique_ptr<TH1D> ratioFrame;
+@@ -46,0 +50,8 @@
++    ratioFrame.reset(dynamic_cast<TH1D*>(histograms[0]->Clone("ratio_frame")));
++    ratioFrame->SetDirectory(nullptr); ratioFrame->Reset();
++    ratioFrame->SetMinimum(0); ratioFrame->SetMaximum(1.1);
++    ratioFrame->GetYaxis()->SetTitle("Stage / no jet-quality cuts");
++    ratioFrame->GetXaxis()->SetTitle("Final calibrated jet p_{T} (GeV)");
++    ratioFrame->GetXaxis()->SetTitleSize(.10);ratioFrame->GetXaxis()->SetLabelSize(.08);
++    ratioFrame->GetYaxis()->SetTitleSize(.075);ratioFrame->GetYaxis()->SetLabelSize(.075);ratioFrame->GetYaxis()->SetTitleOffset(.6);
++    ratioFrame->Draw("AXIS");
+@@ -48,3 +59,3 @@
+-      std::unique_ptr<TH1D> ratio(dynamic_cast<TH1D*>(histograms[j]->Clone(("ratio_"+std::to_string(j)).c_str())));
+-      ratio->SetDirectory(nullptr);
+-      for(int b=0;b<=ratio->GetNbinsX()+1;++b) {
++      auto ratio=std::make_unique<TGraph>();
++      ratio->SetMarkerColor(colors[j]); ratio->SetMarkerStyle(20+j); ratio->SetMarkerSize(.7);
++      for(int b=1;b<=histograms[0]->GetNbinsX();++b) {
+@@ -52,2 +63,3 @@
+-        ratio->SetBinContent(b,denominator>0?histograms[j]->GetBinContent(b)/denominator:0);
+-        ratio->SetBinError(b,0); // Correlated/event-cluster uncertainty is not inferred from independent Sumw2.
++        if(denominator<=0) continue; // Empty/unsupported bins are omitted, never drawn as zero efficiency.
++        const double value=histograms[j]->GetBinContent(b)/denominator;
++        if(std::isfinite(value)) ratio->SetPoint(ratio->GetN(),histograms[0]->GetBinCenter(b),value);
+@@ -55,6 +67 @@
+-      ratio->SetMinimum(0); ratio->SetMaximum(1.1);
+-      ratio->GetYaxis()->SetTitle("Stage / no jet-quality cuts");
+-      ratio->GetXaxis()->SetTitle("Final calibrated jet p_{T} (GeV)");
+-      ratio->GetXaxis()->SetTitleSize(.10);ratio->GetXaxis()->SetLabelSize(.08);
+-      ratio->GetYaxis()->SetTitleSize(.075);ratio->GetYaxis()->SetLabelSize(.075);ratio->GetYaxis()->SetTitleOffset(.6);
+-      ratio->Draw(j==1?"HIST":"HIST SAME");ratioHistograms.push_back(std::move(ratio));
++      ratio->Draw("P SAME");ratioGraphs.push_back(std::move(ratio));
