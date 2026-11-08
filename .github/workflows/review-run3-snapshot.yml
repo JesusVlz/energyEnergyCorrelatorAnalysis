@@ -1,0 +1,24 @@
+name: Run-3 review source snapshot
+on:
+  push:
+    branches: ['review/run3-jec-id-qa-20261108']
+    paths: ['.github/workflows/review-run3-snapshot.yml']
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Archive review code and calibration inputs only
+        run: |
+          git rev-parse HEAD > source-revision.txt
+          tar -czf run3-review-source.tgz src plotting validation jetEnergyCorrections jetVetoMaps Makefile README.md eecAnalysis.cxx card*.input cards crab makeEECAnalysisTar.sh source-revision.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: run3-review-source
+          path: run3-review-source.tgz
+          retention-days: 3
