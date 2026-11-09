@@ -28,7 +28,7 @@ CPP = r'''
 using namespace EECRun3Tracking;
 void writeCharges(const std::string& path, bool vector, int sign) {
   TFile file(path.c_str(),"RECREATE"); TTree tree("tracks","");
-  int n=2, q[2]={-sign,sign}; std::vector<char> v={static_cast<char>(-sign),static_cast<char>(sign)};
+  int n=4, q[4]={-sign,sign,0,2}; std::vector<char> v={static_cast<char>(-sign),static_cast<char>(sign),0,2};
   tree.Branch("nTrk",&n,"nTrk/I");
   if(vector) tree.Branch("trkCharge",&v); else tree.Branch("trkCharge",q,"trkCharge[nTrk]/I");
   tree.Fill(); tree.Write();
@@ -56,7 +56,11 @@ int main(int argc,char** argv) {
     TChain chain("tracks"); chain.Add(a.c_str()); chain.Add(b.c_str());
     TrackCharge charge; charge.Bind(&chain);
     chain.GetEntry(0); assert(charge.Get(0)==-1); assert(charge.Get(1)==1);
+    assert(charge.Get(2)==0); // Neutral candidates reach the analyzer charge cut.
+    rejected=false; try { charge.Get(3); } catch(const std::runtime_error&) {rejected=true;} assert(rejected);
     chain.GetEntry(1); assert(charge.Get(0)==1); assert(charge.Get(1)==-1);
+    assert(charge.Get(2)==0);
+    rejected=false; try { charge.Get(3); } catch(const std::runtime_error&) {rejected=true;} assert(rejected);
   }
   TTree missing("missing",""); TrackCharge charge;
   rejected=false; try {charge.Bind(&missing);} catch(const std::runtime_error&){rejected=true;} assert(rejected);
@@ -151,6 +155,7 @@ class PreparationTests(unittest.TestCase):
         self.assertIn('EECRun3Tracking::Payload(true, fTrackSelectionVariation)',source)
         self.assertIn('EECRun3Tracking::Payload(false, fTrackSelectionVariation)',source)
         self.assertIn('Run3TrackSelectionVersion',source)
+        self.assertIn('if(trackReader->GetTrackCharge(iTrack) == 0) return false;',source)
         self.assertIn('selectedTrackCorrection[firstParticleType[iPairingType]]',source)
 
     @unittest.skipUnless(shutil.which('root-config'),'ROOT development environment required')
