@@ -1,0 +1,195 @@
+name: Run3 OO CERNBox validation
+
+on:
+  push:
+    branches:
+      - review/run3-jec-id-qa-20261108
+    paths:
+      - ".github/workflows/run3-oo-cernbox-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout review branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ROOT
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ROOT==0.1a12 matplotlib
+          root-config --version
+          python - <<'PY'
+          import ROOT
+          print("PyROOT", ROOT.gROOT.GetVersion())
+          PY
+
+      - name: Build framework
+        run: |
+          make -j2
+          ./eecAnalysis 2>&1 | head -20 || true
+
+      - name: Run synthetic Run-3 regressions
+        run: |
+          rm -rf validation/run3Jets/ci-selection-tests
+          python3 validation/run3Jets/run_selection_tests.py --output validation/run3Jets/ci-selection-tests
+
+      - name: Download CERNBox OO data share
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p ci_oo_input
+          curl -fsSL --retry 3 --retry-delay 3 -D ci_oo_input/headers.txt             -o ci_oo_input/share_payload             "https://cernbox.cern.ch/s/8ijuBlE4H95W9kv/download"
+          file ci_oo_input/share_payload | tee ci_oo_input/file_type.txt
+          ls -lh ci_oo_input/share_payload | tee ci_oo_input/size.txt
+
+          if unzip -t ci_oo_input/share_payload >/dev/null 2>&1; then
+            mkdir -p ci_oo_input/unpacked
+            unzip -o ci_oo_input/share_payload -d ci_oo_input/unpacked
+          else
+            cp ci_oo_input/share_payload ci_oo_input/oo_input.root
+          fi
+
+          python - <<'PY'
+          import ROOT, pathlib, shutil, sys
+          base = pathlib.Path("ci_oo_input")
+          candidates = []
+          if (base/"oo_input.root").exists():
+              candidates.append(base/"oo_input.root")
+          candidates += list((base/"unpacked").rglob("*.root")) if (base/"unpacked").exists() else []
+          print("ROOT candidates:", candidates)
+          chosen = None
+          for p in candidates:
+              f = ROOT.TFile.Open(str(p))
+              ok = bool(f and not f.IsZombie())
+              print(p, "ROOT_OPEN", ok)
+              if ok:
+                  keys = [k.GetName() for k in f.GetListOfKeys()]
+                  print("top-level keys:", keys[:50])
+                  if f.Get("akCs4PFJetAnalyzer/t") and f.Get("hiEvtAnalyzer/HiTree"):
+                      chosen = p
+                      break
+              if f: f.Close()
+          if chosen is None:
+              raise SystemExit("No usable OO HiForest ROOT file found in CERNBox share")
+          target = base/"oo_data.root"
+          if chosen.resolve() != target.resolve():
+              shutil.copy2(chosen, target)
+          f = ROOT.TFile.Open(str(target))
+          required = [
+              "akCs4PFJetAnalyzer/t",
+              "hiEvtAnalyzer/HiTree",
+              "skimanalysis/HltTree",
+          ]
+          for name in required:
+              obj = f.Get(name)
+              print(name, "FOUND" if obj else "MISSING", obj.GetEntries() if obj else "")
+          jets = f.Get("akCs4PFJetAnalyzer/t")
+          if jets:
+              for branch in [
+                  "rawpt","jtpt","jteta","jtphi","WTAeta","WTAphi","trackMax",
+                  "jtPfCHF","jtPfNHF","jtPfCEF","jtPfNEF","jtPfMUF",
+                  "jtPfCHM","jtPfNHM","jtPfCEM","jtPfNEM","jtPfMUM"
+              ]:
+                  print("JET_BRANCH", branch, "FOUND" if jets.GetBranch(branch) else "MISSING")
+          f.Close()
+          PY
+
+      - name: Prepare bounded OO data card
+        run: |
+          cp cardEECOOInclusiveR04.input ci_oo_input/OO_data_test.input
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("ci_oo_input/OO_data_test.input")
+          s=p.read_text()
+          replacements = {
+            "FilledHistograms 31": "FilledHistograms 3",
+            "BackgroundMethods 6": "BackgroundMethods 0",
+            "DebugLevel 2": "DebugLevel 1",
+            "MaxEventsPerFile 0": "MaxEventsPerFile 20000",
+          }
+          for old,new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f"Card token not found: {old}")
+              s=s.replace(old,new,1)
+          p.write_text(s)
+          print(p.read_text())
+          PY
+
+      - name: Run eecAnalysis on OO data
+        run: |
+          set -o pipefail
+          ./eecAnalysis             ci_oo_input/oo_data.root             ci_oo_input/OO_data_test.input             ci_oo_input/oo_data_test_output.root             0 true             2>&1 | tee ci_oo_input/eecAnalysis.log
+
+      - name: Produce representative QA plots
+        run: |
+          mkdir -p ci_oo_input/plots
+          root -l -b -q 'plotting/plotRun3JetQA.C("ci_oo_input/oo_data_test_output.root","ci_oo_input/plots/oo_data",-1,100)'             | tee ci_oo_input/plotRun3JetQA.log
+          root -l -b -q 'plotting/plotRun3VetoMap.C("jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root","ci_oo_input/plots/oo_veto_map.png")'             | tee ci_oo_input/plotRun3VetoMap.log
+          cat > ci_oo_input/plot_trackmax.C <<'EOF'
+          {
+            TFile f("ci_oo_input/oo_data_test_output.root","READ");
+            auto *h=(TH3D*)f.Get("run3JetQA/trackMaxOverRawPt");
+            if(!h) { std::cerr<<"missing trackMaxOverRawPt"<<std::endl; gSystem->Exit(2); }
+            auto *h2=(TH2D*)h->Project3D("yx");
+            h2->SetName("trackmax_vs_rawpt");
+            h2->SetTitle(";trackMax/rawPt;Raw jet p_{T} (GeV)");
+            TCanvas c("c","",900,700);
+            c.SetLogz();
+            h2->GetXaxis()->SetRangeUser(0,1.2);
+            h2->GetYaxis()->SetRangeUser(0,300);
+            h2->Draw("COLZ");
+            c.SaveAs("ci_oo_input/plots/oo_trackmax_over_rawpt_vs_rawpt.png");
+
+            auto *p=h->ProjectionX("trackmax_ratio_all",1,h->GetNbinsY(),1,h->GetNbinsZ(),"e");
+            TCanvas c2("c2","",900,700);
+            p->SetTitle(";trackMax/rawPt;Weighted jets");
+            p->Draw("HIST");
+            TLine low(.01,0,.01,p->GetMaximum()*1.05), high(.98,0,.98,p->GetMaximum()*1.05);
+            low.SetLineStyle(2); high.SetLineStyle(2); low.Draw(); high.Draw();
+            c2.SaveAs("ci_oo_input/plots/oo_trackmax_over_rawpt.png");
+          }
+          EOF
+          root -l -b -q ci_oo_input/plot_trackmax.C | tee ci_oo_input/plotTrackMax.log
+          ls -lh ci_oo_input/plots
+
+      - name: Summarize QA counts
+        run: |
+          python - <<'PY' | tee ci_oo_input/qa_summary.txt
+          import ROOT
+          f=ROOT.TFile.Open("ci_oo_input/oo_data_test_output.root")
+          sel=f.Get("run3JetQA/selectionPtCounts")
+          cal=f.Get("run3JetQA/calibrationPtWeighted")
+          print("selection integral by stage:")
+          for i in range(1,sel.GetNbinsY()+1):
+              total=sel.Integral(1,sel.GetNbinsX(),i,i,1,sel.GetNbinsZ())
+              print(i, sel.GetYaxis().GetBinLabel(i), total)
+          print("calibration integral by stage:")
+          for i in range(1,cal.GetNbinsY()+1):
+              total=cal.Integral(1,cal.GetNbinsX(),i,i,1,cal.GetNbinsZ())
+              print(i, cal.GetYaxis().GetBinLabel(i), total)
+          for key in ["JECState","JetIDTable","PpL1FastJetState","VetoState"]:
+              obj=f.Get("run3JetQA/"+key)
+              if obj: print(key, obj.GetTitle())
+          f.Close()
+          PY
+
+      - name: Upload OO validation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run3-oo-cernbox-validation
+          path: |
+            ci_oo_input/**
+            validation/run3Jets/ci-selection-tests/**
+          retention-days: 7
