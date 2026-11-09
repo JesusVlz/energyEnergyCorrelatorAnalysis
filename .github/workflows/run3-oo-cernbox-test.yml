@@ -46,7 +46,6 @@ jobs:
           which root-config
           root-config --version
           which root
-          root -l -b -q -e 'std::cout << gROOT->GetVersion() << std::endl;'
 
       - name: Build framework
         run: |
