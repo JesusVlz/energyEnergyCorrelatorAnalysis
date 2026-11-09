@@ -15,6 +15,7 @@ import itertools
 import json
 import math
 from pathlib import Path
+from preparation_contract import write_contract
 
 FIELDS = ('gen', 'raw', 'single', 'pair', 'pair_jet_independent')
 EVENT_FIELDS = {'pair': 'pair_supported', 'pair_jet_independent': 'pair_jet_independent_supported'}
@@ -52,9 +53,10 @@ def write_tables(ROOT, result, output):
     systems = sorted({row['key'][0] for row in rows + independent})
     outputs = []
     for system in systems:
-        filename = output / ('trackPairEfficiencyCorrection_' + system + '_run3-an751-v1.root')
+        filename = output / ('trackPairEfficiencyCorrection_' + system + '_' + result['correction_version'] + '.root')
         rootfile = ROOT.TFile(str(filename), 'RECREATE')
-        ROOT.TNamed('Run3PairCorrectionVersion', 'run3-an751-v1').Write()
+        ROOT.TNamed('Run3PairCorrectionVersion', result['correction_version']).Write()
+        write_contract(ROOT, result, rootfile, system)
         put_json(ROOT, 'Provenance', {key: result.get(key) for key in (
             'method', 'control', 'fold_algorithm', 'min_raw_pairs_per_cell_and_control',
             'input_path', 'input_sha256', 'input_files', 'tool_sha256', 'status', 'invalid_cell_policy', 'correction_version', 'AN_reference', 'jet_independent_population', 'jet_independent_trigger_abs_eta_max_exclusive')})

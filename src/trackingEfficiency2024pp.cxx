@@ -1,3 +1,4 @@
+#include "TrackingTableValidation.h"
 #include "trackingEfficiency2024pp.h"
 
 // C++ includes
@@ -79,6 +80,7 @@ TrkEff2024ppRef::TrkEff2024ppRef(
       "histograms: hEff_2D, hFak_2D, hSec_2D, hMul_2D."
     );
   }
+  EECRun3Tracking::ValidateTables({fEfficiency, fFakeRate, fSecondaryRate, fMultipleRecoRate}, 2, filePath);
 }
 
 TrkEff2024ppRef::~TrkEff2024ppRef(){
@@ -95,7 +97,7 @@ bool TrkEff2024ppRef::CheckBounds(
   float eta
 ) const {
 
-  if(fEfficiency == NULL){
+  if(fEfficiency == NULL || !std::isfinite(pt) || !std::isfinite(eta)){
     return false;
   }
 
@@ -213,6 +215,8 @@ float TrkEff2024ppRef::getCorrection(
     fMultipleRecoRate->GetBinContent(
       multipleRecoBin
     );
+
+  if(!EECRun3Tracking::ValidContents(efficiency, fakeRate, secondaryRate, multipleRecoRate)) return 0;
 
   const float denominator =
     efficiency * (1.0f + multipleRecoRate);

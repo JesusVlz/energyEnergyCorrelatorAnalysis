@@ -19,7 +19,7 @@ ACTIVITY = (0., 60., 100., 180., 200.)  # source-event hiBin: 0-30/30-50/50-90/9
 DR = (0., .002, .005, .008, .01, .02, .04, .07, .1, .15, .2, .3, .4, .6, .8)
 CONTROL = (.1, .4)
 TRIGGER_ETA = 1.6  # native Run-3 R4 JetEtaCut; AN method 1 uses jet acceptance
-VERSION = 'run3-an751-v1'
+VERSION = 'run3-an751-v2'
 SELECTIONS = {'OO': ('MB', 'C0_30', 'C30_50', 'C50_90'), 'pp': ('ppRef',)}
 
 
@@ -109,7 +109,9 @@ def validate_population(tracks, allow_unsupported_auxiliary=False):
         elif not math.isfinite(correction) or correction <= 0:
             raise ValueError('Invalid single-track correction; no unity fallback')
     # Consume only index validation, not the O(N^2) combinations.
-    pairs(tracks)
+    indices = [track['index'] for track in tracks]
+    if len(indices) != len(set(indices)):
+        raise ValueError('Duplicate physical track index within one population')
 
 
 def validate(events):
@@ -471,8 +473,11 @@ def main():
             parser.error('input manifest repeats a JSONL path')
     else:
         paths = [args.input]
+    from preparation_contract import check_export_metadata
+    tracking_contracts = check_export_metadata(paths)
     events = JsonlEvents(paths)
     result = run(events, args.min_pairs, tuple(args.control))
+    result['tracking_contracts'] = tracking_contracts
     result['tool_sha256'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     result['input_sha256'] = file_digest(args.input)
     result['input_path'] = str(args.input.resolve())

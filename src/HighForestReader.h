@@ -11,6 +11,7 @@
 
 // Own includes
 #include "ForestReader.h"
+#include "Run3TrackCharge.h"
 
 using namespace std;
 
@@ -140,6 +141,8 @@ private:
   Float_t fMatchedJetEtaArray[fnMaxJet] = {0};    // etas of all the generator level jets in an event
   Float_t fMatchedJetWTAEtaArray[fnMaxJet] = {0}; // etas of all the generator level jets in an event with respect to WTA axis
   
+  EECRun3Tracking::TrackCharge fRun3TrackCharge;
+
   // Leaves for the track tree in AOD forests
   Float_t fTrackPtArray[fnMaxTrack] = {0};                    // Array for track pT:s
   Float_t fTrackPtErrorArray[fnMaxTrack] = {0};               // Array for track pT errors

@@ -55,3 +55,8 @@ cl:  clean $(PROGRAM)
 #		@echo "Generating dictionary ..."
 #		@rm -f nanoDict.cc nanoDict.hh nanoDict.h
 #		@rootcling nanoDict.cc -c -D$(version) $(HDRSDICT)
+
+# Run-3 tracking changes must invalidate dependent objects in incremental builds.
+src/EECAnalyzer.o: src/Run3TrackSelection.h
+src/HighForestReader.o: src/Run3TrackCharge.h
+src/trackingEfficiency2025OO.o src/trackingEfficiency2024pp.o: src/TrackingTableValidation.h

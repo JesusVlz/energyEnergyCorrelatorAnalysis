@@ -215,6 +215,7 @@ HighForestReader::HighForestReader(const HighForestReader& in) :
 {
   // Copy constructor
   fRun3PFJetInputs = in.fRun3PFJetInputs;
+  fRun3TrackCharge = in.fRun3TrackCharge;
   fRun3JetInputsBound = in.fRun3JetInputsBound;
   fRun3ValidatedJetTreeNumber = in.fRun3ValidatedJetTreeNumber;
   for(Int_t i = 0; i < fnMaxJet; i++){
@@ -259,6 +260,7 @@ HighForestReader& HighForestReader::operator=(const HighForestReader& in){
   
   ForestReader::operator=(in);
   fRun3PFJetInputs = in.fRun3PFJetInputs;
+  fRun3TrackCharge = in.fRun3TrackCharge;
   fRun3JetInputsBound = in.fRun3JetInputsBound;
   fRun3ValidatedJetTreeNumber = in.fRun3ValidatedJetTreeNumber;
   
@@ -769,6 +771,7 @@ void HighForestReader::Initialize(){
   if(fReadTrackTree){
     
     fTrackTree->SetBranchStatus("*", 0);
+    if((fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC) && !fMegaSkimMode) fRun3TrackCharge.Bind(fTrackTree);
     
     // We need to read the forest to vectors for MiniAODs and to arrays for AODs
     if(fIsMiniAOD){
@@ -1238,7 +1241,8 @@ Float_t HighForestReader::GetTrackEnergyHcal(Int_t iTrack) const{
 
 // Getter for track charge. Charge is only relevant for generator level tracks.
 Int_t HighForestReader::GetTrackCharge(Int_t iTrack) const{
-  return 1;
+  if((fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC) && !fMegaSkimMode) return fRun3TrackCharge.Get(iTrack);
+  return 1; // Unchanged legacy/mega-skim path, not used for Run-3 matching.
 }
 
 // Getter for track subevent index. Relevant only for generator level tracks.

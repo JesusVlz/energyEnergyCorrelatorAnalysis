@@ -49,10 +49,11 @@ JetVetoPtConvention stored # Nominal PAT/HiForest jtpt; no extra JES/JER variati
 JetVetoInputMinPt 15 # Owner-declared retention bound; complete upstream coverage still requires validation
 
 # Cuts for tracks
+Run3TrackSelection Nominal # Change together with VertexMaxDistance and matching payload
 TrackEtaCut 2.4             # Region in eta around midrapidity from which tracks are accepted
 MinTrackPtCut 0.5
 MaxTrackPtCut 500           # Maximum track pT considered in the analysis
-MaxTrackPtRelativeError 0.1 # Maximum relative error allowed for track pT. 0.1 = Nominal, 0.1 = Loose, 0.05 = Tight
+MaxTrackPtRelativeError 0.1 # Run-3: <=0.1 only above 10 GeV, all selections
 VertexMaxDistance 3         # Position with respect to PV resolution. 3 = Nominal, 5 = Loose, 2 = Tight
 CalorimeterSignalLimitPt 20 # Require signal in calorimeters for all track above this pT
 HighPtEtFraction 0.5        # For high pT tracks, require Et to be at least this fraction of pT
@@ -105,7 +106,7 @@ VzMixingBins -0.5 1 # vz binning for mixing
 HiBinMixingBins -0.5 1 # HiBin binning for mixing
 HFEnergyMixingBins 0 1 # HF energy binning for mixing
 MultiplicityMixingBins -0.5 1 # Multiplicity binning for mixing
-HFEnergyShift 25 # Shift in HF energy when matching to find mixed events
+HFEnergyShift 0 # OFF for Run-3; no inherited HF shift
 
 # Debug
 DebugLevel 2   # 0 = No debug messages, 1 = Some debug messages, 2 = All debug messages
