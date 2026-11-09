@@ -25,7 +25,19 @@ import ROOT
 
 REPO=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(REPO/'validation/run3Pairs'))
-from export_forest import digest, select_branches
+from export_forest import digest
+
+
+def select_branches(tree, names):
+    """Local checked branch selection; the native pair exporter no longer exposes it."""
+    if not tree:
+        raise ValueError('Missing input tree for calibration diagnostics')
+    missing = [name for name in names if not tree.GetBranch(name)]
+    if missing:
+        raise ValueError('Missing diagnostic branches: ' + ', '.join(missing))
+    tree.SetBranchStatus('*', 0)
+    for name in names:
+        tree.SetBranchStatus(name, 1)
 
 PT_EDGES=np.array([0,10,20,40,60,80,120,160,250,500.])
 GROUPS={'integrated':(-1,200),'0_30':(0,60),'30_50':(60,100),'50_90':(100,180),'90_100':(180,200)}

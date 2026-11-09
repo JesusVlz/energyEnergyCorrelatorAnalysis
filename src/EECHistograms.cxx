@@ -183,6 +183,7 @@ EECHistograms::EECHistograms(const EECHistograms& in) :
   fCard(in.fCard)
 {
   // Copy constructor
+  fRun3JetQA=in.fRun3JetQA;
 
 }
 
@@ -194,6 +195,7 @@ EECHistograms& EECHistograms::operator=(const EECHistograms& in){
   
   if (&in==this) return *this;
   
+  fRun3JetQA=in.fRun3JetQA;
   fhVertexZ = in.fhVertexZ;
   fhVertexZWeighted = in.fhVertexZWeighted;
   fhEvents = in.fhEvents;
@@ -321,6 +323,8 @@ void EECHistograms::SetCard(ConfigurationCard* newCard){
  * Create the necessary histograms
  */
 void EECHistograms::CreateHistograms(){
+  if(fCard->HasKey("Run3JetQA") && fCard->Get("Run3JetQA")==1)
+    fRun3JetQA=std::make_shared<Run3JetQA>(fCard);
   const bool matchEECBinning = fCard->HasKey("MatchEECBinning") && fCard->Get("MatchEECBinning") == 1;
   
   // ======== Common binning information for histograms =========
@@ -1328,6 +1332,7 @@ void EECHistograms::CreateHistograms(){
  * Write the histograms to file
  */
 void EECHistograms::Write() const{
+  if(fRun3JetQA) fRun3JetQA->Write();
 
   {
     TDirectory* parent = gDirectory;

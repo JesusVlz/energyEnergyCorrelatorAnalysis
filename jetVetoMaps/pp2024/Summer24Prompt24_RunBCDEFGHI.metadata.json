@@ -6,7 +6,7 @@
   "source_path": "jet_veto_maps/Summer24Prompt24_V1/Summer24Prompt24_RunBCDEFGHI.root",
   "sha256": "ac1c38cdc92ab27f0362895591481c5e2e6a391dcb46359f385000d5105daedf",
   "deployment_status": "ENABLED_FOR_PRODUCTION_TESTS",
-  "era": "ppRef2024",
+  "era": "pp2024",
   "era_run_coverage": {
     "map_run_intervals": [],
     "sample_run_intervals": [],

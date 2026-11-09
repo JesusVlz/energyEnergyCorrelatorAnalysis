@@ -19,7 +19,7 @@ double DetectorPhi(double phi);
 
 // Explicit alternatives remain separate: the HIN helpers have different
 // collision-specific criteria from the originally supplied generic CHS table.
-enum class JetIDPrescription { Tight = 1, TightLeptonVeto = 2, HINPbPb = 3, HINpp = 4 };
+enum class JetIDPrescription { Tight = 1, TightLeptonVeto = 2, HINPbPb = 3, HINpp = 4, MiniPOGOO = 5, MiniPOGpp = 6 };
 
 // HIN Run-3 tight AK4/AK8 CHS criteria. leptonVeto additionally applies the
 // charged EM and muon fraction requirements in |eta| <= 2.7. Nonfinite or
@@ -29,11 +29,16 @@ enum class JetIDPrescription { Tight = 1, TightLeptonVeto = 2, HINPbPb = 3, HINp
 // five-category counts may omit HF: lower bounds can establish a passing
 // multiplicity cut, but an unresolved threshold throws instead of guessing.
 bool PassJetID(const JetInputs& jet, bool leptonVeto = false);
-// HIN prescriptions reproduce the ID sections of HIN-Jets include/JetSelection_
+// MiniPOGOO/MiniPOGpp implement the HIN miniPOG table supplied by the
+// analysis owner on 2026-11-08. The legacy HIN prescriptions reproduce the ID sections of HIN-Jets include/JetSelection_
 // {PbPb,pp}.h at c64293a132af388af1827044779af36e57f884d2. HINpp defines its
 // neutral and total counts as the five-category sums, independently of whether
 // those sums include all physical HF constituents. No map default is adopted.
 bool PassJetID(const JetInputs& jet, JetIDPrescription prescription);
+
+// Independent EEC analysis cut. The denominator is ALWAYS uncorrected rawpt.
+// This requirement is not part of the all-jet event-veto eligibility predicate.
+bool PassTrackMaxFraction(double trackMax, double rawPt, double minimum, double maximum);
 
 // An explicit map and histogram key are always required. The histogram must
 // have detector eta on X and phi in radians on Y, and cover |eta| <= 5 and a

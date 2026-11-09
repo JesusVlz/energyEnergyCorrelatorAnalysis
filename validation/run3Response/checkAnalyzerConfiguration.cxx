@@ -26,7 +26,7 @@ void Set(ConfigurationCard& card, const char* key, float value){
 void DisableJetSelection(ConfigurationCard& card){
   // This fixture isolates response and track behavior; native PF composition
   // and event-veto coverage are exercised by the separate jet-selection suite.
-  Set(card,"Run3JetID",0); Set(card,"ApplyJetVeto",0);
+  Set(card,"Run3JetID",0); Set(card,"ApplyJetVeto",0); Set(card,"Run3JetQA",0); Set(card,"Run3JEC",0);
 }
 
 void Require(bool condition, const char* message){

@@ -41,10 +41,15 @@ MinMaxTrackPtFraction 0.01 # Minimum fraction of jet pT taken by the highest pT 
 MaxMaxTrackPtFraction 0.98 # Maximum fraction of jet pT taken by the highest pT track in jet
 JetUncertainty 0           # 0 = Nominal jet pT, 1 = Minus uncertainty, 2 = Plus uncertainty, 3 = Nominal smear for MC, 4 = Uncertainty smear down, 5 = Uncertainty smear up
 
-# Run-3 HIN collision-system Jet ID and whole-event veto (owner enabled)
-Run3JetID 1 # OO: pinned HIN PbPb ID; ppRef: pinned HIN pp ID
+# Run-3 miniPOG Jet ID ADDED to trackMax/rawPt; whole-event veto remains separate
+Run3JetID 1 # Additional to the independent trackMax/rawPt requirement
+Run3JetIDTable MiniPOG20261108 # Owner-supplied HIN miniPOG table, not a dated website release
+Run3JetQA 1 # Save pre-veto selection and fixed-sample calibration-stage spectra
+Run3JEC 1 # Run-3 jet-pT JEC
+Run3UsePpL1FastJet 0 # Current forests do not save the rho input needed by L1FastJet; keep off for production
+
 ApplyJetVeto 1
-JetVetoMapFile jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root
+JetVetoMapFile jetVetoMaps/pp2024/Summer24Prompt24_RunBCDEFGHI.root
 JetVetoMapHistogram jetvetomap_all
 JetVetoPtConvention stored # Nominal PAT/HiForest jtpt; no extra JES/JER variation
 JetVetoInputMinPt 15 # Owner-declared retention bound; complete upstream coverage still requires validation

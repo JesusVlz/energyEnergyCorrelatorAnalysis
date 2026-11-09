@@ -35,7 +35,9 @@ void ValidatePrescription(JetIDPrescription prescription) {
     case JetIDPrescription::Tight:
     case JetIDPrescription::TightLeptonVeto:
     case JetIDPrescription::HINPbPb:
-    case JetIDPrescription::HINpp: return;
+    case JetIDPrescription::HINpp:
+    case JetIDPrescription::MiniPOGOO:
+    case JetIDPrescription::MiniPOGpp: return;
   }
   throw std::invalid_argument("Run-3 Jet ID: unknown explicit prescription");
 }
@@ -108,6 +110,14 @@ void ValidateMap(const TH2& map) {
 }
 }  // namespace
 
+bool PassTrackMaxFraction(double trackMax, double rawPt, double minimum, double maximum) {
+  if(!std::isfinite(minimum) || !std::isfinite(maximum) || minimum >= maximum)
+    throw std::invalid_argument("Invalid trackMax/rawPt cut interval");
+  if(!std::isfinite(rawPt) || rawPt <= 0 || !std::isfinite(trackMax) || trackMax < 0) return false;
+  const double fraction = trackMax/rawPt;
+  return fraction > minimum && fraction < maximum;
+}
+
 double DetectorPhi(double phi) { return CanonicalDetectorPhi(phi); }
 
 bool PassJetID(const JetInputs& jet, bool leptonVeto) {
@@ -119,11 +129,13 @@ bool PassJetID(const JetInputs& jet, JetIDPrescription prescription) {
   ValidateJetIDInputs(jet);
   const double eta = std::abs(jet.eta);
   if(eta > 5) return false;
-  if(prescription == JetIDPrescription::HINPbPb) {
+  if(prescription == JetIDPrescription::MiniPOGpp)
+    return PassJetID(jet, JetIDPrescription::TightLeptonVeto);
+  if(prescription == JetIDPrescription::HINPbPb || prescription == JetIDPrescription::MiniPOGOO) {
     if(eta <= 2.6) return jet.neutralEmFraction < 0.9 && jet.muonFraction < 0.8 && jet.chargedEmFraction < 0.8;
     if(eta <= 2.7) return jet.neutralEmFraction < 0.99 && jet.muonFraction < 0.8 && jet.chargedEmFraction < 0.8;
     if(eta <= 3.0) return jet.neutralEmFraction < 0.99;
-    return jet.neutralEmFraction < 0.9;
+    return jet.neutralEmFraction < (prescription == JetIDPrescription::MiniPOGOO ? 0.4 : 0.9);
   }
   if(prescription == JetIDPrescription::HINpp) {
     // The pinned helper explicitly defines m=CHM+NHM+CEM+NEM+MUM,

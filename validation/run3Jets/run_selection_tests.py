@@ -34,6 +34,7 @@ def main():
         ('readers','validation/run3Jets/testRun3JetSelectionReaders.cxx',['src/ForestReader.o','src/HighForestReader.o'],False),
         ('analyzer','validation/run3Jets/checkAnalyzerJetSelection.cxx',objects,True),
         ('calibration','validation/run3Jets/checkCalibrationInputs.cxx',objects,True),
+        ('update20261108','validation/run3Jets/testRun3Update.cxx',objects,True),
         ('response_regression','validation/run3Response/checkAnalyzerConfiguration.cxx',objects,True),
     ]
     for label,source,inputs,private in fixtures:

@@ -81,6 +81,8 @@ public:
   Float_t GetMatchedPhi(Int_t iJet) const;  // Getter for matched reconstructed jet phi
   Int_t GetPartonFlavor(Int_t iJet) const;  // Get the flavor of the parton initiating the jet
   
+  Int_t GetMatchedRecoIndex(Int_t iJet) const { return GetMatchingIndex(iJet); }
+
 private:
   
   // Methods

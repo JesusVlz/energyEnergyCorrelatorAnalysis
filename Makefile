@@ -60,3 +60,5 @@ cl:  clean $(PROGRAM)
 src/EECAnalyzer.o: src/Run3TrackSelection.h
 src/HighForestReader.o: src/Run3TrackCharge.h
 src/trackingEfficiency2025OO.o src/trackingEfficiency2024pp.o: src/TrackingTableValidation.h
+src/EECHistograms.o src/EECAnalyzer.o: src/Run3JetQA.h
+src/EECAnalyzer.o src/HighForestReader.o src/UnfoldingForestReader.o: src/Run3JetL1Inputs.h
