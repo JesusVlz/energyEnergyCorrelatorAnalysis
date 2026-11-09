@@ -31,14 +31,18 @@ jobs:
           python - <<'PY'
           import ROOT, pathlib, os
           print("PyROOT", ROOT.gROOT.GetVersion())
-          root_dir = pathlib.Path(ROOT.__file__).resolve().parent
-          candidates = list(root_dir.rglob("root-config"))
-          if not candidates:
-              raise SystemExit("root-config not found inside ROOT wheel")
-          bindir = candidates[0].parent
+          root = pathlib.Path(ROOT.__file__).resolve().parent
           with open(os.environ["GITHUB_PATH"],"a") as out:
-              out.write(str(bindir)+"\n")
-          print("Added ROOT bin:", bindir)
+              out.write(str(root/"bin")+"\n")
+          with open(os.environ["GITHUB_ENV"],"a") as out:
+              out.write("ROOTSYS="+str(root)+"\n")
+              out.write("LD_LIBRARY_PATH="+str(root/"lib")+"\n")
+          mock=root/"mock_site_packages"
+          mock.mkdir(exist_ok=True)
+          link=mock/"ROOT"
+          if not link.exists():
+              link.symlink_to(root,target_is_directory=True)
+          print("Initialized ROOT wheel environment:", root)
           PY
 
       - name: Verify ROOT CLI
