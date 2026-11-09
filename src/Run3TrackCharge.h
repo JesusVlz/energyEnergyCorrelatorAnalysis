@@ -80,7 +80,10 @@ public:
         throw std::runtime_error("Invalid Run-3 physical track charge");
       value = static_cast<int>(charge);
     }
-    if(value != -1 && value != 1) throw std::runtime_error("Run-3 reconstructed track must have physical charge -1 or +1");
+    // MiniAOD track trees can retain neutral packed candidates. Return their
+    // stored zero so PassTrackCuts can reject them via its existing charge cut.
+    // Missing charge remains an error; never replace it with a fabricated sign.
+    if(value < -1 || value > 1) throw std::runtime_error("Invalid Run-3 stored track charge; expected -1, 0 or +1");
     return value;
   }
 };
