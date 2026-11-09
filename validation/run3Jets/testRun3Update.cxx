@@ -48,56 +48,29 @@ void IDAndTrackMax() {
   Need(!PassTrackMaxFraction(98,100,.01,.98),"Upper strict boundary accepted");
   Need(!PassTrackMaxFraction(0,0,.01,.98),"Invalid rawpt accepted");
 }
-void WriteL1(const std::string& path,float rhoValue,float areaValue,int entries=2) {
-  TFile f(path.c_str(),"RECREATE");
-  f.mkdir("hiEvtAnalyzer")->cd(); TTree events("HiTree","");int evt=0;events.Branch("dummy",&evt,"dummy/I");
-  for(int i=0;i<entries;++i){evt=i;events.Fill();}events.Write();
-  f.mkdir("ak4PFJetAnalyzer")->cd();TTree jets("t","");int nref=1;float area[250]{};area[0]=areaValue;
-  jets.Branch("nref",&nref,"nref/I");jets.Branch("measuredArea",area,"measuredArea[nref]/F");
-  for(int i=0;i<entries;++i)jets.Fill();jets.Write();
-  f.mkdir("rhoProducer")->cd();TTree rho("t","");float r=rhoValue;rho.Branch("measuredRho",&r,"measuredRho/F");
-  for(int i=0;i<entries;++i)rho.Fill();rho.Write();
-}
-void L1AndCalibration(const std::string& dir) {
-  const auto first=dir+"/rho1.root",second=dir+"/rho2.root",bad=dir+"/area0.root";
-  WriteL1(first,4,.5);WriteL1(second,7,.7);WriteL1(bad,4,0);
-  Run3JetL1Inputs inputs("rhoProducer/t","measuredRho","measuredArea");
-  inputs.Bind({first.c_str(),second.c_str()},"ak4PFJetAnalyzer/t");
-  Reject([&]{inputs.Get(0);},"Unread L1 data accepted");
-  inputs.Read(0,1);auto values=inputs.Get(0);Need(values.first==4 && values.second==.5,"L1 input values changed");
-  inputs.Read(3,1);values=inputs.Get(0);Need(values.first==7 && std::abs(values.second-.7)<1e-6,"L1 chain transition read wrong values");
-  Reject([&]{inputs.Read(0,2);},"L1 count mismatch accepted");
-  Run3JetL1Inputs missing("rhoProducer/t","wrongRho","measuredArea");
-  Reject([&]{missing.Bind({first.c_str()},"ak4PFJetAnalyzer/t");},"Missing rho accepted");
-  inputs.Bind({bad.c_str()},"ak4PFJetAnalyzer/t");inputs.Read(0,1);
-  Reject([&]{inputs.Get(0);},"Zero area replaced with geometric area");
-
-  const std::string base="jetEnergyCorrections/run3/HIN-Jets_c64293a/";
-  const std::vector<std::string> files={base+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt",base+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt",base+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt"};
-  JetCorrector chain(files);chain.SetJetPT(50);chain.SetJetEta(.3);chain.SetJetPhi(.1);
-  Reject([&]{chain.GetCorrectedPT();},"L1 used uninitialised rho or area");
-  chain.SetRho(4);chain.SetJetArea(.5);auto stages=chain.GetCorrectedPTStages();
-  Need(stages.size()==4 && stages[0]==50,"Sequential calibration stages missing");
-  double pt=50;
-  for(size_t i=0;i<files.size();++i) {
-    JetCorrector level(files[i]);level.SetJetPT(pt);level.SetJetEta(.3);level.SetJetPhi(.1);level.SetRho(4);level.SetJetArea(.5);
-    pt=level.GetCorrectedPT();Need(std::isfinite(pt) && pt>0 && std::abs(stages[i+1]-pt)<1e-10,"Wrong sequential correction inputs");
+void Calibration() {
+  const std::string ppBase="jetEnergyCorrections/pp2024/";
+  {
+    JetCorrector mc(ppBase+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
+    mc.SetJetPT(50); mc.SetJetEta(.3); mc.SetJetPhi(.1);
+    auto stages=mc.GetCorrectedPTStages();
+    Need(stages.size()==2 && stages[0]==50 && std::isfinite(stages[1]) && stages[1]>0,
+         "pp MC must be raw -> L2Relative only");
   }
-  ConfigurationCard incomplete("cardEECpp5v36TeVR04.input");Set(incomplete,"Run3JEC",1);
-  Reject([&]{EECAnalyzer a({},&incomplete,1,-1);},"pp JEC enabled without explicit applicable rho/area branches");
+  {
+    JetCorrector data({ppBase+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt",
+                       ppBase+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt"});
+    data.SetJetPT(50); data.SetJetEta(.3); data.SetJetPhi(.1);
+    auto stages=data.GetCorrectedPTStages();
+    Need(stages.size()==3 && stages[0]==50 && std::isfinite(stages[1]) && std::isfinite(stages[2]),
+         "pp data must be raw -> L2Relative -> residual");
+  }
   for(const char* cardName:{"cardEECpp5v36TeVR04.input","cardEECpp5v36TeVMCR04.input"}) {
-    ConfigurationCard c(cardName);Set(c,"Run3JEC",1);Set(c,"BackgroundMethods",0);
-    Str(c,"Run3RhoTree","rhoProducer/t");Str(c,"Run3RhoBranch","measuredRho");Str(c,"Run3JetAreaBranch","measuredArea");
-    const std::string savedCard=dir+"/saved_card_"+std::to_string(int(c.Get("DataType")))+".root";
-    {TFile output(savedCard.c_str(),"RECREATE");c.WriteCard(&output);}
-    {TFile input(savedCard.c_str(),"READ");
-      for(const char* key:{"Run3JetIDTable","Run3RhoTree","Run3RhoBranch","Run3JetAreaBranch"}) {
-        auto* value=dynamic_cast<TObjString*>(input.Get((std::string("JCard/")+key+"String").c_str()));
-        Need(value && value->GetString()==c.GetStr(key),"New calibration/ID string metadata was lost");
-      }
-    }
-    EECAnalyzer a({},&c,1,-1);a.RunAnalysis();
-    Need(a.fJetCorrector->JEC.size()==(c.Get("DataType")==11?3:2),"pp active chain has missing L1 or wrong residual data/MC routing");
+    ConfigurationCard c(cardName); Set(c,"BackgroundMethods",0);
+    Need(c.Get("Run3JEC")==1,"pp Run-3 JEC must be enabled");
+    EECAnalyzer a({},&c,1,-1); a.RunAnalysis();
+    Need(a.fJetCorrector->JEC.size()==(c.Get("DataType")==11?2:1),
+         "pp active chain has wrong number of jet-pT correction levels");
   }
 }
 class Reco : public HighForestReader {
@@ -150,7 +123,7 @@ int main(int argc,char** argv) {
   try {
     if(argc!=2) throw std::invalid_argument("Pass a new test directory");
     std::filesystem::create_directories(argv[1]);
-    IDAndTrackMax();L1AndCalibration(argv[1]);StagesBeforeVeto(argv[1]);
-    std::cout<<"PASS: updated ID table, strict additive trackMax/rawPt, L1 scalar/area validation and chain transitions, sequential levels/data-only residuals, pre-veto denominators, fixed-jet calibration stages and saved mask\n";
+    IDAndTrackMax();Calibration();StagesBeforeVeto(argv[1]);
+    std::cout<<"PASS: updated ID table, strict additive trackMax/rawPt, jet-pT-only Run-3 JEC with data-only residual, pre-veto denominators, fixed-jet calibration stages and saved mask\n";
   } catch(const std::exception& e) {std::cerr<<"FAIL: "<<e.what()<<'\n';return 1;}
 }

@@ -89,7 +89,7 @@ void plotRun3JetQA(const char* input,const char* prefix="run3",double centrality
   Run3Plot::Draw(selection,{0,1,3,5},low,high,std::string(prefix)+"_selection_cumulative.png",true);
   Run3Plot::Draw(selection,{0,1,2,4},low,high,std::string(prefix)+"_selection_independent.png",true);
   std::vector<int> active;
-  for(int level=0;level<4;++level) {
+  for(int level=0;level<3;++level) {
     auto p=Run3Plot::Project(calibration,level,low,high,"level_check_"+std::to_string(level));
     if(p->Integral(0,p->GetNbinsX()+1)!=0) active.push_back(level);
   }
