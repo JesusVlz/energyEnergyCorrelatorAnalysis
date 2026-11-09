@@ -26,13 +26,13 @@ public:
     TDirectory::TContext context(nullptr);
     fSelection.reset(new TH3D("selectionPtWeighted",";Final calibrated jet p_{T} (GeV);Selection;Centrality (%)",500,0,1000,6,-.5,5.5,101,-1,100));
     fCounts.reset(new TH3D("selectionPtCounts",";Final calibrated jet p_{T} (GeV);Selection;Centrality (%)",500,0,1000,6,-.5,5.5,101,-1,100));
-    fCalibration.reset(new TH3D("calibrationPtWeighted",";Jet p_{T} at this calibration level (GeV);Actual JEC level;Centrality (%)",500,0,1000,3,-.5,2.5,101,-1,100));
+    fCalibration.reset(new TH3D("calibrationPtWeighted",";Jet p_{T} at this calibration level (GeV);Actual JEC level;Centrality (%)",500,0,1000,4,-.5,3.5,101,-1,100));
     fTrackFraction.reset(new TH3D("trackMaxOverRawPt",";trackMax/rawPt;Raw jet p_{T} (GeV);Centrality (%)",120,0,1.2,100,0,1000,101,-1,100));
     for(TH3D* h:{fSelection.get(),fCounts.get(),fCalibration.get(),fTrackFraction.get()}) { h->SetDirectory(nullptr); h->Sumw2(); }
     const char* selections[]={"No jet-quality selection","trackMax/rawPt only","Jet ID only","trackMax/rawPt AND Jet ID","Jet ID AND event veto","trackMax/rawPt AND Jet ID AND event veto"};
     for(int i=0;i<6;++i) {fSelection->GetYaxis()->SetBinLabel(i+1,selections[i]);fCounts->GetYaxis()->SetBinLabel(i+1,selections[i]);}
-    const char* corrections[]={"rawpt","after L2Relative","after L2Residual (data only)"};
-    for(int i=0;i<3;++i) fCalibration->GetYaxis()->SetBinLabel(i+1,corrections[i]);
+    const char* corrections[]={"rawpt","after L1FastJet","after L2Relative","after L2Residual (data only)"};
+    for(int i=0;i<4;++i) fCalibration->GetYaxis()->SetBinLabel(i+1,corrections[i]);
     if(fVeto) {
       fMapPath=card->GetStr("JetVetoMapFile").Data(); fMapKey=card->GetStr("JetVetoMapHistogram").Data();
       std::unique_ptr<TFile> file(TFile::Open(fMapPath.c_str(),"READ"));
@@ -52,11 +52,13 @@ public:
     for(int i=0;i<6;++i) if(selected[i]) { fSelection->Fill(pt,i,centrality,weight); fCounts->Fill(pt,i,centrality); }
     if(raw>0 && std::isfinite(trackMax) && trackMax>=0) fTrackFraction->Fill(trackMax/raw,raw,centrality,weight);
     if(!(trackPass && idPass && vetoPass)) return;
-    const size_t expected=(!fOO && fData)?3:2;
+    const size_t expected=fOO?2:(fRequestedJEC?(fData?4:3):(fData?3:2));
     if(stages.size()!=expected) throw std::logic_error("Unexpected calibration stage count in Run3JetQA");
     fCalibration->Fill(stages[0],0.0,centrality,weight);
-    fCalibration->Fill(stages[1],1.0,centrality,weight);
-    if(!fOO && fData) fCalibration->Fill(stages[2],2.0,centrality,weight);
+    if(!fOO && fRequestedJEC) fCalibration->Fill(stages[1],1,centrality,weight);
+    const size_t relative=(!fOO && fRequestedJEC)?2:1;
+    fCalibration->Fill(stages[relative],2,centrality,weight);
+    if(!fOO && fData) fCalibration->Fill(stages.back(),3,centrality,weight);
   }
 
   void Write() const {
@@ -66,7 +68,7 @@ public:
     directory->cd();
     fSelection->Write(); fCounts->Write(); fCalibration->Write(); fTrackFraction->Write();
     TNamed("JetIDTable",fTable.c_str()).Write();
-    TNamed("JECState",fRequestedJEC?"Run-3 jet-pT JEC: detector jteta selects payload bin; OO L2; pp L2V2->[data residual]":"LEGACY calibration: Run-3 jet-pT JEC not active").Write();
+    TNamed("JECState",fRequestedJEC?"Run-3 jet-pT JEC: OO L2; pp L1FastJet->L2V2->[data residual], with rho/jet area used only inside L1":"LEGACY calibration: Run-3 jet-pT JEC not active").Write();
     TNamed("SelectionDefinition","Reco analysis-jet modes only; after trigger and standard event cuts; common analysis-axis eta and final-pT/matching cuts; before trackMax/ID/event-veto rejection. No selection means no jet-quality selection, not no event/kinematic selection. All curves share the same input exposure; do not unit-normalize separately.").Write();
     TNamed("CalibrationDefinition","Fixed jets passing trackMax/rawPt AND Jet ID and configured event selection, with final calibrated pT in the analysis range; identical jets at every active JEC level. No inactive or absent level is fabricated.").Write();
     TNamed("TrackMaxDefinition","MinMaxTrackPtFraction < trackMax/rawpt < MaxMaxTrackPtFraction; NOT trackMax/correctedPt. Raw and final-pT flow bins retained.").Write();

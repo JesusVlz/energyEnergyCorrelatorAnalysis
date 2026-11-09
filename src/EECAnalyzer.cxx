@@ -1311,6 +1311,7 @@ void EECAnalyzer::RunAnalysis(){
       correctionFiles.push_back(base+"Prompt25HIOO_V1_MC_L2Relative_AK4PF.txt");
     } else {
       const std::string base="jetEnergyCorrections/pp2024/";
+      correctionFiles.push_back(base+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt");
       correctionFiles.push_back(base+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
       if(fIsRealData) correctionFiles.push_back(base+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt");
     }
@@ -1361,16 +1362,25 @@ void EECAnalyzer::RunAnalysis(){
     if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
       fUnfoldingForestReader->EnableRun3JetSelection(true);
   }
+  if(fUseRun3JEC && fIsPp2024Data){
+    if(auto* reco = dynamic_cast<HighForestReader*>(fJetReader)) reco->EnableRun3PpL1Inputs();
+    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
+      fUnfoldingForestReader->EnableRun3PpL1Inputs();
+  }
   if(fApplyJetVeto || fUseRun3JEC){
     if(fMcCorrelationType == kGenReco || fMcCorrelationType == kGenGen){
       fRecoJetReader = new HighForestReader(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false);
       fRecoJetReader->EnableRun3JetSelection(true);
+      if(fUseRun3JEC && fIsPp2024Data) fRecoJetReader->EnableRun3PpL1Inputs();
     }
     if(fDoMixedCone && fApplyJetVeto){
-      if(auto* reco = dynamic_cast<HighForestReader*>(fMixedEventReader)) reco->EnableRun3JetSelection(true);
-      else {
+      if(auto* reco = dynamic_cast<HighForestReader*>(fMixedEventReader)) {
+        reco->EnableRun3JetSelection(true);
+        if(fUseRun3JEC && fIsPp2024Data && fJetVetoPtConvention=="recomputed") reco->EnableRun3PpL1Inputs();
+      } else {
         fMixedVetoJetReader = std::make_shared<HighForestReader>(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false, true, false);
         fMixedVetoJetReader->EnableRun3JetSelection(true);
+        if(fUseRun3JEC && fIsPp2024Data && fJetVetoPtConvention=="recomputed") fMixedVetoJetReader->EnableRun3PpL1Inputs();
       }
     }
   }
