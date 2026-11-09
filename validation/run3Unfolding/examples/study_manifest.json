@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "delta_r_region": [0.008, 0.39],
+  "channels": [
+    {
+      "id": "OO_C0_30_n1",
+      "system": "OO",
+      "activity": [0, 30],
+      "power": 1,
+      "particle_pt": 2,
+      "truth_definition": "response_marginal",
+      "train": "/REPLACE_WITH_EXISTING_PRODUCTS/OO_train_n1_projected.root",
+      "validation": "/REPLACE_WITH_EXISTING_PRODUCTS/OO_validation_n1_projected.root",
+      "split_evidence": "split_evidence.json"
+    }
+  ]
+}
