@@ -41,7 +41,7 @@ Run3JetQA 1 # Save pre-veto selection and fixed-sample calibration-stage spectra
 Run3JEC 0 # Explicitly legacy until applicable rho/area inputs are configured; see validation/run3Jets/RUN3_UPDATE.md
 
 ApplyJetVeto 1
-JetVetoMapFile jetVetoMaps/ppRef2024/Summer24Prompt24_RunBCDEFGHI.root
+JetVetoMapFile jetVetoMaps/pp2024/Summer24Prompt24_RunBCDEFGHI.root
 JetVetoMapHistogram jetvetomap_all
 JetVetoPtConvention stored # Nominal PAT/HiForest jtpt; no extra JES/JER variation
 JetVetoInputMinPt 15 # Owner-declared retention bound; complete upstream coverage still requires validation
