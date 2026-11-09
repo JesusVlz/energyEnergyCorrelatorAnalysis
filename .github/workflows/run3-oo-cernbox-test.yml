@@ -28,11 +28,25 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install ROOT==0.1a12 matplotlib
-          root-config --version
           python - <<'PY'
-          import ROOT
+          import ROOT, pathlib, os
           print("PyROOT", ROOT.gROOT.GetVersion())
+          root_dir = pathlib.Path(ROOT.__file__).resolve().parent
+          candidates = list(root_dir.rglob("root-config"))
+          if not candidates:
+              raise SystemExit("root-config not found inside ROOT wheel")
+          bindir = candidates[0].parent
+          with open(os.environ["GITHUB_PATH"],"a") as out:
+              out.write(str(bindir)+"\n")
+          print("Added ROOT bin:", bindir)
           PY
+
+      - name: Verify ROOT CLI
+        run: |
+          which root-config
+          root-config --version
+          which root
+          root -l -b -q -e 'std::cout << gROOT->GetVersion() << std::endl;'
 
       - name: Build framework
         run: |
