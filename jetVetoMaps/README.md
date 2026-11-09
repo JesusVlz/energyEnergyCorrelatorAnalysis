@@ -1,6 +1,6 @@
 # Run-3 jet-veto map deployment contract
 
-The owner-uploaded OO2025 and ppRef2024 ROOT maps match the pinned source bytes
+The owner-uploaded OO2025 and pp2024 ROOT maps match the pinned source bytes
 recorded in their metadata sidecars. The R=0.4 local and CRAB cards enable them
 for production tests with `jetvetomap_all`, stored nominal PAT/HiForest `jtpt`
 and an owner-declared 15 GeV input-retention bound. Their deployment status is

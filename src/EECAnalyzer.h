@@ -117,17 +117,13 @@ public:
   EECJetSelection::JetIDPrescription Run3JetIDPrescription() const;
   bool fUseRun3JEC = false;
   bool fFillRun3JetQA = false;
-  // One convention for main analysis, closure, response and recomputed veto pT.
+  // Run-3 JEC changes only jet pT. Detector jteta selects the payload bin; WTA remains the EEC axis.
   template<class Reader> std::vector<double> CorrectRecoJet(Reader* reader, int index) {
     const double raw = reader->GetJetRawPt(index);
     if(!std::isfinite(raw) || raw<=0) throw std::invalid_argument("Cannot calibrate a jet with nonpositive/nonfinite rawpt");
     double eta=reader->GetJetEta(index), phi=reader->GetJetPhi(index);
     if(fUseRun3JEC) {
       const auto jet=reader->GetJetSelectionInputs(index); eta=jet.eta; phi=jet.phi;
-      if(fIsPp2024Data) {
-        const auto inputs=reader->GetJetL1Inputs(index);
-        fJetCorrector->SetRho(inputs.first); fJetCorrector->SetJetArea(inputs.second);
-      }
     }
     fJetCorrector->SetJetPT(raw); fJetCorrector->SetJetEta(eta); fJetCorrector->SetJetPhi(phi);
     auto stages=fJetCorrector->GetCorrectedPTStages();

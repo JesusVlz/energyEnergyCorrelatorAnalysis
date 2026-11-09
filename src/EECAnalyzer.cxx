@@ -839,12 +839,6 @@ void EECAnalyzer::ReadConfigurationFromCard(){
     throw std::invalid_argument("Requested Run-3 calibration/QA supports native R4 OO/ppRef only");
   if(fFillRun3JetQA && !fRun3JetID)
     throw std::invalid_argument("Run3JetQA requires Run3JetID 1 to label the actual ID prescription");
-  if(fUseRun3JEC && fIsPp2024Data) {
-    for(const char* key:{"Run3RhoTree","Run3RhoBranch","Run3JetAreaBranch"})
-      if(!fCard->HasKey(key) || fCard->GetStr(key).IsNull())
-        throw std::invalid_argument(std::string("Run3JEC 1 for ppRef requires explicit applicable measured input: ")+key);
-  }
-
   if((fRun3JetID || fApplyJetVeto) && (!(fIsOOData || fIsPp2024Data) || fCard->Get("JetType") != 1))
     throw std::invalid_argument("Run-3 PF Jet ID/veto requires OO2025 or ppRef2024 PF jets.");
   if(fApplyJetVeto){
@@ -1311,11 +1305,12 @@ void EECAnalyzer::RunAnalysis(){
   }
   
   if(fUseRun3JEC) {
-    const std::string base="jetEnergyCorrections/run3/HIN-Jets_c64293a/";
     correctionFiles.clear();
-    if(fIsOOData) correctionFiles.push_back(base+"Prompt25HIOO_V1_MC_L2Relative_AK4PF.txt");
-    else {
-      correctionFiles.push_back(base+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt");
+    if(fIsOOData) {
+      const std::string base="jetEnergyCorrections/OO2025/";
+      correctionFiles.push_back(base+"Prompt25HIOO_V1_MC_L2Relative_AK4PF.txt");
+    } else {
+      const std::string base="jetEnergyCorrections/pp2024/";
       correctionFiles.push_back(base+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
       if(fIsRealData) correctionFiles.push_back(base+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt");
     }
@@ -1324,7 +1319,7 @@ void EECAnalyzer::RunAnalysis(){
       if(!input.good()) throw std::runtime_error("Missing pinned Run-3 JEC payload: "+path);
     }
   } else if(fIsOOData || fIsPp2024Data) {
-    std::cout<<"Run3JEC 0: legacy calibration retained for comparison; requested current pp L1+L2V2 is NOT active."<<std::endl;
+    std::cout<<"Run3JEC 0: legacy calibration retained for comparison; current Run-3 L2 calibration is NOT active."<<std::endl;
   }
   fJetCorrector = new JetCorrector(correctionFiles);
   fJetUncertainty = new JetUncertainty(uncertaintyFile[fDataType]);
@@ -1377,20 +1372,6 @@ void EECAnalyzer::RunAnalysis(){
         fMixedVetoJetReader = std::make_shared<HighForestReader>(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false, true, false);
         fMixedVetoJetReader->EnableRun3JetSelection(true);
       }
-    }
-  }
-
-  if(fUseRun3JEC && fIsPp2024Data) {
-    const std::string rhoTree=fCard->GetStr("Run3RhoTree").Data();
-    const std::string rhoBranch=fCard->GetStr("Run3RhoBranch").Data();
-    const std::string areaBranch=fCard->GetStr("Run3JetAreaBranch").Data();
-    if(dynamic_cast<HighForestReader*>(fJetReader)) fJetReader->EnableRun3L1Inputs(rhoTree,rhoBranch,areaBranch);
-    if(fRecoJetReader) fRecoJetReader->EnableRun3L1Inputs(rhoTree,rhoBranch,areaBranch);
-    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
-      fUnfoldingForestReader->EnableRun3L1Inputs(rhoTree,rhoBranch,areaBranch);
-    if(fApplyJetVeto && fJetVetoPtConvention=="recomputed" && fDoMixedCone) {
-      ForestReader* reco=fMixedVetoJetReader?fMixedVetoJetReader.get():fMixedEventReader;
-      reco->EnableRun3L1Inputs(rhoTree,rhoBranch,areaBranch);
     }
   }
 

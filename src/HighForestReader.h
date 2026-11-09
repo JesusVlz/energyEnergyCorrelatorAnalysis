@@ -14,14 +14,9 @@
 
 using namespace std;
 
-#include "Run3JetL1Inputs.h"
-#include <memory>
-
 class HighForestReader : public ForestReader{
   
 private:
-  std::shared_ptr<Run3JetL1Inputs> fRun3L1Inputs;
-
   static const Int_t fnMaxJet = 250;        // Maximum number of jets in an event
   static const Int_t fnMaxTrack = 60000;    // Maximum number of tracks in an event
   
@@ -51,14 +46,6 @@ public:
   
   void EnableRun3JetSelection(Bool_t enabled = true) override;
   EECJetSelection::JetInputs GetJetSelectionInputs(Int_t iJet) const override;
-  void EnableRun3L1Inputs(const std::string& tree, const std::string& rho, const std::string& area) {
-    fRun3L1Inputs = std::make_shared<Run3JetL1Inputs>(tree,rho,area);
-  }
-  std::pair<double,double> GetJetL1Inputs(Int_t iJet) const {
-    if(!fRun3L1Inputs) throw std::logic_error("Run-3 L1 rho/area inputs were not enabled");
-    return fRun3L1Inputs->Get(iJet);
-  }
-
 
   // Getters for leaves in the track tree
   Float_t GetTrackPt(Int_t iTrack) const;                    // Getter for track pT

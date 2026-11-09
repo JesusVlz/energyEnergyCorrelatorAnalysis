@@ -1007,7 +1007,6 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
   
   // Connect branches to trees
   Initialize();
-  if(fRun3L1Inputs) fRun3L1Inputs->Bind(fileList,treeName[fJetType]);
 }
 
 /*
@@ -1114,7 +1113,6 @@ void HighForestReader::GetEvent(Int_t nEvent){
   if(fIsMC){
     fParticleTree->GetEntry(nEvent);
   }
-  if(fRun3L1Inputs) fRun3L1Inputs->Read(nEvent,fnJets);
 
 }
 
