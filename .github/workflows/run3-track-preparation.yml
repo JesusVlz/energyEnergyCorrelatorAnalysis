@@ -3,15 +3,15 @@ on:
   push:
     branches: [repair/run3-track-pair-preparation]
     paths:
-      - 'validation/run3Pairs/bootstrap_apply.py'
-      - 'validation/run3Pairs/test_run3_preparation.py'
-      - 'src/Run3TrackSelection.h'
-      - 'src/Run3TrackCharge.h'
-      - 'src/TrackingTableValidation.h'
+      - 'validation/run3Pairs/*.py'
+      - 'src/**'
       - '.github/workflows/run3-track-preparation.yml'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: run3-track-preparation
+  cancel-in-progress: true
 jobs:
   preparation:
     if: github.ref == 'refs/heads/repair/run3-track-pair-preparation'
@@ -25,11 +25,11 @@ jobs:
         id: ready
         shell: bash
         run: |
-          if test -f validation/run3Pairs/bootstrap_apply.py && test -f validation/run3Pairs/test_run3_preparation.py && test -f src/Run3TrackSelection.h; then
+          if test -f validation/run3Pairs/bootstrap_apply.py && test -f validation/run3Pairs/test_run3_preparation.py && test -f validation/run3Pairs/prepare_inputs.py; then
             echo 'ready=true' >> "$GITHUB_OUTPUT"
           else
             echo 'ready=false' >> "$GITHUB_OUTPUT"
-            echo 'Preparation upload not complete; no source changes or tests performed.'
+            echo 'Preparation upload incomplete; no source changes or tests performed.'
           fi
       - uses: actions/setup-python@v5
         if: steps.ready.outputs.ready == 'true'
@@ -43,13 +43,19 @@ jobs:
         run: |
           python -m pip install 'ROOT==0.1a10'
           python - <<'PY'
-          import pathlib, ROOT
+          import os, pathlib, ROOT
           root = pathlib.Path(ROOT.__file__).resolve().parent
+          # The wheel's root-config still uses its build-time relocation prefix.
+          # Supply that prefix only in this ephemeral test environment.
+          link = root / 'mock_site_packages' / 'ROOT'
+          link.parent.mkdir(exist_ok=True)
+          if not link.exists():
+              link.symlink_to(root, target_is_directory=True)
           print('ROOT', ROOT.gROOT.GetVersion(), 'at', root)
-          with open(__import__('os').environ['GITHUB_ENV'], 'a') as out:
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
               out.write('ROOTSYS=' + str(root) + '\n')
-              out.write('LD_LIBRARY_PATH=' + str(root / 'lib') + '\n')
-          with open(__import__('os').environ['GITHUB_PATH'], 'a') as out:
+              out.write('LD_LIBRARY_PATH=' + str(root / 'lib') + ':' + str(root.parent / 'root.libs') + ':' + os.environ.get('LD_LIBRARY_PATH', '') + '\n')
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
               out.write(str(root / 'bin') + '\n')
           PY
       - name: Build analyzer and run software regression tests
@@ -57,9 +63,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          make -j2
-          python -m unittest discover -s validation/run3Pairs -p 'test_*.py' -v
-          python validation/run3Pairs/prepare_inputs.py audit-tables --output /tmp/run3-tracking-table-audit.json
+          mkdir -p /tmp/run3-preparation
+          make -j2 2>&1 | tee /tmp/run3-preparation/build.log
+          python -m unittest discover -s validation/run3Pairs -p 'test_*.py' -v 2>&1 | tee /tmp/run3-preparation/tests.log
+          python validation/run3Pairs/prepare_inputs.py audit-tables --output /tmp/run3-preparation/tracking_tables.json
           git diff --check
       - name: Commit only repaired source and configuration to this branch
         if: steps.ready.outputs.ready == 'true'
@@ -73,10 +80,17 @@ jobs:
             git commit -m 'Repair Run-3 track selections, payload routing and pair preparation'
             git push origin HEAD:repair/run3-track-pair-preparation
           fi
-      - name: Upload technical table audit
+          git rev-parse HEAD > /tmp/run3-preparation/validated_commit.txt
+      - name: Save patch evidence
+        if: always() && steps.ready.outputs.ready == 'true'
+        run: |
+          mkdir -p /tmp/run3-preparation
+          git diff --stat > /tmp/run3-preparation/change_summary.txt
+          git diff > /tmp/run3-preparation/uncommitted_repair.diff
+      - name: Upload technical evidence
         if: always() && steps.ready.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: run3-track-preparation-audit
-          path: /tmp/run3-tracking-table-audit.json
+          path: /tmp/run3-preparation
           if-no-files-found: warn
