@@ -45,8 +45,7 @@ jobs:
           python - <<'PY'
           import os, pathlib, ROOT
           root = pathlib.Path(ROOT.__file__).resolve().parent
-          # The wheel's root-config still uses its build-time relocation prefix.
-          # Supply that prefix only in this ephemeral test environment.
+          # Resolve the wheel's build-time relocation prefix for CI only.
           link = root / 'mock_site_packages' / 'ROOT'
           link.parent.mkdir(exist_ok=True)
           if not link.exists():
@@ -68,11 +67,17 @@ jobs:
           python -m unittest discover -s validation/run3Pairs -p 'test_*.py' -v 2>&1 | tee /tmp/run3-preparation/tests.log
           python validation/run3Pairs/prepare_inputs.py audit-tables --output /tmp/run3-preparation/tracking_tables.json
           git diff --check
-      - name: Commit only repaired source and configuration to this branch
+          git diff > /tmp/run3-preparation/source_repair.diff
+      - name: Commit tested repair without overwriting concurrent work
         if: steps.ready.outputs.ready == 'true'
         shell: bash
         run: |
           set -euo pipefail
+          git fetch origin repair/run3-track-pair-preparation
+          if test "$(git rev-parse FETCH_HEAD)" != "$GITHUB_SHA"; then
+            echo 'Repair branch advanced during validation; no rebase or force-push of untested changes.'
+            exit 1
+          fi
           git add src Makefile cardEECOO*.input cardEECpp5v36TeV*.input validation/run3Pairs
           if ! git diff --cached --quiet; then
             git config user.name 'github-actions[bot]'
@@ -81,12 +86,6 @@ jobs:
             git push origin HEAD:repair/run3-track-pair-preparation
           fi
           git rev-parse HEAD > /tmp/run3-preparation/validated_commit.txt
-      - name: Save patch evidence
-        if: always() && steps.ready.outputs.ready == 'true'
-        run: |
-          mkdir -p /tmp/run3-preparation
-          git diff --stat > /tmp/run3-preparation/change_summary.txt
-          git diff > /tmp/run3-preparation/uncommitted_repair.diff
       - name: Upload technical evidence
         if: always() && steps.ready.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
