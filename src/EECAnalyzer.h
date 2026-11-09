@@ -116,15 +116,16 @@ public:
   void ReadMixingEvent(Int_t event); // Align generator-track and reco-veto companions
   EECJetSelection::JetIDPrescription Run3JetIDPrescription() const;
   bool fUseRun3JEC = false;
+  bool fUsePpL1FastJet = false; // Optional ppRef L1; off for current forests without a saved rho tree.
   bool fFillRun3JetQA = false;
-  // Run-3 JEC changes jet pT. pp L1 uses rho/jet area internally; detector jteta selects the payload bin; WTA remains the EEC axis.
+  // Run-3 JEC changes jet pT. Optional pp L1 uses rho/jet area only when enabled; detector jteta selects the payload bin; WTA remains the EEC axis.
   template<class Reader> std::vector<double> CorrectRecoJet(Reader* reader, int index) {
     const double raw = reader->GetJetRawPt(index);
     if(!std::isfinite(raw) || raw<=0) throw std::invalid_argument("Cannot calibrate a jet with nonpositive/nonfinite rawpt");
     double eta=reader->GetJetEta(index), phi=reader->GetJetPhi(index);
     if(fUseRun3JEC) {
       const auto jet=reader->GetJetSelectionInputs(index); eta=jet.eta; phi=jet.phi;
-      if(fIsPp2024Data) {
+      if(fIsPp2024Data && fUsePpL1FastJet) {
         const auto inputs=reader->GetJetL1Inputs(index);
         fJetCorrector->SetRho(inputs.first);
         fJetCorrector->SetJetArea(inputs.second);

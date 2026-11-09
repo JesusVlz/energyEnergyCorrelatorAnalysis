@@ -31,7 +31,7 @@ def main():
         if 'L1FastJet' in relative and ('Rho' not in first or 'JetA' not in first):
             raise ValueError(f'{relative}: expected Rho and JetA dependencies')
         print(f'PASS {relative}: git_blob={actual} sha256={hashlib.sha256(data).hexdigest()}')
-    print('PASS: ppRef chain contains L1FastJet, L2Relative V2, and data residual.')
+    print('PASS: ppRef payload set contains optional L1FastJet, active L2Relative V2, and data residual.')
 
 if __name__ == '__main__':
     try:

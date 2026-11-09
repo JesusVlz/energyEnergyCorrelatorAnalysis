@@ -44,7 +44,8 @@ JetUncertainty 0           # 0 = Nominal jet pT, 1 = Minus uncertainty, 2 = Plus
 Run3JetID 1 # Additional to the independent trackMax/rawPt requirement
 Run3JetIDTable MiniPOG20261108 # Owner-supplied HIN miniPOG table, not a dated website release
 Run3JetQA 1 # Save pre-veto selection and fixed-sample calibration-stage spectra
-Run3JEC 1 # Run-3 jet-pT JEC: L2Relative V2; pp data also gets L2Residual
+Run3JEC 1 # Run-3 jet-pT JEC
+Run3UsePpL1FastJet 0 # Current forests do not save the rho input needed by L1FastJet; keep off for production
 
 ApplyJetVeto 1
 JetVetoMapFile jetVetoMaps/pp2024/Summer24Prompt24_RunBCDEFGHI.root

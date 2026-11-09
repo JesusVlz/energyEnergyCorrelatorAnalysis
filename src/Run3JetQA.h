@@ -19,6 +19,7 @@ class Run3JetQA {
 public:
   explicit Run3JetQA(ConfigurationCard* card)
     : fRequestedJEC(card->HasKey("Run3JEC") && card->Get("Run3JEC")==1),
+      fPpL1(card->HasKey("Run3UsePpL1FastJet") && card->Get("Run3UsePpL1FastJet")==1),
       fOO(card->Get("DataType")==9 || card->Get("DataType")==10),
       fData(card->Get("DataType")==9 || card->Get("DataType")==11),
       fVeto(card->HasKey("ApplyJetVeto") && card->Get("ApplyJetVeto")==1),
@@ -52,11 +53,14 @@ public:
     for(int i=0;i<6;++i) if(selected[i]) { fSelection->Fill(pt,i,centrality,weight); fCounts->Fill(pt,i,centrality); }
     if(raw>0 && std::isfinite(trackMax) && trackMax>=0) fTrackFraction->Fill(trackMax/raw,raw,centrality,weight);
     if(!(trackPass && idPass && vetoPass)) return;
-    const size_t expected=fOO?2:(fRequestedJEC?(fData?4:3):(fData?3:2));
+    const size_t expected=fOO?2:(fRequestedJEC?(fData?(fPpL1?4:3):(fPpL1?3:2)):(fData?3:2));
     if(stages.size()!=expected) throw std::logic_error("Unexpected calibration stage count in Run3JetQA");
     fCalibration->Fill(stages[0],0.0,centrality,weight);
-    if(!fOO && fRequestedJEC) fCalibration->Fill(stages[1],1,centrality,weight);
-    const size_t relative=(!fOO && fRequestedJEC)?2:1;
+    size_t relative=1;
+    if(!fOO && fRequestedJEC && fPpL1) {
+      fCalibration->Fill(stages[1],1,centrality,weight);
+      relative=2;
+    }
     fCalibration->Fill(stages[relative],2,centrality,weight);
     if(!fOO && fData) fCalibration->Fill(stages.back(),3,centrality,weight);
   }
@@ -68,7 +72,12 @@ public:
     directory->cd();
     fSelection->Write(); fCounts->Write(); fCalibration->Write(); fTrackFraction->Write();
     TNamed("JetIDTable",fTable.c_str()).Write();
-    TNamed("JECState",fRequestedJEC?"Run-3 jet-pT JEC: OO L2; pp L1FastJet->L2V2->[data residual], with rho/jet area used only inside L1":"LEGACY calibration: Run-3 jet-pT JEC not active").Write();
+    const std::string jecState = !fRequestedJEC ? "LEGACY calibration: Run-3 jet-pT JEC not active" :
+      (fOO ? "Run-3 jet-pT JEC: OO L2Relative" :
+       (fPpL1 ? "Run-3 jet-pT JEC: pp L1FastJet->L2Relative V2->[data residual]" :
+                "Run-3 jet-pT JEC: pp L2Relative V2->[data residual]; L1FastJet disabled by card"));
+    TNamed("JECState",jecState.c_str()).Write();
+    TNamed("PpL1FastJetState",fPpL1?"ENABLED":"DISABLED").Write();
     TNamed("SelectionDefinition","Reco analysis-jet modes only; after trigger and standard event cuts; common analysis-axis eta and final-pT/matching cuts; before trackMax/ID/event-veto rejection. No selection means no jet-quality selection, not no event/kinematic selection. All curves share the same input exposure; do not unit-normalize separately.").Write();
     TNamed("CalibrationDefinition","Fixed jets passing trackMax/rawPt AND Jet ID and configured event selection, with final calibrated pT in the analysis range; identical jets at every active JEC level. No inactive or absent level is fabricated.").Write();
     TNamed("TrackMaxDefinition","MinMaxTrackPtFraction < trackMax/rawpt < MaxMaxTrackPtFraction; NOT trackMax/correctedPt. Raw and final-pT flow bins retained.").Write();
@@ -81,7 +90,7 @@ public:
     }
   }
 private:
-  bool fRequestedJEC,fOO,fData,fVeto;
+  bool fRequestedJEC,fPpL1,fOO,fData,fVeto;
   std::string fTable,fMapPath,fMapKey;
   std::unique_ptr<TH3D> fSelection,fCounts,fCalibration,fTrackFraction;
   std::unique_ptr<TH2> fMap;

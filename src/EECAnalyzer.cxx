@@ -525,6 +525,9 @@ EECAnalyzer::EECAnalyzer(const EECAnalyzer& in) :
   fIsPp2024Data(in.fIsPp2024Data),
   fIsOOData(in.fIsOOData),
   fRun3JetID(in.fRun3JetID),
+  fUseRun3JEC(in.fUseRun3JEC),
+  fUsePpL1FastJet(in.fUsePpL1FastJet),
+  fFillRun3JetQA(in.fFillRun3JetQA),
   fApplyJetVeto(in.fApplyJetVeto),
   fJetVetoPtConvention(in.fJetVetoPtConvention),
   fJetVetoMap(in.fJetVetoMap),
@@ -647,6 +650,9 @@ EECAnalyzer& EECAnalyzer::operator=(const EECAnalyzer& in){
   fIsOOData = in.fIsOOData;
   fIsPpData = in.fIsPpData;
   fRun3JetID = in.fRun3JetID;
+  fUseRun3JEC = in.fUseRun3JEC;
+  fUsePpL1FastJet = in.fUsePpL1FastJet;
+  fFillRun3JetQA = in.fFillRun3JetQA;
   fApplyJetVeto = in.fApplyJetVeto;
   fJetVetoPtConvention = in.fJetVetoPtConvention;
   fJetVetoMap = in.fJetVetoMap;
@@ -831,10 +837,13 @@ void EECAnalyzer::ReadConfigurationFromCard(){
   if(fRun3JetID) Run3JetIDPrescription();
   fApplyJetVeto = applyVeto == 1;
   const double run3JEC=fCard->HasKey("Run3JEC")?fCard->Get("Run3JEC"):0;
+  const double ppL1=fCard->HasKey("Run3UsePpL1FastJet")?fCard->Get("Run3UsePpL1FastJet"):0;
   const double jetQA=fCard->HasKey("Run3JetQA")?fCard->Get("Run3JetQA"):0;
-  if((run3JEC!=0 && run3JEC!=1) || (jetQA!=0 && jetQA!=1))
-    throw std::invalid_argument("Run3JEC and Run3JetQA must be 0 or 1");
-  fUseRun3JEC=run3JEC==1; fFillRun3JetQA=jetQA==1;
+  if((run3JEC!=0 && run3JEC!=1) || (ppL1!=0 && ppL1!=1) || (jetQA!=0 && jetQA!=1))
+    throw std::invalid_argument("Run3JEC, Run3UsePpL1FastJet and Run3JetQA must be 0 or 1");
+  fUseRun3JEC=run3JEC==1; fUsePpL1FastJet=ppL1==1; fFillRun3JetQA=jetQA==1;
+  if(fUsePpL1FastJet && (!fUseRun3JEC || !fIsPp2024Data))
+    throw std::invalid_argument("Run3UsePpL1FastJet 1 is valid only for ppRef2024 with Run3JEC 1");
   if((fUseRun3JEC || fFillRun3JetQA) && (!(fIsOOData || fIsPp2024Data) || fCard->Get("JetType")!=1 || std::abs(fCard->Get("JetRadius")-.4)>1e-6))
     throw std::invalid_argument("Requested Run-3 calibration/QA supports native R4 OO/ppRef only");
   if(fFillRun3JetQA && !fRun3JetID)
@@ -1311,7 +1320,7 @@ void EECAnalyzer::RunAnalysis(){
       correctionFiles.push_back(base+"Prompt25HIOO_V1_MC_L2Relative_AK4PF.txt");
     } else {
       const std::string base="jetEnergyCorrections/pp2024/";
-      correctionFiles.push_back(base+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt");
+      if(fUsePpL1FastJet) correctionFiles.push_back(base+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt");
       correctionFiles.push_back(base+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
       if(fIsRealData) correctionFiles.push_back(base+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt");
     }
@@ -1362,7 +1371,7 @@ void EECAnalyzer::RunAnalysis(){
     if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
       fUnfoldingForestReader->EnableRun3JetSelection(true);
   }
-  if(fUseRun3JEC && fIsPp2024Data){
+  if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data){
     if(auto* reco = dynamic_cast<HighForestReader*>(fJetReader)) reco->EnableRun3PpL1Inputs();
     if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
       fUnfoldingForestReader->EnableRun3PpL1Inputs();
@@ -1371,16 +1380,16 @@ void EECAnalyzer::RunAnalysis(){
     if(fMcCorrelationType == kGenReco || fMcCorrelationType == kGenGen){
       fRecoJetReader = new HighForestReader(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false);
       fRecoJetReader->EnableRun3JetSelection(true);
-      if(fUseRun3JEC && fIsPp2024Data) fRecoJetReader->EnableRun3PpL1Inputs();
+      if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data) fRecoJetReader->EnableRun3PpL1Inputs();
     }
     if(fDoMixedCone && fApplyJetVeto){
       if(auto* reco = dynamic_cast<HighForestReader*>(fMixedEventReader)) {
         reco->EnableRun3JetSelection(true);
-        if(fUseRun3JEC && fIsPp2024Data && fJetVetoPtConvention=="recomputed") reco->EnableRun3PpL1Inputs();
+        if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data && fJetVetoPtConvention=="recomputed") reco->EnableRun3PpL1Inputs();
       } else {
         fMixedVetoJetReader = std::make_shared<HighForestReader>(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false, true, false);
         fMixedVetoJetReader->EnableRun3JetSelection(true);
-        if(fUseRun3JEC && fIsPp2024Data && fJetVetoPtConvention=="recomputed") fMixedVetoJetReader->EnableRun3PpL1Inputs();
+        if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data && fJetVetoPtConvention=="recomputed") fMixedVetoJetReader->EnableRun3PpL1Inputs();
       }
     }
   }

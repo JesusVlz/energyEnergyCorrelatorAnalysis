@@ -57,6 +57,16 @@ void WritePpL1Fixture(const std::string& path,float rhoValue,float areaValue) {
 }
 void Calibration(const std::string& dir) {
   const std::string ppBase="jetEnergyCorrections/pp2024/";
+  {
+    ConfigurationCard card("cardEECpp5v36TeVMCR04.input");
+    Need(card.HasKey("Run3UsePpL1FastJet") && card.Get("Run3UsePpL1FastJet")==0,
+         "Current ppRef MC production card must keep L1FastJet disabled");
+    JetCorrector nominal(ppBase+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
+    nominal.SetJetPT(50); nominal.SetJetEta(.3); nominal.SetJetPhi(.1);
+    auto stages=nominal.GetCorrectedPTStages();
+    Need(stages.size()==2 && stages[0]==50 && std::isfinite(stages[1]),
+         "L1-disabled pp MC chain must be raw -> L2Relative");
+  }
   const std::string fixture=dir+"/pp_l1_fixture.root";
   WritePpL1Fixture(fixture,2.5,.5);
   Run3JetL1Inputs inputs("ggHiNtuplizer/EventTree","rho","jtarea");
@@ -134,6 +144,6 @@ int main(int argc,char** argv) {
     if(argc!=2) throw std::invalid_argument("Pass a new test directory");
     std::filesystem::create_directories(argv[1]);
     IDAndTrackMax();Calibration(argv[1]);StagesBeforeVeto(argv[1]);
-    std::cout<<"PASS: updated ID table, strict additive trackMax/rawPt, pp L1FastJet+L2 with rho/jtarea inputs and data-only residual, pre-veto denominators, fixed-jet calibration stages and saved mask\n";
+    std::cout<<"PASS: updated ID table, strict additive trackMax/rawPt, card-disabled pp L1FastJet with optional L1 regression, data-only residual, pre-veto denominators, fixed-jet calibration stages and saved mask\n";
   } catch(const std::exception& e) {std::cerr<<"FAIL: "<<e.what()<<'\n';return 1;}
 }
