@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Apply checked repair and integrate pinned jet update
+      - name: Integrate pinned jet update without dropping either repair
         shell: bash
         run: |
           set -euo pipefail
@@ -36,12 +36,56 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git fetch --depth=100 origin 792d76c0cd043ab1871b3217ac988f6455f2d9f0
           if ! git merge-base --is-ancestor 792d76c0cd043ab1871b3217ac988f6455f2d9f0 HEAD; then
-            if ! git merge --no-commit --no-ff 792d76c0cd043ab1871b3217ac988f6455f2d9f0; then
-              git diff --name-only --diff-filter=U
-              git diff --cc | tee /tmp/run3-preparation/integration_conflicts.diff
-              exit 1
-            fi
+            git merge --no-commit --no-ff 792d76c0cd043ab1871b3217ac988f6455f2d9f0 || true
+            python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          unmerged = set(subprocess.check_output(['git','diff','--name-only','--diff-filter=U'],text=True).splitlines())
+          expected = {
+            'Makefile': (
+              '# Run-3 tracking changes must invalidate dependent objects in incremental builds.\nsrc/EECAnalyzer.o: src/Run3TrackSelection.h\nsrc/HighForestReader.o: src/Run3TrackCharge.h\nsrc/trackingEfficiency2025OO.o src/trackingEfficiency2024pp.o: src/TrackingTableValidation.h\n',
+              'src/EECHistograms.o src/EECAnalyzer.o: src/Run3JetQA.h\nsrc/EECAnalyzer.o src/HighForestReader.o src/UnfoldingForestReader.o: src/Run3JetL1Inputs.h\n'),
+            'src/HighForestReader.h': (
+              '#include "Run3TrackCharge.h"\n',
+              '#include "Run3JetL1Inputs.h"\n#include <memory>\n')}
+          if not unmerged.issubset(expected):
+              raise RuntimeError('Unreviewed merge conflict: '+str(unmerged))
+          for name in sorted(unmerged):
+              ours,theirs = expected[name]
+              marker = '<<<<<<< HEAD\n'+ours+'=======\n'+theirs+'>>>>>>> 792d76c0cd043ab1871b3217ac988f6455f2d9f0\n'
+              path=Path(name); text=path.read_text()
+              if text.count(marker)!=1:
+                  raise RuntimeError('Conflict differs from reviewed additive header/dependency change: '+name)
+              path.write_text(text.replace(marker,ours+theirs))
+              subprocess.run(['git','add',name],check=True)
+          if subprocess.check_output(['git','diff','--name-only','--diff-filter=U'],text=True).strip():
+              raise RuntimeError('Unresolved conflict remains')
+          subprocess.run(['git','rev-parse','--verify','MERGE_HEAD'],check=True)
+          PY
           fi
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          # Keep CRAB text cards consistent without rebuilding/submitting an archive.
+          for path in Path('crab').glob('card*.input'):
+              text=path.read_text()
+              if not re.search(r'^DataType\s+(9|10|11|12)\b',text,re.M) or not re.search(r'^JetRadius\s+0\.4\b',text,re.M):
+                  continue
+              text=re.sub(r'^MaxTrackPtRelativeError.*$', 'MaxTrackPtRelativeError 0.1 # Run-3: <=0.1 only above 10 GeV, all selections',text,flags=re.M)
+              if 'Run3TrackSelection ' not in text:
+                  text=text.replace('# Cuts for tracks','# Cuts for tracks\nRun3TrackSelection Nominal # Change together with VertexMaxDistance and matching payload')
+              text=re.sub(r'^HFEnergyShift.*$','HFEnergyShift 0 # OFF for Run-3; no inherited HF shift',text,flags=re.M)
+              path.write_text(text)
+          # Preserve string settings in native ROOT JCards, not only numeric zero.
+          path=Path('src/ConfigurationCard.cxx'); text=path.read_text()
+          before='fKeyWordVector[i] == "JetVetoPtConvention" || fKeyWordVector[i] == "Run3JetIDTable")'
+          after='fKeyWordVector[i] == "JetVetoPtConvention" || fKeyWordVector[i] == "Run3JetIDTable" ||\n       fKeyWordVector[i] == "Run3TrackSelection" || fKeyWordVector[i] == "Run3TrackPairCorrectionFile")'
+          if before in text:
+              if text.count(before)!=1: raise RuntimeError('Ambiguous JCard metadata anchor')
+              path.write_text(text.replace(before,after))
+          elif after not in text:
+              raise RuntimeError('JCard string metadata anchor changed')
+          PY
           python validation/run3Pairs/prepare_inputs.py cards --output validation/run3Pairs/cards
       - name: Install ROOT for software tests only
         run: |
@@ -51,14 +95,12 @@ jobs:
           root = pathlib.Path(ROOT.__file__).resolve().parent
           link = root / 'mock_site_packages' / 'ROOT'
           link.parent.mkdir(exist_ok=True)
-          if not link.exists():
-              link.symlink_to(root, target_is_directory=True)
+          if not link.exists(): link.symlink_to(root, target_is_directory=True)
           print('ROOT', ROOT.gROOT.GetVersion(), 'at', root)
           with open(os.environ['GITHUB_ENV'], 'a') as out:
               out.write('ROOTSYS=' + str(root) + '\n')
               out.write('LD_LIBRARY_PATH=' + str(root / 'lib') + ':' + str(root.parent / 'root.libs') + ':' + os.environ.get('LD_LIBRARY_PATH', '') + '\n')
-          with open(os.environ['GITHUB_PATH'], 'a') as out:
-              out.write(str(root / 'bin') + '\n')
+          with open(os.environ['GITHUB_PATH'], 'a') as out: out.write(str(root / 'bin') + '\n')
           PY
       - name: Build and run software regression tests
         shell: bash
@@ -78,7 +120,7 @@ jobs:
             echo 'Repair branch advanced during validation; no rebase or force-push of untested changes.'
             exit 1
           fi
-          git add src Makefile cardEECOO*.input cardEECpp5v36TeV*.input validation/run3Pairs
+          git add src Makefile cardEECOO*.input cardEECpp5v36TeV*.input crab/card*.input validation/run3Pairs
           if ! git diff --cached --quiet; then
             git commit -m 'Integrate current Run-3 jets with validated track-pair preparation'
             git push origin HEAD:repair/run3-track-pair-preparation
