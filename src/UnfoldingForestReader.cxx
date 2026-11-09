@@ -311,6 +311,7 @@ UnfoldingForestReader::UnfoldingForestReader(const UnfoldingForestReader& in) :
   fJetTree(in.fJetTree),
   fTrackTree(in.fTrackTree),
   fGenParticleTree(in.fGenParticleTree),
+  fRun3L1Inputs(in.fRun3L1Inputs),
   fHiVzBranch(in.fHiVzBranch),
   fHiBinBranch(in.fHiBinBranch),
   fPtHatBranch(in.fPtHatBranch),
@@ -446,6 +447,7 @@ UnfoldingForestReader& UnfoldingForestReader::operator=(const UnfoldingForestRea
   fJetTree = in.fJetTree;
   fTrackTree = in.fTrackTree;
   fGenParticleTree = in.fGenParticleTree;
+  fRun3L1Inputs = in.fRun3L1Inputs;
   fHiVzBranch = in.fHiVzBranch;
   fHiBinBranch = in.fHiBinBranch;
   fPtHatBranch = in.fPtHatBranch;
@@ -792,6 +794,7 @@ void UnfoldingForestReader::ReadForestFromFile(TFile* inputFile){
   }
 
   Initialize();
+  if(fRun3L1Inputs) fRun3L1Inputs->Bind({TString(inputFile->GetName())},treeName[fJetType]);
 
 }
 
@@ -880,6 +883,7 @@ void UnfoldingForestReader::GetEvent(Int_t nEvent){
       CheckVectorSize(fGenParticleSubeventArray, fnGenParticles, "sube");
     }
   }
+  if(fRun3L1Inputs) fRun3L1Inputs->Read(nEvent,fnJets);
 
 }
 

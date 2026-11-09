@@ -57,3 +57,4 @@ cl:  clean $(PROGRAM)
 #		@rootcling nanoDict.cc -c -D$(version) $(HDRSDICT)
 
 src/EECHistograms.o src/EECAnalyzer.o: src/Run3JetQA.h
+src/EECAnalyzer.o src/HighForestReader.o src/UnfoldingForestReader.o: src/Run3JetL1Inputs.h

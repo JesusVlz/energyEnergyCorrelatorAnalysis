@@ -10,6 +10,8 @@
 #define UNFOLDINGFORESTREADER_H
 
 #include "Run3JetSelectionInputs.h"
+#include "Run3JetL1Inputs.h"
+#include <memory>
 
 // C++ includes
 #include <iostream>
@@ -28,6 +30,7 @@ using namespace std;
 class UnfoldingForestReader{
   
 private:
+  std::shared_ptr<Run3JetL1Inputs> fRun3L1Inputs;
   static const Int_t fnMaxJet = 250;        // Maximum number of jets in an event
   static const Int_t fnMaxTrack = 60000;    // Maximum number of tracks in an event
   
@@ -77,6 +80,13 @@ public:
 
   void EnableRun3JetSelection(Bool_t enabled = true);
   EECJetSelection::JetInputs GetJetSelectionInputs(Int_t iJet) const;
+  void EnableRun3PpL1Inputs() {
+    fRun3L1Inputs = std::make_shared<Run3JetL1Inputs>("ggHiNtuplizer/EventTree","rho","jtarea");
+  }
+  std::pair<double,double> GetJetL1Inputs(Int_t iJet) const {
+    if(!fRun3L1Inputs) throw std::logic_error("2024 ppRef L1 inputs were not enabled");
+    return fRun3L1Inputs->Get(iJet);
+  }
 
   // Getters for leaves in generator level jet tree
   Int_t GetNGeneratorJets() const;                   // Getter for number of generator level jets
