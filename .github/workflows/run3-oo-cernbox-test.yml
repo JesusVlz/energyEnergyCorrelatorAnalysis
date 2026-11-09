@@ -205,8 +205,18 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: run3-oo-cernbox-validation
+          name: run3-oo-cernbox-validation-small
           path: |
-            ci_oo_input/**
-            validation/run3Jets/ci-selection-tests/**
+            ci_oo_input/plots/**
+            ci_oo_input/qa_summary.txt
+            ci_oo_input/eecAnalysis.log
+            ci_oo_input/plotRun3JetQA.log
+            ci_oo_input/plotRun3VetoMap.log
+            ci_oo_input/plotTrackMax.log
+            ci_oo_input/file_type.txt
+            ci_oo_input/size.txt
+            ci_oo_input/headers.txt
+            ci_oo_input/OO_data_test.input
+            validation/run3Jets/ci-selection-tests/*.log
+            validation/run3Jets/ci-selection-tests/commands.json
           retention-days: 7
