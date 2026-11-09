@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the Run-3 jet-pT JEC payloads used by the EEC analysis."""
+"""Verify the Run-3 JEC payloads used by the EEC analysis."""
 import hashlib
 from pathlib import Path
 import sys
@@ -7,6 +7,8 @@ import sys
 PAYLOADS = {
     'OO2025/Prompt25HIOO_V1_MC_L2Relative_AK4PF.txt':
         'd3f8498ad7ee1bc5de1dcf0de802b5d22d0ce5d5',
+    'pp2024/Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt':
+        '7bcc3847f0f5e7d3b0b927e6df64d2d7c9ff60fa',
     'pp2024/Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt':
         '2f2f4b04cb1134919b3a54e6ba5d11a73e3ac710',
     'pp2024/Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt':
@@ -25,11 +27,11 @@ def main():
             raise ValueError(f'{relative}: git blob {actual}, expected {expected}')
         first = data.decode('utf-8').splitlines()[0]
         if 'JetEta' not in first or 'JetPt' not in first:
-            raise ValueError(f'{relative}: expected JetEta-bin / JetPt correction payload')
-        if 'Rho' in first or 'JetA' in first:
-            raise ValueError(f'{relative}: rho/area-dependent correction must not enter EEC chain')
+            raise ValueError(f'{relative}: expected JetEta/JetPt JEC payload')
+        if 'L1FastJet' in relative and ('Rho' not in first or 'JetA' not in first):
+            raise ValueError(f'{relative}: expected Rho and JetA dependencies')
         print(f'PASS {relative}: git_blob={actual} sha256={hashlib.sha256(data).hexdigest()}')
-    print('PASS: EEC Run-3 JEC uses only L2Relative and pp-data residual payloads.')
+    print('PASS: ppRef chain contains L1FastJet, L2Relative V2, and data residual.')
 
 if __name__ == '__main__':
     try:

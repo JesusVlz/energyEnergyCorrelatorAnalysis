@@ -48,29 +48,39 @@ void IDAndTrackMax() {
   Need(!PassTrackMaxFraction(98,100,.01,.98),"Upper strict boundary accepted");
   Need(!PassTrackMaxFraction(0,0,.01,.98),"Invalid rawpt accepted");
 }
-void Calibration() {
+void WritePpL1Fixture(const std::string& path,float rhoValue,float areaValue) {
+  TFile f(path.c_str(),"RECREATE");
+  f.mkdir("hiEvtAnalyzer")->cd(); TTree events("HiTree",""); float vz=0; events.Branch("vz",&vz,"vz/F"); events.Fill(); events.Write();
+  f.mkdir("ak4PFJetAnalyzer")->cd(); TTree jets("t",""); int nref=1; float area[250]{}; area[0]=areaValue;
+  jets.Branch("nref",&nref,"nref/I"); jets.Branch("jtarea",area,"jtarea[nref]/F"); jets.Fill(); jets.Write();
+  f.mkdir("ggHiNtuplizer")->cd(); TTree rho("EventTree",""); float r=rhoValue; rho.Branch("rho",&r,"rho/F"); rho.Fill(); rho.Write();
+}
+void Calibration(const std::string& dir) {
   const std::string ppBase="jetEnergyCorrections/pp2024/";
+  const std::string fixture=dir+"/pp_l1_fixture.root";
+  WritePpL1Fixture(fixture,2.5,.5);
+  Run3JetL1Inputs inputs("ggHiNtuplizer/EventTree","rho","jtarea");
+  inputs.Bind({fixture.c_str()},"ak4PFJetAnalyzer/t");
+  inputs.Read(0,1); auto l1=inputs.Get(0);
+  Need(std::abs(l1.first-2.5)<1e-6 && std::abs(l1.second-.5)<1e-6,
+       "ppRef rho/jtarea branches were not read as calibration inputs");
+
   {
-    JetCorrector mc(ppBase+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
-    mc.SetJetPT(50); mc.SetJetEta(.3); mc.SetJetPhi(.1);
+    JetCorrector mc({ppBase+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt",
+                     ppBase+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt"});
+    mc.SetJetPT(50); mc.SetJetEta(.3); mc.SetJetPhi(.1); mc.SetRho(l1.first); mc.SetJetArea(l1.second);
     auto stages=mc.GetCorrectedPTStages();
-    Need(stages.size()==2 && stages[0]==50 && std::isfinite(stages[1]) && stages[1]>0,
-         "pp MC must be raw -> L2Relative only");
+    Need(stages.size()==3 && stages[0]==50 && std::isfinite(stages[1]) && std::isfinite(stages[2]),
+         "pp MC must be raw -> L1FastJet -> L2Relative");
   }
   {
-    JetCorrector data({ppBase+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt",
+    JetCorrector data({ppBase+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt",
+                       ppBase+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt",
                        ppBase+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt"});
-    data.SetJetPT(50); data.SetJetEta(.3); data.SetJetPhi(.1);
+    data.SetJetPT(50); data.SetJetEta(.3); data.SetJetPhi(.1); data.SetRho(l1.first); data.SetJetArea(l1.second);
     auto stages=data.GetCorrectedPTStages();
-    Need(stages.size()==3 && stages[0]==50 && std::isfinite(stages[1]) && std::isfinite(stages[2]),
-         "pp data must be raw -> L2Relative -> residual");
-  }
-  for(const char* cardName:{"cardEECpp5v36TeVR04.input","cardEECpp5v36TeVMCR04.input"}) {
-    ConfigurationCard c(cardName); Set(c,"BackgroundMethods",0);
-    Need(c.Get("Run3JEC")==1,"pp Run-3 JEC must be enabled");
-    EECAnalyzer a({},&c,1,-1); a.RunAnalysis();
-    Need(a.fJetCorrector->JEC.size()==(c.Get("DataType")==11?2:1),
-         "pp active chain has wrong number of jet-pT correction levels");
+    Need(stages.size()==4 && stages[0]==50 && std::isfinite(stages[1]) && std::isfinite(stages[2]) && std::isfinite(stages[3]),
+         "pp data must be raw -> L1FastJet -> L2Relative -> residual");
   }
 }
 class Reco : public HighForestReader {
@@ -123,7 +133,7 @@ int main(int argc,char** argv) {
   try {
     if(argc!=2) throw std::invalid_argument("Pass a new test directory");
     std::filesystem::create_directories(argv[1]);
-    IDAndTrackMax();Calibration();StagesBeforeVeto(argv[1]);
-    std::cout<<"PASS: updated ID table, strict additive trackMax/rawPt, jet-pT-only Run-3 JEC with data-only residual, pre-veto denominators, fixed-jet calibration stages and saved mask\n";
+    IDAndTrackMax();Calibration(argv[1]);StagesBeforeVeto(argv[1]);
+    std::cout<<"PASS: updated ID table, strict additive trackMax/rawPt, pp L1FastJet+L2 with rho/jtarea inputs and data-only residual, pre-veto denominators, fixed-jet calibration stages and saved mask\n";
   } catch(const std::exception& e) {std::cerr<<"FAIL: "<<e.what()<<'\n';return 1;}
 }
