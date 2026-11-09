@@ -36,6 +36,7 @@
 #include "JetMetScalingFactorManager.h"
 #include "SmearingProvider.h"
 #include "Run3JetSelection.h"
+#include <cmath>
 #include "OOMixingPilot.h"
 
 class EECAnalyzer{
@@ -114,6 +115,30 @@ public:
   Bool_t PassRun3JetVeto(ForestReader* jetReader, Bool_t mixing); // Scan all reco jets before analysis jet cuts
   void ReadMixingEvent(Int_t event); // Align generator-track and reco-veto companions
   EECJetSelection::JetIDPrescription Run3JetIDPrescription() const;
+  bool fUseRun3JEC = false;
+  bool fUsePpL1FastJet = false; // Optional ppRef L1; off for current forests without a saved rho tree.
+  bool fFillRun3JetQA = false;
+  // Run-3 JEC changes jet pT. Optional pp L1 uses rho/jet area only when enabled; detector jteta selects the payload bin; WTA remains the EEC axis.
+  template<class Reader> std::vector<double> CorrectRecoJet(Reader* reader, int index) {
+    const double raw = reader->GetJetRawPt(index);
+    if(!std::isfinite(raw) || raw<=0) throw std::invalid_argument("Cannot calibrate a jet with nonpositive/nonfinite rawpt");
+    double eta=reader->GetJetEta(index), phi=reader->GetJetPhi(index);
+    if(fUseRun3JEC) {
+      const auto jet=reader->GetJetSelectionInputs(index); eta=jet.eta; phi=jet.phi;
+      if(fIsPp2024Data && fUsePpL1FastJet) {
+        const auto inputs=reader->GetJetL1Inputs(index);
+        fJetCorrector->SetRho(inputs.first);
+        fJetCorrector->SetJetArea(inputs.second);
+      }
+    }
+    fJetCorrector->SetJetPT(raw); fJetCorrector->SetJetEta(eta); fJetCorrector->SetJetPhi(phi);
+    auto stages=fJetCorrector->GetCorrectedPTStages();
+    for(const double pt:stages) if(!std::isfinite(pt) || pt<=0)
+      throw std::runtime_error("JEC produced invalid momentum; check payload support and detector coordinates");
+    return stages;
+  }
+  void FillRun3JetDiagnostics(ForestReader* reader, bool eventPassesVeto);
+
   Double_t GetTrackEfficiencyCorrection(const Int_t iTrack); // Get the track efficiency correction for a given track
   Double_t  GetTrackEfficiencyCorrection(const Float_t trackPt, const Float_t trackEta, const Int_t hiBin); // Get the track efficiency correction for given track and event information
   void ConfigureJetUncertainty(const Double_t rawPt, const Double_t correctedPt, const Double_t eta, const Double_t phi); // Preserve legacy inputs; future Run-3 JES uses corrected pT

@@ -1,4 +1,4 @@
-# ppRef2024 maps
+# pp 2024 maps
 
 The owner-uploaded `Summer24Prompt24_RunBCDEFGHI.root` matches the immutable JECDatabase source
 recorded in its `.metadata.json` sidecar. Its current deployment status is

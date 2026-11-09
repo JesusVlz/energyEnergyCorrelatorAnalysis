@@ -10,6 +10,8 @@
 
 // Own includes
 #include "ConfigurationCard.h"
+#include "Run3JetQA.h"
+#include <memory>
 
 class EECHistograms{
   
@@ -52,6 +54,7 @@ public:
   TH1F* fhVertexZ;                 // Vertex z-position
   TH1F* fhVertexZWeighted;         // Weighted vertex z-position (only meaningfull for MC)
   TH1F* fhEvents;                  // Number of events. For binning see enumEventTypes.
+  std::shared_ptr<Run3JetQA> fRun3JetQA;
   TH1D* fhJetVetoEventCounts = nullptr;
   TH2D* fhJetVetoEtaPhiBefore[2] = {nullptr, nullptr}; // signal and mixing; all eligible reco jets
   TH2D* fhJetVetoEtaPhiAfter[2] = {nullptr, nullptr}; // only events passing the full event veto

@@ -1,6 +1,8 @@
 // Implementation of the class
 
 #include "JetCorrector.h"
+#include <cmath>
+#include <stdexcept>
 
 void JetCorrector::Initialize(std::vector<std::string> Files)
 {
@@ -19,7 +21,13 @@ double JetCorrector::GetCorrection()
 
 double JetCorrector::GetCorrectedPT()
 {
+  return GetCorrectedPTStages().back();
+}
+
+std::vector<double> JetCorrector::GetCorrectedPTStages()
+{
   double PT = JetPT;
+  std::vector<double> stages{PT};
   
   for(int i = 0; i < (int)JEC.size(); i++)
   {
@@ -30,12 +38,13 @@ double JetCorrector::GetCorrectedPT()
     JEC[i].SetJetArea(JetArea);
     
     PT = JEC[i].GetCorrectedPT();
+    stages.push_back(PT);
     
     if(PT < 0)
       break;
   }
   
-  return PT;
+  return stages;
 }
 
 void SingleJetCorrector::Initialize(std::string FileName)
@@ -291,8 +300,14 @@ double SingleJetCorrector::GetValue(Type T)
   if(T == TypeJetPT)     return JetPT;
   if(T == TypeJetEta)    return JetEta;
   if(T == TypeJetPhi)    return JetPhi;
-  if(T == TypeJetArea)   return JetArea;
-  if(T == TypeRho)       return Rho;
+  if(T == TypeJetArea) {
+    if(!std::isfinite(JetArea) || JetArea<=0) throw std::invalid_argument("JEC requires finite positive measured JetA");
+    return JetArea;
+  }
+  if(T == TypeRho) {
+    if(!std::isfinite(Rho) || Rho<0) throw std::invalid_argument("JEC requires finite nonnegative measured Rho");
+    return Rho;
+  }
   
   return -1;
 }

@@ -525,6 +525,9 @@ EECAnalyzer::EECAnalyzer(const EECAnalyzer& in) :
   fIsPp2024Data(in.fIsPp2024Data),
   fIsOOData(in.fIsOOData),
   fRun3JetID(in.fRun3JetID),
+  fUseRun3JEC(in.fUseRun3JEC),
+  fUsePpL1FastJet(in.fUsePpL1FastJet),
+  fFillRun3JetQA(in.fFillRun3JetQA),
   fApplyJetVeto(in.fApplyJetVeto),
   fJetVetoPtConvention(in.fJetVetoPtConvention),
   fJetVetoMap(in.fJetVetoMap),
@@ -647,6 +650,9 @@ EECAnalyzer& EECAnalyzer::operator=(const EECAnalyzer& in){
   fIsOOData = in.fIsOOData;
   fIsPpData = in.fIsPpData;
   fRun3JetID = in.fRun3JetID;
+  fUseRun3JEC = in.fUseRun3JEC;
+  fUsePpL1FastJet = in.fUsePpL1FastJet;
+  fFillRun3JetQA = in.fFillRun3JetQA;
   fApplyJetVeto = in.fApplyJetVeto;
   fJetVetoPtConvention = in.fJetVetoPtConvention;
   fJetVetoMap = in.fJetVetoMap;
@@ -828,7 +834,20 @@ void EECAnalyzer::ReadConfigurationFromCard(){
      !std::isfinite(applyVeto) || (applyVeto != 0 && applyVeto != 1))
     throw std::invalid_argument("Run3JetID must be 0/1 and ApplyJetVeto must be 0/1.");
   fRun3JetID = static_cast<int>(run3ID);
+  if(fRun3JetID) Run3JetIDPrescription();
   fApplyJetVeto = applyVeto == 1;
+  const double run3JEC=fCard->HasKey("Run3JEC")?fCard->Get("Run3JEC"):0;
+  const double ppL1=fCard->HasKey("Run3UsePpL1FastJet")?fCard->Get("Run3UsePpL1FastJet"):0;
+  const double jetQA=fCard->HasKey("Run3JetQA")?fCard->Get("Run3JetQA"):0;
+  if((run3JEC!=0 && run3JEC!=1) || (ppL1!=0 && ppL1!=1) || (jetQA!=0 && jetQA!=1))
+    throw std::invalid_argument("Run3JEC, Run3UsePpL1FastJet and Run3JetQA must be 0 or 1");
+  fUseRun3JEC=run3JEC==1; fUsePpL1FastJet=ppL1==1; fFillRun3JetQA=jetQA==1;
+  if(fUsePpL1FastJet && (!fUseRun3JEC || !fIsPp2024Data))
+    throw std::invalid_argument("Run3UsePpL1FastJet 1 is valid only for ppRef2024 with Run3JEC 1");
+  if((fUseRun3JEC || fFillRun3JetQA) && (!(fIsOOData || fIsPp2024Data) || fCard->Get("JetType")!=1 || std::abs(fCard->Get("JetRadius")-.4)>1e-6))
+    throw std::invalid_argument("Requested Run-3 calibration/QA supports native R4 OO/ppRef only");
+  if(fFillRun3JetQA && !fRun3JetID)
+    throw std::invalid_argument("Run3JetQA requires Run3JetID 1 to label the actual ID prescription");
   if((fRun3JetID || fApplyJetVeto) && (!(fIsOOData || fIsPp2024Data) || fCard->Get("JetType") != 1))
     throw std::invalid_argument("Run-3 PF Jet ID/veto requires OO2025 or ppRef2024 PF jets.");
   if(fApplyJetVeto){
@@ -1294,6 +1313,24 @@ void EECAnalyzer::RunAnalysis(){
     correctionFiles.push_back(correctionFileResidual[fDataType]);
   }
   
+  if(fUseRun3JEC) {
+    correctionFiles.clear();
+    if(fIsOOData) {
+      const std::string base="jetEnergyCorrections/OO2025/";
+      correctionFiles.push_back(base+"Prompt25HIOO_V1_MC_L2Relative_AK4PF.txt");
+    } else {
+      const std::string base="jetEnergyCorrections/pp2024/";
+      if(fUsePpL1FastJet) correctionFiles.push_back(base+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt");
+      correctionFiles.push_back(base+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
+      if(fIsRealData) correctionFiles.push_back(base+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt");
+    }
+    for(const auto& path:correctionFiles) {
+      std::ifstream input(path);
+      if(!input.good()) throw std::runtime_error("Missing pinned Run-3 JEC payload: "+path);
+    }
+  } else if(fIsOOData || fIsPp2024Data) {
+    std::cout<<"Run3JEC 0: legacy calibration retained for comparison; current Run-3 L2 calibration is NOT active."<<std::endl;
+  }
   fJetCorrector = new JetCorrector(correctionFiles);
   fJetUncertainty = new JetUncertainty(uncertaintyFile[fDataType]);
     
@@ -1329,21 +1366,30 @@ void EECAnalyzer::RunAnalysis(){
     fUnfoldingForestReader = new UnfoldingForestReader(fDataType,fJetType,fJetAxis);
   }
 
-  if(fRun3JetID || fApplyJetVeto){
+  if(fRun3JetID || fApplyJetVeto || fUseRun3JEC){
     if(auto* reco = dynamic_cast<HighForestReader*>(fJetReader)) reco->EnableRun3JetSelection(true);
     if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
       fUnfoldingForestReader->EnableRun3JetSelection(true);
   }
-  if(fApplyJetVeto){
+  if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data){
+    if(auto* reco = dynamic_cast<HighForestReader*>(fJetReader)) reco->EnableRun3PpL1Inputs();
+    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
+      fUnfoldingForestReader->EnableRun3PpL1Inputs();
+  }
+  if(fApplyJetVeto || fUseRun3JEC){
     if(fMcCorrelationType == kGenReco || fMcCorrelationType == kGenGen){
       fRecoJetReader = new HighForestReader(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false);
       fRecoJetReader->EnableRun3JetSelection(true);
+      if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data) fRecoJetReader->EnableRun3PpL1Inputs();
     }
-    if(fDoMixedCone){
-      if(auto* reco = dynamic_cast<HighForestReader*>(fMixedEventReader)) reco->EnableRun3JetSelection(true);
-      else {
+    if(fDoMixedCone && fApplyJetVeto){
+      if(auto* reco = dynamic_cast<HighForestReader*>(fMixedEventReader)) {
+        reco->EnableRun3JetSelection(true);
+        if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data && fJetVetoPtConvention=="recomputed") reco->EnableRun3PpL1Inputs();
+      } else {
         fMixedVetoJetReader = std::make_shared<HighForestReader>(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false, true, false);
         fMixedVetoJetReader->EnableRun3JetSelection(true);
+        if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data && fJetVetoPtConvention=="recomputed") fMixedVetoJetReader->EnableRun3PpL1Inputs();
       }
     }
   }
@@ -1621,7 +1667,7 @@ void EECAnalyzer::RunAnalysis(){
     currentFile = fFileNames.at(iFile);
     inputFile = TFile::Open(currentFile);
     std::unique_ptr<TFile> vetoInputFile;
-    if(fApplyJetVeto && fRecoJetReader){
+    if((fApplyJetVeto || fUseRun3JEC) && fRecoJetReader){
       vetoInputFile.reset(TFile::Open(currentFile));
       if(!vetoInputFile || vetoInputFile->IsZombie()) throw std::runtime_error("Cannot open independent reconstructed-veto input");
     }
@@ -2001,7 +2047,8 @@ void EECAnalyzer::RunAnalysis(){
           if(!(fMcCorrelationType == kGenGen || fMcCorrelationType == kGenReco)){
             if(fRun3JetID){
               if(!EECJetSelection::PassJetID(fJetReader->GetJetSelectionInputs(jetIndex), Run3JetIDPrescription())) continue;
-            } else {
+            }
+            // HIN ID supplements, never replaces, the EEC trackMax/rawpt cut.
             // I forgot to include the trackMax branch in the "NewRelease" MC production
             // This branch in correctly included in default MC and in the data production
             // But in case we want to use the NewRelease-files, we need to calculate trackMax manually
@@ -2033,26 +2080,18 @@ void EECAnalyzer::RunAnalysis(){
                 
               } // Track pT loop for manual calculation
               
-              if(fMinimumMaxTrackPtFraction >= manualMaxTrackPt/fJetReader->GetJetRawPt(jetIndex)){
-                continue; // Cut for jets with only very low pT particles
-              }
-              if(fMaximumMaxTrackPtFraction <= manualMaxTrackPt/fJetReader->GetJetRawPt(jetIndex)){
-                continue; // Cut for jets where all the pT is taken by one track
-              }
+              if(!EECJetSelection::PassTrackMaxFraction(manualMaxTrackPt, fJetReader->GetJetRawPt(jetIndex),
+                  fMinimumMaxTrackPtFraction, fMaximumMaxTrackPtFraction)) continue;
               
             } else {
               // Default jet quality cut, used in all other cases expect for NewRelease MC test
               
-              if(fMinimumMaxTrackPtFraction >= fJetReader->GetJetMaxTrackPt(jetIndex)/fJetReader->GetJetRawPt(jetIndex)){
-                continue; // Cut for jets with only very low pT particles
-              }
-              if(fMaximumMaxTrackPtFraction <= fJetReader->GetJetMaxTrackPt(jetIndex)/fJetReader->GetJetRawPt(jetIndex)){
-                continue; // Cut for jets where all the pT is taken by one track
-              }
+              if(!EECJetSelection::PassTrackMaxFraction(fJetReader->GetJetMaxTrackPt(jetIndex), fJetReader->GetJetRawPt(jetIndex),
+                  fMinimumMaxTrackPtFraction, fMaximumMaxTrackPtFraction)) continue;
             }
           }
           
-          } // inherited max-track quality, when PF Jet ID is disabled
+          // Both reconstructed quality requirements have now been applied.
 
           // Jet matching between reconstructed and generator level jets
           if((fMatchJets == 1) && !fJetReader->HasMatchingJet(jetIndex)){
@@ -2078,12 +2117,13 @@ void EECAnalyzer::RunAnalysis(){
           //  ========================================
           
           // Do a correction for the jet pT
-          fJetCorrector->SetJetPT(jetPt);
-          fJetCorrector->SetJetEta(jetEta);
-          fJetCorrector->SetJetPhi(jetPhi);
-          
-          jetPtCorrected = fJetCorrector->GetCorrectedPT();
-          ConfigureJetUncertainty(jetPt, jetPtCorrected, jetEta, jetPhi);
+          jetPtCorrected=jetPt;
+          if(!(fMcCorrelationType == kGenGen || fMcCorrelationType == kGenReco)) {
+            if(!std::isfinite(jetPt) || jetPt<=0) continue;
+            jetPtCorrected=CorrectRecoJet(fJetReader,jetIndex).back();
+            const auto detector=fUseRun3JEC ? fJetReader->GetJetSelectionInputs(jetIndex) : EECJetSelection::JetInputs{};
+            ConfigureJetUncertainty(jetPt,jetPtCorrected,fUseRun3JEC?detector.eta:jetEta,fUseRun3JEC?detector.phi:jetPhi);
+          }
           
           // No jet pT correction for generator level jets
           if(!(fMcCorrelationType == kGenGen || fMcCorrelationType == kGenReco)) {
@@ -2412,24 +2452,16 @@ void EECAnalyzer::RunAnalysis(){
               if(!(fMcCorrelationType == kGenGen || fMcCorrelationType == kGenReco)){
               if(fRun3JetID){
                 if(!EECJetSelection::PassJetID(fJetReader->GetJetSelectionInputs(reflectedConeJetIndex), Run3JetIDPrescription())) continue;
-              } else {
-              if(fMinimumMaxTrackPtFraction >= fJetReader->GetJetMaxTrackPt(reflectedConeJetIndex)/fJetReader->GetJetRawPt(reflectedConeJetIndex)){
-                continue; // Cut for jets with only very low pT particles
               }
-              if(fMaximumMaxTrackPtFraction <= fJetReader->GetJetMaxTrackPt(reflectedConeJetIndex)/fJetReader->GetJetRawPt(reflectedConeJetIndex)){
-                continue; // Cut for jets where all the pT is taken by one track
-              }
+              if(!EECJetSelection::PassTrackMaxFraction(fJetReader->GetJetMaxTrackPt(reflectedConeJetIndex), fJetReader->GetJetRawPt(reflectedConeJetIndex),
+                  fMinimumMaxTrackPtFraction, fMaximumMaxTrackPtFraction)) continue;
 
-              }
               } // no reconstructed PF/track quality requirement for generator jets
 
               // For non-generator level jet pT: do a correction for the jet pT
               if(!(fMcCorrelationType == kGenGen || fMcCorrelationType == kGenReco)){              
-                fJetCorrector->SetJetPT(reflectedConeJetPt);
-                fJetCorrector->SetJetEta(reflectedConeJetEta);
-                fJetCorrector->SetJetPhi(reflectedConeJetPhi);
-
-                reflectedConeJetPt = fJetCorrector->GetCorrectedPT();
+                if(!std::isfinite(reflectedConeJetPt) || reflectedConeJetPt<=0) continue;
+                reflectedConeJetPt=CorrectRecoJet(fJetReader,reflectedConeJetIndex).back();
               }
 
               // After the jet pT can been corrected, apply jet pT cuts for the jets in reflected cone
@@ -3037,10 +3069,22 @@ void EECAnalyzer::FillJetPtClosureHistograms(const Int_t jetIndex){
   Double_t smearingFactor;
   
   // For 2018 data, we need to correct the reconstructed pT with jet energy correction
-  fJetCorrector->SetJetPT(recoPt);
-  fJetCorrector->SetJetEta(jetEta);
-  fJetCorrector->SetJetPhi(jetPhi);
-  recoPt = fJetCorrector->GetCorrectedPT();
+  if(fUseRun3JEC) {
+    ForestReader* reco=fJetReader;
+    int recoIndex=jetIndex;
+    if(fMcCorrelationType == kGenReco || fMcCorrelationType == kGenGen) {
+      auto* generator=dynamic_cast<GeneratorLevelForestReader*>(fJetReader);
+      if(!generator || !fRecoJetReader) throw std::runtime_error("Run-3 closure needs the synchronized native reconstructed companion");
+      reco=fRecoJetReader; recoIndex=generator->GetMatchedRecoIndex(jetIndex);
+      if(recoIndex<0) throw std::runtime_error("Run-3 closure has no matching reconstructed jet");
+    }
+    recoPt=CorrectRecoJet(reco,recoIndex).back();
+  } else {
+    fJetCorrector->SetJetPT(recoPt);
+    fJetCorrector->SetJetEta(jetEta);
+    fJetCorrector->SetJetPhi(jetPhi);
+    recoPt = fJetCorrector->GetCorrectedPT();
+  }
   
   // If we are using smearing scenario, modify the reconstructed jet pT using gaussian smearing
   if(fJetUncertaintyMode > 0){
@@ -3115,14 +3159,9 @@ void EECAnalyzer::FillUnfoldingResponse(){
 
     if(fRun3JetID){
       if(!EECJetSelection::PassJetID(fUnfoldingForestReader->GetJetSelectionInputs(jetIndex), Run3JetIDPrescription())) continue;
-    } else {
-    if(fMinimumMaxTrackPtFraction >= fUnfoldingForestReader->GetJetMaxTrackPt(jetIndex) / fUnfoldingForestReader->GetJetRawPt(jetIndex)){
-      continue;  // Cut for jets with only very low pT particles
     }
-    if(fMaximumMaxTrackPtFraction <= fUnfoldingForestReader->GetJetMaxTrackPt(jetIndex) / fUnfoldingForestReader->GetJetRawPt(jetIndex)){
-      continue;  // Cut for jets where all the pT is taken by one track
-    }
-    }
+    if(!EECJetSelection::PassTrackMaxFraction(fUnfoldingForestReader->GetJetMaxTrackPt(jetIndex), fUnfoldingForestReader->GetJetRawPt(jetIndex),
+        fMinimumMaxTrackPtFraction, fMaximumMaxTrackPtFraction)) continue;
     
 
     //  ========================================
@@ -3130,13 +3169,11 @@ void EECAnalyzer::FillUnfoldingResponse(){
     //  ========================================
 
     // For 2018 data: do a correction for the jet pT
-    fJetCorrector->SetJetPT(jetPt);
-    fJetCorrector->SetJetEta(jetEta);
-    fJetCorrector->SetJetPhi(jetPhi);
-
+    if(!std::isfinite(jetPt) || jetPt<=0) continue;
     const Double_t rawPtForUncertainty = jetPt;
-    jetPt = fJetCorrector->GetCorrectedPT();
-    ConfigureJetUncertainty(rawPtForUncertainty, jetPt, jetEta, jetPhi);
+    jetPt=CorrectRecoJet(fUnfoldingForestReader,jetIndex).back();
+    const auto detector=fUseRun3JEC ? fUnfoldingForestReader->GetJetSelectionInputs(jetIndex) : EECJetSelection::JetInputs{};
+    ConfigureJetUncertainty(rawPtForUncertainty,jetPt,fUseRun3JEC?detector.eta:jetEta,fUseRun3JEC?detector.phi:jetPhi);
 
     // If we are using smearing scenario, modify the jet pT using gaussian smearing
     // Note that for MC, we need to smear the jet pT to match the resolution in data
@@ -3495,14 +3532,9 @@ void EECAnalyzer::ConstructParticleResponses(){
 
     if(fRun3JetID){
       if(!EECJetSelection::PassJetID(fUnfoldingForestReader->GetJetSelectionInputs(jetIndex), Run3JetIDPrescription())) continue;
-    } else {
-    if(fMinimumMaxTrackPtFraction >= fUnfoldingForestReader->GetJetMaxTrackPt(jetIndex) / fUnfoldingForestReader->GetJetRawPt(jetIndex)){
-      continue;  // Cut for jets with only very low pT particles
     }
-    if(fMaximumMaxTrackPtFraction <= fUnfoldingForestReader->GetJetMaxTrackPt(jetIndex) / fUnfoldingForestReader->GetJetRawPt(jetIndex)){
-      continue;  // Cut for jets where all the pT is taken by one track
-    }
-    }
+    if(!EECJetSelection::PassTrackMaxFraction(fUnfoldingForestReader->GetJetMaxTrackPt(jetIndex), fUnfoldingForestReader->GetJetRawPt(jetIndex),
+        fMinimumMaxTrackPtFraction, fMaximumMaxTrackPtFraction)) continue;
     
 
     //  ========================================
@@ -3510,13 +3542,11 @@ void EECAnalyzer::ConstructParticleResponses(){
     //  ========================================
 
     // For 2018 data: do a correction for the jet pT
-    fJetCorrector->SetJetPT(jetPt);
-    fJetCorrector->SetJetEta(jetEta);
-    fJetCorrector->SetJetPhi(jetPhi);
-
+    if(!std::isfinite(jetPt) || jetPt<=0) continue;
     const Double_t rawPtForUncertainty = jetPt;
-    jetPt = fJetCorrector->GetCorrectedPT();
-    ConfigureJetUncertainty(rawPtForUncertainty, jetPt, jetEta, jetPhi);
+    jetPt=CorrectRecoJet(fUnfoldingForestReader,jetIndex).back();
+    const auto detector=fUseRun3JEC ? fUnfoldingForestReader->GetJetSelectionInputs(jetIndex) : EECJetSelection::JetInputs{};
+    ConfigureJetUncertainty(rawPtForUncertainty,jetPt,fUseRun3JEC?detector.eta:jetEta,fUseRun3JEC?detector.phi:jetPhi);
 
     // If we are using smearing scenario, modify the jet pT using gaussian smearing
     if(fJetUncertaintyMode > 0) {
@@ -3869,7 +3899,11 @@ Bool_t EECAnalyzer::PassSubeventCut(const Int_t subeventIndex) const{
  *   return = True if all event cuts are passed, false otherwise
  */
 EECJetSelection::JetIDPrescription EECAnalyzer::Run3JetIDPrescription() const{
-  return fIsOOData ? EECJetSelection::JetIDPrescription::HINPbPb : EECJetSelection::JetIDPrescription::HINpp;
+  const TString table = fCard->HasKey("Run3JetIDTable") ? fCard->GetStr("Run3JetIDTable") : "MiniPOG20261108";
+  if(table == "HINc64293a")
+    return fIsOOData ? EECJetSelection::JetIDPrescription::HINPbPb : EECJetSelection::JetIDPrescription::HINpp;
+  if(table != "MiniPOG20261108") throw std::invalid_argument("Run3JetIDTable must be MiniPOG20261108 or HINc64293a");
+  return fIsOOData ? EECJetSelection::JetIDPrescription::MiniPOGOO : EECJetSelection::JetIDPrescription::MiniPOGpp;
 }
 
 void EECAnalyzer::ReadMixingEvent(Int_t event){
@@ -3887,11 +3921,8 @@ Bool_t EECAnalyzer::PassRun3JetVeto(ForestReader* jetReader, Bool_t mixing){
     double pt = jet.storedPt;
     if(fJetVetoPtConvention == "raw") pt = jet.rawPt;
     else if(fJetVetoPtConvention == "recomputed"){
-      fJetCorrector->SetJetPT(jet.rawPt);
-      // Preserve the inherited selected-axis JEC lookup; map/ID use detector axes.
-      fJetCorrector->SetJetEta(jetReader->GetJetEta(index));
-      fJetCorrector->SetJetPhi(jetReader->GetJetPhi(index));
-      pt = fJetCorrector->GetCorrectedPT();
+      if(jet.rawPt<=0) continue;
+      pt=CorrectRecoJet(jetReader,index).back();
     }
     if(!EECJetSelection::IsEligibleVetoJet(jet, pt, Run3JetIDPrescription())) continue;
     eligible.emplace_back(jet.eta, EECJetSelection::DetectorPhi(jet.phi));
@@ -3907,6 +3938,36 @@ Bool_t EECAnalyzer::PassRun3JetVeto(ForestReader* jetReader, Bool_t mixing){
     }
   }
   return !reject;
+}
+
+void EECAnalyzer::FillRun3JetDiagnostics(ForestReader* reader, bool passesVeto) {
+  if(!fHistograms->fRun3JetQA) throw std::logic_error("Run-3 jet QA was not constructed");
+  const double centrality=fIsOOData?reader->GetCentrality():-0.5;
+  for(int index=0;index<reader->GetNJets();++index) {
+    const double raw=reader->GetJetRawPt(index), eta=reader->GetJetEta(index), phi=reader->GetJetPhi(index);
+    if(!std::isfinite(raw) || raw<=0 || std::abs(eta)>=fJetEtaCut) continue;
+    if(fCutBadPhiRegion && phi>-.1 && phi<1.2) continue;
+    const auto stages=CorrectRecoJet(reader,index);
+    const double pt=stages.back();
+    if(pt<fJetMinimumPtCut || pt>fJetMaximumPtCut) continue;
+    if(fMatchJets) {
+      const bool matched=reader->HasMatchingJet(index);
+      const double partner=matched?reader->GetMatchedPt(index):-1;
+      const bool compatible=matched && pt*.5<=partner && partner*.5<=pt;
+      if((fMatchJets==1 && !compatible) || (fMatchJets==2 && compatible)) continue;
+    }
+    double trackMax=reader->GetJetMaxTrackPt(index);
+    if(trackMax==-1) {
+      trackMax=0;
+      for(int t=0;t<reader->GetNTracks();++t)
+        if(PassTrackCuts(reader,t,fHistograms->fhTrackCuts,true) &&
+           GetDeltaR(eta,phi,reader->GetTrackEta(t),reader->GetTrackPhi(t))<fJetRadius)
+          trackMax=std::max(trackMax,static_cast<double>(reader->GetTrackPt(t)));
+    }
+    const bool trackPass=EECJetSelection::PassTrackMaxFraction(trackMax,raw,fMinimumMaxTrackPtFraction,fMaximumMaxTrackPtFraction);
+    const bool idPass=EECJetSelection::PassJetID(reader->GetJetSelectionInputs(index),Run3JetIDPrescription());
+    fHistograms->fRun3JetQA->Fill(pt,raw,trackMax,centrality,fTotalEventWeight,trackPass,idPass,passesVeto,stages);
+  }
 }
 
 Bool_t EECAnalyzer::PassEventCuts(ForestReader* eventReader, const Bool_t fillHistograms){
@@ -3939,14 +4000,18 @@ Bool_t EECAnalyzer::PassEventCuts(ForestReader* eventReader, const Bool_t fillHi
   if(TMath::Abs(eventReader->GetVz()) > fVzCut) return false;
   if(fillHistograms) fHistograms->fhEvents->Fill(EECHistograms::kVzCut);
 
+  const bool mixing = eventReader == fMixedEventReader;
+  bool passesVeto=true;
   if(fApplyJetVeto){
-    const bool mixing = eventReader == fMixedEventReader;
     ForestReader* jets = mixing && fMixedVetoJetReader ? fMixedVetoJetReader.get() : eventReader;
     if(!mixing && fRecoJetReader) jets = fRecoJetReader;
-    if(!PassRun3JetVeto(jets, mixing)) return false;
+    passesVeto=PassRun3JetVeto(jets,mixing);
   }
-  
-  return true;
+  // Preserve the no-veto denominator: fill before rejecting the event.
+  if(fFillRun3JetQA && !mixing && eventReader==fJetReader &&
+     !(fMcCorrelationType==kGenGen || fMcCorrelationType==kGenReco))
+    FillRun3JetDiagnostics(eventReader,passesVeto);
+  return passesVeto;
   
 }
 

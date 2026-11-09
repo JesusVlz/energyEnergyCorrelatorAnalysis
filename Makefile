@@ -55,3 +55,6 @@ cl:  clean $(PROGRAM)
 #		@echo "Generating dictionary ..."
 #		@rm -f nanoDict.cc nanoDict.hh nanoDict.h
 #		@rootcling nanoDict.cc -c -D$(version) $(HDRSDICT)
+
+src/EECHistograms.o src/EECAnalyzer.o: src/Run3JetQA.h
+src/EECAnalyzer.o src/HighForestReader.o src/UnfoldingForestReader.o: src/Run3JetL1Inputs.h

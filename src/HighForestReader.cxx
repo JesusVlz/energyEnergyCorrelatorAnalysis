@@ -181,6 +181,7 @@ HighForestReader::HighForestReader(const HighForestReader& in) :
   fSkimTree(in.fSkimTree),
   fTrackTree(in.fTrackTree),
   fParticleTree(in.fParticleTree),
+  fRun3L1Inputs(in.fRun3L1Inputs),
   fnJetsBranch(in.fnJetsBranch),
   fnTracksBranch(in.fnTracksBranch),
   fMatchedJetWTAEtaBranch(in.fMatchedJetWTAEtaBranch),
@@ -268,6 +269,7 @@ HighForestReader& HighForestReader::operator=(const HighForestReader& in){
   fSkimTree = in.fSkimTree;
   fTrackTree = in.fTrackTree;
   fParticleTree = in.fParticleTree;
+  fRun3L1Inputs = in.fRun3L1Inputs;
   fnJetsBranch = in.fnJetsBranch;
   fnTracksBranch = in.fnTracksBranch;
   fMatchedJetWTAEtaBranch = in.fMatchedJetWTAEtaBranch;
@@ -1007,6 +1009,7 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
   
   // Connect branches to trees
   Initialize();
+  if(fRun3L1Inputs) fRun3L1Inputs->Bind(fileList,treeName[fJetType]);
 }
 
 /*
@@ -1113,6 +1116,8 @@ void HighForestReader::GetEvent(Int_t nEvent){
   if(fIsMC){
     fParticleTree->GetEntry(nEvent);
   }
+  if(fRun3L1Inputs) fRun3L1Inputs->Read(nEvent,fnJets);
+
 }
 
 // Getter for jet pT
