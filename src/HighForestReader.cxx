@@ -1087,7 +1087,7 @@ void HighForestReader::GetEvent(Int_t nEvent){
     if(localEntry < 0 || !nativeTree)
       throw std::runtime_error("HighForestReader: cannot load Run-3 native jet entry");
     if(fRun3ValidatedJetTreeNumber != fJetTree->GetTreeNumber()){
-      EECJetSelection::Detail::ValidateNativeJetInputs(nativeTree);
+      fRun3PFJetInputs.ValidateSchema(nativeTree);
       EECJetSelection::Detail::RequireJetLeaf(nativeTree, "trackMax", "Float_t", "nref");
       if(fJetAxis != 0){
         EECJetSelection::Detail::RequireJetLeaf(nativeTree, "WTAeta", "Float_t", "nref");

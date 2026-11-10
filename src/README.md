@@ -76,3 +76,20 @@ calibration/QA remains restricted to native R4.
 The matching producer configuration and a checker that enumerates all
 ROOT trees/branches are maintained on
 [the CMSSW EEC review branch](https://github.com/JesusVlz/cmssw/tree/eec-ppref-l1fastjet-20261109/HeavyIonsAnalysis/Configuration).
+
+For ppRef MiniPOG Jet ID, new forests also save Int_t[nref] `jtPfCM`
+and `jtPfNM` from the aggregate PAT charged/neutral multiplicities.
+Their sum supplies the constituent count, including HF constituents.
+The five category sums remain separate for the pinned HINpp prescription.
+Legacy forests without the pair retain the unresolved-lower-bound error;
+reforest to supply these values. Partial pairs and schema changes across
+a chain are rejected. The producer update adds two integers per ppRef jet.
+
+A ROOT-based regression test covers legacy unresolved/resolved counts,
+HF-inclusive exact counts, genuine one-constituent rejection, invalid pairs,
+overflow, and chain schema consistency:
+
+```bash
+g++ -std=c++17 $(root-config --cflags) validation/test_full_pf_multiplicities.cxx src/Run3JetSelection.cxx $(root-config --libs) -o /tmp/test_full_pf_multiplicities
+/tmp/test_full_pf_multiplicities
+```
