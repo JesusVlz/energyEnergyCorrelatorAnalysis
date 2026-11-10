@@ -798,16 +798,34 @@ void HighForestReader::Initialize(){
         fTrackTree->SetBranchAddress("trkDxyFirstVtx", &fTrackVertexDistanceXYVector, &fTrackVertexDistanceXYBranch);
         fTrackTree->SetBranchStatus("trkDxyErrFirstVtx", 1);
         fTrackTree->SetBranchAddress("trkDxyErrFirstVtx", &fTrackVertexDistanceXYErrorVector, &fTrackVertexDistanceXYErrorBranch);
-        fTrackTree->SetBranchStatus("trkNormChi2", 1);
-        fTrackTree->SetBranchAddress("trkNormChi2", &fTrackNormalizedChi2Vector, &fTrackChi2Branch);
-        fTrackTree->SetBranchStatus("trkNLayers", 1);
-        fTrackTree->SetBranchAddress("trkNLayers", &fnHitsTrackerLayerVector, &fnHitsTrackerLayerBranch);
-        fTrackTree->SetBranchStatus("trkNHits", 1);
-        fTrackTree->SetBranchAddress("trkNHits", &fnHitsTrackVector, &fnHitsTrackBranch);
-        fTrackTree->SetBranchStatus("pfEcal", 1);
-        fTrackTree->SetBranchAddress("pfEcal", &fTrackEnergyEcalVector, &fTrackEnergyEcalBranch);
-        fTrackTree->SetBranchStatus("pfHcal", 1);
-        fTrackTree->SetBranchAddress("pfHcal", &fTrackEnergyHcalVector, &fTrackEnergyHcalBranch);
+        // OO/ppRef return before the PbPb-only chi2, hit-count and calo cuts.
+        const bool requireLegacyTrackInputs = !(fDataType == kOO || fDataType == kOOMC ||
+                                               fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC);
+        fTrackNormalizedChi2Vector = nullptr;
+        if(requireLegacyTrackInputs || fTrackTree->GetBranch("trkNormChi2")){
+          fTrackTree->SetBranchStatus("trkNormChi2", 1);
+          fTrackTree->SetBranchAddress("trkNormChi2", &fTrackNormalizedChi2Vector, &fTrackChi2Branch);
+        }
+        fnHitsTrackerLayerVector = nullptr;
+        if(requireLegacyTrackInputs || fTrackTree->GetBranch("trkNLayers")){
+          fTrackTree->SetBranchStatus("trkNLayers", 1);
+          fTrackTree->SetBranchAddress("trkNLayers", &fnHitsTrackerLayerVector, &fnHitsTrackerLayerBranch);
+        }
+        fnHitsTrackVector = nullptr;
+        if(requireLegacyTrackInputs || fTrackTree->GetBranch("trkNHits")){
+          fTrackTree->SetBranchStatus("trkNHits", 1);
+          fTrackTree->SetBranchAddress("trkNHits", &fnHitsTrackVector, &fnHitsTrackBranch);
+        }
+        fTrackEnergyEcalVector = nullptr;
+        if(requireLegacyTrackInputs || fTrackTree->GetBranch("pfEcal")){
+          fTrackTree->SetBranchStatus("pfEcal", 1);
+          fTrackTree->SetBranchAddress("pfEcal", &fTrackEnergyEcalVector, &fTrackEnergyEcalBranch);
+        }
+        fTrackEnergyHcalVector = nullptr;
+        if(requireLegacyTrackInputs || fTrackTree->GetBranch("pfHcal")){
+          fTrackTree->SetBranchStatus("pfHcal", 1);
+          fTrackTree->SetBranchAddress("pfHcal", &fTrackEnergyHcalVector, &fTrackEnergyHcalBranch);
+        }
       }
       
     } else { // Read the tree from AOD files
@@ -1201,7 +1219,10 @@ Float_t HighForestReader::GetTrackVertexDistanceXYError(Int_t iTrack) const{
 
 // Getter for normalized track chi2 value from reconstruction fit
 Float_t HighForestReader::GetTrackNormalizedChi2(Int_t iTrack) const{
-  if(fIsMiniAOD) return fTrackNormalizedChi2Vector->at(iTrack);
+  if(fIsMiniAOD){
+    if(!fTrackNormalizedChi2Vector) throw std::logic_error("Legacy track quality input is absent from this slim Run-3 forest");
+    return fTrackNormalizedChi2Vector->at(iTrack);
+  }
   return GetTrackChi2(iTrack) / (1.0*GetNTrackDegreesOfFreedom(iTrack));
 }
 
@@ -1219,25 +1240,37 @@ Int_t HighForestReader::GetNTrackDegreesOfFreedom(Int_t iTrack) const{
 
 // Getter for number of hits in tracker layers
 Int_t HighForestReader::GetNHitsTrackerLayer(Int_t iTrack) const{
-  if(fIsMiniAOD) return fnHitsTrackerLayerVector->at(iTrack);
+  if(fIsMiniAOD){
+    if(!fnHitsTrackerLayerVector) throw std::logic_error("Legacy track quality input is absent from this slim Run-3 forest");
+    return fnHitsTrackerLayerVector->at(iTrack);
+  }
   return fnHitsTrackerLayerArray[iTrack];
 }
 
 // Getter for number of hits for the track
 Int_t HighForestReader::GetNHitsTrack(Int_t iTrack) const{
-  if(fIsMiniAOD) return fnHitsTrackVector->at(iTrack);
+  if(fIsMiniAOD){
+    if(!fnHitsTrackVector) throw std::logic_error("Legacy track quality input is absent from this slim Run-3 forest");
+    return fnHitsTrackVector->at(iTrack);
+  }
   return fnHitsTrackArray[iTrack];
 }
 
 // Getter for track energy in ECal
 Float_t HighForestReader::GetTrackEnergyEcal(Int_t iTrack) const{
-  if(fIsMiniAOD) return fTrackEnergyEcalVector->at(iTrack);
+  if(fIsMiniAOD){
+    if(!fTrackEnergyEcalVector) throw std::logic_error("Legacy track quality input is absent from this slim Run-3 forest");
+    return fTrackEnergyEcalVector->at(iTrack);
+  }
   return fTrackEnergyEcalArray[iTrack];
 }
 
 // Getter for track energy in HCal
 Float_t HighForestReader::GetTrackEnergyHcal(Int_t iTrack) const{
-  if(fIsMiniAOD) return fTrackEnergyHcalVector->at(iTrack);
+  if(fIsMiniAOD){
+    if(!fTrackEnergyHcalVector) throw std::logic_error("Legacy track quality input is absent from this slim Run-3 forest");
+    return fTrackEnergyHcalVector->at(iTrack);
+  }
   return fTrackEnergyHcalArray[iTrack];
 }
 
