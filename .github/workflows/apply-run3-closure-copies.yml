@@ -1,0 +1,58 @@
+name: Materialize reviewed Run3 closure copies
+on:
+  push:
+    branches: [run3-legacy-closure-plots]
+    paths: [.github/workflows/apply-run3-closure-copies.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: run3-legacy-closure-plots
+          fetch-depth: 0
+      - name: Generate and verify only the requested copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object plotting/compareDifferentEECpairings.C)" = 3ad7f8dfdb7eba8c936e8f9d9c78038ce262fb17
+          test "$(git hash-object plotting/validateBackgroundSubtraction.C)" = c571a0ee20a72d9cc11cf7956d04b9a380476ffb
+          g++ -std=c++17 -O2 validation/run3Plotting/makeRun3ClosureCopies.cxx -o /tmp/makeRun3ClosureCopies
+          /tmp/makeRun3ClosureCopies .
+          test "$(git hash-object plotting/compareDifferentEECpairingsRun3.C)" = 3beb8905017df40bc3bd1fd35a9b28484c8597f7
+          test "$(git hash-object plotting/validateBackgroundSubtractionRun3.C)" = 9f52aaa026af242c4bdddfe100d8a0bb9c8c34cb
+          test "$(git hash-object plotting/Run3ClosureTools.h)" = 86cff956d7bff6d028ae7e3833345ae04cf5c2fc
+          git diff --exit-code 792d76c0cd043ab1871b3217ac988f6455f2d9f0 -- plotting/compareDifferentEECpairings.C plotting/validateBackgroundSubtraction.C plotting/EECHistogramManager.cxx plotting/EECHistogramManager.h plotting/EECCard.cxx plotting/EECCard.h plotting/EECDrawer.cxx plotting/EECComparingDrawer.cxx plotting/JDrawer.h plotting/Makefile
+      - name: Remove narrowly superseded entry points and update references
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm plotting/plotOOMCBackgroundPresentation.C plotting/compareOOMCBackgroundMethods.C plotting/compareOOMCPerpendicularBackground.C plotting/compareOOMCPerpendicularSignal.C
+          sed -i 's/For presentation figures use plotOOMCBackgroundPresentation.C./For C++ closure figures use compareDifferentEECpairingsRun3.C; see README_Run3Closure.md./' plotting/plotOOMCBackgroundStudies.py
+          sed -i '/^| `compareOOMCPerpendicularBackground` /d; /^| `compareOOMCPerpendicularSignal` /d; /root -l -b -q.*plotting\/compareOOMCPerpendicularBackground.C/d; /root -l -b -q.*plotting\/compareOOMCPerpendicularSignal.C/d' README.md
+          sed -i 's/Example calls for all nine macros are:/Example calls for the retained diagnostic macros are:/' README.md
+          sed -i '/^## Plotting and OO diagnostics$/a\
+          \nRun-3 background and signal closure plots now use the legacy-derived C++ copies\n`plotting/compareDifferentEECpairingsRun3.C` and\n`plotting/validateBackgroundSubtractionRun3.C`. See\n[Run-3 closure configuration and error conventions](plotting/README_Run3Closure.md).\nThe original Run-2 macros and shared drawing classes remain unchanged.\n' README.md
+          git rm .github/workflows/run3-closure-runtime.yml .github/workflows/run3-closure-dependencies.yml .github/workflows/apply-run3-closure-copies.yml
+          git add plotting/compareDifferentEECpairingsRun3.C plotting/validateBackgroundSubtractionRun3.C plotting/plotOOMCBackgroundStudies.py README.md
+          git diff --cached --stat
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add tested legacy-derived Run3 closure copies; preserve Run2 and retire four bespoke macros'
+          git push origin HEAD:run3-legacy-closure-plots
+      - name: Package code-only verification artifact
+        shell: bash
+        run: |
+          mkdir -p code-artifact
+          git archive --format=tar.gz HEAD plotting/compareDifferentEECpairingsRun3.C plotting/validateBackgroundSubtractionRun3.C plotting/Run3ClosureTools.h plotting/README_Run3Closure.md validation/run3Plotting README.md > code-artifact/run3-closure-source.tar.gz
+          git diff --stat 792d76c0cd043ab1871b3217ac988f6455f2d9f0 HEAD > code-artifact/change-summary.txt
+          git diff 792d76c0cd043ab1871b3217ac988f6455f2d9f0 HEAD > code-artifact/run3-closure.patch
+          git rev-parse HEAD > code-artifact/commit.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: run3-closure-code
+          path: code-artifact/
+          retention-days: 1
