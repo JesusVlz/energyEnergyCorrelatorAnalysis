@@ -1025,9 +1025,9 @@ void HighForestReader::ReadForestFromFileList(std::vector<TString> fileList){
     }
   }
   
-  // Connect branches to trees
-  Initialize();
+  // Initialize primes event zero, so bind its L1 companion chains first.
   if(fRun3L1Inputs) fRun3L1Inputs->Bind(fileList,treeName[fJetType]);
+  Initialize();
 }
 
 /*
