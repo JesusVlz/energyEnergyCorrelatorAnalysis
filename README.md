@@ -443,6 +443,13 @@ Before calculating the O–O/ppRef ratio, verify that both files use the same je
 
 ## Plotting and OO diagnostics
 
+Run-3 background and signal closure plots now use the legacy-derived C++ copies
+`plotting/compareDifferentEECpairingsRun3.C` and
+`plotting/validateBackgroundSubtractionRun3.C`. See
+[Run-3 closure configuration and error conventions](plotting/README_Run3Closure.md).
+The original Run-2 macros and shared drawing classes remain unchanged.
+
+
 Build `plotting/DrawingClasses.so` with `make -C plotting`, then run the macros
 from the repository root in a ROOT environment. Pass the input paths explicitly;
 the filenames in the examples below are placeholders for your projected or raw
@@ -472,22 +479,18 @@ The pp legend reads `pp 5.36 TeV`.
 | `plotEEChistogramsJetPtComparison` | Projected OO MC; compare the first four jet bins at one track threshold using the general drawer. Current cards give 40–80, 80–120, 120–160, and 160–200 GeV. | Track threshold, output directory, centrality minimum/maximum. |
 | `plotEEChistogramsTrackPtComparison` | Projected OO MC; compare the first four track thresholds in the first jet bin. Current cards give 0.5, 1, 1.5, and 2 GeV in 40–80 GeV jets. | Centrality minimum/maximum; output goes to `figures/`. |
 | `plotOOMCJetPtComparison` | Wrapper for `plotEEChistogramsJetPtComparison` with the same drawing style. | Output directory, track threshold, centrality minimum/maximum. |
-| `compareOOMCPerpendicularBackground` | Projected OO MC with subevents and perpendicular-cone pairings; compare the estimated background with the same-jet mixed plus background-background components at 40–80 GeV and track pT above 2 GeV. | Centrality minimum/maximum; output goes to `figures/`. |
-| `compareOOMCPerpendicularSignal` | Projected OO MC with subevents and perpendicular-cone pairings; compare total and background-subtracted EECs with the same-jet Pythia-Pythia component at track pT above 2 GeV. | Jet pT minimum/maximum, centrality minimum/maximum; output goes to `figures/`. |
 | `compareFourOOMCModes` | Directory of projected RecoReco, RecoGen, GenReco, and GenGen files; compare total EEC shapes for track thresholds 0.5, 1, 2, and 3 GeV at 0–30% and 40–80 GeV. | Output directory. |
 | `plotOOMCGenRecoTrackSelections` | Projected GenReco OO MC; draw the total EEC for the same four track thresholds at 0–30% and 40–80 GeV, without assuming reconstructed tracks have truth-origin labels. | Output directory. |
 | `plotOOMCSubeventDecomposition` | Raw seven-dimensional RecoGen/GenGen OO MC EEC sparse histogram; project exponent 1 and plot Pythia-Pythia, Pythia-Hijing, and Hijing-Hijing components at 0–30% and 40–80 GeV. | Output directory, whether to use the verified stored generator range instead of resolving the four low-pT thresholds. |
 | `plotRawOODataComparisons` | Projected OO data; compare four jet bins and four track thresholds for every stored centrality. | Output directory. |
 
-Example calls for all nine macros are:
+Example calls for the retained diagnostic macros are:
 
 ```bash
 mkdir -p figures
 root -l -b -q 'plotting/plotEEChistogramsJetPtComparison.C("projected/OO_MC_processed.root",2.,"figures",0.,30.)'
 root -l -b -q 'plotting/plotEEChistogramsTrackPtComparison.C("projected/OO_MC_processed.root",0.,30.)'
 root -l -b -q 'plotting/plotOOMCJetPtComparison.C("projected/OO_MC_processed.root","figures",2.,0.,30.)'
-root -l -b -q 'plotting/compareOOMCPerpendicularBackground.C("projected/OO_MC_processed.root",0.,30.)'
-root -l -b -q 'plotting/compareOOMCPerpendicularSignal.C("projected/OO_MC_processed.root",40.,80.,0.,30.)'
 root -l -b -q 'plotting/compareFourOOMCModes.C("projected/fourModes","figures")'
 root -l -b -q 'plotting/plotOOMCGenRecoTrackSelections.C("projected/OO_GenReco_processed.root","figures")'
 root -l -b -q 'plotting/plotOOMCSubeventDecomposition.C("OO_RecoGen_raw.root","figures",false)'
