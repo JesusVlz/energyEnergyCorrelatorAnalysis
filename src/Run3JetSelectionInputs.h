@@ -23,6 +23,9 @@ struct JetInputs {
   // A neutral/constituent lower bound above an ID threshold proves a pass; a
   // lower bound below it cannot establish a failing Jet ID decision.
   bool multiplicitiesAreLowerBounds = false;
+  // Optional exact PAT totals; the category sums above retain their HIN meaning.
+  int fullChargedMultiplicity = -1;
+  int fullNeutralMultiplicity = -1;
 };
 
 namespace Detail {
@@ -41,6 +44,19 @@ inline void RequireJetLeaf(TTree* tree, const char* name, const char* type,
   }
 }
 
+// Old forests may omit both aggregate counts, but a partial pair is invalid.
+inline bool HasFullPFMultiplicities(TTree* tree) {
+  const bool charged = tree && tree->GetBranch("jtPfCM");
+  const bool neutral = tree && tree->GetBranch("jtPfNM");
+  if(charged != neutral)
+    throw std::runtime_error("Run-3 jet selection: jtPfCM and jtPfNM must be provided together");
+  if(charged) {
+    RequireJetLeaf(tree, "jtPfCM", "Int_t", "nref");
+    RequireJetLeaf(tree, "jtPfNM", "Int_t", "nref");
+  }
+  return charged;
+}
+
 // Native branch types are pinned by HiInclusiveJetAnalyzer: fractions /F,
 // multiplicities /I, all indexed by nref. Validate before any payload is read.
 inline void ValidateNativeJetInputs(TTree* tree) {
@@ -50,6 +66,7 @@ inline void ValidateNativeJetInputs(TTree* tree) {
     RequireJetLeaf(tree, name, "Float_t", "nref");
   for(const char* name : {"jtPfCHM", "jtPfNHM", "jtPfCEM", "jtPfNEM", "jtPfMUM"})
     RequireJetLeaf(tree, name, "Int_t", "nref");
+  HasFullPFMultiplicities(tree);
 }
 
 template <size_t Capacity>
@@ -57,6 +74,7 @@ class NativePFJetInputs {
 public:
   void Bind(TTree* tree) {
     ValidateNativeJetInputs(tree);
+    fHasFullMultiplicities = HasFullPFMultiplicities(tree);
     const char* floatNames[] = {"jtPfCHF", "jtPfNHF", "jtPfCEF", "jtPfNEF", "jtPfMUF"};
     const char* intNames[] = {"jtPfCHM", "jtPfNHM", "jtPfCEM", "jtPfNEM", "jtPfMUM"};
     for(size_t i = 0; i < 5; ++i) {
@@ -66,6 +84,18 @@ public:
          tree->SetBranchAddress(intNames[i], fMultiplicities[i].data()) < 0)
         throw std::runtime_error("Run-3 jet selection: cannot bind native PF composition");
     }
+    if(fHasFullMultiplicities) {
+      for(const char* name : {"jtPfCM", "jtPfNM"}) tree->SetBranchStatus(name, 1);
+      if(tree->SetBranchAddress("jtPfCM", fChargedMultiplicities.data()) < 0 ||
+         tree->SetBranchAddress("jtPfNM", fNeutralMultiplicities.data()) < 0)
+        throw std::runtime_error("Run-3 jet selection: cannot bind full PF multiplicities");
+    }
+  }
+
+  void ValidateSchema(TTree* tree) const {
+    ValidateNativeJetInputs(tree);
+    if(HasFullPFMultiplicities(tree) != fHasFullMultiplicities)
+      throw std::runtime_error("Run-3 jet selection: full PF multiplicity schema changed between input files");
   }
 
   JetInputs Get(size_t i, double eta, double phi, double rawPt, double storedPt) const {
@@ -78,15 +108,28 @@ public:
     }
     if(charged + neutral > std::numeric_limits<int>::max())
       throw std::runtime_error("Run-3 jet selection: native PF multiplicity sum overflows int");
-    return JetInputs{eta, phi, rawPt, storedPt, fFractions[1][i], fFractions[3][i],
+    JetInputs inputs{eta, phi, rawPt, storedPt, fFractions[1][i], fFractions[3][i],
                      fFractions[0][i], fFractions[2][i], fFractions[4][i],
                      static_cast<int>(charged), static_cast<int>(neutral),
                      static_cast<int>(charged + neutral), true};
+    if(fHasFullMultiplicities) {
+      const int fullCharged = fChargedMultiplicities[i];
+      const int fullNeutral = fNeutralMultiplicities[i];
+      if(fullCharged < charged || fullNeutral < neutral ||
+         static_cast<long long>(fullCharged) + fullNeutral > std::numeric_limits<int>::max())
+        throw std::runtime_error("Run-3 jet selection: invalid full PF multiplicities or counts below category sums");
+      inputs.fullChargedMultiplicity = fullCharged;
+      inputs.fullNeutralMultiplicity = fullNeutral;
+    }
+    return inputs;
   }
 
 private:
   std::array<std::array<Float_t, Capacity>, 5> fFractions{};
   std::array<std::array<Int_t, Capacity>, 5> fMultiplicities{};
+  std::array<Int_t, Capacity> fChargedMultiplicities{};
+  std::array<Int_t, Capacity> fNeutralMultiplicities{};
+  bool fHasFullMultiplicities = false;
 };
 
 } // namespace Detail

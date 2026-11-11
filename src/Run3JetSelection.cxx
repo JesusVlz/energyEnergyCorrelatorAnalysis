@@ -58,6 +58,9 @@ void ValidateJetIDInputs(const JetInputs& jet) {
   RequireFraction(jet.chargedHadronFraction, "charged hadron fraction");
   RequireFraction(jet.chargedEmFraction, "charged EM fraction");
   RequireFraction(jet.muonFraction, "muon fraction");
+  if(jet.fullChargedMultiplicity < -1 || jet.fullNeutralMultiplicity < -1 ||
+     ((jet.fullChargedMultiplicity >= 0) != (jet.fullNeutralMultiplicity >= 0)))
+    throw std::invalid_argument("Run-3 Jet ID: full charged/neutral multiplicities must be a nonnegative pair or both absent");
 }
 
 bool PassMultiplicity(int count, int threshold, bool lowerBound, const char* name) {
@@ -67,7 +70,7 @@ bool PassMultiplicity(int count, int threshold, bool lowerBound, const char* nam
   if(count > threshold) return true;
   if(lowerBound) {
     throw std::runtime_error(std::string("Run-3 Jet ID: the forest's ") + name +
-      " is only a lower bound and cannot resolve the ID threshold; provide the total multiplicity including HF constituents");
+      " is only a lower bound and cannot resolve the ID threshold; regenerate the forest with jtPfCM/jtPfNM including HF constituents");
   }
   return false;
 }
@@ -159,25 +162,34 @@ bool PassJetID(const JetInputs& jet, JetIDPrescription prescription) {
     return jet.neutralHadronFraction > 0.2 && jet.neutralEmFraction < 0.9 &&
       PassMultiplicity(jet.neutralMultiplicity, 10, false, "neutral category count");
   }
+  // CMSSW PFJetIDSelectionFunctor uses CM, NM and CM+NM, including HF.
+  const bool hasFullCounts = jet.fullChargedMultiplicity >= 0;
+  const int charged = hasFullCounts ? jet.fullChargedMultiplicity : jet.chargedMultiplicity;
+  const int neutral = hasFullCounts ? jet.fullNeutralMultiplicity : jet.neutralMultiplicity;
+  const long long fullTotal = static_cast<long long>(charged) + neutral;
+  if(fullTotal > std::numeric_limits<int>::max())
+    throw std::invalid_argument("Run-3 Jet ID: full constituent count overflows int");
+  const int total = hasFullCounts ? static_cast<int>(fullTotal) : jet.numberOfConstituents;
+  const bool lowerBound = !hasFullCounts && jet.multiplicitiesAreLowerBounds;
   const bool leptonVeto = prescription == JetIDPrescription::TightLeptonVeto;
   if(eta <= 2.6) {
     return jet.neutralHadronFraction < 0.99 && jet.neutralEmFraction < 0.90 &&
       jet.chargedHadronFraction > 0.01 &&
       (!leptonVeto || (jet.muonFraction < 0.80 && jet.chargedEmFraction < 0.80)) &&
-      PassMultiplicity(jet.chargedMultiplicity, 0, false, "charged multiplicity") &&
-      PassMultiplicity(jet.numberOfConstituents, 1, jet.multiplicitiesAreLowerBounds, "constituent count");
+      PassMultiplicity(charged, 0, false, "charged multiplicity") &&
+      PassMultiplicity(total, 1, lowerBound, "constituent count");
   }
   if(eta <= 2.7) {
     return jet.neutralHadronFraction < 0.90 && jet.neutralEmFraction < 0.99 &&
       (!leptonVeto || (jet.muonFraction < 0.80 && jet.chargedEmFraction < 0.80)) &&
-      PassMultiplicity(jet.chargedMultiplicity, 0, false, "charged multiplicity");
+      PassMultiplicity(charged, 0, false, "charged multiplicity");
   }
   if(eta <= 3.0) {
     return jet.neutralHadronFraction < 0.99 && jet.neutralEmFraction < 0.99 &&
-      PassMultiplicity(jet.neutralMultiplicity, 1, jet.multiplicitiesAreLowerBounds, "neutral multiplicity");
+      PassMultiplicity(neutral, 1, lowerBound, "neutral multiplicity");
   }
   return jet.neutralEmFraction < 0.4 &&
-    PassMultiplicity(jet.neutralMultiplicity, 10, jet.multiplicitiesAreLowerBounds, "neutral multiplicity");
+    PassMultiplicity(neutral, 10, lowerBound, "neutral multiplicity");
 }
 
 JetVetoMap::JetVetoMap(const std::string& path, const std::string& histogramKey) :

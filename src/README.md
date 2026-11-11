@@ -45,3 +45,51 @@ Class managing tracking efficiency correction for 2018 PbPb data. The code is or
 **trackingEfficiency2017pp.cxx**
 
 Class managing tracking efficiency correction for 2017 pp data. The code is originally from https://twiki.cern.ch/twiki/bin/view/CMS/HiTracking2017pp. It has been slightly modified for this analysis.
+
+## Slim OO/ppRef forests
+
+For DataTypes 9-12, the five PbPb-only MiniAOD track fields
+`trkNormChi2`, `trkNLayers`, `trkNHits`, `pfEcal`, and `pfHcal`
+are optional in HighForestReader. Present fields are still read; absent
+fields are not bound, and their getters report an error if called.
+The OO/ppRef track cuts return before those PbPb-only quality cuts.
+PbPb's existing reader requirements are preserved. UnfoldingForestReader
+already treats these fields as optional.
+
+The slim track contract retains `nTrk`, `trkPt`, `trkEta`, `trkPhi`,
+`trkPtError`, `highPurity`, the four first-vertex impact-parameter fields,
+and `trkCharge` (for response studies). Native MiniAOD vector types and
+event-tree entry ordering must be preserved.
+
+This compatibility change does not relax the current native jet input
+contract: `rawpt`, `trackMax`, measured `jtarea` when L1 is enabled,
+and the ten `jtPf*` composition branches must be genuinely produced.
+Old `chargedMax`/`jtptUncorrected` schemas are not automatically aliased.
+
+For ppRef R4, optional L1FastJet uses scalar
+`ggHiNtuplizer/EventTree/rho` from `fixedGridRhoFastjetAll` and measured
+`ak4PFJetAnalyzer/t/jtarea`. Enable it with `Run3JEC 1` and
+`Run3UsePpL1FastJet 1` only on forests containing valid, aligned inputs.
+The OO eta-binned rho profile is not this scalar, and current Run-3
+calibration/QA remains restricted to native R4.
+
+The matching producer configuration and a checker that enumerates all
+ROOT trees/branches are maintained on
+[the CMSSW EEC review branch](https://github.com/JesusVlz/cmssw/tree/eec-ppref-l1fastjet-20261109/HeavyIonsAnalysis/Configuration).
+
+For ppRef MiniPOG Jet ID, new forests also save Int_t[nref] `jtPfCM`
+and `jtPfNM` from the aggregate PAT charged/neutral multiplicities.
+Their sum supplies the constituent count, including HF constituents.
+The five category sums remain separate for the pinned HINpp prescription.
+Legacy forests without the pair retain the unresolved-lower-bound error;
+reforest to supply these values. Partial pairs and schema changes across
+a chain are rejected. The producer update adds two integers per ppRef jet.
+
+A ROOT-based regression test covers legacy unresolved/resolved counts,
+HF-inclusive exact counts, genuine one-constituent rejection, invalid pairs,
+overflow, and chain schema consistency:
+
+```bash
+g++ -std=c++17 $(root-config --cflags) validation/test_full_pf_multiplicities.cxx src/Run3JetSelection.cxx $(root-config --libs) -o /tmp/test_full_pf_multiplicities
+/tmp/test_full_pf_multiplicities
+```

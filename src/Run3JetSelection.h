@@ -26,8 +26,8 @@ enum class JetIDPrescription { Tight = 1, TightLeptonVeto = 2, HINPbPb = 3, HINp
 // unphysical inputs throw; fraction-domain validation allows 3 Float_t epsilon
 // endpoint rounding without changing the raw values used by any ID threshold.
 // Finite jets outside |eta| <= 5 fail the ID. Native
-// five-category counts may omit HF: lower bounds can establish a passing
-// multiplicity cut, but an unresolved threshold throws instead of guessing.
+// five-category counts may omit HF: full jtPfCM/jtPfNM counts resolve the
+// multiplicity cuts. Legacy lower bounds still throw at unresolved thresholds.
 bool PassJetID(const JetInputs& jet, bool leptonVeto = false);
 // MiniPOGOO/MiniPOGpp implement the HIN miniPOG table supplied by the
 // analysis owner on 2026-11-08. The legacy HIN prescriptions reproduce the ID sections of HIN-Jets include/JetSelection_
