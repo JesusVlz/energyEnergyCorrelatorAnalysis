@@ -1,0 +1,133 @@
+name: OO integration validation
+on:
+  push:
+    branches: [oo-integration]
+    paths:
+      - 'src/**'
+      - 'plotting/**'
+      - 'validation/**'
+      - 'card*.input'
+      - 'crab/**'
+      - 'Makefile'
+      - 'eecAnalysis.cxx'
+      - 'jetEnergyCorrections/**'
+      - 'trackCorrectionTables/**'
+      - 'jetVetoMaps/**'
+      - '.github/workflows/oo-integration-validation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: oo-integration-validation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  combined-software:
+    if: github.ref == 'refs/heads/oo-integration'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MPLBACKEND: Agg
+      MPLCONFIGDIR: /tmp/oo-integration-mpl
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned ROOT software-test environment
+        id: root
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/oo-integration
+          git rev-parse HEAD > /tmp/oo-integration/validated_commit.txt
+          python -m pip install 'ROOT==0.1a10' numpy matplotlib
+          python - <<'PY'
+          import os, pathlib, ROOT
+          root = pathlib.Path(ROOT.__file__).resolve().parent
+          link = root / 'mock_site_packages' / 'ROOT'
+          link.parent.mkdir(exist_ok=True)
+          if not link.exists(): link.symlink_to(root, target_is_directory=True)
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write('ROOTSYS=' + str(root) + '\n')
+              out.write('LD_LIBRARY_PATH=' + str(root / 'lib') + ':' + str(root.parent / 'root.libs') + ':' + os.environ.get('LD_LIBRARY_PATH', '') + '\n')
+          with open(os.environ['GITHUB_PATH'], 'a') as out: out.write(str(root / 'bin') + '\n')
+          pathlib.Path('/tmp/oo-integration/root_version.txt').write_text(ROOT.gROOT.GetVersion() + '\n')
+          print('ROOT software-test version:', ROOT.gROOT.GetVersion())
+          PY
+      - name: Build combined analyzer
+        id: analyzer
+        run: |
+          set -euo pipefail
+          make -j2 2>&1 | tee /tmp/oo-integration/analyzer-build.log
+      - name: Tracking and pair regressions
+        if: ${{ !cancelled() && steps.analyzer.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s validation/run3Pairs -p 'test_*.py' -v 2>&1 | tee /tmp/oo-integration/tracking-tests.log
+      - name: Tracking payload and generated-card audit
+        if: ${{ !cancelled() && steps.root.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python validation/run3Pairs/prepare_inputs.py audit-tables --output /tmp/oo-integration/tracking_tables.json 2>&1 | tee /tmp/oo-integration/table-audit.log
+          python validation/run3Pairs/prepare_inputs.py cards --output /tmp/oo-integration/cards
+          diff -r validation/run3Pairs/cards /tmp/oo-integration/cards
+      - name: Jet calibration selection reader and response regressions
+        if: ${{ !cancelled() && steps.analyzer.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python validation/run3Jets/run_selection_tests.py --output /tmp/oo-integration/jets 2>&1 | tee /tmp/oo-integration/jet-tests.log
+      - name: Exact PF multiplicity regression
+        if: ${{ !cancelled() && steps.root.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          g++ -std=c++17 $(root-config --cflags) validation/test_full_pf_multiplicities.cxx src/Run3JetSelection.cxx $(root-config --libs) -o /tmp/oo-integration/test_full_pf_multiplicities
+          /tmp/oo-integration/test_full_pf_multiplicities 2>&1 | tee /tmp/oo-integration/pf-count-tests.log
+      - name: Build drawing library
+        id: plotting
+        if: ${{ !cancelled() && steps.root.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          make -C plotting -j2 2>&1 | tee /tmp/oo-integration/plotting-build.log
+      - name: Compile Run-3 closure macros without physics inputs
+        if: ${{ !cancelled() && steps.plotting.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/oo-integration/aclic
+          for macro in plotting/compareDifferentEECpairingsRun3.C plotting/validateBackgroundSubtractionRun3.C validation/run3Plotting/checkRun3Closure.C; do
+            MACRO="$macro" root -l -b -q -e 'if(gSystem->Load("plotting/DrawingClasses.so")<0) gSystem->Exit(1); if(!gSystem->CompileMacro(gSystem->Getenv("MACRO"),"kf","","/tmp/oo-integration/aclic")) gSystem->Exit(1);' 2>&1 | tee "/tmp/oo-integration/$(basename "$macro").log"
+          done
+      - name: Unfolding numerical metadata and renderer regressions
+        if: ${{ !cancelled() && steps.root.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s validation/run3Unfolding -p 'test_study*.py' -v 2>&1 | tee /tmp/oo-integration/unfolding-tests.log
+          python validation/run3Unfolding/run3_study.py --help > /tmp/oo-integration/unfolding-help.txt
+          python - <<'PY'
+          import pathlib, ROOT
+          available = ROOT.gSystem.Load('libRooUnfold') >= 0
+          message = ('RooUnfold library available; inspect runtime-test outcome in unfolding-tests.log.' if available else
+                     'NOT_RUN: real RooUnfold regression skipped because libRooUnfold is unavailable. Require EEC_REQUIRE_ROOT_TESTS=1 on the analysis host before main promotion.')
+          pathlib.Path('/tmp/oo-integration/roounfold-runtime-status.txt').write_text(message+'\n')
+          print(message)
+          PY
+      - name: Record final source status
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          git diff --check
+          git status --short > /tmp/oo-integration/worktree-status.txt
+          printf '%s\n' 'Software/compilation checks only. No native MC closure, data unfolding, production submission, correction qualification, or main update.' > /tmp/oo-integration/scope.txt
+          cat /tmp/oo-integration/scope.txt >> "$GITHUB_STEP_SUMMARY"
+          if test -f /tmp/oo-integration/roounfold-runtime-status.txt; then cat /tmp/oo-integration/roounfold-runtime-status.txt >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Upload integration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oo-integration-software-${{ github.sha }}
+          path: /tmp/oo-integration
+          if-no-files-found: warn
+          retention-days: 14
