@@ -10,7 +10,7 @@ CARD=${2#card=}
 OUTPUT=${3#output=}
 LOCATION=${4#location=}
 MIXINGLIST=${5#mixinglist=}
-if [[ ! $JOBID =~ ^[1-9][0-9]*$ || ! $LOCATION =~ ^[0-3]$ || -z $OUTPUT || $OUTPUT == */* ]]; then
+if [[ ! $JOBID =~ ^[1-9][0-9]*$ || ! $LOCATION =~ ^[0-4]$ || -z $OUTPUT || $OUTPUT == */* ]]; then
   echo "Invalid CRAB job ID, file location, or output basename" >&2
   exit 64
 fi

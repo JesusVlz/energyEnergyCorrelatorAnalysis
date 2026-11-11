@@ -33,14 +33,27 @@ using namespace std;
  *    std::vector<TString> &fileNameVector = Vector filled with filenames found in the file
  *    TString fileNameFile = Text file containing one analysis file name in each line
  *    int debug = Level of debug messages shown
- *    int locationIndex = Where to find analysis files: 0 = Purdue EOS, 1 = CERN EOS, 2 = Vanderbilt T2,  3 = Use xrootd to find the data
+ *    int locationIndex = Where to find analysis files: 0 = Purdue EOS, 1 = CERN EOS, 2 = Vanderbilt T2, 3 = FNAL XRootD redirector, 4 = Nebraska T2
  *    bool runLocal = True: Local run mode. False: Crab run mode
  */
 void ReadFileList(std::vector<TString> &fileNameVector, TString fileNameFile, int debug, int locationIndex, bool runLocal)
 {
   
   // Possible location for the input files
-  const char* fileLocation[] = {"root://eos.cms.rcac.purdue.edu/", "root://eoscms.cern.ch/", "root://xrootd-vanderbilt.sites.opensciencegrid.org/", "root://cmsxrootd.fnal.gov/"};
+  const char* fileLocation[] = {
+    "root://eos.cms.rcac.purdue.edu/",
+    "root://eoscms.cern.ch/",
+    "root://xrootd-vanderbilt.sites.opensciencegrid.org/",
+    "root://cmsxrootd.fnal.gov/",
+    "root://xrootd-local.unl.edu:1094/"
+  };
+  const int numberOfFileLocations = sizeof(fileLocation) / sizeof(fileLocation[0]);
+  // Local lists do not use this index; retain the negative ACCRE convention.
+  if(!runLocal && (locationIndex < 0 || locationIndex >= numberOfFileLocations)){
+    std::cerr << "Error: invalid file location index " << locationIndex
+              << "; expected 0.." << numberOfFileLocations - 1 << " for CRAB running." << std::endl;
+    exit(EXIT_FAILURE);
+  }
   
   // Set up the file names file for reading
   ifstream file_stream(fileNameFile);
@@ -82,8 +95,11 @@ void ReadFileList(std::vector<TString> &fileNameVector, TString fileNameFile, in
             currentFileName.Remove(TString::kBoth,','); // Remove commas
             currentFileName.Remove(TString::kBoth,'"'); // Remove quotation marks
             
-            // After stripping characters not belonging to the file name, we can add the file to list
-            currentFileName.Prepend(fileLocation[locationIndex]);  // If not running locally, we need to give xrootd path
+            // Keep explicit URLs unchanged; ROOT selects the appropriate protocol.
+            // Bare file names still use the selected XRootD endpoint.
+            if(!currentFileName.Contains("://")){
+              currentFileName.Prepend(fileLocation[locationIndex]);
+            }
             fileNameVector.push_back(currentFileName);
           }
         }
@@ -133,7 +149,8 @@ int main(int argc, char **argv) {
     cout<<"+  fileNameFile: Text file containing the list of files used in the analysis. Also a single .root file can be given. For crab analysis a job id should be given here." <<endl;
     cout<<"+  configurationCard: Card file with binning and cut information for the analysis." <<endl;
     cout<<"+  outputFileName: .root file to which the histograms are written." <<endl;
-    cout<<"+  fileLocation: Where to find analysis files: 0 = Purdue EOS, 1 = CERN EOS, 2 = Vanderbilt T2, 3 = Use xrootd to find the data. -1 is used to indicate running slurm jobs on ACCRE." << endl;
+    cout<<"+  fileLocation: Where to find analysis files: 0 = Purdue EOS, 1 = CERN EOS, 2 = Vanderbilt T2, 3 = FNAL XRootD redirector, 4 = Nebraska T2. -1 with runLocal=true indicates running slurm jobs on ACCRE." << endl;
+    cout<<"+  Complete URLs in CRAB input lists are preserved; fileLocation prefixes only bare file names." << endl;
     cout<<"+  runLocal: True: Search input files from local machine. False (default): Search input files from grid with xrootd." << endl;
     cout<<"+  mixingListIndex: Mixing file list index for CRAB running. If -1, used list is determined from CRAB job ID (default = -1)" << endl;
     cout<<"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
