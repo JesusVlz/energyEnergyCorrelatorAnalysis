@@ -1,0 +1,72 @@
+name: Run-3 track preparation
+on:
+  push:
+    branches: [repair/run3-track-pair-preparation]
+    paths:
+      - 'src/**'
+      - 'validation/run3Pairs/**'
+      - 'card*.input'
+      - 'crab/card*.input'
+      - 'Makefile'
+      - '.github/workflows/run3-track-preparation.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'validation/run3Pairs/**'
+      - 'card*.input'
+      - 'crab/card*.input'
+      - 'Makefile'
+      - '.github/workflows/run3-track-preparation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: run3-track-preparation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  preparation:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install ROOT for software tests only
+        run: |
+          python -m pip install 'ROOT==0.1a10'
+          python - <<'PY'
+          import os, pathlib, ROOT
+          root = pathlib.Path(ROOT.__file__).resolve().parent
+          # Work around the pinned wheel's build-time root-config prefix in CI.
+          link = root / 'mock_site_packages' / 'ROOT'
+          link.parent.mkdir(exist_ok=True)
+          if not link.exists(): link.symlink_to(root, target_is_directory=True)
+          print('ROOT', ROOT.gROOT.GetVersion(), 'at', root)
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write('ROOTSYS=' + str(root) + '\n')
+              out.write('LD_LIBRARY_PATH=' + str(root / 'lib') + ':' + str(root.parent / 'root.libs') + ':' + os.environ.get('LD_LIBRARY_PATH', '') + '\n')
+          with open(os.environ['GITHUB_PATH'], 'a') as out: out.write(str(root / 'bin') + '\n')
+          PY
+      - name: Build and run software regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/run3-preparation
+          make -j2 2>&1 | tee /tmp/run3-preparation/build.log
+          python -m unittest discover -s validation/run3Pairs -p 'test_*.py' -v 2>&1 | tee /tmp/run3-preparation/tests.log
+          python validation/run3Pairs/prepare_inputs.py audit-tables --output /tmp/run3-preparation/tracking_tables.json
+          python validation/run3Pairs/prepare_inputs.py cards --output /tmp/run3-preparation/cards
+          diff -r validation/run3Pairs/cards /tmp/run3-preparation/cards
+          git diff --check
+          git rev-parse HEAD > /tmp/run3-preparation/validated_commit.txt
+      - name: Upload technical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run3-track-preparation-audit
+          path: /tmp/run3-preparation
+          if-no-files-found: warn

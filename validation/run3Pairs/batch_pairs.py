@@ -14,6 +14,7 @@ import sqlite3
 import struct
 from collections import Counter, defaultdict
 from pathlib import Path
+from preparation_contract import validate_contract
 import pair_counts as p
 from plot_closure import FIELDS, EVENT_FIELDS, normalized_shapes
 
@@ -101,6 +102,10 @@ def train(input_path,prefix,raw_ledger=None,metadata_path=None,task=None):
     if task and numbers['raw']!=task['entry_limit']:raise ValueError('Raw coverage differs from full-file task')
     if task and (task['system']!=system or task['sample_namespace']!=namespace):raise ValueError('Task namespace/system mismatch')
     metadata=read_json(metadata_path) if metadata_path else {}
+    if metadata.get('tracking_contract') is not None:
+        validate_contract(metadata['tracking_contract'])
+    elif task and task.get('preparation_version'):
+        raise ValueError('New campaign requires corrected, versioned native export')
     result={'batch_schema':SCHEMA,'correction_version':p.VERSION,'system':system,'sample_namespace':namespace,
             'event_counts':dict(numbers),'derivation_coverage':coverage,
             'differential':raw_counts(table),'jet_independent':raw_counts(independent),
@@ -139,7 +144,7 @@ def merge_training(manifest,directory,system,output,identity_db,min_pairs=10):
             if counts['batch_schema']!=SCHEMA or counts['correction_version']!=p.VERSION:raise ValueError('Incompatible shard physics version')
             core_hash=core_hash or counts['physics_core_sha256']
             if counts['physics_core_sha256']!=core_hash:raise ValueError('Mixed physics-core versions')
-            signature={k:counts['native_metadata'].get(k) for k in ('analyzer_sha256','native_binary_sha256','payload_sha256','tool_sha256','event_weight_policy','jet_policy')}
+            signature={k:counts['native_metadata'].get(k) for k in ('analyzer_sha256','native_binary_sha256','payload_sha256','tool_sha256','event_weight_policy','jet_policy','tracking_contract')}
             if native_signature is None:native_signature=signature
             if signature!=native_signature:raise ValueError('Mixed native source/binary/calibration/policy provenance')
             ledger=checked_file(directory,receipt,'identities');cache=checked_file(directory,receipt,'holdout')
@@ -186,6 +191,9 @@ def merge_training(manifest,directory,system,output,identity_db,min_pairs=10):
                   input_path=str(manifest.resolve()),input_sha256=p.file_digest(manifest),physics_core_sha256=core_hash,native_signature=native_signature,
                   input_files=[{'path':t['input'],'identity':t.get('input_identity')} for t in tasks],
                   batch_status='GLOBAL_COUNTS_NORMALIZED_HOLDOUT_NOT_YET_EVALUATED')
+    if native_signature and native_signature.get('tracking_contract'):
+        contract = validate_contract(native_signature['tracking_contract'])
+        result['tracking_contracts'] = {system: contract}
     write_json(output,result);return result
 
 

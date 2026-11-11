@@ -1,0 +1,34 @@
+name: Run-3 offline input inspection tools
+on:
+  push:
+    branches: [repair/run3-track-pair-preparation]
+    paths: ['.github/workflows/run3-upload-inspection-tools.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tools:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Package tools and public source snapshot only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/root-inspection/wheels
+          python -m pip download --only-binary=:all: --dest /tmp/root-inspection/wheels 'uproot==5.6.8' 'awkward==2.8.10'
+          git archive --format=tar.gz --output=/tmp/root-inspection/framework.tar.gz HEAD
+          git rev-parse HEAD > /tmp/root-inspection/framework_commit.txt
+          python -m pip download --only-binary=:all: --no-deps --dest /tmp/root-inspection/wheels 'ROOT==0.1a10'
+          sha256sum /tmp/root-inspection/wheels/* > /tmp/root-inspection/wheel_checksums.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: run3-offline-root-inspection-tools
+          path: /tmp/root-inspection
+          compression-level: 0
+          retention-days: 3

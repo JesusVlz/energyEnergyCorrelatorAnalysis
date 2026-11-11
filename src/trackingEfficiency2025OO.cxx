@@ -1,3 +1,4 @@
+#include "TrackingTableValidation.h"
 #include "trackingEfficiency2025OO.h"
 
 // ROOT includes
@@ -30,6 +31,7 @@ bool TrkEff2025OO::checkBounds(float pt, float eta, int hiBin) {
 
   const bool inBounds =
     (
+      std::isfinite(pt) && std::isfinite(eta) &&
       TMath::Abs(eta) <= 2.4 &&
       hiBin >= 0 &&
       hiBin <= 199 &&
@@ -82,6 +84,9 @@ float TrkEff2025OO::getCorrection(float pt, float eta, int hiBin) {
    */
   const float lookupPt =
     (pt > kMaximumLookupPt) ? kMaximumLookupPt : pt;
+  if(!EECRun3Tracking::InsideAxis(efficiency->GetXaxis(), eta) ||
+     !EECRun3Tracking::InsideAxis(efficiency->GetYaxis(), lookupPt) ||
+     !EECRun3Tracking::InsideAxis(efficiency->GetZaxis(), hiBin)) return 0;
 
   /**
    * TH3::FindBin returns the global ROOT bin corresponding to:
@@ -137,7 +142,7 @@ float TrkEff2025OO::getCorrection(float pt, float eta, int hiBin) {
    * Protect against division by an efficiency that is zero or very close
    * to zero.
    */
-  if (efficiencyValue <= 0.001) {
+  if (!EECRun3Tracking::ValidContents(efficiencyValue, fakeRateValue, secondaryRateValue, multipleRateValue) || efficiencyValue <= 0.001) {
 
     if (!isQuiet && !warnedAboutLowEfficiency) {
 
@@ -293,10 +298,12 @@ TrkEff2025OO::TrkEff2025OO(
     );
   }
 
+  EECRun3Tracking::ValidateTables({efficiency, fakeRate, secondaryRate, multipleRate}, 3, fileName);
+
   if (!isQuiet) {
 
     std::cout
-      << "TrkEff2025OO: using nominal OO tracking correction table: "
+      << "TrkEff2025OO: using selected OO tracking correction table: "
       << fileName
       << std::endl;
 

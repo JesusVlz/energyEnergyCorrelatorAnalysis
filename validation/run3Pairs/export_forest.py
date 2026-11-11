@@ -14,6 +14,7 @@ import subprocess
 import time
 from array import array
 from pathlib import Path
+from preparation_contract import selection_from_card, payload_path, export_contract
 
 REPO = Path(__file__).resolve().parents[2]
 PAYLOADS = {
@@ -85,19 +86,24 @@ def export(args):
     output.parent.mkdir(parents=True, exist_ok=True)
     work = output.parent/(output.stem+'.native')
     work.mkdir(exist_ok=True)
-    payload = PAYLOADS[args.system]
+    base = args.card or REPO/('cardEECOOMCInclusiveR04.input' if args.system == 'OO' else 'cardEECpp5v36TeVMCR04.input')
+    selection = selection_from_card(base)
+    payload = payload_path(args.system, selection)
+    contract = export_contract(args.system, selection, payload)
     if args.payload and digest(args.payload) != digest(payload):
         raise ValueError('--payload differs from the analyzer nominal payload; configure analyzer explicitly')
     base = args.card or REPO/('cardEECOOMCInclusiveR04.input' if args.system == 'OO' else 'cardEECpp5v36TeVMCR04.input')
+    if args.reuse_native:
+        raise ValueError('Native reuse requires a verified campaign receipt; regenerate this standalone export after the Run-3 cut repair')
     paths, commands = {}, []
     for population, correlation in [('reco', 0), ('gen', 1)]:
         prefix = work/population
         paths[population] = prefix.with_suffix('.jsonl')
         settings = {'McCorrelationType': correlation, 'BackgroundMethods': 0,
-                    'MinJetPtCut': 40, 'MaxJetPtCut': 160, 'MinTrackPtCut': 2,
+                    'MinJetPtCut': 40, 'MaxJetPtCut': 160, 'MinTrackPtCut': 0.5,
                     'TrackEtaCut': 2.4, 'WeightExponent': '1 2', 'MinPairTrackPt': 2,
                     'MaxEventsPerFile': args.max_events, 'HFEnergyShift': 0,
-                    'FilledHistograms': 275 if args.responses and population == 'reco' else 19,
+                    'FilledHistograms': 279 if args.responses and population == 'reco' else 23,
                     'DisableTrackPairEfficiencyCorrection': 1, 'JetPtWeight': 0,
                     'SkipCovarianceMatrix': 1, 'OOClosurePilot': 0,
                     'CentralityBinEdges': '0 30 50 90 100' if args.system == 'OO' else '-1 100',
@@ -147,7 +153,8 @@ def export(args):
                 counts['selected_jets_R04'] += 1
                 counts['jet_pt_changed_from_stored'] += not math.isclose(rjet['pt'], rjet['stored_pt'], rel_tol=1e-6)
                 for track in rjet['reco']:
-                    relative = abs(track['correction']/track['legacy_relative_eta_correction']-1)
+                    old_factor = track['legacy_relative_eta_correction']
+                    relative = abs(track['correction']/old_factor-1) if math.isfinite(old_factor) and old_factor > 0 else 1.
                     counts['factor_changed_from_relative_eta'] += relative > 1e-6
                     max_factor_change = max(max_factor_change, relative)
                 if args.parity:
@@ -158,10 +165,11 @@ def export(args):
                             momentum = first['pt']*second['pt']
                             for exponent in (1, 2):
                                 expected[population][exponent-1] += weight*momentum**exponent
+            reco['tracking_contract'] = contract
             result.write(json.dumps(reco, allow_nan=False)+'\n')
     native_parity = {population: parity(work/(population+'.root'), expected[population])
                      for population in ('reco', 'gen')} if args.parity else 'not requested (reuse bounded parity evidence)'
-    metadata = {'status': 'NATIVE_SELECTION_EXPORT', 'system': args.system,
+    metadata = {'status': 'NATIVE_SELECTION_EXPORT', 'system': args.system, 'tracking_contract': contract,
                 'sample_namespace': args.sample_namespace, 'input': str(args.input.resolve()),
                 'input_size_bytes': args.input.stat().st_size,
                 'payload': str(payload), 'payload_sha256': digest(payload),
@@ -175,7 +183,7 @@ def export(args):
                 'jet_policy': 'native Run-3 R4 raw pT + applicable L2Relative; nominal card Jet ID and whole-event veto retained',
                 'unsupported': ['no cross-section generator weight calibration inferred; analyzer existing unity policy retained',
                                 'auxiliary full-event tracks with unavailable single-track factors are flagged; any consumed all-event pair cell/control must be invalidated'],
-                'tool_sha256': digest(Path(__file__)), 'analyzer_sha256': digest(REPO/'src/EECAnalyzer.cxx'),
+                'tool_sha256': digest(Path(__file__)), 'analyzer_sha256': digest(REPO/'src/EECAnalyzer.cxx'), 'native_binary_sha256': digest(REPO/'eecAnalysis'),
                 'output_sha256': digest(output), 'elapsed_seconds': time.monotonic()-started}
     output.with_suffix(output.suffix+'.metadata.json').write_text(json.dumps(metadata, indent=2)+'\n')
     print(json.dumps(metadata, indent=2))

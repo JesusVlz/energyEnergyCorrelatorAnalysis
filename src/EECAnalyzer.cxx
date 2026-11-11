@@ -12,6 +12,8 @@
 // Own includes
 #include "EECAnalyzer.h"
 #include "Run3JetGeometry.h"
+#include "Run3TrackSelection.h"
+// RUN3_TRACK_PREPARATION_V1
 
 using namespace std;
 
@@ -271,14 +273,9 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   
   } else if(fIsOOData){
     
-    // 1. Apply the nominal 2025 OO tracking correction.
-    // This is currently the only OO table available, so Loose/Tight track
-    // selections still use the nominal table and print an explicit warning.
-    if(!fTrackSelectionVariation.empty()){
-      cout << "WARNING: No " << fTrackSelectionVariation
-          << " OO tracking correction table is available. Using the nominal table." << endl;
-    }
-    fTrackEfficiencyCorrector = new TrkEff2025OO( false, "trackCorrectionTables/OO2025/Eff_OO_2025_Hijing_MB_Centrality_fromHihfpf_NoPU_3D_Nominal_Official_18Nov2025.root");
+    // Match the Run-3 selection to its OO table (never a Run-2 payload).
+    fTrackEfficiencyCorrector = new TrkEff2025OO(false,
+      EECRun3Tracking::Payload(true, fTrackSelectionVariation));
 
     // Derived from eecAnalysis_OOMC_eventWeights_merged_processed.root and
     // merged_eecOO2025_processed_121026.root; fit details and marginal checks:
@@ -327,7 +324,7 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   // ============================================================
 
   // Run-3 ppRef tracking efficiency.
-  fTrackEfficiencyCorrector = new TrkEff2024ppRef(false, "trackCorrectionTables/pp2024/Eff_ppref_2024_Pythia_QCD_pThat15_NopU_2D_Nominal_Official.root");
+  fTrackEfficiencyCorrector = new TrkEff2024ppRef(false, EECRun3Tracking::Payload(false, fTrackSelectionVariation));
 
   // Validated with merged_eecpp2024_run3_v7_processed.root and
   // merged_eecppMC2024_GenGen_processed.root. The existing coefficients
@@ -488,6 +485,16 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
     fTrackPairEfficiencyCorrector=new TrackPairEfficiencyCorrector(fCard->GetStr("Run3TrackPairCorrectionFile"),false,fIsOOData);
     if(!fTrackPairEfficiencyCorrector->IsRun3Table())
       throw std::invalid_argument("Run3TrackPairCorrectionFile is missing Run3PairCorrectionVersion");
+    // Old pre-repair maps cannot be applied to the corrected Run-3 selections.
+    TFile metadata(fCard->GetStr("Run3TrackPairCorrectionFile"), "READ");
+    const auto requireTag = [&metadata](const char* key, const std::string& expected){
+      TObject* object = metadata.Get(key);
+      if(!object || expected != object->GetTitle())
+        throw std::invalid_argument(std::string("Run-3 pair payload mismatch/missing tag: ") + key);
+    };
+    requireTag("Run3TrackSelectionVersion", EECRun3Tracking::Version());
+    requireTag("Run3TrackSelection", EECRun3Tracking::CanonicalSelection(fTrackSelectionVariation));
+    requireTag("Run3PairCollisionSystem", fIsOOData ? "OO" : "pp");
   }
   bool disableTrackPairEfficiencyCorrection = (fCard->Get("DisableTrackPairEfficiencyCorrection") == 1);
   if((fMcCorrelationType == kGenGen) || (fMcCorrelationType == kRecoGen)) disableTrackPairEfficiencyCorrection = true; // Disable the track pair efficiency correction for generator level particles
@@ -893,10 +900,21 @@ void EECAnalyzer::ReadConfigurationFromCard(){
 
   fTrackEfficiencyVariation = fCard->Get("TrackEfficiencyVariation"); // Relative amount with which the tracking efficiency corrections are varied to estimate systematic uncertainties
 
+  if(fIsOOData || fIsPp2024Data){
+    const std::string requested = fCard->HasKey("Run3TrackSelection")
+      ? std::string(fCard->GetStr("Run3TrackSelection").Data()) : std::string();
+    const std::string selection = EECRun3Tracking::ResolveSelection(
+      requested, fMaxTrackPtRelativeError, fMaxTrackDistanceToVertex);
+    fTrackSelectionVariation = selection == "Nominal" ? "" : selection;
+    cout << "Run-3 track selection: " << selection << ", " << EECRun3Tracking::Version()
+         << "; pT>10: sigmaPt/pT <= 0.1; vertex significance <= " << fMaxTrackDistanceToVertex << endl;
+  } else {
   // Determine the correct efficiency table to use based on track selection cuts
   fTrackSelectionVariation = "";
   if(TMath::Abs(fMaxTrackPtRelativeError-0.05) < 0.001 && TMath::Abs(fMaxTrackDistanceToVertex-2) < 0.001 && TMath::Abs(fChi2QualityCut-0.15) < 0.001) fTrackSelectionVariation = "Tight";
   if(TMath::Abs(fMaxTrackPtRelativeError-0.15) < 0.001 && TMath::Abs(fMaxTrackDistanceToVertex-5) < 0.001) fTrackSelectionVariation = "Loose";
+
+  }
 
   // Select the jet pT weighting configuration
   fJetPtWeightConfiguration = fCard->Get("JetPtWeight");
@@ -2906,6 +2924,10 @@ void EECAnalyzer::CalculateEnergyEnergyCorrelator(const vector<double> selectedT
         if(trackPt2 < trackPt1) lowerTrackPt = trackPt2;
         // Optional generic EEC pair threshold; reader/track QA cuts remain independent.
         if(fCard->HasKey("MinPairTrackPt") && lowerTrackPt <= fCard->Get("MinPairTrackPt")) continue;
+        if((fIsOOData || fIsPp2024Data) &&
+           (!std::isfinite(trackEfficiencyCorrection1) || trackEfficiencyCorrection1<=0 ||
+            !std::isfinite(trackEfficiencyCorrection2) || trackEfficiencyCorrection2<=0))
+          throw std::runtime_error("Unsupported single-track correction in a selected Run-3 EEC pair; no silent zero/unity replacement");
 
         // Realistic smearing for track DeltaR if selected
         if(fSmearDeltaR){
@@ -4070,12 +4092,27 @@ Bool_t EECAnalyzer::PassTrackCuts(ForestReader* trackReader, const Int_t iTrack,
   if(fFillTrackHistograms && !bypassFill) trackCutHistogram->Fill(EECHistograms::kHighPurity);
   
   // Cut for relative error for track pT
+  if(fIsOOData || fIsPp2024Data){
+    if(!std::isfinite(trackPt) || !std::isfinite(trackEta) ||
+       !EECRun3Tracking::PassMomentum(trackPt, trackReader->GetTrackPtError(iTrack))) return false;
+  } else {
   if(trackReader->GetTrackPtError(iTrack)/trackPt >= fMaxTrackPtRelativeError) return false; // Cut for track pT relative error
+  }
   if(fFillTrackHistograms && !bypassFill) trackCutHistogram->Fill(EECHistograms::kPtError);
   
   // Cut for track distance from primary vertex
-  if(TMath::Abs(trackReader->GetTrackVertexDistanceZ(iTrack)/trackReader->GetTrackVertexDistanceZError(iTrack)) >= fMaxTrackDistanceToVertex) return false; // Mysterious cut about track proximity to vertex in z-direction
-  if(TMath::Abs(trackReader->GetTrackVertexDistanceXY(iTrack)/trackReader->GetTrackVertexDistanceXYError(iTrack)) >= fMaxTrackDistanceToVertex) return false; // Mysterious cut about track proximity to vertex in xy-direction
+  if(fIsOOData || fIsPp2024Data){
+    if(!EECRun3Tracking::PassVertex(trackReader->GetTrackVertexDistanceZ(iTrack),
+       trackReader->GetTrackVertexDistanceZError(iTrack), fMaxTrackDistanceToVertex)) return false;
+  } else {
+    if(TMath::Abs(trackReader->GetTrackVertexDistanceZ(iTrack)/trackReader->GetTrackVertexDistanceZError(iTrack)) >= fMaxTrackDistanceToVertex) return false;
+  } // Mysterious cut about track proximity to vertex in z-direction
+  if(fIsOOData || fIsPp2024Data){
+    if(!EECRun3Tracking::PassVertex(trackReader->GetTrackVertexDistanceXY(iTrack),
+       trackReader->GetTrackVertexDistanceXYError(iTrack), fMaxTrackDistanceToVertex)) return false;
+  } else {
+    if(TMath::Abs(trackReader->GetTrackVertexDistanceXY(iTrack)/trackReader->GetTrackVertexDistanceXYError(iTrack)) >= fMaxTrackDistanceToVertex) return false;
+  } // Mysterious cut about track proximity to vertex in xy-direction
   if(fFillTrackHistograms && !bypassFill) trackCutHistogram->Fill(EECHistograms::kVertexDistance);
 
   // The final cuts are applied only for PbPb data
@@ -4129,11 +4166,26 @@ Bool_t EECAnalyzer::PassTrackCuts(UnfoldingForestReader* trackReader, const Int_
   if(!trackReader->GetTrackHighPurity(iTrack)) return false;     // High purity cut
   
   // Cut for relative error for track pT
+  if(fIsOOData || fIsPp2024Data){
+    if(!std::isfinite(trackPt) || !std::isfinite(trackEta) ||
+       !EECRun3Tracking::PassMomentum(trackPt, trackReader->GetTrackPtError(iTrack))) return false;
+  } else {
   if(trackReader->GetTrackPtError(iTrack)/trackPt >= fMaxTrackPtRelativeError) return false; // Cut for track pT relative error
+  }
   
   // Cut for track distance from primary vertex
-  if(TMath::Abs(trackReader->GetTrackVertexDistanceZ(iTrack)/trackReader->GetTrackVertexDistanceZError(iTrack)) >= fMaxTrackDistanceToVertex) return false; // Mysterious cut about track proximity to vertex in z-direction
-  if(TMath::Abs(trackReader->GetTrackVertexDistanceXY(iTrack)/trackReader->GetTrackVertexDistanceXYError(iTrack)) >= fMaxTrackDistanceToVertex) return false; // Mysterious cut about track proximity to vertex in xy-direction
+  if(fIsOOData || fIsPp2024Data){
+    if(!EECRun3Tracking::PassVertex(trackReader->GetTrackVertexDistanceZ(iTrack),
+       trackReader->GetTrackVertexDistanceZError(iTrack), fMaxTrackDistanceToVertex)) return false;
+  } else {
+    if(TMath::Abs(trackReader->GetTrackVertexDistanceZ(iTrack)/trackReader->GetTrackVertexDistanceZError(iTrack)) >= fMaxTrackDistanceToVertex) return false;
+  } // Mysterious cut about track proximity to vertex in z-direction
+  if(fIsOOData || fIsPp2024Data){
+    if(!EECRun3Tracking::PassVertex(trackReader->GetTrackVertexDistanceXY(iTrack),
+       trackReader->GetTrackVertexDistanceXYError(iTrack), fMaxTrackDistanceToVertex)) return false;
+  } else {
+    if(TMath::Abs(trackReader->GetTrackVertexDistanceXY(iTrack)/trackReader->GetTrackVertexDistanceXYError(iTrack)) >= fMaxTrackDistanceToVertex) return false;
+  } // Mysterious cut about track proximity to vertex in xy-direction
 
   // Use the same reconstructed-track selection as the ordinary Run-3 path.
   // The calorimeter and reconstruction-quality cuts below belong to the
