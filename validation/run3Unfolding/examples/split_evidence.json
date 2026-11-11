@@ -1,0 +1,14 @@
+{
+  "description": "Example only. Bind products and original ledgers from the SAME existing native batch production; retain its merge and worker receipts.",
+  "product_sha256": {
+    "train": "REPLACE_WITH_SHA256_OF_PROJECTED_TRAIN_FILE",
+    "validation": "REPLACE_WITH_SHA256_OF_PROJECTED_VALIDATION_FILE"
+  },
+  "ledgers": [
+    {
+      "path": "/REPLACE_WITH_EXISTING_WORKER_OUTPUT/event_identity.csv.gz",
+      "sha256": "REPLACE_WITH_SHA256_OF_THIS_LEDGER"
+    }
+  ],
+  "embedding_source_reuse": "NOT_PROVEN"
+}
