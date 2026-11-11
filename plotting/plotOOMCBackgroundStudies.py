@@ -5,7 +5,7 @@ The inclusive input is used without a centrality choice, like pp and pPb.
 Coefficients match EECHistogramManager::SubtractBackground(0/1). Projected S1
 already merges the two mixed origins. Shared-event covariance is unavailable.
 Defaults: finite jet bins inside 40-200 GeV and charged-particle pT > 2 GeV.
-For presentation figures use plotOOMCBackgroundPresentation.C.
+For C++ closure figures use compareDifferentEECpairingsRun3.C; see README_Run3Closure.md.
 """
 import argparse
 from array import array
