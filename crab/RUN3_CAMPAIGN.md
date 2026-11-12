@@ -18,6 +18,9 @@ Vanderbilt; the MC inputs are read remotely through `root://eosuser.cern.ch`
 from the user's EOS directories. CRAB stages histogram output at
 `T2_CH_CERN` (`/store/group/phys_heavyions/jvelazqu/eec/`). The whitelist is
 an execution-site restriction, not a stageout-site setting.
+Versioned data lists may contain LFNs or XRootD PFNs; the data configuration
+normalizes each to its `/store/` LFN, and the analyzer reads it from the
+Vanderbilt XRootD endpoint (`location=2`). The MC PFNs are preserved.
 
 Build input lists from the *actual* EOS directory contents rather than copying
 the older MC lists that point at Vanderbilt. The OO glob is

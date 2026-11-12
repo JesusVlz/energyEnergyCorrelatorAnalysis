@@ -103,9 +103,13 @@ def files_for(sample, part, chunk, values):
         normalized = [lfn(s) for s in lines]
         if len(set(normalized)) != len(lines):
             raise ValueError('Duplicate signal LFNs')
-        if any(not s.startswith('root://xrootd-vanderbilt.sites.opensciencegrid.org/')
-               for s in lines):
-            raise ValueError('Data inputs must be Vanderbilt XRootD PFNs')
+        for entry in lines:
+            if '://' in entry and urlsplit(entry).scheme != 'root':
+                raise ValueError('Expected a /store LFN or XRootD PFN: ' + entry)
+        # CRAB accepts LFNs. The analyzer's location=2 then consistently
+        # prefixes Vanderbilt's XRootD endpoint for the actual read, even
+        # when an older versioned list contains a different redirector PFN.
+        lines = normalized
         pool = REPO / 'mixingFileList' / ('OO2025_MB_pool_pilot.txt' if sample == 'oo-data'
                                           else 'ppRef2024_pool_pilot.txt')
         donors = read_list(pool)
