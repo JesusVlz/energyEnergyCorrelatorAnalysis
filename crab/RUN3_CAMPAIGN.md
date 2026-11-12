@@ -174,9 +174,15 @@ RecoGen/GenReco/GenGen closure cards, 5 GeV truth-guard response, jet and
 track-pair QA, and Nominal/Loose/Tight RecoReco/RecoGen pair preparation.
 The OO RecoReco measurement uses `BackgroundMethods 3` for both same-event
 cones. The ppRef MC measurement uses `BackgroundMethods 0`: no mixed cone or
-other background method is requested for ppRef MC. An independent OO MC donor
-pool is not configured, so mixed-event MC is not submitted. The pair-preparation
-outputs do not turn on a residual pair correction.
+other background method is requested for ppRef MC. The existing
+`mixingFileList/OO2025_HIJING_MC_pool_pilot_A.txt` references the pure-HIJING
+donors, but its header requires an event-level partition and campaign-wide
+reservation. The ordinary RecoReco `allCones` card cannot enforce that contract;
+this CRAB driver rejects MC mixed-cone cards. The separate strict OO GenGen
+mixed+perpendicular closure workflow (`BackgroundMethods 6`) uses the fixed
+100,000-event HIJING donor prefix with `OOClosurePartitionPolicy 1` and writes
+partner/exposure ledgers; see `condor/README.md` for its submitted campaigns.
+The pair-preparation outputs do not turn on a residual pair correction.
 
 ```bash
 python3 crab/buildEOSMCLists.py
