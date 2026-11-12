@@ -66,3 +66,8 @@ validation/run3Pairs/results/
 # Campaign outputs stay local; reusable cards and test fixtures are versioned.
 /validation/run3Campaign/results/
 /validation/run3Unfolding/results/
+
+# Local Run-3 CRAB input inventories, projects and materialized cards.
+/crab/inputLists/
+/crab/crab_projects/
+/cards/R4/materialized/

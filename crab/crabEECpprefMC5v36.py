@@ -1,39 +1,5 @@
-from WMCore.Configuration import Configuration
-config = Configuration()
+"""Run-3 ppref-mc CRAB entry point; use submitRun3.py for the full campaign."""
 
-card='cardEECpp5v36TeVMC.input'
-jobTag='eecAnalysis_ppMC2024_run3_v1'
-inputList='ppMC2024ForestFiles.txt'
-outputFile=jobTag+'.root'
-fileLocation='2'  # Vanderbilt
+from run3_crab import create_config
 
-config.section_("General")
-config.General.requestName = jobTag
-config.General.workArea = config.General.requestName 
-config.General.transferOutputs = True
-
-config.section_("JobType")
-config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'PSet.py'
-config.JobType.scriptExe = 'compileAndRun.sh'
-config.JobType.scriptArgs = ['card='+card,'output='+outputFile,'location='+fileLocation,'mixinglist=none']  # VERIFICAR punto 3
-config.JobType.inputFiles = ['FrameworkJobReport.xml','eecOO.tar.gz',card]  # tarball propio, ver punto 1
-config.JobType.outputFiles = [outputFile]
-config.JobType.maxJobRuntimeMin = 120
-config.JobType.maxMemoryMB = 2500
-
-config.section_("Data")
-config.Data.userInputFiles = open(inputList).readlines() 
-config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 2
-config.Data.totalUnits = len(config.Data.userInputFiles)
-config.Data.outputPrimaryDataset = 'eecppMC2024Histograms'
-config.Data.outLFNDirBase = '/store/group/phys_heavyions/jvelazqu/eec/'+config.General.requestName
-config.Data.publication = False
-
-config.section_("Site")
-config.Site.whitelist = ['T2_US_Vanderbilt']
-config.Site.storageSite = 'T2_CH_CERN'
-
-config.section_("Debug")
-config.Debug.extraJDL = ['+CMS_ALLOW_OVERFLOW=False']
+config = create_config('ppref-mc')
