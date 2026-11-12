@@ -2,9 +2,10 @@
 """Plan or submit the R4 MC inputs needed for the OO/ppRef EEC workflow.
 
 The OO RecoReco measurement uses all three background components with the
-selected HIJING pool A file list. ppRef MC measurement has no background
-cones. Ordinary OO mixing uses its legacy matching, not the event-reserved
-strict GenGen closure workflow; treat their outputs separately.
+selected HIJING pool A file list. ppRef MC measurement fills reflected and
+perpendicular cones without mixed cones. Ordinary OO mixing uses its legacy
+matching, not the event-reserved strict GenGen closure workflow; treat their
+outputs separately.
 Pair preparation produces inputs for a later derived correction;
 it does not enable an unqualified pair correction in the measurement cards.
 """
@@ -28,7 +29,7 @@ def cards(sample):
     core = []
     for scope in scopes:
         stem = f'{system}_MC_{scope}'
-        cone_mode = 'allCones_HIJING_A' if sample == 'oo-mc' else 'none'
+        cone_mode = 'allCones_HIJING_A' if sample == 'oo-mc' else 'sameEventCones'
         core += [f'cards/R4/measurement/{stem}_{cone_mode}.input']
         core += [f'cards/R4/mc-closure/{stem}_{mode}.input'
                  for mode in ('RecoGen', 'GenReco', 'GenGen')]
