@@ -1,0 +1,91 @@
+name: Checked Run-3 main integration
+on:
+  push:
+    branches: [oo-integration]
+    paths:
+      - '.github/workflows/run3-main-integration.yml'
+      - 'validation/run3Integration/main-update.patch'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: checked-run3-main-integration
+  cancel-in-progress: false
+jobs:
+  checked-update:
+    if: github.ref == 'refs/heads/oo-integration'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MPLBACKEND: Agg
+      MPLCONFIGDIR: /tmp/run3-main-mpl
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Export tracked source for review
+        run: |
+          mkdir -p /tmp/run3-source /tmp/run3-evidence
+          git archive --format=tar.gz HEAD > /tmp/run3-source/source.tar.gz
+          git rev-parse HEAD > /tmp/run3-source/source_commit.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: run3-source-${{ github.sha }}
+          path: /tmp/run3-source
+          retention-days: 3
+      - name: Detect authorized patch
+        id: patch
+        shell: bash
+        run: |
+          if test -f validation/run3Integration/main-update.patch; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'present=false' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.patch.outputs.present == 'true'
+        with:
+          python-version: '3.11'
+      - name: Apply reviewed patch without changing main
+        if: steps.patch.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          if git apply --reverse --check validation/run3Integration/main-update.patch 2>/dev/null; then
+            echo 'Patch already applied.'
+          else
+            git apply --check validation/run3Integration/main-update.patch
+            git apply validation/run3Integration/main-update.patch
+          fi
+          git diff --check
+      - name: Run checked integration commands
+        if: steps.patch.outputs.present == 'true'
+        run: bash validation/run3Integration/checkMainUpdate.sh
+      - name: Commit checked files to the existing integration branch
+        if: steps.patch.outputs.present == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin oo-integration
+          test "$(git rev-parse origin/oo-integration)" = "$GITHUB_SHA"
+          git diff --check
+          python validation/run3Integration/checkMainUpdatePaths.py
+          git add -u
+          git add cards/R4 plotting/deriveMonteCarloWeightsRun3.C plotting/deriveMonteCarloWeightsRun2.C plotting/testDeriveMonteCarloWeightsRun3.C plotting/README_Run3MCWeights.md validation/run3Integration/OverallCoordination.md validation/run3Integration/checkMainUpdate.sh validation/run3Integration/checkMainUpdatePaths.py validation/run3Integration/testSlimTrackPolicy.cxx
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Integrate Run-3 slim-track policy, R4 catalog, and MC-weight plots'
+            git push origin HEAD:oo-integration
+          fi
+          git rev-parse HEAD > /tmp/run3-evidence/checked_commit.txt
+          git status --short > /tmp/run3-evidence/worktree-status.txt
+      - name: Upload integration evidence
+        if: always() && steps.patch.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: run3-main-evidence-${{ github.sha }}
+          path: /tmp/run3-evidence
+          if-no-files-found: warn
+          retention-days: 14
