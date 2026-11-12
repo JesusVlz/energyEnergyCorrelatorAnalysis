@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Plan or submit the R4 MC inputs needed for the OO/ppRef EEC workflow.
 
-The measurement cards include the two same-event cone components. Mixed-event
-MC needs a separately qualified independent MC donor pool and is not in this
-campaign. Pair preparation produces inputs for a later derived correction;
+The OO measurement cards include the two same-event cone components. The
+ppRef MC measurement has no background cones. Mixed-event OO MC needs a
+separately qualified independent MC donor pool and is not in this campaign.
+Pair preparation produces inputs for a later derived correction;
 it does not enable an unqualified pair correction in the measurement cards.
 """
 
@@ -26,7 +27,8 @@ def cards(sample):
     core = []
     for scope in scopes:
         stem = f'{system}_MC_{scope}'
-        core += [f'cards/R4/measurement/{stem}_sameEventCones.input']
+        cone_mode = 'sameEventCones' if sample == 'oo-mc' else 'none'
+        core += [f'cards/R4/measurement/{stem}_{cone_mode}.input']
         core += [f'cards/R4/mc-closure/{stem}_{mode}.input'
                  for mode in ('RecoGen', 'GenReco', 'GenGen')]
         core += [f'cards/R4/response/{stem}_truthGuard5.input',
