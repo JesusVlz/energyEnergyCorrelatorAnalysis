@@ -2,8 +2,9 @@
 """Plan or submit the R4 MC inputs needed for the OO/ppRef EEC workflow.
 
 The OO measurement cards include the two same-event cone components. The
-ppRef MC measurement has no background cones. Mixed-event OO MC needs a
-separately qualified independent MC donor pool and is not in this campaign.
+ppRef MC measurement has no background cones. The existing HIJING pool A
+requires event-level reservations and belongs to the separate strict GenGen
+closure workflow; ordinary mixed-cone MC is not in this CRAB campaign.
 Pair preparation produces inputs for a later derived correction;
 it does not enable an unqualified pair correction in the measurement cards.
 """
