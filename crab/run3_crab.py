@@ -77,6 +77,11 @@ def card_for(sample, choice=None):
             values[fields[0]] = fields[1]
     if int(values.get('DataType', -1)) != dtype:
         raise ValueError(f'Card DataType differs from {sample}: {path}')
+    if sample.endswith('mc') and int(values.get('BackgroundMethods', '0')) & 4:
+        raise ValueError(
+            'Mixed-cone MC is not supported by this CRAB campaign. The OO HIJING '
+            'pool A list needs event-level donor reservations and ledger outputs; '
+            'use the existing strict OO GenGen closure workflow in condor/README.md.')
     if sample == 'ppref-data' and values.get('Run3UsePpL1FastJet', '0') != '0':
         raise ValueError('Vanderbilt ppRef forests have not been certified for L1FastJet inputs')
     return path, values
