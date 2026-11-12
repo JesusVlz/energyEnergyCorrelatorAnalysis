@@ -1,0 +1,319 @@
++  const TString stem=d.system+"_"+(d.centrality ? "hiBin" : "vz")+(refit ? "_refit" : "_stored");
++  TCanvas* canvas=drawer->GetUpperPad()->GetCanvas();
++  canvas->SetName(Unique(stem));
++  SaveCanvas(*canvas,outputDir,stem);
++  ratioBefore->Write(stem+"_ratio_before"); ratioAfter->Write(stem+"_ratio_after");
++  return canvas;
++}
++
++void DrawOOCombined(TCanvas* centrality, TCanvas* vz, const TString& outDir, bool refit) {
++  if (!centrality || !vz) return;
++  auto* canvas=new TCanvas(Unique("OO_eventWeights"),"OO event weights",1400,650);
++  canvas->Divide(2,1,0,0);
++  canvas->cd(1); centrality->DrawClonePad();
++  canvas->cd(2); vz->DrawClonePad();
++  canvas->cd();
++  SaveCanvas(*canvas,outDir,refit ? "OO_eventWeights_refit" : "OO_eventWeights_stored");
++}
++
++void ReportAgreement(const Distribution& d, const TH1D& mc, const char* stage, std::ostream& log) {
++  double rms=0,totalVariation=0,covered=0,largest=0;
++  for (int i=1; i<=d.data->GetNbinsX(); ++i) {
++    const double a=d.data->GetBinContent(i),b=mc.GetBinContent(i);
++    totalVariation+=std::abs(a-b)/2;
++    if (a<=0) continue;
++    const double residual=b/a-1;
++    rms+=a*residual*residual; covered+=a; largest=std::max(largest,std::abs(residual));
++  }
++  log << "  " << stage << ": data-weighted relative RMS [%] = " << 100*std::sqrt(rms/covered)
++      << ", max relative deviation [%] = " << 100*largest
++      << ", total variation [%] = " << 100*totalVariation << '\n';
++}
++
++void WriteFit(const Distribution& d, const Fit& fit, std::ostream& parameters) {
++  fit.after->Write("mc_refit_preview");
++  TVectorD p(fit.p.size());
++  for (int j=0; j<int(fit.p.size()); ++j) p[j]=fit.p[j];
++  p.Write("scaled_basis_parameters"); fit.covariance.Write("scaled_basis_covariance_diagonal_errors");
++  TParameter<double>("fit_chi2_diagonal_errors",fit.chi2).Write();
++  TParameter<int>("fit_ndof",fit.ndof).Write();
++  parameters << "\n// " << d.system << " / " << d.observable << ": candidate REPLACEMENT, not a residual multiplier.\n";
++  const auto writeOne=[&](TF1* f,const char* key,const char* member) {
++    if (!f) return;
++    f->Write(key);
++    parameters << "// pol6, physical x; domain [" << f->GetXmin() << ',' << f->GetXmax() << "]\n";
++    parameters << member << "->SetParameters(";
++    for (int j=0; j<7; ++j) parameters << (j ? ", " : "") << f->GetParameter(j);
++    parameters << ");\n";
++  };
++  writeOne(fit.vertex,"weight_vz","fVzWeightFunction");
++  writeOne(fit.central,"weight_centrality_0_30","fCentralityWeightFunctionCentral");
++  writeOne(fit.peripheral,"weight_centrality_30_max","fCentralityWeightFunctionPeripheral");
++  if (d.centrality)
++    parameters << "// Evaluate with c = hiBin/2.0. Require 0 <= hiBin < " << 2*d.cmax
++               << "; outside the fitted range use unity, not polynomial extrapolation.\n";
++}
++
++} // namespace Run3MCWeights
++
++void deriveMonteCarloWeightsRun3(const char* ooData="", const char* ooMC="",
++                                const char* ppData="", const char* ppMC="",
++                                const char* outputDirectory="figures/mcWeightsRun3",
++                                const char* mode="both", double maxCentrality=90.0,
++                                int vertexPlotRebin=1, int centralityPlotRebin=1) {
++  using namespace Run3MCWeights;
++  Require(ooData && ooMC && ppData && ppMC && outputDirectory && mode,
++          "Use empty strings, not null pointers, for unused input arguments.");
++  if (!std::strlen(ooData) && !std::strlen(ooMC) && !std::strlen(ppData) && !std::strlen(ppMC)) {
++    std::cout << "Run from plotting/:\n"
++      << "  root -l -b -q 'deriveMonteCarloWeightsRun3.C(\"OO_DATA.root\",\"OO_MC.root\",\"PP_DATA.root\",\"PP_MC.root\")'\n"
++      << "Modes in argument 6: stored, derive, both. Use \"\",\"\" to skip a system.\n"
++      << "Inputs must be analyzer/processed event-information histograms, not HiForest files.\n";
++    return;
++  }
++  const TString selectedMode=mode;
++  Require(selectedMode=="stored" || selectedMode=="derive" || selectedMode=="both", "Mode must be stored, derive, or both.");
++  const bool stored=selectedMode!="derive", derive=selectedMode!="stored";
++  Require(bool(std::strlen(ooData))==bool(std::strlen(ooMC)), "Supply both OO data and OO MC, or neither.");
++  Require(bool(std::strlen(ppData))==bool(std::strlen(ppMC)), "Supply both pp data and pp MC, or neither.");
++  Require(maxCentrality>kCentralitySplit && maxCentrality<=90 &&
++          std::abs(maxCentrality*2-std::round(maxCentrality*2))<1e-8,
++          "maxCentrality must be on the 0.5% grid, above 30% and at most 90%.");
++  TString outDir=outputDirectory;
++  gSystem->ExpandPathName(outDir);
++  Require(!outDir.IsNull(), "Output directory must not be empty.");
++  gSystem->mkdir(outDir,kTRUE);
++  Require(!gSystem->AccessPathName(outDir), "Cannot create output directory.");
++  const TString rootName=outDir+"/run3_mc_weights.root";
++  // Never RECREATE an input file by an accidental identical output path.
++  struct stat outputInfo{};
++  const bool outputExists=(::stat(rootName.Data(),&outputInfo)==0);
++  for (const char* input : {ooData,ooMC,ppData,ppMC}) {
++    if (!std::strlen(input)) continue;
++    TString path=input; gSystem->ExpandPathName(path);
++    Require(path!=rootName,"Output ROOT file coincides with an input file.");
++    struct stat inputInfo{};
++    if (outputExists && ::stat(path.Data(),&inputInfo)==0)
++      Require(inputInfo.st_dev!=outputInfo.st_dev || inputInfo.st_ino!=outputInfo.st_ino,
++              "Output ROOT file aliases an input file; refusing to overwrite it.");
++  }
++  std::ofstream log((outDir+"/weight_audit.txt").Data());
++  std::ofstream parameters((outDir+"/candidate_parameters.txt").Data());
++  Require(bool(log) && bool(parameters), "Cannot open output text files.");
++  log << std::setprecision(17); parameters << std::setprecision(17);
++  log << "Run-3 event-weight QA and derivation; mode=" << mode << '\n'
++      << "Source audited at 6d4800b8c57747e1db761fc4fecf72a38a1a00c3.\n"
++      << "MC baseline = vertexZ/centrality. Stored after = vertexZweighted/centralityWeighted.\n"
++      << "At that source revision Run-3 generator/pThat normalization is unity.\n"
++      << "The stored weighted histograms contain the FULL event-weight product.\n"
++      << "1D refits do not validate the combined product, generator normalization, or independent closure.\n"
++      << "Fit/ratio errors neglect unit-area normalization correlations; refit preview errors hold fitted weights fixed.\n"
++      << "Vertex refits use bin-center evaluation. Centrality refits use discrete hiBin/2.0.\n"
++      << "Centrality plotting/fitting range is [0," << maxCentrality << ")%; vertex plots retain the full selected-event centrality acceptance.\n"
++      << "WARNING: do not combine disjoint pThat samples using these shape weights as cross-section weights.\n\n";
++  parameters << "// Candidate fits only. These lines do not modify the analyzer automatically.\n"
++             << "// Apply to the matching Run-3 constructor branch only AFTER validation.\n"
++             << "// Keep the generator/pThat normalization policy separate.\n"
++             << "// Outside |vz| <= 15 cm or the stated centrality support, do not extrapolate.\n";
++  std::unique_ptr<TFile> output(TFile::Open(rootName,"RECREATE"));
++  Require(output && !output->IsZombie(), "Cannot create output ROOT file.");
++  TNamed("mode",mode).Write();
++  TNamed("scope","stored=production product; refit=same-sample single-marginal preview, not event-level closure").Write();
++  TParameter<int>("complete",0).Write();
++
++  for (int system=0; system<2; ++system) {
++    const char* dataName=system==0 ? ooData : ppData;
++    const char* mcName=system==0 ? ooMC : ppMC;
++    if (!std::strlen(dataName)) continue;
++    const TString label=system==0 ? "OO" : "pp";
++    auto dataFile=OpenInput(dataName),mcFile=OpenInput(mcName);
++    AuditCard(*dataFile,system==0 ? 9 : 11,log);
++    AuditCard(*mcFile,system==0 ? 10 : 12,log);
++    output->cd();
++    TDirectory* sysDir=output->mkdir(label);
++    Require(sysDir,"Cannot create system output directory."); sysDir->cd();
++    TNamed("data_file",dataName).Write(); TNamed("mc_file",mcName).Write();
++    TCanvas *storedVz=nullptr,*storedCent=nullptr,*refitVz=nullptr,*refitCent=nullptr;
++    for (int observable=0; observable<(system==0 ? 2 : 1); ++observable) {
++      const bool centrality=observable==1;
++      Distribution d=LoadDistribution(*dataFile,*mcFile,label,centrality,maxCentrality,stored,log);
++      sysDir->cd();
++      TDirectory* obsDir=sysDir->mkdir(d.observable); obsDir->cd();
++      d.data->Write("data_normalized"); d.before->Write("mc_before_normalized");
++      if (d.stored) d.stored->Write("mc_stored_normalized");
++      RatioGraph(*d.data,*d.before,centrality)->Write("data_over_mc_for_fit");
++      ReportAgreement(d,*d.before,"before",log);
++      const int rebin=centrality ? centralityPlotRebin : vertexPlotRebin;
++      if (stored) {
++        ReportAgreement(d,*d.stored,"stored production weights",log);
++        TCanvas* c=DrawComparison(d,*d.stored,false,rebin,outDir,log);
++        if (centrality) storedCent=c; else storedVz=c;
++      }
++      if (derive) {
++        Fit fit=Derive(d,log);
++        WriteFit(d,fit,parameters);
++        ReportAgreement(d,*fit.after,"single-marginal refit preview",log);
++        TCanvas* c=DrawComparison(d,*fit.after,true,rebin,outDir,log);
++        if (centrality) refitCent=c; else refitVz=c;
++      }
++    }
++    sysDir->cd();
++    if (system==0) {
++      if (stored) DrawOOCombined(storedCent,storedVz,outDir,false);
++      if (derive) DrawOOCombined(refitCent,refitVz,outDir,true);
++    }
++  }
++  output->cd();
++  TParameter<int>("complete",1).Write("complete",TObject::kOverwrite);
++  output->Write(); output->Close();
++  log << "\nCOMPLETE. No analyzer configuration or input files were changed.\n";
++  std::cout << "Run-3 weight outputs: " << outDir << '\n'
++            << "  run3_mc_weights.root, weight_audit.txt, candidate_parameters.txt, PDF/PNG figures\n"
++            << "  Stored plots show the input file's weights; refit plots are one-dimensional previews.\n";
++}
++
++#endif // EEC_DERIVE_MONTE_CARLO_WEIGHTS_RUN3_C
+diff --git a/plotting/testDeriveMonteCarloWeightsRun3.C b/plotting/testDeriveMonteCarloWeightsRun3.C
+new file mode 100644
+index 0000000..c79bbab
+--- /dev/null
++++ b/plotting/testDeriveMonteCarloWeightsRun3.C
+@@ -0,0 +1,95 @@
++// Synthetic ROOT smoke test. This is a SOFTWARE test, not physics closure.
++// Run beside deriveMonteCarloWeightsRun3.C and the repository's JDrawer.h:
++// root -l -b -q 'testDeriveMonteCarloWeightsRun3.C()'
++#include "deriveMonteCarloWeightsRun3.C"
++
++namespace Run3WeightSmokeTest {
++void WriteSample(const TString& path, bool oo, bool data) {
++  TFile file(path,"RECREATE");
++  if (file.IsZombie()) throw std::runtime_error("Cannot create synthetic input.");
++  TH1D vz("vertexZ","",80,-20,20), vzw("vertexZweighted","",80,-20,20);
++  TH1D cent("centrality","",202,-1,100), centw("centralityWeighted","",202,-1,100);
++  for (TH1D* h : {&vz,&vzw,&cent,&centw}) { h->SetDirectory(nullptr); h->Sumw2(); }
++  const double exposure=data ? 5.0 : 1.0;
++  for (int i=1; i<=vz.GetNbinsX(); ++i) {
++    const double x=vz.GetBinCenter(i),t=x/15.0;
++    if (std::abs(x)>=15) continue;
++    const double base=1.e5*std::exp(-0.5*std::pow((x-0.2)/4.2,2));
++    const double weight=0.9-0.05*t+0.32*t*t+0.07*t*t*t*t;
++    const double count=base*exposure*(data ? weight : 1.0);
++    vz.SetBinContent(i,count); vz.SetBinError(i,std::sqrt(count));
++    vzw.SetBinContent(i,data ? count : base*weight);
++    vzw.SetBinError(i,data ? std::sqrt(count) : std::sqrt(base)*weight);
++  }
++  for (int i=1; i<=cent.GetNbinsX(); ++i) {
++    const double x=cent.GetXaxis()->GetBinLowEdge(i);
++    if (x<0 || x>=90) continue;
++    const double t=(x-30)/(x<30 ? 30.0 : 60.0);
++    const double weight=x<30 ? 1+0.4*t+0.15*t*t : 1-0.2*t+0.1*t*t;
++    const double base=2.e4*(0.8+std::exp(-x/35.0));
++    const double count=base*exposure*(data ? weight : 1.0);
++    cent.SetBinContent(i,count); cent.SetBinError(i,std::sqrt(count));
++    centw.SetBinContent(i,data ? count : base*weight);
++    centw.SetBinError(i,data ? std::sqrt(count) : std::sqrt(base)*weight);
++  }
++  vz.Write(); vzw.Write(); cent.Write(); centw.Write();
++  TDirectory* card=file.mkdir("JCard"); card->cd();
++  TVectorF v(1);
++  v[0]=oo ? (data ? 9 : 10) : (data ? 11 : 12); v.Write("DataType");
++  v[0]=15; v.Write("ZVertexCut");
++  v[0]=0; v.Write("MultiplicityMode"); v.Write("JetPtWeight");
++  v[0]=data ? 8 : 0; v.Write("TriggerSelection");
++  TObjString("synthetic_software_test_not_physics").Write("GitHash");
++  file.Close();
++}
++
++void CheckShape(TFile& result, const char* prefix) {
++  auto* data=dynamic_cast<TH1*>(result.Get(TString(prefix)+"/data_normalized"));
++  auto* preview=dynamic_cast<TH1*>(result.Get(TString(prefix)+"/mc_refit_preview"));
++  Run3MCWeights::Require(data && preview,"Missing synthetic-test output histograms.");
++  double maximum=0;
++  for (int i=1; i<=data->GetNbinsX(); ++i)
++    maximum=std::max(maximum,std::abs(preview->GetBinContent(i)/data->GetBinContent(i)-1));
++  Run3MCWeights::Require(maximum<1e-7,std::string(prefix)+": synthetic polynomial shape was not recovered.");
++}
++}
++
++void testDeriveMonteCarloWeightsRun3() {
++  using namespace Run3WeightSmokeTest;
++  try {
++    gROOT->SetBatch(kTRUE);
++    const TString base=TString::Format("%s/eec_weight_test_%d",gSystem->TempDirectory(),gSystem->GetPid());
++    gSystem->mkdir(base,kTRUE);
++    const TString od=base+"/oo_data.root",om=base+"/oo_mc.root";
++    const TString pd=base+"/pp_data.root",pm=base+"/pp_mc.root";
++    WriteSample(od,true,true); WriteSample(om,true,false);
++    WriteSample(pd,false,true); WriteSample(pm,false,false);
++    deriveMonteCarloWeightsRun3(od,om,pd,pm,base+"/output","both");
++    TFile result(base+"/output/run3_mc_weights.root","READ");
++    auto* complete=dynamic_cast<TParameter<int>*>(result.Get("complete"));
++    Run3MCWeights::Require(complete && complete->GetVal()==1,"Macro did not finish.");
++    CheckShape(result,"OO/vz"); CheckShape(result,"OO/centrality"); CheckShape(result,"pp/vz");
++    auto* left=dynamic_cast<TF1*>(result.Get("OO/centrality/weight_centrality_0_30"));
++    auto* right=dynamic_cast<TF1*>(result.Get("OO/centrality/weight_centrality_30_max"));
++    Run3MCWeights::Require(left && right && std::abs(left->Eval(30)-right->Eval(30))<1e-8,
++                          "Centrality continuity failed.");
++    for (const char* figure : {"OO_eventWeights_stored.pdf","OO_eventWeights_refit.pdf",
++                               "pp_vz_stored.png","pp_vz_refit.png"})
++      Run3MCWeights::Require(!gSystem->AccessPathName(base+"/output/"+figure),"Missing figure output.");
++    // A data-populated bin with no MC must fail derivation, not silently become zero weight.
++    Run3MCWeights::Distribution bad;
++    bad.data=new TH1D("bad_data","",10,-15,15);
++    bad.before=new TH1D("bad_mc","",10,-15,15);
++    bad.data->SetDirectory(nullptr); bad.before->SetDirectory(nullptr);
++    bad.data->SetBinContent(1,1); bad.data->SetBinError(1,1);
++    bool rejected=false; std::ostringstream sink;
++    try { Run3MCWeights::Derive(bad,sink); } catch (const std::exception&) { rejected=true; }
++    Run3MCWeights::Require(rejected,"Zero-MC support guard did not reject the input.");
++    delete bad.data; delete bad.before;
++    std::cout << "PASS: synthetic fits, export continuity, plots and zero-MC guard.\n"
++              << "Test output: " << base << '\n';
++  } catch (const std::exception& e) {
++    std::cerr << "FAIL: " << e.what() << '\n';
++    gSystem->Exit(1);
++  }
++}
+diff --git a/src/EECAnalyzer.cxx b/src/EECAnalyzer.cxx
+index a745d0d..67e09f2 100644
+--- a/src/EECAnalyzer.cxx
++++ b/src/EECAnalyzer.cxx
+@@ -8,6 +8,7 @@
+ #include <stdexcept>
+ #include <cmath>
+ #include <iomanip>
++#include <limits>
+ 
+ // Own includes
+ #include "EECAnalyzer.h"
+@@ -887,10 +888,19 @@ void EECAnalyzer::ReadConfigurationFromCard(){
+   fTrackMaxPtCut = fCard->Get("MaxTrackPtCut"); // Maximum track pT cut
+   fMaxTrackPtRelativeError = fCard->Get("MaxTrackPtRelativeError");   // Maximum relative error for pT
+   fMaxTrackDistanceToVertex = fCard->Get("VertexMaxDistance");        // Maximum distance to primary vetrex
+-  fCalorimeterSignalLimitPt = fCard->Get("CalorimeterSignalLimitPt"); // Require signal in calorimeters for track above this pT
+-  fHighPtEtFraction = fCard->Get("HighPtEtFraction"); // For high pT tracks, minimum required Et as a fraction of track pT
+-  fChi2QualityCut = fCard->Get("Chi2QualityCut");     // Quality cut for track reconstruction
+-  fMinimumTrackHits = fCard->Get("MinimumTrackHits"); // Quality cut for track hits
++  if(fIsOOData || fIsPp2024Data){
++    // The Run-3 track selection ends before PbPb-only calo/chi2/hit cuts.
++    // Do not request obsolete card keys or resurrect their forest branches.
++    fCalorimeterSignalLimitPt = std::numeric_limits<double>::infinity();
++    fHighPtEtFraction = 0;
++    fChi2QualityCut = std::numeric_limits<double>::infinity();
++    fMinimumTrackHits = 0;
++  } else {
++    fCalorimeterSignalLimitPt = fCard->Get("CalorimeterSignalLimitPt"); // Require signal in calorimeters for track above this pT
++    fHighPtEtFraction = fCard->Get("HighPtEtFraction"); // For high pT tracks, minimum required Et as a fraction of track pT
++    fChi2QualityCut = fCard->Get("Chi2QualityCut");     // Quality cut for track reconstruction
++    fMinimumTrackHits = fCard->Get("MinimumTrackHits"); // Quality cut for track hits
++  }
+   
+   fSubeventCut = fCard->Get("SubeventCut");     // Required subevent type
+ 
+diff --git a/src/HighForestReader.cxx b/src/HighForestReader.cxx
+index 5b9323f..3e73e49 100644
+--- a/src/HighForestReader.cxx
++++ b/src/HighForestReader.cxx
+@@ -771,6 +771,15 @@ void HighForestReader::Initialize(){
+   
+   // Connect the branches to the track tree
