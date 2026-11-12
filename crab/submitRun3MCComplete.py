@@ -29,8 +29,10 @@ def cards(sample):
     core = []
     for scope in scopes:
         stem = f'{system}_MC_{scope}'
-        cone_mode = 'allCones_HIJING_A' if sample == 'oo-mc' else 'sameEventCones'
-        core += [f'cards/R4/measurement/{stem}_{cone_mode}.input']
+        if sample == 'oo-mc':
+            core.append(f'cards/R4/materialized/{stem}_allCones_HIJING_A.input')
+        else:
+            core.append(f'cards/R4/measurement/{stem}_sameEventCones.input')
         core += [f'cards/R4/mc-closure/{stem}_{mode}.input'
                  for mode in ('RecoGen', 'GenReco', 'GenGen')]
         core += [f'cards/R4/response/{stem}_truthGuard5.input',
