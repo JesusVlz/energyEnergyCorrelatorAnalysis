@@ -76,18 +76,30 @@ python3 crab/submitRun3.py oo-data --parts 1 \
   --card cards/R4/materialized/OO_Data_split_allCones.input
 ```
 
-To prepare the ppRef mixed-cone pilot from the five supplied ZeroBias files:
+The ready ppRef all-cone card binds the five owner-selected Nebraska ZeroBias
+donors at `mixingFileList/ppRef2024_ZeroBiasPlusForward1_Nebraska_v2.txt`.
+`BackgroundMethods 7` writes reflected, perpendicular, and mixed-cone
+components in one analysis pass. It is a materialized card under
+`cards/R4/materialized/ppRef_Data_inclusive_allCones_NebraskaZB_v2.input`.
+For the four full ppRef data partitions, from the repository root on lxplus:
 
 ```bash
-printf '{"MIXING_LIST":"mixingFileList/ppRef2024_ZeroBiasPlusForward1_Nebraska_v2.txt"}\n' > cards/R4/materialized/ppref-zerobias-pool.json
-python3 cards/build_r4_catalog.py materialize \
-  cards/R4/measurement/ppRef_Data_inclusive_allCones.input.in \
-  --values cards/R4/materialized/ppref-zerobias-pool.json \
-  --output cards/R4/materialized/ppRef_Data_inclusive_allCones_ZeroBiasPlusForward1.input
+git fetch origin main
+git merge --ff-only FETCH_HEAD
+python3 cards/build_r4_catalog.py --check
 python3 crab/makeOOAnalysisTar.py
-python3 crab/submitRun3.py ppref-data --pilot 10 \
-  --card cards/R4/materialized/ppRef_Data_inclusive_allCones_ZeroBiasPlusForward1.input
+python3 crab/submitRun3.py ppref-data \
+  --card cards/R4/materialized/ppRef_Data_inclusive_allCones_NebraskaZB_v2.input
+python3 crab/submitRun3.py ppref-data \
+  --card cards/R4/materialized/ppRef_Data_inclusive_allCones_NebraskaZB_v2.input \
+  --submit
 ```
+
+The final command invokes `crab submit` for all four partitions. CRAB
+requires an lxplus shell with `cmsenv` and a valid CMS proxy. It stops at
+the first failed submission; inspect the printed CRAB project paths before
+retrying, and use `--parts` for any remaining partitions. The default tag
+is `R4v1`; use `--tag` only when deliberately starting a new campaign.
 
 The CRAB checks accept a nonempty donor list of any size and reject duplicate
 or file-level overlapping donors. Check that all five Nebraska files open and
