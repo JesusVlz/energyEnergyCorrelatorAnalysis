@@ -66,6 +66,9 @@ def main():
     for name, part, chunk, files in names:
         env = os.environ.copy()
         env.update({'EEC_CARD': str(card), 'EEC_RUN_TAG': tag})
+        # CRAB loads the configuration in its own Python process. Keep the
+        # directory containing run3_crab.py importable in that process.
+        env['PYTHONPATH'] = str(CRAB_DIR) + os.pathsep + env.get('PYTHONPATH', '')
         if args.pilot is not None:
             pilot_list = CRAB_DIR / 'inputLists' / (name + '.txt')
             if args.submit:
