@@ -13,7 +13,8 @@ const std::vector<std::string> unused = {"trkNormChi2","trkNLayers","trkNHits",
   "pfEcal","pfHcal","trkChi2","trkNdof","trkNlayer","trkNHit"};
 int unexpectedWarnings = 0;
 void Handler(int level, Bool_t abort, const char* location, const char* message){
-  if(level >= kWarning) for(const auto& name : unused)
+  if(level >= kError) ++unexpectedWarnings;
+  else if(level >= kWarning) for(const auto& name : unused)
     if(std::string(message).find(name) != std::string::npos) ++unexpectedWarnings;
   DefaultErrorHandler(level,abort,location,message);
 }
@@ -64,7 +65,8 @@ void CompleteFixture(const std::string& path,int type,bool aod){
     jets->GetDirectory()->cd();jets->Write("",TObject::kOverwrite);
   }
   file.mkdir("skimanalysis")->cd();TTree skim("HltTree","");int pass=1;
-  for(const char* name:{"pprimaryVertexFilter","phfCoincFilter2Th4","pOOprimaryVertexFilter"})
+  for(const char* name:{"pprimaryVertexFilter","phfCoincFilter2Th4","pOOprimaryVertexFilter",
+                       "OOpfCoincFilterPF2Th4","OOphfCoincFilterPF2Th4","pileupVertexFilter"})
     skim.Branch(name,&pass,(std::string(name)+"/I").c_str());
   for(int i=0;i<2;++i)skim.Fill();skim.Write();
 }
@@ -90,7 +92,7 @@ int main(int argc,char** argv){
       reader->ReadForestFromFile(&input);reader->GetEvent(0);Check(*reader,reader->fTrackTree);++checked;
     }
     SetErrorHandler(oldHandler);
-    Require(unexpectedWarnings==0,"Reader requested disabled legacy track branches");
-    std::cout<<"PASS: "<<checked<<" reader cases; all four Run-3 types, AOD/MiniAOD, fields present/absent, ordinary/mixed chains and unfolding; no unused-branch warnings.\n";
+    Require(unexpectedWarnings==0,"Reader reported an unexpected error or requested disabled legacy track branches");
+    std::cout<<"PASS: "<<checked<<" reader cases; all four Run-3 types, AOD/MiniAOD, fields present/absent, ordinary/mixed chains and unfolding; no reader errors or unused-branch warnings.\n";
   } catch(const std::exception& error){std::cerr<<"FAIL: "<<error.what()<<'\n';return 1;}
 }
