@@ -1,0 +1,355 @@
+diff --git a/.github/workflows/oo-integration-validation.yml b/.github/workflows/oo-integration-validation.yml
+index ef1c565..3ff48d8 100644
+--- a/.github/workflows/oo-integration-validation.yml
++++ b/.github/workflows/oo-integration-validation.yml
+@@ -1,12 +1,13 @@
+ name: OO integration validation
+ on:
+   push:
+-    branches: [oo-integration]
++    branches: [main, oo-integration]
+     paths:
+       - 'src/**'
+       - 'plotting/**'
+       - 'validation/**'
+       - 'card*.input'
++      - 'cards/**'
+       - 'crab/**'
+       - 'Makefile'
+       - 'eecAnalysis.cxx'
+@@ -22,7 +23,7 @@ concurrency:
+   cancel-in-progress: true
+ jobs:
+   combined-software:
+-    if: github.ref == 'refs/heads/oo-integration'
++    if: github.ref == 'refs/heads/oo-integration' || github.ref == 'refs/heads/main'
+     runs-on: ubuntu-22.04
+     timeout-minutes: 25
+     env:
+@@ -110,10 +111,19 @@ jobs:
+           import pathlib, ROOT
+           available = ROOT.gSystem.Load('libRooUnfold') >= 0
+           message = ('RooUnfold library available; inspect runtime-test outcome in unfolding-tests.log.' if available else
+-                     'NOT_RUN: real RooUnfold regression skipped because libRooUnfold is unavailable. Require EEC_REQUIRE_ROOT_TESTS=1 on the analysis host before main promotion.')
++                     'NOT_RUN: real RooUnfold regression skipped because libRooUnfold is unavailable. Require EEC_REQUIRE_ROOT_TESTS=1 on the analysis host before physics qualification.')
+           pathlib.Path('/tmp/oo-integration/roounfold-runtime-status.txt').write_text(message+'\n')
+           print(message)
+           PY
++      - name: Slim-track policy, catalog and MC-weight macro
++        if: ${{ !cancelled() && steps.analyzer.outcome == 'success' }}
++        run: |
++          set -euo pipefail
++          python validation/run3Integration/checkSlimTrackCards.py
++          python cards/build_r4_catalog.py --check
++          g++ $(root-config --cflags) -fno-access-control -Isrc validation/run3Integration/testSlimTrackPolicy.cxx src/ForestReader.o src/HighForestReader.o src/UnfoldingForestReader.o $(root-config --libs) -o /tmp/oo-integration/slim_tracks
++          /tmp/oo-integration/slim_tracks /tmp/oo-integration/slim-fixtures
++          (cd plotting; root -l -b -q 'testDeriveMonteCarloWeightsRun3.C()')
+       - name: Record final source status
+         if: ${{ !cancelled() }}
+         run: |
+diff --git a/README.md b/README.md
+index eedf6b1..1de9321 100644
+--- a/README.md
++++ b/README.md
+@@ -707,3 +707,14 @@ tar -xvzf eecAllFinalResultFiles.tar.gz
+ 
+ The publication figures are written under `paperFigures/`.
+ 
++
++## Consolidated OO/ppRef software integration
++
++The [overall-coordination record](validation/run3Integration/OverallCoordination.md)
++tracks the integrated preparation work and separates software checks from physics closure.
++Use the [R4 card catalog](cards/R4/README.md) for new configurations and the
++[Run-3 MC-weight macro](plotting/README_Run3MCWeights.md) for stored-weight QA
++and candidate fits. OO/ppRef readers skip unused PbPb-only track branches;
++active cards no longer request those cuts. Rebuild executables and job tarballs
++after syncing; no existing forest, correction, ROOT output or production job
++is altered by this source update.
+diff --git a/cards/README.md b/cards/README.md
+index db30af1..60fc981 100644
+--- a/cards/README.md
++++ b/cards/README.md
+@@ -50,3 +50,11 @@ hard-coded legacy default. The existing tarball script packages the analysis
+ code and corrections, while CRAB configurations stage their own card through
+ `config.JobType.inputFiles`. No launcher or packaging path needed changing
+ for these seven moves.
++
++## Active R4 catalog and slim-track policy
++
++See [R4/README.md](R4/README.md) for the generated R4 configurations.
++Run-3 cards omit the unused calo/chi2/hit cut controls. Check all active cards
++with `python3 validation/run3Integration/checkSlimTrackCards.py` and the catalog
++with `python3 cards/build_r4_catalog.py --check`. Historical inventory/evidence
++snapshots are intentionally unchanged. R8 is outside active production scope.
+diff --git a/cards/build_r4_catalog.py b/cards/build_r4_catalog.py
+index 0754531..8382ed0 100644
+--- a/cards/build_r4_catalog.py
++++ b/cards/build_r4_catalog.py
+@@ -13,7 +13,8 @@ import subprocess
+ from pathlib import Path
+ 
+ REPO = Path(__file__).resolve().parents[1]
+-VERSION = 'run3-r4-cards-v1'
++VERSION = 'run3-r4-cards-v2-slim-tracks'
++UNUSED_TRACK_KEYS = {'CalorimeterSignalLimitPt', 'HighPtEtFraction', 'Chi2QualityCut', 'MinimumTrackHits'}
+ BASE_SHA = '6d4800b8c57747e1db761fc4fecf72a38a1a00c3'
+ EDGES = '5 10 20 40 80 120 160 200 300 500 5020'
+ VERTEX = {'Nominal': 3, 'Loose': 5, 'Tight': 2}
+@@ -48,7 +49,7 @@ def base(system, mc, activity):
+         'cardEECpp5v36TeVMCR04.input' if mc else 'cardEECpp5v36TeVR04.input')
+     result = values(name)
+     for key in list(result):
+-        if key.startswith(('PairExport', 'OOClosure')) or key in ('MixingFileList', 'Run3TrackPairCorrectionFile'):
++        if key in UNUSED_TRACK_KEYS or key.startswith(('PairExport', 'OOClosure')) or key in ('MixingFileList', 'Run3TrackPairCorrectionFile'):
+             del result[key]
+     result.update({k: str(v) for k, v in {
+         'DataType': (10 if mc else 9) if system == 'OO' else (12 if mc else 11),
+@@ -78,6 +79,8 @@ def base(system, mc, activity):
+ 
+ 
+ def validate(card):
++    if UNUSED_TRACK_KEYS.intersection(card):
++        raise ValueError('Run-3 cards must not request PbPb-only track cuts')
+     def number(key):
+         return float(card[key])
+     if 'InclusiveMode' in card:
+@@ -288,7 +291,7 @@ def catalog():
+         ]}
+     files['cards/R4/systematics/pending.json'] = json.dumps(pending, indent=2) + '\n'
+     inventory = {'version': VERSION, 'reviewed_base': BASE_SHA,
+-                 'scope': 'R4 only; R8 deferred under cards/R8/pending',
++                 'scope': 'R4 only; R8 deferred and excluded from active catalog',
+                  'source_cards': {p: sha((REPO/p).read_bytes()) for p in
+                                   ('cardEECOOInclusiveR04.input', 'cardEECOOMCInclusiveR04.input',
+                                    'cardEECpp5v36TeVR04.input', 'cardEECpp5v36TeVMCR04.input')},
+@@ -362,7 +365,7 @@ Data trigger is inherited from the dedicated base (currently selection 8,
+ OO MB / ppRef ZeroBias). Check trigger/sample acceptance; this is NOT a claim
+ that every HardProbes forest provides an unbiased usable reference.
+ All paths resolve from repository root. Existing root R4 and CRAB cards remain
+-unchanged compatibility entries; select this catalog explicitly for new jobs.
++compatibility entries with the same physics settings and obsolete track keys removed; select this catalog explicitly for new jobs.
+ Existing campaign tarballs were NOT rebuilt and their cards were NOT replaced.
+ 
+ An .input.in file is NOT a runnable card. Materialize using explicit values:
+@@ -395,8 +398,8 @@ response worker owns synchronized event folds; duplicated card names do not
+ establish independence. Retain the existing per-jet covariance convention and
+ separately evaluate donor/training/shared-reference statistics.
+ 
+-R8 cards are preserved byte-for-byte under cards/R8/pending and excluded from
+-this catalog. Do not run them or apply AK4 corrections to them.
++R8 is deferred and excluded from this catalog. Its separate configurations
++are not promoted to a calibrated production prescription. Do not run them or apply AK4 corrections to them.
+ '''
+ 
+ 
+diff --git a/plotting/README_Run3MCWeights.md b/plotting/README_Run3MCWeights.md
+new file mode 100644
+index 0000000..e90a751
+--- /dev/null
++++ b/plotting/README_Run3MCWeights.md
+@@ -0,0 +1,236 @@
++# Run-3 MC event weights: derivation and Jussi-style QA
++
++## Files and installation
++
++The public `plotting/deriveMonteCarloWeights.C` entry point now calls the
++Run-3 implementation in `deriveMonteCarloWeightsRun3.C`. The previous Run-2
++implementation remains callable as `deriveMonteCarloWeightsRun2.C`.
++The macro uses ROOT and the existing `JDrawer.h`; it does not require
++`libEECDrawing.so`, a separate drawing package, or Python.
++The synthetic ROOT test is `testDeriveMonteCarloWeightsRun3.C`.
++Running the macro never modifies the analyzer, existing event weights, or input files.
++
++## Run from plotting/
++
++```bash
++root -l -b -q 'deriveMonteCarloWeightsRun3.C("OO_DATA.root","OO_MC.root","PP_DATA.root","PP_MC.root")'
++```
++
++Arguments, in order:
++
++```cpp
++deriveMonteCarloWeightsRun3(
++  const char* ooData = "",
++  const char* ooMC = "",
++  const char* ppData = "",
++  const char* ppMC = "",
++  const char* outputDirectory = "figures/mcWeightsRun3",
++  const char* mode = "both",             // stored, derive, both
++  double maxCentrality = 90.0,           // percent, NOT hiBin
++  int vertexPlotRebin = 1,               // display only
++  int centralityPlotRebin = 1);           // display only
++```
++
++Supply analyzer output or processed ROOT files containing event-information
++histograms, NOT `HiForestMiniAOD_*.root` forests. Data and MC must describe the
++intended compatible event selections. The macro prints the input card's trigger,
++vertex, multiplicity, and producer-hash information into its audit file. It does
++not establish trigger equivalence, luminosity normalization, or cross-section
++normalization from these histograms.
++
++The following filenames are recorded in the existing repository weight studies.
++This command assumes they are in the repository root; their presence on lxplus
++has not been checked here. Replace them with your new merged files as appropriate.
++
++```bash
++root -l -b -q 'deriveMonteCarloWeightsRun3.C("../merged_eecOO2025_processed_121026.root","../eecAnalysis_OOMC_eventWeights_merged_processed.root","../merged_eecpp2024_run3_v7_processed.root","../merged_eecppMC2024_GenGen_processed.root","figures/mcWeightsRun3","both")'
++```
++
++OO only, audit the weights actually stored in the production file:
++
++```bash
++root -l -b -q 'deriveMonteCarloWeightsRun3.C("OO_DATA.root","OO_MC.root","","","figures/mcWeightsRun3_stored","stored")'
++```
++
++pp only, derive a candidate vertex weight:
++
++```bash
++root -l -b -q 'deriveMonteCarloWeightsRun3.C("","","PP_DATA.root","PP_MC.root","figures/mcWeightsRun3_pp","derive")'
++```
++
++Use `maxCentrality=80` to show hiBin 0-160 as in the example. The default is 90%
++(hiBin 0-180), matching the currently implemented OO weight domain. A fit derived
++only to 80% must NOT be used in the 80-90% range. The generated parameter comments
++state the required hiBin guard. Vertex plots remain inclusive in the selected
++event activity; cropping a 1D centrality histogram cannot impose that cut on vz.
++
++## What is already active in the inspected framework
++
++Audited repository: `JesusVlz/energyEnergyCorrelatorAnalysis`.
++Pinned revision: `6d4800b8c57747e1db761fc4fecf72a38a1a00c3`.
++
++`src/EECAnalyzer.cxx` contains:
++
++- OO MC vertex `pol6` in the `fIsOOData` constructor branch, starting with
++  `0.838856911780552, -0.00776989024519781, 0.0058636391429985266, ...`.
++- OO MC centrality: two `pol6` functions with a common value at 30%, defined for
++  0-30% and 30-90%. `GetCentralityWeight` evaluates them at `hiBin/2.0` and returns
++  unity outside `0 <= hiBin < 180` for OO MC.
++- ppRef MC vertex `pol6`, with coefficients
++  `0.901743, -0.0100148, 0.00349298, -5.14891e-05, 6.59866e-06, 7.97589e-08, -5.10072e-08`.
++  ppRef has no centrality weight.
++- `GetVzWeight` returns unity for real data and evaluates the function for MC.
++- In the regular centrality-based Run-3 path, the event loop forms
++  `fTotalEventWeight = fVzWeight * fCentralityWeight * fPtHatWeight`.
++  For OO MC and ppRef MC, `fPtHatWeight` is explicitly set to **1.0**. Generator/
++  cross-section weighting is therefore a separate outstanding question, not
++  something this shape-reweighting macro derives or enables.
++
++Existing studies are recorded in `validation/ooEventWeights/summary.json` and
++`validation/ppEventWeights/summary.json`. The historical input files described
++there had identical raw and weighted histogram contents. Active source code
++alone does not establish that an old ROOT output contains those weights.
++The macro checks the supplied files rather than assuming they were regenerated.
++
++## Exact input histogram semantics
++
++| Purpose | Vertex z key | Centrality key |
++|---|---|---|
++| Data, including any trigger-combination event weights | `vertexZweighted` | `centralityWeighted` |
++| MC baseline, without vertex/centrality factors | `vertexZ` | `centrality` |
++| MC as actually weighted in that production | `vertexZweighted` | `centralityWeighted` |
++
++In the inspected analyzer, baseline MC histograms use `fPtHatWeight`; the weighted
++ones use `fTotalEventWeight`. Thus the stored OO vertex histogram also includes
++the centrality factor, and the stored OO centrality histogram also includes the
++vertex factor. A `stored` plot is a genuine readout of that production's full
++weight product; it is NOT a new application of the weights in the plotting macro.
++
++The macro warns if raw and stored-weighted contents are identical. An identical
++shape by itself cannot identify exactly which factors were applied; inspect the
++producer hash and regenerate with the intended analyzer when necessary.
++
++## Derivation and important distinctions
++
++The target is the unit-area ratio `data / baseline MC` in the stated domain.
++Candidate weights are full REPLACEMENTS for the corresponding old event-shape
++functions, not residual multipliers on top of them.
++
++Vertex fits use degree six and the native histogram bin centers. OO centrality
++fits use two degree-six polynomials fitted jointly with a shared value at 30%.
++The coordinate is the discrete `c = hiBin/2.0`, at the lower edge of the native
++0.5%-wide centrality bins, not the bin center (which would shift it by 0.25%).
++The plotting x coordinate alone is converted to hiBin.
++
++Weighted linear least squares is solved with ROOT's `TDecompSVD` in scaled
++coordinates, then converted to the ordinary `pol6` coefficients used by the
++analyzer. This changes the numerical basis, not the polynomial degree or physical
++coordinate. The new centrality fit imposes continuity during the joint fit;
++it does not merely adjust the peripheral intercept afterward.
++
++Fits use the original fine bins. The optional rebin factors affect drawings
++only and must divide the number of selected bins. Missing MC support under
++populated data, wrong systems, incompatible native binning, rank-deficient fits,
++and non-positive polynomial excursions fail explicitly rather than being hidden
++by clipping or substituted weights.
++
++`*_refit` green curves are deterministic, single-marginal, same-sample previews:
++MC bin contents AND their errors are multiplied by the fitted weight and the
++result is renormalized. They are not independent closure and do not validate
++simultaneously applying both OO factors when vz and centrality are correlated.
++Use a new analyzer pass (or suitable joint event-level information) to check the
++combined product. Do not divide an old weighted 1D projection by a marginal
++function to attempt to recover the joint event distribution.
++
++Fit chi2/covariance and displayed ratio errors use diagonal input errors.
++Normalization-induced correlations and fitted-weight uncertainty are not included
++in the preview error bars. These are QA/fit diagnostics, not final uncertainties.
++
++## Figures and outputs
++
++The style uses the repository's own `JDrawer::SetDefaultAppearanceSplitCanvas`,
++logarithmic top panels, linear MC/Data panels, a dashed unity line, red data
++squares, blue baseline-MC circles, and green after-weighting triangles. Headers
++are CMS Preliminary and 5.36 TeV. `P+H` is retained as the OO generator shorthand
++from the example, without assuming an expansion; change `kOOLabel` if desired.
++
++The default `both` mode creates:
++
++```text
++figures/mcWeightsRun3/
++  OO_eventWeights_stored.pdf/.png      # hiBin left, vz right
++  OO_eventWeights_refit.pdf/.png       # same layout, candidate 1D checks
++  OO_hiBin_stored.pdf/.png
++  OO_hiBin_refit.pdf/.png
++  OO_vz_stored.pdf/.png
++  OO_vz_refit.pdf/.png
++  pp_vz_stored.pdf/.png
++  pp_vz_refit.pdf/.png
++  run3_mc_weights.root
++  weight_audit.txt
++  candidate_parameters.txt
++```
++
++The fixed displayed ratio range is 0.5-1.5, matching the example. The audit reports
++any off-scale points and full ratio graphs are saved in ROOT. Adjust `kRatioMin`
++and `kRatioMax` to inspect them visually.
++
++ROOT subdirectories are `OO/vz`, `OO/centrality`, and `pp/vz`. They contain
++normalized input histograms, full ratios, canvases, candidate predictions, scaled
++fit parameters/covariance and candidate TF1 objects. Relevant functions are:
++
++```text
++OO/vz/weight_vz
++OO/centrality/weight_centrality_0_30
++OO/centrality/weight_centrality_30_max
++pp/vz/weight_vz
++```
++
++The root-level `TParameter<int>("complete")` must be 1. It remains 0 after a
++failure; do not use a partially written candidate file. The text file provides
++`SetParameters(...)` lines for the appropriate existing constructor branches.
++Nothing is deployed automatically. Reusing an output directory replaces the
++macro's previous output files; use a new directory to retain comparisons.
++
++## Tests and execution status
++
++The portable polynomial conversion/continuity routines were compiled with
++`clang++ -std=c++17 -Wall -Wextra -Werror` and tested locally. The test passed
++200 randomized parameter sets, both 0-80% and 0-90% centrality domains, vertex
++round trips, and the invalid-domain guard. Maximum conversion round-trip
++absolute error was about `1.33e-15` in those tests.
++
++ROOT/PyROOT and the actual data/MC ROOT inputs were not available in the authoring
++environment. For the repository integration, the ROOT smoke test is run by CI; consult its
