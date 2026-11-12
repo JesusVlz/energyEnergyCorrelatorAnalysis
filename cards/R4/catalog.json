@@ -1,0 +1,2182 @@
+{
+  "version": "run3-r4-cards-v2-slim-tracks",
+  "reviewed_base": "6d4800b8c57747e1db761fc4fecf72a38a1a00c3",
+  "scope": "R4 only; R8 deferred and excluded from active catalog",
+  "source_cards": {
+    "cardEECOOInclusiveR04.input": "4759b5bbf299fef654a74f4436c6f2a9f11d2d19743ebacd9dccd9cb69584605",
+    "cardEECOOMCInclusiveR04.input": "f0ae11a19384785e65e5c6c30ad2064410ea7a9188eeb3f8fe06797d38a1143e",
+    "cardEECpp5v36TeVR04.input": "ebf004cf8680f85c8358b9cc8183fc7a129e01303354bec4fa35200cb4c2faba",
+    "cardEECpp5v36TeVMCR04.input": "883a63a99876a3cc5bef0eea43fdc10f72c6708103f34f283793809a50f8c52a"
+  },
+  "cards": [
+    {
+      "path": "cards/R4/measurement/OO_Data_integrated_none.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "ecdffbdc248356d2187883e37ecd5b15308ad8bb005f048789925df579af3736",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_integrated_reflected.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "d98b7f7778884e9d4cee9a48fcf687b3cbeef775edfc1f5214fd41b110662556",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 1,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_integrated_perpendicular.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "242409397bf385172a787bf4805ab272928fa3c74cb809aba8d0679af13cb9da",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 2,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_integrated_sameEventCones.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "c69d9a75e394755fc15b82d0c9d6f825a594658918ba0452b09b75a3afbe6e25",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_integrated_mixed.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "35ceef9f02f0dd190670f7b4eb04ce2a42caafe23e4e772e8c742b7156c0e431",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 4,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_integrated_mixedPerpendicular.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "22270f40590eebcbd4476c19d57613063c2cc6ea56cd66e9724de7163b12f08e",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 6,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_integrated_allCones.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "8e64ffb0dc8f2e8ceed1fc61eac366405e5581efe3e7946762811347f44ed557",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/OO_Data_integrated_Loose.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "f3f1799800d3c3c356edbaa59d5912016640064db35d1dba22945d146dd21c22",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/OO_Data_integrated_Tight.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "ad5a69d6d235317cd78256e289ad3d7ac664b2d292f065fe74f140cc0dad1a95",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_integrated_Nominal_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "dadd856f327f09b077746ad0bd237fad0878e4f4fcf9e90c6fbc6bf65672d15b",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_integrated_Nominal_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "d1b1687e12dab9743190c8dbcee03308ff6bfce62bb3b82e7badaed5b9f50908",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_integrated_Loose_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "4267f60e54b24501c8ec7b4321e8a417037c366f2bc7859befd70173e55a18d6",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_integrated_Loose_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "aee7b322014650adeee4c7dbb0fd8443fd2b35f5c901f3bd4e6dbf5c12fcb801",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_integrated_Tight_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "767867c6e22aa2bbf16ad2cf15a2dc8fca4979271c879fb0f940ce3e639be4a6",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_integrated_Tight_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "78270aca97a7d25ab88ec0509e3a9a528452b7aee401f5a00481c9ad08498f5e",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/systematics/templates/OO_Data_integrated_trackingFactors.input.in",
+      "purpose": "Fill existing nominal/no-efficiency/up/down EEC variation objects.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD",
+        "TRACKING_RELATIVE_VARIATION"
+      ],
+      "requirements": [
+        "Run-3 tracking variation prescription; covariance and data propagation"
+      ],
+      "sha256": "1045305e5443ad726ca20537ea437f8f6900081ad3dd3046abefd7d92b1e3864",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_integrated_none.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "1b728d3be76ddeea40d528a7cfb8dedd6222545f41777fd6a1a11e433b8ffa2f",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_integrated_reflected.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "6ff22b1e115de258c70e8a359d28bfa749102175109a98d66212b107220d3970",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 1,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_integrated_perpendicular.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "0003c985882171071531cf30f418d5a614be521fc253b7839337a96f6c32be8b",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 2,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_integrated_sameEventCones.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "cd043f239f0601827d254017acdffb9a3630091bbd6d63136709fd3099d9f4f6",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_integrated_mixed.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "efd12857e9982d8e838aa28bf1914ebc6a46d42fca7a027c4ffdeb346d753fa6",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 4,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_integrated_mixedPerpendicular.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "a7622266a327900fa1c3c5593a84c3bebc9ef20d2f621464f844b3b6bdf7ad5a",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 6,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_integrated_allCones.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "5f23a08a493e2a5c417b15c643f3838d8904ca2ed270a6eeaea28afeecb3f888",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/OO_MC_integrated_Loose.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "90dfc02e61077f376599b327a3c0b333889aaf6b80d7a983c16de96e7ca2af6a",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/OO_MC_integrated_Tight.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "f57323193ba31e002e29bc8021def2a0528813bddabb375dc10286cba81d6bcc",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_integrated_Nominal_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "6c777fb39ef207c280ef25e690fea9888c24e16e5ac717f6b6a62eb8d820045c",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_integrated_Nominal_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "525c1230f3099ebcab3c373849c727c8b4d69edc69bbf9b62573c29164421089",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_integrated_Loose_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "0b085c199634e900510935afbc4ede2659f4c9003f34bff5be53bfca56d023a8",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_integrated_Loose_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "83307c20b685e8f173c87b40fbc911c3a464cae745a487ef9d0d648c208c0979",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_integrated_Tight_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "024dd537244c39f18c6f60e61a58757d8126dd81d80c153279ade4762cbf1351",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_integrated_Tight_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "0bab67a0095d5b36880bf6db7ef5517c5355750b59ec1e2088cb12f4d0dfc747",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/systematics/templates/OO_MC_integrated_trackingFactors.input.in",
+      "purpose": "Fill existing nominal/no-efficiency/up/down EEC variation objects.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD",
+        "TRACKING_RELATIVE_VARIATION"
+      ],
+      "requirements": [
+        "Run-3 tracking variation prescription; covariance and data propagation"
+      ],
+      "sha256": "799cdcf6c4e8abcd9a3e7eb318876faae035cfc844f09b30f9b0e390ea0a1b92",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_integrated_RecoGen.input",
+      "purpose": "RecoGen diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "4664d634b763e3b0c835a611a07f78de179f55fccee5ed6dd6c43fa44d974330",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_integrated_GenReco.input",
+      "purpose": "GenReco diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "e3c54f0c098a25f7fdd537281180ce6d3b019f4ec4552991bbd196565f215c80",
+      "DataType": 10,
+      "correlation": 2,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_integrated_GenGen.input",
+      "purpose": "GenGen diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "d1df301b75ec8f064af16b6aa7f2ee2e2ec0302dd7d59b008703595d86396abc",
+      "DataType": 10,
+      "correlation": 3,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_integrated_RecoReco_matchedJets.input",
+      "purpose": "Matched-jet-only diagnostic, not the nominal inclusive measurement.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "cb9fa483e278058bc662ccc2ed1cb3aa1ea766393acb240b923b14af8ad50f2d",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_integrated_RecoGen_matchedJets.input",
+      "purpose": "Matched-jet-only diagnostic, not the nominal inclusive measurement.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "1955d698fe27d3b6256d9e94214dc408fe892a32778d0c30f828f303f6652bb0",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/jet-qa/OO_MC_integrated_jetResponse.input",
+      "purpose": "Jet QA and reconstructed/generated jet response; no EEC cone filling.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "e1e07a1b24c265616538a98a247e957516e02e38e971c84ef03bfa0a5a69b39a",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/particle-response/OO_MC_integrated_trackPairResolution.input",
+      "purpose": "Matched-track angle and momentum-product diagnostics, separate from jet-pT unfolding.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "f99c76edafcd0b2a9a3de430f5f82495c88c6d2efc8d7bf528343f24c490bace",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/response/OO_MC_integrated_truthGuard5.input",
+      "purpose": "Native generator-particle jet-pT response, misses/fakes and per-jet covariance.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "da08e6109c4e73cc4f492ca2b7d549b9be649cbece8b2ef7f86300fa5c5c80f4",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/response/OO_MC_integrated_truthGuard10.input",
+      "purpose": "Native generator-particle jet-pT response, misses/fakes and per-jet covariance.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "a8365c3ff2f2c73a8d32ec781928b150429880452a432e885aee45a477557cf3",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_split_none.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "e0fa6e01ea2e20cc692d5316a398c69df78b6706b91d54be750308a21c84b528",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_split_reflected.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "28dbcb708aa6e4583e97d853cf9eeb463a7e9a372d00e1e7a170522c40198f90",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 1,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_split_perpendicular.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "2c6a4607f9c0b0a83161406feac9a79aefe653ecb7f9a607907b8b5ed36bcecf",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 2,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_split_sameEventCones.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "264ebf62374350e26146fe86a7202724a202ee182e7ba6ded89f41a3b0cca462",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_split_mixed.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "01200e4bd39d8144fd07786f6243c5df75025c9adee75ae9111ac76cea4caee0",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 4,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_split_mixedPerpendicular.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "9c963ae9aac4d139d7419a8f6c9d3cc1419d5e26223e8f38d048d571cf41648d",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 6,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_Data_split_allCones.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "3bb887cc6318aa0741c978271f4537e54105899d960cd36cd096df883565ba5e",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/OO_Data_split_Loose.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "25f2c494e1aaeadc7a3b49fc5ff3a2195cc5894982185893b40e50b0bff92385",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/OO_Data_split_Tight.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "1ade1ad74007524d41285164f4afe20ba91d5833c471ba5c7acb482d4fbb2f5c",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_split_Nominal_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "72f79166d5b2cc9ac492838d70f60374dbe8034117cc0ea12d14811066cd193b",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_split_Nominal_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "5785edba55d631c3e1d4f5c9f47ee5c91c1e13eba5206a0cb1292eaa5d262696",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_split_Loose_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "896e49a69cc45fd705b6e4f241441c791cbda6faf9794009e6ab93c881112381",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_split_Loose_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "7d4397c307afd249937e0f733335e7ebd1819d7a7493a83cec929a7cfd807fcb",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_split_Tight_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "84eb7834bfa0d4471da4fe5ec831ef28e70faaf34588ce4e29ed32a0adecef16",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_Data_split_Tight_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "84faaa42352dadfe4ce1b5c35c440c218e82f385e8b0d800e922729d1079f700",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/systematics/templates/OO_Data_split_trackingFactors.input.in",
+      "purpose": "Fill existing nominal/no-efficiency/up/down EEC variation objects.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD",
+        "TRACKING_RELATIVE_VARIATION"
+      ],
+      "requirements": [
+        "Run-3 tracking variation prescription; covariance and data propagation"
+      ],
+      "sha256": "e4b80b16005098a8c99027f320867a77f91613e7677c422530579a69caa6f566",
+      "DataType": 9,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_split_none.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "08c87f8e14142234dd79d3b41cd3f4d258a13f15245fa27f20fc1c9b11ef8eaf",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_split_reflected.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "6c4f5a1af88172d0d860528d813609cfb4644a7adafd2f02de4167735711a08a",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 1,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_split_perpendicular.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "211fb148a18c57c8c814690e96238ac621ff5e46f912579be90bf7aa2c7afb0e",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 2,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_split_sameEventCones.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "e0ecd52becd6cb0c75e6eec7bdb3ede785f134c010b75337d13f066cd10fba60",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_split_mixed.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "407eb9734002d975eb4dc675081d3af941cdfce455e743cbe088821a48f57022",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 4,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_split_mixedPerpendicular.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "08ba67263b16119bbd93f794f479040cd21f15003b51d363b9d2b56c0cb1380c",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 6,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/OO_MC_split_allCones.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "8ce12a96ee1870a2562a247ce55c747a0c7361a67a76d05c79eb4feadf541155",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/OO_MC_split_Loose.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "23a040901ada82c0607165a4647135add106afcc12c5d0ad527d56f9e59571f8",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/OO_MC_split_Tight.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "b2f6425682361d4ecdb3e688dc24de1dced8bdc7586aabea244eb6596d5f06ab",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_split_Nominal_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "9330615b7c76977b620b75d655b213294f71a2c1f994a363547fa2f4db83d029",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_split_Nominal_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "620cecf194ee694ec8bf4e22feb6125465b44b0f0cfb544994f8d1a6d2e93686",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_split_Loose_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "c7b4200defa16728029df85d6ecaebd66b19c0d5f2dd97d77f4bbd132b6d7a9e",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_split_Loose_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "af17b3dbc4dde5d4023b8ce78069bbe508343b0b4cfed59d64fd6a897a741dfa",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_split_Tight_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "e54fb0dd67f63da6bcdc1a357dc2313126c20e75f6e208d6c8909d7bc58ea499",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/OO_MC_split_Tight_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "8570943a448365b0ea77a88f7645f9a3f7624b2b4332395c9d9cace4fd337824",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/systematics/templates/OO_MC_split_trackingFactors.input.in",
+      "purpose": "Fill existing nominal/no-efficiency/up/down EEC variation objects.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD",
+        "TRACKING_RELATIVE_VARIATION"
+      ],
+      "requirements": [
+        "Run-3 tracking variation prescription; covariance and data propagation"
+      ],
+      "sha256": "de658ec3ca191990d1fbfe3318657ea2ec3fb6e3a435f2f52ac94e7abffb6631",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_split_RecoGen.input",
+      "purpose": "RecoGen diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "de4db814f3df1a5cc5dac9a2de5ee00a7672c96996bb93d683ec2b800a24b627",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_split_GenReco.input",
+      "purpose": "GenReco diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "24c9d5732dc20c04e254030792e72d73f7c32cc867ef833796a28e521692925d",
+      "DataType": 10,
+      "correlation": 2,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_split_GenGen.input",
+      "purpose": "GenGen diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "ff536409948a15276fc0d81c415d9cd7bb65736982596b24ec269d65500500e1",
+      "DataType": 10,
+      "correlation": 3,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_split_RecoReco_matchedJets.input",
+      "purpose": "Matched-jet-only diagnostic, not the nominal inclusive measurement.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "0226fb47d99fc4cf49bdcb199ecf4fd98ac7bef235b3b500903570fe55c73ad4",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/OO_MC_split_RecoGen_matchedJets.input",
+      "purpose": "Matched-jet-only diagnostic, not the nominal inclusive measurement.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "bf27d399f40d3775b708d8731f74cdc2b026508f20761309a6a588cafde6ebca",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/jet-qa/OO_MC_split_jetResponse.input",
+      "purpose": "Jet QA and reconstructed/generated jet response; no EEC cone filling.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "9480f9d6651cd5301061e601fd478aa03b62cbc66584493fe61f51f352b35ed1",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/particle-response/OO_MC_split_trackPairResolution.input",
+      "purpose": "Matched-track angle and momentum-product diagnostics, separate from jet-pT unfolding.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "f347f8a198f38eb5073431f1e37e349ac186fc4a87a87fc6c39c317ef4dffc8d",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/response/OO_MC_split_truthGuard5.input",
+      "purpose": "Native generator-particle jet-pT response, misses/fakes and per-jet covariance.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "251226ca73700917a899530b6fbf1280e17d424172bb5592c7e2adc204969761",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/response/OO_MC_split_truthGuard10.input",
+      "purpose": "Native generator-particle jet-pT response, misses/fakes and per-jet covariance.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "c519bd6f86fee83c0d3da13b30dc38d4121e613f5c6586d1ca915d8a2a855e71",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_Data_inclusive_none.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "e01adab1798f92787aed15c291bd54fd05d19e4f20cf5c58fe962a3da7e6ffb9",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_Data_inclusive_reflected.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "e9cb658cf05293ee1d2664a642d59f60f2d2137a904556152fffb7c6dae9e205",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 1,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_Data_inclusive_perpendicular.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "5c3120ec51120b93d7126f1161416736ceea9f5997ca4a08f01122fc6be2ff9d",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 2,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_Data_inclusive_sameEventCones.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "73032d961f531f2bb31510c8ebeb1c1c27d75c1e08a4b481e4e7bedc78ef2d34",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_Data_inclusive_mixed.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "7cdd63662b6a3cf57d82d9700693c0afe26070abee1c7e8df63ec868b60b0b27",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 4,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_Data_inclusive_mixedPerpendicular.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "063b197ff97247e0f03288b2042a18b21a47798cc6719f9686d47cb0d2097094",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 6,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_Data_inclusive_allCones.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "d74cc484e2c46bda6ea49450d275ad240d30770b97414496fa816c53027bbf41",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/ppRef_Data_inclusive_Loose.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "602f65df4db1a9e15ec0b7531a7f6401d271e012f5a88447d36be7746fc119b8",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/ppRef_Data_inclusive_Tight.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "17b49971359252fdd6430eb509cbf8e3b21d294897bfc181db69f18a3c6daf3f",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_Data_inclusive_Nominal_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "3b916bc3f67a9aa9458aebc5ea5f2229251a45a930156b87bbbb02ef3216f3aa",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_Data_inclusive_Nominal_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "58de53c951fdde8badf13fcfeef6e007a187b59566b4f90b2aeea2c2abfdd474",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_Data_inclusive_Loose_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "bb6049d9e273f3d33fbff7103f71b89c1c0e8b444553811267f281f9524b492d",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_Data_inclusive_Loose_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "46282ab8cdaf45bfbf3dd76f197fa1a97f7e5f7671b8bd5a3c692a6d2f5ad089",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_Data_inclusive_Tight_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "dcf5087f5574d08b7cf8f6e92f04f140c97c8b2a0b63e10e33af71e79b6f406f",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_Data_inclusive_Tight_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "d6816fe8f17dbd7e20933c610998064850e3ba6c19c45166fe42ba1581c34cfa",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/systematics/templates/ppRef_Data_inclusive_trackingFactors.input.in",
+      "purpose": "Fill existing nominal/no-efficiency/up/down EEC variation objects.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD",
+        "TRACKING_RELATIVE_VARIATION"
+      ],
+      "requirements": [
+        "Run-3 tracking variation prescription; covariance and data propagation"
+      ],
+      "sha256": "f34c571bdbfd89be30a15edb0f9a568cb564b0972cd2b00c69a2c0a51a13f458",
+      "DataType": 11,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_MC_inclusive_none.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "dcb2b1d87de123cea7048a5827f29173a12f266f9de8d03f814922d8a95ef881",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_MC_inclusive_reflected.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "efce914895c5d7e18188285d1f143c09a3028ed6fb9121541abd48a15016aaac",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 1,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_MC_inclusive_perpendicular.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "b9e57b714faf1b70d757d2eb35cdebd2dec8f5f58cbe39d4e81cb7e218f2c7e6",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 2,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_MC_inclusive_sameEventCones.input",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability"
+      ],
+      "sha256": "085cdcb077fa49f7a8ce4e3c57282751a20389c9f413a0945fc208cc8b35915d",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_MC_inclusive_mixed.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "eea5b33c61dfb3e5b0e6d62aca1c8f01b36521a92a30baa3820b7213ad6fb424",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 4,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_MC_inclusive_mixedPerpendicular.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "b5a1a940bc9c9abac55fcc581f0e9b7d337f5fb63bae7d672f7a8a91042dec6e",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 6,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/measurement/ppRef_MC_inclusive_allCones.input.in",
+      "purpose": "Single-track-corrected EEC and cone components; residual pair correction OFF.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "compatible native R4 forest; nominal jet/tracking/weight applicability",
+        "independent compatible donor pool and matching validation"
+      ],
+      "sha256": "af7dd028494687c959ed36da7f6e9ea9d12bed410452af7822f1b89ac676ecdf",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/ppRef_MC_inclusive_Loose.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "8bdc5b3c29faa61621f328927b0e42e80d16026b5570e711dbee23a64b25a3c6",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/systematics/track-selection/ppRef_MC_inclusive_Tight.input",
+      "purpose": "Track-selection study with its corresponding existing single-track table.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "9d556d39074822990dc106aad7c774e7804295a062b9f0a99f873ae3de562363",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 3,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_MC_inclusive_Nominal_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "111a00bd077fa3ada3e4030fa60ec23cfffbeceb07a0b73c879ea9530565fcca",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_MC_inclusive_Nominal_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "df1e175467c9eb90dae6f5753321b47cc2c5053f2ee99a8abe8dc75f5d4ac2d8",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_MC_inclusive_Loose_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "257c0ba28ffecc750e278a59776bcd7856810fc762acafdbb3e9c8ac90e3e5b7",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_MC_inclusive_Loose_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "c16b9dceeef0c064609376a06cb47fab31fb72bc262f5b99d3ac00803796af3f",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_MC_inclusive_Tight_none.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "c79397a1bccce9ed1eb90c2a7526f331189dfc62152dd0f774d607b34063c4fa",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/corrected-templates/ppRef_MC_inclusive_Tight_allCones.input.in",
+      "purpose": "Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD"
+      ],
+      "requirements": [
+        "qualified current selection-specific pair map including migration support",
+        "compatible data/MC response and downstream background adjustment"
+      ],
+      "sha256": "52e359531946196e7cc02df356579e78134decbe9a52c66056b95b7277565b49",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/systematics/templates/ppRef_MC_inclusive_trackingFactors.input.in",
+      "purpose": "Fill existing nominal/no-efficiency/up/down EEC variation objects.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "MIXING_LIST",
+        "PAIR_PAYLOAD",
+        "TRACKING_RELATIVE_VARIATION"
+      ],
+      "requirements": [
+        "Run-3 tracking variation prescription; covariance and data propagation"
+      ],
+      "sha256": "4d53a95773596396b5eaf28a458fc17ee837bbbd04325055338cc852257de601",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 7,
+      "pair_correction": true,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/ppRef_MC_inclusive_RecoGen.input",
+      "purpose": "RecoGen diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "053c07e7d0654a551d6880d56b12e0c5fa5b96bc32e31ec6d50c88f2294d6a36",
+      "DataType": 12,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/ppRef_MC_inclusive_GenReco.input",
+      "purpose": "GenReco diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "50858d8892df9969c4efe5140dbda8e0fef2d7c629a022330480b536fa2c0d47",
+      "DataType": 12,
+      "correlation": 2,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/ppRef_MC_inclusive_GenGen.input",
+      "purpose": "GenGen diagnostic on the standard R4 path; compare appropriate populations.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "89fe53d28d6acc8604ff7f3430d83aafa01afd88ff0b805c20d0f3585d619978",
+      "DataType": 12,
+      "correlation": 3,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/ppRef_MC_inclusive_RecoReco_matchedJets.input",
+      "purpose": "Matched-jet-only diagnostic, not the nominal inclusive measurement.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "7b6508dda441de93f944d64836846c863b6e8109b944eb0d5d1d8ba4299b719a",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/mc-closure/ppRef_MC_inclusive_RecoGen_matchedJets.input",
+      "purpose": "Matched-jet-only diagnostic, not the nominal inclusive measurement.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "6e2f04076a898393babb185773a9d77448a56dd6e7e2d3377f17aaf96b5bcf5c",
+      "DataType": 12,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/jet-qa/ppRef_MC_inclusive_jetResponse.input",
+      "purpose": "Jet QA and reconstructed/generated jet response; no EEC cone filling.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "e833272c1166867172186e241759cfb67a6b8d58cfaa301f4348165ebc62ec61",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/particle-response/ppRef_MC_inclusive_trackPairResolution.input",
+      "purpose": "Matched-track angle and momentum-product diagnostics, separate from jet-pT unfolding.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "49f56447580b69adbab40bd739e0c3a65192b1790c8751d6331100c0753c57b5",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/response/ppRef_MC_inclusive_truthGuard5.input",
+      "purpose": "Native generator-particle jet-pT response, misses/fakes and per-jet covariance.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "275ae4c10a55ca3583bf4a825131df1f8c2a25e9e3578ed5ffd37fe9a41bf987",
+      "DataType": 12,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/response/ppRef_MC_inclusive_truthGuard10.input",
+      "purpose": "Native generator-particle jet-pT response, misses/fakes and per-jet covariance.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "9550cab2ebff370ba90b89346b2de08bcb8f0755208484b0ca8389f63392b413",
+      "DataType": 12,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/pairs/OO_Loose_RecoGen.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "9646f7ea721e20150ef654957d7806b2d7f0dc56ffc00c89f7b790c78ab55c18",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/pairs/OO_Loose_RecoReco.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "245690d7c5978d8168307016b9ae44de6a509651ff8b2c38b7a0085dcc0ecae4",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/pairs/OO_Nominal_RecoGen.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "a46e518f4caf9298ecf07fdabdd421acd843f447374692cdd70097fee9c830b8",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/pairs/OO_Nominal_RecoReco.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "5419a6e7dc300c415c9152a1e0e549b6fa2dc45452618aa06c1027148e57758f",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/pairs/OO_Tight_RecoGen.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "46b02d453b39a6852e1340e5dfb13c750cda51a862da18bd81af04c3c0484227",
+      "DataType": 10,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/pairs/OO_Tight_RecoReco.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "6ee1fc09f922123cb179e089b5a955b95b5c53ecc64ec8bdf6913b0af8988899",
+      "DataType": 10,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/pairs/pp_Loose_RecoGen.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "0fdf4953c7ac075afa5aae0fe454b9764d780efa572c6601a0a5726e8934b9d0",
+      "DataType": 12,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/pairs/pp_Loose_RecoReco.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "c40872e076f0c88f0ef6b2ad3af4b81c9524660d7e3644f8a9eadbc9290701e3",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Loose"
+    },
+    {
+      "path": "cards/R4/pairs/pp_Nominal_RecoGen.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "f8c3fe3590c885f93026d1a4e6c29df5f44b321d419d7f75d8e7f1ab4d0e8c5d",
+      "DataType": 12,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/pairs/pp_Nominal_RecoReco.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "1a71f724dcaeffc5b38da59d91f280bb29792b6826547a9b29fc8318acd68d9b",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/pairs/pp_Tight_RecoGen.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "7699a46ae12fa49074ba4deb5cfc3701f93b1e37bc75208dc313858ee43efaf1",
+      "DataType": 12,
+      "correlation": 1,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/pairs/pp_Tight_RecoReco.input",
+      "purpose": "Bounded existing pair derivation card; use prepare_inputs.py plan/export/batch, not EEC division.",
+      "status": "CONFIGURED_NOT_PHYSICS_VALIDATED",
+      "required_tokens": [],
+      "requirements": [],
+      "sha256": "063e97b0ce3c99f8c0f1b50573d24880f8041b65821f05d183b20e7078ebbeed",
+      "DataType": 12,
+      "correlation": 0,
+      "background_mask": 0,
+      "pair_correction": false,
+      "selection": "Tight"
+    },
+    {
+      "path": "cards/R4/background-benchmark/OO_MC_integrated_GenGen_NH.input.in",
+      "purpose": "Strict two-donor OO GenGen NH/vz pilot, separate from ordinary all-cone configuration.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "LEDGER_PREFIX",
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "pure-HIJING donor/source independence; unique writable ledger prefix"
+      ],
+      "sha256": "aa82202ed0eefe8d202b2e40d26a55c0762e38b938f158f32f125a9f06b709d6",
+      "DataType": 10,
+      "correlation": 3,
+      "background_mask": 6,
+      "pair_correction": false,
+      "selection": "Nominal"
+    },
+    {
+      "path": "cards/R4/background-benchmark/OO_MC_split_GenGen_NH.input.in",
+      "purpose": "Strict two-donor OO GenGen NH/vz pilot, separate from ordinary all-cone configuration.",
+      "status": "TEMPLATE_REQUIRES_INPUTS",
+      "required_tokens": [
+        "LEDGER_PREFIX",
+        "MIXING_LIST"
+      ],
+      "requirements": [
+        "pure-HIJING donor/source independence; unique writable ledger prefix"
+      ],
+      "sha256": "327cbaa1cc607a0f5bc72de2ea0e86aeb5aca3b2309e4216989d5ed32109cf6b",
+      "DataType": 10,
+      "correlation": 3,
+      "background_mask": 6,
+      "pair_correction": false,
+      "selection": "Nominal"
+    }
+  ],
+  "unfolding_templates": [
+    "cards/R4/unfolding/response_marginal.json.in",
+    "cards/R4/unfolding/ordinary_GenGen.json.in"
+  ],
+  "physics_closure": "NOT_RUN",
+  "production_submitted": false
+}

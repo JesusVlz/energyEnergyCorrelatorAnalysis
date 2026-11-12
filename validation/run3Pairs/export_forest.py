@@ -33,10 +33,18 @@ def digest(path):
 
 def card_text(base, settings):
     lines = []
-    remaining = dict(settings)
-    for line in base.read_text().splitlines():
+    text = base.read_text()
+    baseline = {}
+    for line in text.splitlines():
+        words = line.split('#', 1)[0].split()
+        if len(words) > 1: baseline[words[0]] = words[1]
+    run3 = int(float(settings.get('DataType', baseline.get('DataType', -1)))) in (9, 10, 11, 12)
+    unused = {'CalorimeterSignalLimitPt', 'HighPtEtFraction', 'Chi2QualityCut', 'MinimumTrackHits'} if run3 else set()
+    remaining = {key: value for key, value in settings.items() if key not in unused}
+    for line in text.splitlines():
         fields = line.split()
         key = fields[0] if fields else ''
+        if key in unused: continue
         if key in settings:
             if key in remaining:
                 lines.append(f'{key} {remaining.pop(key)}')

@@ -707,3 +707,14 @@ tar -xvzf eecAllFinalResultFiles.tar.gz
 
 The publication figures are written under `paperFigures/`.
 
+
+## Consolidated OO/ppRef software integration
+
+The [overall-coordination record](validation/run3Integration/OverallCoordination.md)
+tracks the integrated preparation work and separates software checks from physics closure.
+Use the [R4 card catalog](cards/R4/README.md) for new configurations and the
+[Run-3 MC-weight macro](plotting/README_Run3MCWeights.md) for stored-weight QA
+and candidate fits. OO/ppRef readers skip unused PbPb-only track branches;
+active cards no longer request those cuts. Rebuild executables and job tarballs
+after syncing; no existing forest, correction, ROOT output or production job
+is altered by this source update.

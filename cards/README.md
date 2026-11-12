@@ -50,3 +50,11 @@ hard-coded legacy default. The existing tarball script packages the analysis
 code and corrections, while CRAB configurations stage their own card through
 `config.JobType.inputFiles`. No launcher or packaging path needed changing
 for these seven moves.
+
+## Active R4 catalog and slim-track policy
+
+See [R4/README.md](R4/README.md) for the generated R4 configurations.
+Run-3 cards omit the unused calo/chi2/hit cut controls. Check all active cards
+with `python3 validation/run3Integration/checkSlimTrackCards.py` and the catalog
+with `python3 cards/build_r4_catalog.py --check`. Historical inventory/evidence
+snapshots are intentionally unchanged. R8 is outside active production scope.

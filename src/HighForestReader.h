@@ -20,6 +20,10 @@ using namespace std;
 class HighForestReader : public ForestReader{
   
 private:
+  bool UsesRun3SlimTracks() const {
+    return fDataType == kOO || fDataType == kOOMC ||
+           fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC;
+  }
   std::shared_ptr<Run3JetL1Inputs> fRun3L1Inputs;
   static const Int_t fnMaxJet = 250;        // Maximum number of jets in an event
   static const Int_t fnMaxTrack = 60000;    // Maximum number of tracks in an event

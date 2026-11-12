@@ -13,7 +13,8 @@ import subprocess
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-VERSION = 'run3-r4-cards-v1'
+VERSION = 'run3-r4-cards-v2-slim-tracks'
+UNUSED_TRACK_KEYS = {'CalorimeterSignalLimitPt', 'HighPtEtFraction', 'Chi2QualityCut', 'MinimumTrackHits'}
 BASE_SHA = '6d4800b8c57747e1db761fc4fecf72a38a1a00c3'
 EDGES = '5 10 20 40 80 120 160 200 300 500 5020'
 VERTEX = {'Nominal': 3, 'Loose': 5, 'Tight': 2}
@@ -48,7 +49,7 @@ def base(system, mc, activity):
         'cardEECpp5v36TeVMCR04.input' if mc else 'cardEECpp5v36TeVR04.input')
     result = values(name)
     for key in list(result):
-        if key.startswith(('PairExport', 'OOClosure')) or key in ('MixingFileList', 'Run3TrackPairCorrectionFile'):
+        if key in UNUSED_TRACK_KEYS or key.startswith(('PairExport', 'OOClosure')) or key in ('MixingFileList', 'Run3TrackPairCorrectionFile'):
             del result[key]
     result.update({k: str(v) for k, v in {
         'DataType': (10 if mc else 9) if system == 'OO' else (12 if mc else 11),
@@ -78,6 +79,8 @@ def base(system, mc, activity):
 
 
 def validate(card):
+    if UNUSED_TRACK_KEYS.intersection(card):
+        raise ValueError('Run-3 cards must not request PbPb-only track cuts')
     def number(key):
         return float(card[key])
     if 'InclusiveMode' in card:
@@ -288,7 +291,7 @@ def catalog():
         ]}
     files['cards/R4/systematics/pending.json'] = json.dumps(pending, indent=2) + '\n'
     inventory = {'version': VERSION, 'reviewed_base': BASE_SHA,
-                 'scope': 'R4 only; R8 deferred under cards/R8/pending',
+                 'scope': 'R4 only; R8 deferred and excluded from active catalog',
                  'source_cards': {p: sha((REPO/p).read_bytes()) for p in
                                   ('cardEECOOInclusiveR04.input', 'cardEECOOMCInclusiveR04.input',
                                    'cardEECpp5v36TeVR04.input', 'cardEECpp5v36TeVMCR04.input')},
@@ -362,7 +365,7 @@ Data trigger is inherited from the dedicated base (currently selection 8,
 OO MB / ppRef ZeroBias). Check trigger/sample acceptance; this is NOT a claim
 that every HardProbes forest provides an unbiased usable reference.
 All paths resolve from repository root. Existing root R4 and CRAB cards remain
-unchanged compatibility entries; select this catalog explicitly for new jobs.
+compatibility entries with the same physics settings and obsolete track keys removed; select this catalog explicitly for new jobs.
 Existing campaign tarballs were NOT rebuilt and their cards were NOT replaced.
 
 An .input.in file is NOT a runnable card. Materialize using explicit values:
@@ -395,8 +398,8 @@ response worker owns synchronized event folds; duplicated card names do not
 establish independence. Retain the existing per-jet covariance convention and
 separately evaluate donor/training/shared-reference statistics.
 
-R8 cards are preserved byte-for-byte under cards/R8/pending and excluded from
-this catalog. Do not run them or apply AK4 corrections to them.
+R8 is deferred and excluded from this catalog. Its separate configurations
+are not promoted to a calibrated production prescription. Do not run them or apply AK4 corrections to them.
 '''
 
 

@@ -3,7 +3,7 @@
 from pathlib import Path
 
 
-STRING_KEYS = {"MixingFileList", "JetVetoMapFile", "JetVetoMapHistogram", "JetVetoPtConvention"}
+STRING_KEYS = {"MixingFileList", "JetVetoMapFile", "JetVetoMapHistogram", "JetVetoPtConvention", "Run3JetIDTable", "Run3TrackSelection", "Run3TrackPairCorrectionFile"}
 
 
 def parse(path):

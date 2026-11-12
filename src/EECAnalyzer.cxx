@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 
 // Own includes
 #include "EECAnalyzer.h"
@@ -887,10 +888,19 @@ void EECAnalyzer::ReadConfigurationFromCard(){
   fTrackMaxPtCut = fCard->Get("MaxTrackPtCut"); // Maximum track pT cut
   fMaxTrackPtRelativeError = fCard->Get("MaxTrackPtRelativeError");   // Maximum relative error for pT
   fMaxTrackDistanceToVertex = fCard->Get("VertexMaxDistance");        // Maximum distance to primary vetrex
-  fCalorimeterSignalLimitPt = fCard->Get("CalorimeterSignalLimitPt"); // Require signal in calorimeters for track above this pT
-  fHighPtEtFraction = fCard->Get("HighPtEtFraction"); // For high pT tracks, minimum required Et as a fraction of track pT
-  fChi2QualityCut = fCard->Get("Chi2QualityCut");     // Quality cut for track reconstruction
-  fMinimumTrackHits = fCard->Get("MinimumTrackHits"); // Quality cut for track hits
+  if(fIsOOData || fIsPp2024Data){
+    // The Run-3 track selection ends before PbPb-only calo/chi2/hit cuts.
+    // Do not request obsolete card keys or resurrect their forest branches.
+    fCalorimeterSignalLimitPt = std::numeric_limits<double>::infinity();
+    fHighPtEtFraction = 0;
+    fChi2QualityCut = std::numeric_limits<double>::infinity();
+    fMinimumTrackHits = 0;
+  } else {
+    fCalorimeterSignalLimitPt = fCard->Get("CalorimeterSignalLimitPt"); // Require signal in calorimeters for track above this pT
+    fHighPtEtFraction = fCard->Get("HighPtEtFraction"); // For high pT tracks, minimum required Et as a fraction of track pT
+    fChi2QualityCut = fCard->Get("Chi2QualityCut");     // Quality cut for track reconstruction
+    fMinimumTrackHits = fCard->Get("MinimumTrackHits"); // Quality cut for track hits
+  }
   
   fSubeventCut = fCard->Get("SubeventCut");     // Required subevent type
 

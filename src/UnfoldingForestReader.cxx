@@ -13,8 +13,8 @@
 namespace {
 
 // Fail before processing an incompatible Run-3 forest instead of returning empty
-// response histograms. Some legacy MiniAOD track-quality branches are optional in
-// Run-3; their getters still reject attempts to use unavailable quantities.
+// response histograms. PbPb-only track-quality inputs are not bound in Run-3,
+// even when present. Their getters reject accidental use of disabled quantities.
 template <typename T>
 void BindForestBranch(TTree* tree, const char* name, T address, TBranch** branch, Bool_t required){
   *branch = nullptr;
@@ -652,7 +652,16 @@ void UnfoldingForestReader::Initialize(){
   }
   
   // Connect the branches to the track tree
-  
+  // These inputs are deliberately NOT read for OO/ppRef data or MC.
+  // Reset handles too: a reader may be reused with a different input file.
+  const bool requireLegacyTrackInputs = !IsRun3();
+  fTrackChi2Branch = nullptr;
+  fnTrackDegreesOfFreedomBranch = nullptr;
+  fnHitsTrackerLayerBranch = nullptr;
+  fnHitsTrackBranch = nullptr;
+  fTrackEnergyEcalBranch = nullptr;
+  fTrackEnergyHcalBranch = nullptr;
+
   fTrackTree->SetBranchStatus("*",0);
   
   // We need to read the forest to vectors for MiniAODs and to arrays for AODs
@@ -668,11 +677,13 @@ void UnfoldingForestReader::Initialize(){
     BindForestBranch(fTrackTree, "trkDzErrFirstVtx", &fTrackVertexDistanceZErrorVector, &fTrackVertexDistanceZErrorBranch, IsRun3());
     BindForestBranch(fTrackTree, "trkDxyFirstVtx", &fTrackVertexDistanceXYVector, &fTrackVertexDistanceXYBranch, IsRun3());
     BindForestBranch(fTrackTree, "trkDxyErrFirstVtx", &fTrackVertexDistanceXYErrorVector, &fTrackVertexDistanceXYErrorBranch, IsRun3());
-    BindForestBranch(fTrackTree, "trkNormChi2", &fTrackNormalizedChi2Vector, &fTrackChi2Branch, false);
-    BindForestBranch(fTrackTree, "trkNLayers", &fnHitsTrackerLayerVector, &fnHitsTrackerLayerBranch, false);
-    BindForestBranch(fTrackTree, "trkNHits", &fnHitsTrackVector, &fnHitsTrackBranch, false);
-    BindForestBranch(fTrackTree, "pfEcal", &fTrackEnergyEcalVector, &fTrackEnergyEcalBranch, false);
-    BindForestBranch(fTrackTree, "pfHcal", &fTrackEnergyHcalVector, &fTrackEnergyHcalBranch, false);
+    if(requireLegacyTrackInputs){
+      BindForestBranch(fTrackTree, "trkNormChi2", &fTrackNormalizedChi2Vector, &fTrackChi2Branch, false);
+      BindForestBranch(fTrackTree, "trkNLayers", &fnHitsTrackerLayerVector, &fnHitsTrackerLayerBranch, false);
+      BindForestBranch(fTrackTree, "trkNHits", &fnHitsTrackVector, &fnHitsTrackBranch, false);
+      BindForestBranch(fTrackTree, "pfEcal", &fTrackEnergyEcalVector, &fTrackEnergyEcalBranch, false);
+      BindForestBranch(fTrackTree, "pfHcal", &fTrackEnergyHcalVector, &fTrackEnergyHcalBranch, false);
+    }
     BindForestBranch(fTrackTree, "trkCharge", &fTrackChargeVector, &fTrackChargeBranch, IsRun3());
     
   } else { // Read the tree from AOD files
@@ -687,12 +698,14 @@ void UnfoldingForestReader::Initialize(){
     BindForestBranch(fTrackTree, "trkDzError1", &fTrackVertexDistanceZErrorArray, &fTrackVertexDistanceZErrorBranch, IsRun3());
     BindForestBranch(fTrackTree, "trkDxy1", &fTrackVertexDistanceXYArray, &fTrackVertexDistanceXYBranch, IsRun3());
     BindForestBranch(fTrackTree, "trkDxyError1", &fTrackVertexDistanceXYErrorArray, &fTrackVertexDistanceXYErrorBranch, IsRun3());
-    BindForestBranch(fTrackTree, "trkChi2", &fTrackChi2Array, &fTrackChi2Branch, IsRun3());
-    BindForestBranch(fTrackTree, "trkNdof", &fnTrackDegreesOfFreedomArray, &fnTrackDegreesOfFreedomBranch, IsRun3());
-    BindForestBranch(fTrackTree, "trkNlayer", &fnHitsTrackerLayerArray, &fnHitsTrackerLayerBranch, IsRun3());
-    BindForestBranch(fTrackTree, "trkNHit", &fnHitsTrackArray, &fnHitsTrackBranch, IsRun3());
-    BindForestBranch(fTrackTree, "pfEcal", &fTrackEnergyEcalArray, &fTrackEnergyEcalBranch, false);
-    BindForestBranch(fTrackTree, "pfHcal", &fTrackEnergyHcalArray, &fTrackEnergyHcalBranch, false);
+    if(requireLegacyTrackInputs){
+      BindForestBranch(fTrackTree, "trkChi2", &fTrackChi2Array, &fTrackChi2Branch, IsRun3());
+      BindForestBranch(fTrackTree, "trkNdof", &fnTrackDegreesOfFreedomArray, &fnTrackDegreesOfFreedomBranch, IsRun3());
+      BindForestBranch(fTrackTree, "trkNlayer", &fnHitsTrackerLayerArray, &fnHitsTrackerLayerBranch, IsRun3());
+      BindForestBranch(fTrackTree, "trkNHit", &fnHitsTrackArray, &fnHitsTrackBranch, IsRun3());
+      BindForestBranch(fTrackTree, "pfEcal", &fTrackEnergyEcalArray, &fTrackEnergyEcalBranch, false);
+      BindForestBranch(fTrackTree, "pfHcal", &fTrackEnergyHcalArray, &fTrackEnergyHcalBranch, false);
+    }
     BindForestBranch(fTrackTree, "trkCharge", &fTrackChargeArray, &fTrackChargeBranch, IsRun3());
   }
   
@@ -1212,6 +1225,7 @@ Float_t UnfoldingForestReader::GetTrackVertexDistanceXYError(Int_t iTrack) const
 
 // Getter for normalized track chi2 value from reconstruction fit
 Float_t UnfoldingForestReader::GetTrackNormalizedChi2(Int_t iTrack) const{
+  if(IsRun3()) throw std::runtime_error("UnfoldingForestReader: trkNormChi2 is unavailable (disabled for Run-3)");
   if(fIsMiniAOD && !fTrackChi2Branch) throw std::runtime_error("UnfoldingForestReader: trkNormChi2 is unavailable");
   if(fIsMiniAOD) return fTrackNormalizedChi2Vector->at(iTrack);
   return GetTrackChi2(iTrack) / (1.0*GetNTrackDegreesOfFreedom(iTrack));
@@ -1219,18 +1233,21 @@ Float_t UnfoldingForestReader::GetTrackNormalizedChi2(Int_t iTrack) const{
 
 // Getter for track chi2 value from reconstruction fit
 Float_t UnfoldingForestReader::GetTrackChi2(Int_t iTrack) const{
+  if(IsRun3()) throw std::runtime_error("UnfoldingForestReader: trkChi2 is unavailable (disabled for Run-3)");
   if(fIsMiniAOD) return -1; // Does not exist in MiniAOD forest
   return fTrackChi2Array[iTrack];
 }
 
 // Getter for number of degrees of freedom in reconstruction fit
 Int_t UnfoldingForestReader::GetNTrackDegreesOfFreedom(Int_t iTrack) const{
+  if(IsRun3()) throw std::runtime_error("UnfoldingForestReader: trkNdof is unavailable (disabled for Run-3)");
   if(fIsMiniAOD) return -1; // Does not exist in MiniAOD forest
   return fnTrackDegreesOfFreedomArray[iTrack];
 }
 
 // Getter for number of hits in tracker layers
 Int_t UnfoldingForestReader::GetNHitsTrackerLayer(Int_t iTrack) const{
+  if(IsRun3()) throw std::runtime_error("UnfoldingForestReader: trkNLayers is unavailable (disabled for Run-3)");
   if(fIsMiniAOD && !fnHitsTrackerLayerBranch) throw std::runtime_error("UnfoldingForestReader: trkNLayers is unavailable");
   if(fIsMiniAOD) return fnHitsTrackerLayerVector->at(iTrack);
   return fnHitsTrackerLayerArray[iTrack];
@@ -1238,6 +1255,7 @@ Int_t UnfoldingForestReader::GetNHitsTrackerLayer(Int_t iTrack) const{
 
 // Getter for number of hits for the track
 Int_t UnfoldingForestReader::GetNHitsTrack(Int_t iTrack) const{
+  if(IsRun3()) throw std::runtime_error("UnfoldingForestReader: trkNHits is unavailable (disabled for Run-3)");
   if(fIsMiniAOD && !fnHitsTrackBranch) throw std::runtime_error("UnfoldingForestReader: trkNHits is unavailable");
   if(fIsMiniAOD) return fnHitsTrackVector->at(iTrack);
   return fnHitsTrackArray[iTrack];
@@ -1245,6 +1263,7 @@ Int_t UnfoldingForestReader::GetNHitsTrack(Int_t iTrack) const{
 
 // Getter for track energy in ECal
 Float_t UnfoldingForestReader::GetTrackEnergyEcal(Int_t iTrack) const{
+  if(IsRun3()) throw std::runtime_error("UnfoldingForestReader: pfEcal is unavailable (disabled for Run-3)");
   if(fIsMiniAOD && !fTrackEnergyEcalBranch) throw std::runtime_error("UnfoldingForestReader: pfEcal is unavailable");
   if(fIsMiniAOD) return fTrackEnergyEcalVector->at(iTrack);
   return fTrackEnergyEcalArray[iTrack];
@@ -1252,6 +1271,7 @@ Float_t UnfoldingForestReader::GetTrackEnergyEcal(Int_t iTrack) const{
 
 // Getter for track energy in HCal
 Float_t UnfoldingForestReader::GetTrackEnergyHcal(Int_t iTrack) const{
+  if(IsRun3()) throw std::runtime_error("UnfoldingForestReader: pfHcal is unavailable (disabled for Run-3)");
   if(fIsMiniAOD && !fTrackEnergyHcalBranch) throw std::runtime_error("UnfoldingForestReader: pfHcal is unavailable");
   if(fIsMiniAOD) return fTrackEnergyHcalVector->at(iTrack);
   return fTrackEnergyHcalArray[iTrack];

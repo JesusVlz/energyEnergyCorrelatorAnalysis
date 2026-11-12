@@ -17,7 +17,7 @@ g++ $(root-config --cflags) validation/run3Response/validateUnfoldingForestReade
 // Kept available when this source is included with EEC_READER_FIXTURES_ONLY, so
 // analysis selection tests can reuse exactly the same small input forest.
 void WriteRun3ReaderFixture(const std::string& path, int dataType, int jetType = 1,
-                           const std::string& issue = "", bool aod = false){
+                           const std::string& issue = "", bool aod = false, bool legacyTrackFields = false){
   const bool isMC = dataType == 2 || dataType == 3 || dataType == 10 || dataType == 12;
   const bool heavyIon = dataType == 1 || dataType == 3 || dataType == 9 || dataType == 10;
   const bool run3 = dataType >= 9;
@@ -100,12 +100,14 @@ void WriteRun3ReaderFixture(const std::string& path, int dataType, int jetType =
     tracks.Branch("trkDzError1", arrayDzError, "trkDzError1[nTrk]/F");
     tracks.Branch("trkDxy1", arrayDxy, "trkDxy1[nTrk]/F");
     tracks.Branch("trkDxyError1", arrayDxyError, "trkDxyError1[nTrk]/F");
-    tracks.Branch("trkChi2", arrayChi2, "trkChi2[nTrk]/F");
-    tracks.Branch("trkNdof", arrayNdof, "trkNdof[nTrk]/b");
-    tracks.Branch("trkNlayer", arrayLayers, "trkNlayer[nTrk]/b");
-    tracks.Branch("trkNHit", arrayHits, "trkNHit[nTrk]/b");
-    tracks.Branch("pfEcal", arrayEcal, "pfEcal[nTrk]/F");
-    tracks.Branch("pfHcal", arrayHcal, "pfHcal[nTrk]/F");
+    if(!run3 || legacyTrackFields){
+      tracks.Branch("trkChi2", arrayChi2, "trkChi2[nTrk]/F");
+      tracks.Branch("trkNdof", arrayNdof, "trkNdof[nTrk]/b");
+      tracks.Branch("trkNlayer", arrayLayers, "trkNlayer[nTrk]/b");
+      tracks.Branch("trkNHit", arrayHits, "trkNHit[nTrk]/b");
+      tracks.Branch("pfEcal", arrayEcal, "pfEcal[nTrk]/F");
+      tracks.Branch("pfHcal", arrayHcal, "pfHcal[nTrk]/F");
+    }
     tracks.Branch("trkCharge", arrayCharge, "trkCharge[nTrk]/I");
   } else {
     // Deliberately omit nTrk in Run-3 fixtures: the vectors define their size.
@@ -120,7 +122,7 @@ void WriteRun3ReaderFixture(const std::string& path, int dataType, int jetType =
     tracks.Branch("trkDxyFirstVtx", &dxy);
     tracks.Branch("trkDxyErrFirstVtx", &dxyError);
     if(issue != "trkCharge") tracks.Branch("trkCharge", &charge);
-    if(!run3){
+    if(!run3 || legacyTrackFields){
       tracks.Branch("trkNormChi2", &chi2);
       tracks.Branch("trkNLayers", &layers);
       tracks.Branch("trkNHits", &hits);
@@ -198,7 +200,7 @@ void ValidateFixture(const std::string& path, int dataType, int jetType, int axi
   Check(reader->GetTrackHighPurity(0), "track quality");
   Check(reader->GetTrackCharge(1) == -1, "negative reconstructed charge");
   Check(Near(reader->GetTrackVertexDistanceZ(0), 0.01), "track vertex association");
-  if(dataType >= 9 && !aod){
+  if(dataType >= 9){
     ExpectFailure([&]{ reader->GetTrackEnergyEcal(0); }, "pfEcal is unavailable");
     ExpectFailure([&]{ reader->GetTrackNormalizedChi2(0); }, "trkNormChi2 is unavailable");
   } else {
@@ -245,6 +247,12 @@ int main(int argc, char** argv){
       const std::string path = directory + "/type" + std::to_string(dataType) + ".root";
       WriteRun3ReaderFixture(path, dataType);
       ValidateFixture(path, dataType, 1, 1);
+    }
+    for(int dataType : {9, 10, 11, 12}) for(bool aod : {false, true}) for(bool fields : {false, true}){
+      const std::string path = directory + "/slimPolicy" + std::to_string(dataType) +
+        (aod ? "AOD" : "MiniAOD") + (fields ? "Present" : "Absent") + ".root";
+      WriteRun3ReaderFixture(path, dataType, 1, "", aod, fields);
+      ValidateFixture(path, dataType, 1, 1, aod);
     }
     const std::string legacyAOD = directory + "/legacyAOD.root";
     WriteRun3ReaderFixture(legacyAOD, 2, 1, "", true);

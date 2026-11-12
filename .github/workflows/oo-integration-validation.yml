@@ -1,12 +1,13 @@
 name: OO integration validation
 on:
   push:
-    branches: [oo-integration]
+    branches: [main, oo-integration]
     paths:
       - 'src/**'
       - 'plotting/**'
       - 'validation/**'
       - 'card*.input'
+      - 'cards/**'
       - 'crab/**'
       - 'Makefile'
       - 'eecAnalysis.cxx'
@@ -22,7 +23,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   combined-software:
-    if: github.ref == 'refs/heads/oo-integration'
+    if: github.ref == 'refs/heads/oo-integration' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
@@ -110,10 +111,19 @@ jobs:
           import pathlib, ROOT
           available = ROOT.gSystem.Load('libRooUnfold') >= 0
           message = ('RooUnfold library available; inspect runtime-test outcome in unfolding-tests.log.' if available else
-                     'NOT_RUN: real RooUnfold regression skipped because libRooUnfold is unavailable. Require EEC_REQUIRE_ROOT_TESTS=1 on the analysis host before main promotion.')
+                     'NOT_RUN: real RooUnfold regression skipped because libRooUnfold is unavailable. Require EEC_REQUIRE_ROOT_TESTS=1 on the analysis host before physics qualification.')
           pathlib.Path('/tmp/oo-integration/roounfold-runtime-status.txt').write_text(message+'\n')
           print(message)
           PY
+      - name: Slim-track policy, catalog and MC-weight macro
+        if: ${{ !cancelled() && steps.analyzer.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python validation/run3Integration/checkSlimTrackCards.py
+          python cards/build_r4_catalog.py --check
+          g++ $(root-config --cflags) -fno-access-control -Isrc validation/run3Integration/testSlimTrackPolicy.cxx src/ForestReader.o src/HighForestReader.o src/UnfoldingForestReader.o $(root-config --libs) -o /tmp/oo-integration/slim_tracks
+          /tmp/oo-integration/slim_tracks /tmp/oo-integration/slim-fixtures
+          (cd plotting; root -l -b -q 'testDeriveMonteCarloWeightsRun3.C()')
       - name: Record final source status
         if: ${{ !cancelled() }}
         run: |

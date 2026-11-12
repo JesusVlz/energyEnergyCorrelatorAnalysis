@@ -31,10 +31,6 @@ MinTrackPtCut 2
 MaxTrackPtCut 500
 MaxTrackPtRelativeError 0.1 # Maximum relative error allowed for track pT. 0.1 = Nominal, 0.1 = Loose, 0.05 = Tight
 VertexMaxDistance 3         # Position with respect to PV resolution. 3 = Nominal, 5 = Loose, 2 = Tight
-CalorimeterSignalLimitPt 20 # Require signal in calorimeters for all track above this pT
-HighPtEtFraction 0.5        # For high pT tracks, require Et to be at least this fraction of pT
-Chi2QualityCut 100000       # Maximum accepted chi2/(nDof*nHits) for tracks
-MinimumTrackHits 0          # Require this many hits for each track
 SubeventCut 2
 TrackEfficiencyVariation 0.0 # For tracking uncertainties, vary the efficiency correction by 2.2%
 JetPtWeight 0

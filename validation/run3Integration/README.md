@@ -1,8 +1,9 @@
 # Combined Run-3 integration testing
 
-Updated: 2026-11-11. Target branch: `oo-integration`, NOT `main`.
-This is a staging branch for combined software and bounded MC tests, not a
-qualified correction payload, production campaign, or final physics result.
+Updated: 2026-11-11. Main promotion is explicitly authorized by the user.
+See [OverallCoordination.md](OverallCoordination.md) for the consolidated scope.
+This is a software integration, not a qualified correction payload, production
+campaign, or final physics result.
 
 ## Integrated revisions
 
@@ -20,7 +21,7 @@ in main through #1 and is not applied twice. Merge commits preserve ancestry.
 
 ## Review findings and retained behavior
 
-- Combined HighForestReader retains physical reconstructed charge, optional
+- Combined HighForestReader retains physical reconstructed charge, disabled
   PbPb-only fields for slim Run-3 inputs, and exact PF multiplicity handling.
   Missing required charge and unresolved Jet ID multiplicities remain errors.
 - R4 JEC, detector-coordinate lookup, additive trackMax/rawPt and Jet ID,
@@ -47,7 +48,7 @@ in main through #1 and is not applied twice. Merge commits preserve ancestry.
 ## Read-only branch CI
 
 `.github/workflows/oo-integration-validation.yml` runs only for oo-integration
-pushes (or an explicit dispatch). Its token has contents:read, checkout does not
+and main pushes (or an explicit dispatch). Its token has contents:read, checkout does not
 persist credentials, and it cannot commit, push, merge or submit analysis jobs.
 It builds the analyzer and drawing library and runs tracking/table/card, jet,
 PF-count, unfolding numerical, and closure-macro compilation checks.
@@ -80,7 +81,7 @@ Use unused worktree/output paths. The EEC_REQUIRE_ROOT_TESTS command is required
 on the analysis host and must fail rather than skip when RooUnfold is unavailable.
 Consult the tracking, unfolding and plotting READMEs for actual input contracts.
 
-## Before promotion to main
+## Physics qualification remaining after software promotion
 
 1. Combined analyzer/drawing builds and software regressions pass. Verify slim
    and legacy forest schemas, real charge, PF counts and ROOT chain transitions.
@@ -96,6 +97,6 @@ Consult the tracking, unfolding and plotting READMEs for actual input contracts.
    run checkRun3Closure.C on its documented local fixture.
 5. Record actual commands, input/card/payload hashes, outputs and failures.
    Distinguish software PASS, runtime PASS and physics closure. Only then
-   consider an explicitly authorized integration PR into main.
+   qualify the corrections/responses for the measured result.
 
 No real MC production or closure is claimed by this integration record.

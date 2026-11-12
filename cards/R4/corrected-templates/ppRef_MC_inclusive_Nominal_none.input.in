@@ -1,0 +1,76 @@
+# run3-r4-cards-v2-slim-tracks: Candidate tracking+pair-corrected spectrum for downstream unfolding/subtraction.
+# Preparation, not a production submission or a physics validation.
+# Run from repository root; all payload paths are repository-relative.
+# Report 40-80,80-120,120-160 GeV; both n=1,2; strict pair pT>2.
+# Stored activity is not an event cut or percentile certification.
+# Require system/selection-compatible independently qualified map over ALL filled jets and tracks.
+# A map limited to 40<=pTjet<160 cannot serve the wider migration-support spectrum here.
+# Do not narrow response guards merely to fit the map. Same-source pair topology is unchanged.
+# TEMPLATE ONLY: resolve PAIR_PAYLOAD before use.
+DataType 12
+McCorrelationType 0
+MatchJets 0
+TriggerSelection 0
+FilledHistograms 31
+JetType 1
+JetAxis 1
+JetEtaCut 1.6
+MinJetPtCut 40
+MaxJetPtCut 5020
+CutBadPhi 0
+CutWithEtaCM 0
+MinMaxTrackPtFraction 0.01
+MaxMaxTrackPtFraction 0.98
+JetUncertainty 0
+Run3JetID 1
+Run3JetIDTable MiniPOG20261108
+Run3JetQA 1
+Run3JEC 1
+Run3UsePpL1FastJet 0
+ApplyJetVeto 1
+JetVetoMapFile jetVetoMaps/pp2024/Summer24Prompt24_RunBCDEFGHI.root
+JetVetoMapHistogram jetvetomap_all
+JetVetoPtConvention stored
+JetVetoInputMinPt 15
+Run3TrackSelection Nominal
+TrackEtaCut 2.4
+MinTrackPtCut 0.5
+MaxTrackPtCut 500
+MaxTrackPtRelativeError 0.1
+VertexMaxDistance 3
+SubeventCut 2
+TrackEfficiencyVariation 0
+JetPtWeight 0
+DisableTrackPairEfficiencyCorrection 0
+ZVertexCut 15
+LowPtHatCut -15
+HighPtHatCut 5020
+MultiplicityMode 0
+JetRadius 0.4
+WeightExponent 1 2
+SmearDeltaR 0
+SmearEnergyWeight 0
+JetPtBinEdgesEEC 5 10 20 40 80 120 160 200 300 500 5020
+TrackPtBinEdgesEEC 0.5 1 1.5 2 2.5 3 3.5 4 300
+SkipCovarianceMatrix 0
+MinJetPtUnfoldingReco 40
+MinJetPtUnfoldingTruth 5
+CentralityBinEdges -1 100
+TrackPtBinEdges 0.7 1 2 3 4 8 12 300
+PtHatBinEdges 0 30 50 80 120 170 220 280 370 460
+BackgroundMethods 0
+MegaSkimMixing 0
+EventMatchForMixing 0
+BinnedMixing 0
+VzMixingBins -0.5 1
+HiBinMixingBins -0.5 1
+HFEnergyMixingBins 0 1
+MultiplicityMixingBins -0.5 1
+HFEnergyShift 0
+DebugLevel 0
+MaxEventsPerFile 0
+ChannelRadiusCode 4
+MinPairTrackPt 2
+FirstUnfoldedJetPtBin 3
+LastUnfoldedJetPtBin 5
+Run3TrackPairCorrectionFile @PAIR_PAYLOAD@

@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "delta_r_region": [
+    0.008,
+    0.39
+  ],
+  "channels": [
+    {
+      "id": "OO_integrated_n1",
+      "system": "OO",
+      "activity": [
+        -1,
+        100
+      ],
+      "power": 1,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@OO_INTEGRATED_N1_TRAIN@",
+      "validation": "@OO_INTEGRATED_N1_VALIDATION@",
+      "split_evidence": "@OO_INTEGRATED_N1_SPLIT_EVIDENCE@",
+      "train_reco": "@OO_INTEGRATED_N1_TRAIN_RECO@",
+      "train_gen": "@OO_INTEGRATED_N1_TRAIN_GEN@",
+      "validation_reco": "@OO_INTEGRATED_N1_VALIDATION_RECO@",
+      "validation_gen": "@OO_INTEGRATED_N1_VALIDATION_GEN@"
+    },
+    {
+      "id": "OO_integrated_n2",
+      "system": "OO",
+      "activity": [
+        -1,
+        100
+      ],
+      "power": 2,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@OO_INTEGRATED_N2_TRAIN@",
+      "validation": "@OO_INTEGRATED_N2_VALIDATION@",
+      "split_evidence": "@OO_INTEGRATED_N2_SPLIT_EVIDENCE@",
+      "train_reco": "@OO_INTEGRATED_N2_TRAIN_RECO@",
+      "train_gen": "@OO_INTEGRATED_N2_TRAIN_GEN@",
+      "validation_reco": "@OO_INTEGRATED_N2_VALIDATION_RECO@",
+      "validation_gen": "@OO_INTEGRATED_N2_VALIDATION_GEN@"
+    },
+    {
+      "id": "OO_C0_30_n1",
+      "system": "OO",
+      "activity": [
+        0,
+        30
+      ],
+      "power": 1,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@OO_C0_30_N1_TRAIN@",
+      "validation": "@OO_C0_30_N1_VALIDATION@",
+      "split_evidence": "@OO_C0_30_N1_SPLIT_EVIDENCE@",
+      "train_reco": "@OO_C0_30_N1_TRAIN_RECO@",
+      "train_gen": "@OO_C0_30_N1_TRAIN_GEN@",
+      "validation_reco": "@OO_C0_30_N1_VALIDATION_RECO@",
+      "validation_gen": "@OO_C0_30_N1_VALIDATION_GEN@"
+    },
+    {
+      "id": "OO_C0_30_n2",
+      "system": "OO",
+      "activity": [
+        0,
+        30
+      ],
+      "power": 2,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@OO_C0_30_N2_TRAIN@",
+      "validation": "@OO_C0_30_N2_VALIDATION@",
+      "split_evidence": "@OO_C0_30_N2_SPLIT_EVIDENCE@",
+      "train_reco": "@OO_C0_30_N2_TRAIN_RECO@",
+      "train_gen": "@OO_C0_30_N2_TRAIN_GEN@",
+      "validation_reco": "@OO_C0_30_N2_VALIDATION_RECO@",
+      "validation_gen": "@OO_C0_30_N2_VALIDATION_GEN@"
+    },
+    {
+      "id": "OO_C30_50_n1",
+      "system": "OO",
+      "activity": [
+        30,
+        50
+      ],
+      "power": 1,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@OO_C30_50_N1_TRAIN@",
+      "validation": "@OO_C30_50_N1_VALIDATION@",
+      "split_evidence": "@OO_C30_50_N1_SPLIT_EVIDENCE@",
+      "train_reco": "@OO_C30_50_N1_TRAIN_RECO@",
+      "train_gen": "@OO_C30_50_N1_TRAIN_GEN@",
+      "validation_reco": "@OO_C30_50_N1_VALIDATION_RECO@",
+      "validation_gen": "@OO_C30_50_N1_VALIDATION_GEN@"
+    },
+    {
+      "id": "OO_C30_50_n2",
+      "system": "OO",
+      "activity": [
+        30,
+        50
+      ],
+      "power": 2,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@OO_C30_50_N2_TRAIN@",
+      "validation": "@OO_C30_50_N2_VALIDATION@",
+      "split_evidence": "@OO_C30_50_N2_SPLIT_EVIDENCE@",
+      "train_reco": "@OO_C30_50_N2_TRAIN_RECO@",
+      "train_gen": "@OO_C30_50_N2_TRAIN_GEN@",
+      "validation_reco": "@OO_C30_50_N2_VALIDATION_RECO@",
+      "validation_gen": "@OO_C30_50_N2_VALIDATION_GEN@"
+    },
+    {
+      "id": "OO_C50_90_n1",
+      "system": "OO",
+      "activity": [
+        50,
+        90
+      ],
+      "power": 1,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@OO_C50_90_N1_TRAIN@",
+      "validation": "@OO_C50_90_N1_VALIDATION@",
+      "split_evidence": "@OO_C50_90_N1_SPLIT_EVIDENCE@",
+      "train_reco": "@OO_C50_90_N1_TRAIN_RECO@",
+      "train_gen": "@OO_C50_90_N1_TRAIN_GEN@",
+      "validation_reco": "@OO_C50_90_N1_VALIDATION_RECO@",
+      "validation_gen": "@OO_C50_90_N1_VALIDATION_GEN@"
+    },
+    {
+      "id": "OO_C50_90_n2",
+      "system": "OO",
+      "activity": [
+        50,
+        90
+      ],
+      "power": 2,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@OO_C50_90_N2_TRAIN@",
+      "validation": "@OO_C50_90_N2_VALIDATION@",
+      "split_evidence": "@OO_C50_90_N2_SPLIT_EVIDENCE@",
+      "train_reco": "@OO_C50_90_N2_TRAIN_RECO@",
+      "train_gen": "@OO_C50_90_N2_TRAIN_GEN@",
+      "validation_reco": "@OO_C50_90_N2_VALIDATION_RECO@",
+      "validation_gen": "@OO_C50_90_N2_VALIDATION_GEN@"
+    },
+    {
+      "id": "pp_inclusive_n1",
+      "system": "pp",
+      "activity": [
+        -1,
+        100
+      ],
+      "power": 1,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@PP_INCLUSIVE_N1_TRAIN@",
+      "validation": "@PP_INCLUSIVE_N1_VALIDATION@",
+      "split_evidence": "@PP_INCLUSIVE_N1_SPLIT_EVIDENCE@",
+      "train_reco": "@PP_INCLUSIVE_N1_TRAIN_RECO@",
+      "train_gen": "@PP_INCLUSIVE_N1_TRAIN_GEN@",
+      "validation_reco": "@PP_INCLUSIVE_N1_VALIDATION_RECO@",
+      "validation_gen": "@PP_INCLUSIVE_N1_VALIDATION_GEN@"
+    },
+    {
+      "id": "pp_inclusive_n2",
+      "system": "pp",
+      "activity": [
+        -1,
+        100
+      ],
+      "power": 2,
+      "particle_pt": 2,
+      "truth_definition": "ordinary_GenGen",
+      "train": "@PP_INCLUSIVE_N2_TRAIN@",
+      "validation": "@PP_INCLUSIVE_N2_VALIDATION@",
+      "split_evidence": "@PP_INCLUSIVE_N2_SPLIT_EVIDENCE@",
+      "train_reco": "@PP_INCLUSIVE_N2_TRAIN_RECO@",
+      "train_gen": "@PP_INCLUSIVE_N2_TRAIN_GEN@",
+      "validation_reco": "@PP_INCLUSIVE_N2_VALIDATION_RECO@",
+      "validation_gen": "@PP_INCLUSIVE_N2_VALIDATION_GEN@"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "status": "NOT_ALL_SYSTEMATICS_ARE_EXECUTABLE",
+  "items": [
+    {
+      "source": "JES/JER",
+      "status": "PENDING_INTERFACE_AND_INPUTS",
+      "reason": "Analyzer explicitly rejects nonzero Run-3 JetUncertainty; applicable inputs and implementation are required."
+    },
+    {
+      "source": "jet-spectrum prior",
+      "status": "PENDING_INTERFACE_AND_INPUTS",
+      "reason": "Run-3 JetPtWeight is guarded; use justified response/pseudo-data reweighting only after implementation/validation."
+    },
+    {
+      "source": "DeltaR and momentum smearing",
+      "status": "PENDING_RESPONSE_INPUTS",
+      "reason": "SmearDeltaR/SmearEnergyWeight cannot use the old Run-2 models."
+    },
+    {
+      "source": "track efficiency",
+      "status": "TEMPLATE_INPUT_REQUIRED",
+      "reason": "Use the applicable Run-3 fractional variation; 0.024 is not adopted by this catalog."
+    },
+    {
+      "source": "track selection and residual pair maps",
+      "status": "MC_DERIVATION_REQUIRED",
+      "reason": "Nominal/Loose/Tight single-track payloads exist; each corrected result needs compatible qualified pair maps."
+    },
+    {
+      "source": "pair and response finite MC",
+      "status": "DOWNSTREAM_RESAMPLING",
+      "reason": "Reuse independent counts/ledgers; repeated identical cards do not generate independent MC statistics."
+    },
+    {
+      "source": "background method and level",
+      "status": "COMPONENTS_THEN_DOWNSTREAM",
+      "reason": "0/1/2/3/4/6/7 masks are available. Validate matching/donor reuse and post-unfolding adjustment. pp nominal remains unsubtracted."
+    },
+    {
+      "source": "HF shift",
+      "status": "OPTIONAL_NOT_NOMINAL",
+      "reason": "Keep zero with existing hiBin/vz ordinary matching or strict NH pilot. Zero alone does not certify an untransformed legacy HF-matching path."
+    },
+    {
+      "source": "iteration/prior/model/refolding",
+      "status": "UNFOLDING_STUDY",
+      "reason": "Use manifests and existing 1-20 two-direction scan; no iteration value selected here. Alternative detector MC must be supplied."
+    },
+    {
+      "source": "trigger, calibration, weights, centrality",
+      "status": "EXTERNAL_APPLICABILITY",
+      "reason": "Current base policy is retained. Validate source retention and data recommendations; no centrality recalibration or invented normalizations."
+    },
+    {
+      "source": "full-chain residual and OO/pp covariance",
+      "status": "AFTER_NOMINAL_QUALIFICATION",
+      "reason": "Apply variations to measured data too; component MC closure is not a completed measurement systematic."
+    }
+  ]
+}
