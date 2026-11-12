@@ -172,16 +172,16 @@ The explicit driver below plans 20 OO MC and 13 ppRef MC tasks. It includes
 OO integrated and split measurement, ppRef inclusive measurement, the
 RecoGen/GenReco/GenGen closure cards, 5 GeV truth-guard response, jet and
 track-pair QA, and Nominal/Loose/Tight RecoReco/RecoGen pair preparation.
-The OO RecoReco measurement uses `BackgroundMethods 3` for both same-event
-cones. The ppRef MC measurement uses `BackgroundMethods 0`: no mixed cone or
-other background method is requested for ppRef MC. The existing
-`mixingFileList/OO2025_HIJING_MC_pool_pilot_A.txt` references the pure-HIJING
-donors, but its header requires an event-level partition and campaign-wide
-reservation. The ordinary RecoReco `allCones` card cannot enforce that contract;
-this CRAB driver rejects MC mixed-cone cards. The separate strict OO GenGen
-mixed+perpendicular closure workflow (`BackgroundMethods 6`) uses the fixed
-100,000-event HIJING donor prefix with `OOClosurePartitionPolicy 1` and writes
-partner/exposure ledgers; see `condor/README.md` for its submitted campaigns.
+The OO RecoReco integrated and split measurement cards use
+`BackgroundMethods 7` and
+`mixingFileList/OO2025_HIJING_MC_pool_pilot_A.txt`. On CRAB workers the four
+EOS mount paths in that packaged list are converted to `root://eosuser.cern.ch`
+PFNs; the tracked list itself is unchanged. The ppRef MC measurement uses
+`BackgroundMethods 0`, with no mixed cone. This ordinary OO RecoReco mixer
+reads whole HIJING files with the legacy matching path. It does not apply the
+event-level donor partition or campaign-wide reservations described in the
+pool list header. Treat its mixed component as a study; the separate strict
+OO GenGen closure with `OOClosurePartitionPolicy 1` retains those ledgers.
 The pair-preparation outputs do not turn on a residual pair correction.
 
 ```bash
