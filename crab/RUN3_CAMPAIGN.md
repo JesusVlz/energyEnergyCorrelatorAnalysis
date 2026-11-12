@@ -172,10 +172,11 @@ The explicit driver below plans 20 OO MC and 13 ppRef MC tasks. It includes
 OO integrated and split measurement, ppRef inclusive measurement, the
 RecoGen/GenReco/GenGen closure cards, 5 GeV truth-guard response, jet and
 track-pair QA, and Nominal/Loose/Tight RecoReco/RecoGen pair preparation.
-The RecoReco measurement uses `BackgroundMethods 3` to fill both same-event
-cones. There is no qualified independent MC mixing pool in this campaign, so
-mixed-event MC is not silently substituted with data ZeroBias donors. The
-pair-preparation outputs do not turn on a residual pair correction.
+The OO RecoReco measurement uses `BackgroundMethods 3` for both same-event
+cones. The ppRef MC measurement uses `BackgroundMethods 0`: no mixed cone or
+other background method is requested for ppRef MC. An independent OO MC donor
+pool is not configured, so mixed-event MC is not submitted. The pair-preparation
+outputs do not turn on a residual pair correction.
 
 ```bash
 python3 crab/buildEOSMCLists.py
