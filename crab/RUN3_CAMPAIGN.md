@@ -48,11 +48,15 @@ rebuild the archive after any code or calibration change.
 
 The default data cards calculate the same-event reflected and perpendicular
 cones together in one pass, without a donor pool. For mixed cones, materialize
-an `allCones.input.in` card with an independently validated donor list. Do not
-submit the `.input.in` template. The current OO 35-file pool is a pilot MB
-sample; the ppRef pilot donor pool consists of HardProbes-filtered forests and
-does not establish an unbiased ZeroBias reference. The config validates
-disjoint signal and pool files, but event-level independence must be checked
+an `allCones.input.in` card with an independently checked donor list. Do not
+submit the `.input.in` template. The OO 35-file pilot pool is MB. The 35
+HardProbes files in `ppRef2024_pool_pilot.txt` remain reserved out of the
+versioned signal partitions; they are not the new ppRef mixing input. The
+owner-selected five ZeroBiasPlusForward1 forests in
+`ppRef2024_ZeroBiasPlusForward1_Nebraska_v2.txt` are a separate Nebraska
+donor candidate. CRAB jobs still run at Vanderbilt and read those donors
+remotely. Only mixed-cone cards check their selected donor list against the
+signal files; event-level independence and tree contents must be checked
 separately. Retaining one data file per CRAB job isolates empty input forests;
 each task stays at or below the CRAB 10,000-job limit. Do not run every
 background mask across the full data sample.
@@ -72,10 +76,26 @@ python3 crab/submitRun3.py oo-data --parts 1 \
   --card cards/R4/materialized/OO_Data_split_allCones.input
 ```
 
-The analogous ppRef pool must first pass the donor provenance checks stated
-above. Do not substitute the HardProbes pilot list as a certified unbiased
-ZeroBias donor sample. The card and its actual donor list must be included
-when rebuilding the worker tarball.
+To prepare the ppRef mixed-cone pilot from the five supplied ZeroBias files:
+
+```bash
+printf '{"MIXING_LIST":"mixingFileList/ppRef2024_ZeroBiasPlusForward1_Nebraska_v2.txt"}\n' > cards/R4/materialized/ppref-zerobias-pool.json
+python3 cards/build_r4_catalog.py materialize \
+  cards/R4/measurement/ppRef_Data_inclusive_allCones.input.in \
+  --values cards/R4/materialized/ppref-zerobias-pool.json \
+  --output cards/R4/materialized/ppRef_Data_inclusive_allCones_ZeroBiasPlusForward1.input
+python3 crab/makeOOAnalysisTar.py
+python3 crab/submitRun3.py ppref-data --pilot 10 \
+  --card cards/R4/materialized/ppRef_Data_inclusive_allCones_ZeroBiasPlusForward1.input
+```
+
+The CRAB checks accept a nonempty donor list of any size and reject duplicate
+or file-level overlapping donors. Check that all five Nebraska files open and
+contain the needed trees and branches before adding `--submit`. The worker
+archive must be rebuilt after adding or changing a donor list. If the local
+`ppRef2024_pool_pilot.txt` was overwritten with the five new paths, compare
+it with the separately tracked ZeroBias list before restoring the original
+35-file reservation required by `splitPPRefForestFiles.py`.
 
 ```bash
 python3 crab/submitRun3.py oo-data --pilot 10

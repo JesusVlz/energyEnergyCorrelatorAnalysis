@@ -472,7 +472,12 @@ def materialize(args):
                 raise FileNotFoundError(path)
             if key == 'MIXING_LIST' and not any(x.split('#',1)[0].strip() for x in path.read_text().splitlines()):
                 raise ValueError('Mixing list contains no inputs')
-            value = str(path.resolve())
+            resolved = path.resolve()
+            # The CRAB worker unpacks repository payloads under its own work
+            # directory; an absolute lxplus path would be invalid there.
+            value = (resolved.relative_to(REPO).as_posix()
+                     if key == 'MIXING_LIST' and resolved.is_relative_to(REPO)
+                     else str(resolved))
         if key == 'TRACKING_RELATIVE_VARIATION' and not 0 < float(value) < 1:
             raise ValueError('Tracking variation must be a positive fractional value below one')
         text = text.replace('@' + key + '@', value)
@@ -514,7 +519,8 @@ def main():
             p.parent.mkdir(parents=True, exist_ok=True); p.write_text(text)
         elif not p.is_file() or p.read_text() != text:
             raise ValueError('Missing/stale catalog file: ' + name)
-    extra = set(str(p.relative_to(REPO)) for p in (REPO/'cards/R4').rglob('*') if p.is_file()) - set(expected)
+    extra = set(str(p.relative_to(REPO)) for p in (REPO/'cards/R4').rglob('*')
+                if p.is_file() and p.relative_to(REPO/'cards/R4').parts[0] != 'materialized') - set(expected)
     if extra:
         raise ValueError('Unexpected files in generated catalog: ' + str(sorted(extra)))
     inventory = json.loads(expected['cards/R4/catalog.json'])

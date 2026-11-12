@@ -110,12 +110,6 @@ def files_for(sample, part, chunk, values):
         # prefixes Vanderbilt's XRootD endpoint for the actual read, even
         # when an older versioned list contains a different redirector PFN.
         lines = normalized
-        pool = REPO / 'mixingFileList' / ('OO2025_MB_pool_pilot.txt' if sample == 'oo-data'
-                                          else 'ppRef2024_pool_pilot.txt')
-        donors = read_list(pool)
-        donor_lfns = {lfn(s) for s in donors}
-        if len(donors) != 35 or len(donor_lfns) != 35 or set(normalized) & donor_lfns:
-            raise ValueError('Mixing pool must contain 35 distinct files, disjoint from signal')
         if int(values.get('BackgroundMethods', '0')) & 4:
             selected = values.get('MixingFileList')
             selected_path = (REPO / selected).resolve() if selected else None

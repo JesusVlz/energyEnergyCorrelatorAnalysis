@@ -1,0 +1,7 @@
+# Owner-selected ppRef 2024 ZeroBiasPlusForward1 data donors at Nebraska.
+# Five distinct files; inspect event content and signal overlap before production mixing.
+root://xrootd-local.unl.edu//store/user/jvelazqu/HiForest/ppref2024/DATA/PPRefZeroBiasPlusForward1/HiForest_ppref2024_DATA_PPRefZeroBiasPlusForward1_Nebraska_v2/261110_170936/0001/HiForestMiniAOD_1999.root
+root://xrootd-local.unl.edu//store/user/jvelazqu/HiForest/ppref2024/DATA/PPRefZeroBiasPlusForward1/HiForest_ppref2024_DATA_PPRefZeroBiasPlusForward1_Nebraska_v2/261110_170936/0001/HiForestMiniAOD_1666.root
+root://xrootd-local.unl.edu//store/user/jvelazqu/HiForest/ppref2024/DATA/PPRefZeroBiasPlusForward1/HiForest_ppref2024_DATA_PPRefZeroBiasPlusForward1_Nebraska_v2/261110_170936/0002/HiForestMiniAOD_2999.root
+root://xrootd-local.unl.edu//store/user/jvelazqu/HiForest/ppref2024/DATA/PPRefZeroBiasPlusForward1/HiForest_ppref2024_DATA_PPRefZeroBiasPlusForward1_Nebraska_v2/261110_170936/0002/HiForestMiniAOD_2496.root
+root://xrootd-local.unl.edu//store/user/jvelazqu/HiForest/ppref2024/DATA/PPRefZeroBiasPlusForward1/HiForest_ppref2024_DATA_PPRefZeroBiasPlusForward1_Nebraska_v2/261110_170936/0005/HiForestMiniAOD_5999.root
