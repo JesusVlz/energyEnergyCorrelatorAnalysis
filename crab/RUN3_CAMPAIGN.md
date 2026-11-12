@@ -177,7 +177,8 @@ The OO RecoReco integrated and split measurement cards use
 `mixingFileList/OO2025_HIJING_MC_pool_pilot_A.txt`. On CRAB workers the four
 EOS mount paths in that packaged list are converted to `root://eosuser.cern.ch`
 PFNs; the tracked list itself is unchanged. The ppRef MC measurement uses
-`BackgroundMethods 0`, with no mixed cone. This ordinary OO RecoReco mixer
+`BackgroundMethods 3` for reflected and perpendicular cones, with no mixed
+cone or donor list. This ordinary OO RecoReco mixer
 reads whole HIJING files with the legacy matching path. It does not apply the
 event-level donor partition or campaign-wide reservations described in the
 pool list header. Treat its mixed component as a study; the separate strict
