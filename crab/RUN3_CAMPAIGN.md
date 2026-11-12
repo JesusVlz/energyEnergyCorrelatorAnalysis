@@ -157,6 +157,30 @@ are available in the same R4 catalog. R8 and input-dependent systematic
 templates remain outside this automatic campaign pending their inputs and
 calibration.
 
+## Complete configured MC set
+
+The explicit driver below plans 20 OO MC and 13 ppRef MC tasks. It includes
+OO integrated and split measurement, ppRef inclusive measurement, the
+RecoGen/GenReco/GenGen closure cards, 5 GeV truth-guard response, jet and
+track-pair QA, and Nominal/Loose/Tight RecoReco/RecoGen pair preparation.
+The RecoReco measurement uses `BackgroundMethods 3` to fill both same-event
+cones. There is no qualified independent MC mixing pool in this campaign, so
+mixed-event MC is not silently substituted with data ZeroBias donors. The
+pair-preparation outputs do not turn on a residual pair correction.
+
+```bash
+python3 crab/buildEOSMCLists.py
+python3 crab/submitRun3MCComplete.py
+python3 crab/submitRun3MCComplete.py --submit
+```
+
+Run from the repository root with `cmsenv`, a valid CMS proxy, and a rebuilt
+`crab/eecOO.tar.gz`. Submission stops at the first CRAB failure. To resume,
+use `--sample` and `--stage` to select pending groups, or submit a pending
+card individually with `crab/submitRun3.py --card`; existing CRAB projects
+are not overwritten. The same full MC forests are processed once per selected
+analysis card, so review the printed task count and CRAB quotas.
+
 For each card, submit a small pilot with `--pilot 10` (or another 1..100
 files). It writes a private list under `crab/inputLists/` with a distinct
 `pilotN` task name. Add `--submit` only after reviewing the printed plan and the
