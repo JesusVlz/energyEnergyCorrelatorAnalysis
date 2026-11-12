@@ -76,6 +76,29 @@ python3 crab/submitRun3.py oo-data --parts 1 \
   --card cards/R4/materialized/OO_Data_split_allCones.input
 ```
 
+The ready OO all-cone card binds the existing 35-file MB pool reserved by
+`splitOOForestFiles.py`, at
+`cards/R4/materialized/OO_Data_split_allCones_MB35.input`. The original ten
+round-robin parts and their two chunks remain unchanged: 20 tasks, at most
+10,000 signal files per task, one file per job. The ppRef four-part, one-chunk
+partition also remains unchanged. For both complete data campaigns, run the
+plan commands first and then their submission counterparts:
+
+```bash
+python3 crab/submitRun3.py oo-data \
+  --card cards/R4/materialized/OO_Data_split_allCones_MB35.input
+python3 crab/submitRun3.py ppref-data \
+  --card cards/R4/materialized/ppRef_Data_inclusive_allCones_NebraskaZB_v2.input
+python3 crab/submitRun3.py oo-data \
+  --card cards/R4/materialized/OO_Data_split_allCones_MB35.input --submit
+python3 crab/submitRun3.py ppref-data \
+  --card cards/R4/materialized/ppRef_Data_inclusive_allCones_NebraskaZB_v2.input --submit
+```
+
+The OO MB file list was selected for the pilot pool. Check its forest content
+and per-job runtime with the pilot before interpreting full mixed-cone output.
+The file-level overlap checks run for every part and chunk at submission.
+
 The ready ppRef all-cone card binds the five owner-selected Nebraska ZeroBias
 donors at `mixingFileList/ppRef2024_ZeroBiasPlusForward1_Nebraska_v2.txt`.
 `BackgroundMethods 7` writes reflected, perpendicular, and mixed-cone
