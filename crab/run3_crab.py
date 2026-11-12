@@ -77,11 +77,11 @@ def card_for(sample, choice=None):
             values[fields[0]] = fields[1]
     if int(values.get('DataType', -1)) != dtype:
         raise ValueError(f'Card DataType differs from {sample}: {path}')
-    if sample.endswith('mc') and int(values.get('BackgroundMethods', '0')) & 4:
-        raise ValueError(
-            'Mixed-cone MC is not supported by this CRAB campaign. The OO HIJING '
-            'pool A list needs event-level donor reservations and ledger outputs; '
-            'use the existing strict OO GenGen closure workflow in condor/README.md.')
+    if sample == 'ppref-mc' and int(values.get('BackgroundMethods', '0')) & 4:
+        raise ValueError('ppRef MC mixed cones are not part of this campaign')
+    if sample == 'oo-mc' and int(values.get('BackgroundMethods', '0')) & 4:
+        if values.get('MixingFileList') != 'mixingFileList/OO2025_HIJING_MC_pool_pilot_A.txt':
+            raise ValueError('OO MC mixed cones require the selected HIJING pool A list')
     if sample == 'ppref-data' and values.get('Run3UsePpL1FastJet', '0') != '0':
         raise ValueError('Vanderbilt ppRef forests have not been certified for L1FastJet inputs')
     return path, values
@@ -128,6 +128,14 @@ def files_for(sample, part, chunk, values):
         prefix = EOS_PREFIXES[sample]
         if any(not s.startswith(prefix) or not s.endswith('.root') for s in lines):
             raise ValueError(f'{sample} list contains non-EOS or unexpected files')
+        if int(values.get('BackgroundMethods', '0')) & 4:
+            selected = REPO / values['MixingFileList']
+            donors = read_list(selected)
+            if any(not s.startswith('/eos/user/j/jvelazqu/Foresting/OOMC_Hijing/')
+                   or not s.endswith('.root') for s in donors):
+                raise ValueError('OO MC mixing list contains unexpected donor paths')
+            if set(lines) & set(donors):
+                raise ValueError('OO MC signal and HIJING donor files overlap')
         if (len(lines) + 1) // 2 > 10000:
             raise ValueError('MC input list exceeds 10,000 jobs with two files/job')
     return lines
