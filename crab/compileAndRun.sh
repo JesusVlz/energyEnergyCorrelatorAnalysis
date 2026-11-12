@@ -33,6 +33,17 @@ echo "CRAB job $JOBID: building in $WORKER_DIRECTORY"
 
 # Isolate archive contents, including any historical cards or build artifacts.
 tar -xzf "$JOB_DIRECTORY/eecOO.tar.gz" -C "$WORKER_DIRECTORY"
+# EOS user paths in the selected OO MC HIJING list are lxplus mount paths.
+# Convert only the worker copy to XRootD PFNs so Vanderbilt jobs can open them.
+if grep -Eq '^MixingFileList[[:space:]]+mixingFileList/OO2025_HIJING_MC_pool_pilot_A.txt([[:space:]]|$)' "$CARD"; then
+  POOL="$WORKER_DIRECTORY/mixingFileList/OO2025_HIJING_MC_pool_pilot_A.txt"
+  if [[ ! -s $POOL ]]; then
+    echo "Missing OO MC HIJING mixing list in worker archive" >&2
+    exit 66
+  fi
+  sed 's#^/eos/user/#root://eosuser.cern.ch//eos/user/#' "$POOL" > "$POOL.remote"
+  mv "$POOL.remote" "$POOL"
+fi
 INPUT_DIRECTORY=$(mktemp -d "$WORKER_DIRECTORY/crab-inputs.XXXXXX")
 tar -xf "$JOB_DIRECTORY/input_files.tar.gz" -C "$INPUT_DIRECTORY"
 cp "$INPUT_DIRECTORY/job_input_file_list_${JOBID}.txt" "$WORKER_DIRECTORY/"
