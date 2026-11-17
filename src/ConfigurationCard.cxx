@@ -306,7 +306,8 @@ void ConfigurationCard::WriteCard(TDirectory *file) const{
     if(fKeyWordVector[i] == "MixingFileList") TObjString(fValueString[i]).Write("MixingFileListPath");
     if(fKeyWordVector[i] == "JetVetoMapFile" || fKeyWordVector[i] == "JetVetoMapHistogram" ||
        fKeyWordVector[i] == "JetVetoPtConvention" || fKeyWordVector[i] == "Run3JetIDTable" ||
-       fKeyWordVector[i] == "Run3TrackSelection" || fKeyWordVector[i] == "Run3TrackPairCorrectionFile")
+       fKeyWordVector[i] == "Run3TrackSelection" || fKeyWordVector[i] == "Run3TrackPairCorrectionFile" ||
+       fKeyWordVector[i] == "PairExportFile" || fKeyWordVector[i] == "PairExportNamespace")
       TObjString(fValueString[i]).Write(fKeyWordVector[i]+"String");
   }
 }

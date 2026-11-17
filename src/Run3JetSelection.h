@@ -70,7 +70,8 @@ private:
 // predicate. Jets failing pT or the EM-sum cut do not require multiplicity
 // decisions. Useful for recording QA for every eligible detector jet.
 bool IsEligibleVetoJet(const JetInputs& jet, double selectedPt, bool leptonVeto = false);
-bool IsEligibleVetoJet(const JetInputs& jet, double selectedPt, JetIDPrescription prescription);
+// Explicit pp MC studies may disable the ID requirement; retain pT/EM/map cuts.
+bool IsEligibleVetoJet(const JetInputs& jet, double selectedPt, JetIDPrescription prescription, bool requireJetID = true);
 
 // Call for EVERY reconstructed jet in an event, before EEC analysis jet cuts.
 // selectedPt is an explicitly chosen caller-side convention; this helper does

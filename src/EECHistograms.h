@@ -98,7 +98,7 @@ public:
   THnSparseF* fhJetPtUnfoldingMeasured;   // Measured jet pT distribution for unfolding test
   THnSparseF* fhJetPtUnfoldingTruth;      // Truth jet pT distribution for unfolding test
   THnSparseF* fhJetPtUnfoldingResponse;   // Jet pT unfolding response matrix
-  THnSparseF* fhJetPtUnfoldingCovariance; // Covariance matrix for jet pT unfolding
+  THnSparse* fhJetPtUnfoldingCovariance; // Covariance matrix for jet pT unfolding
 
   // Reconstructed to generator level particle matching
   THnSparseF* fhParticlesCloseToTracks;     // Histogram counting particles close to tracks

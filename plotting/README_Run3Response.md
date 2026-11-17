@@ -1,8 +1,10 @@
-# OO Run-3 response diagnostics from projected campaign files
+# OO and ppRef Run-3 response diagnostics from projected campaign files
 
-These additive C++/ROOT adaptations leave all Run-2 macros, the analyzer,
-cards and projection code unchanged. They continue after jet-selection QA
-and tracking comparisons. They do not perform unfolding or derive corrections.
+These C++/ROOT plotters read projected OO or pp reference MC files and do not
+perform unfolding or derive corrections. The campaign driver below retains
+its OO file naming; pass pp inputs directly to the macros with the exact
+stored inclusive activity interval. pp plots use pp labels and record when
+Jet ID is disabled.
 
 ## Run from repository root
 
@@ -72,9 +74,10 @@ This does not implement the Gaussian JES/JER extraction from
 
 ## Unfolding inputs, not unfolding execution
 
-Eleven figures per activity/power when all slices are populated: native jet
-matrix, six matched jet slices, EEC-weighted flattened response, measured and
-truth EEC marginals, and stored covariance input. The response/covariance maps
+For the historical 40-160 GeV profile, eleven figures per activity/power
+when all slices are populated: native jet matrix, six matched jet slices,
+EEC-weighted flattened response, measured and truth EEC marginals, and stored
+covariance input. The response/covariance maps
 use bin indices for readability. Raw coordinates and JCard are saved; the
 flattened coordinate is not a jet pT in GeV. All guard bins are retained.
 The native jet matrix is independent of n; the EEC response is not.
@@ -87,6 +90,21 @@ NO error to the difference because the samples overlap. Inspect residuals,
 weights and flow before calling them misses/fakes. No unfolding closure,
 iteration choice, efficiency correction or regularization follows from these
 plots. Centrality-split does not mean independent train/validation halves.
+
+## Extended native jet support
+
+When `MinJetPtCut` is 10 GeV, native jet-response slices use the intervals
+with edges `{5,10,20,30,40,80,120,160,200,300,500,5020}` GeV in both
+reconstructed and generated directions. The six reporting intervals span
+10-160 GeV; additional support bins are retained. Other profiles keep the
+40-80, 80-120, and 120-160 GeV slices. Exact axis alignment and positive
+regular-bin slice sums are required; unavailable or empty slices are skipped
+with a message, so the figure count depends on the input.
+
+Flattened response/covariance displays mark jet-pT block boundaries.
+`EECHistogramManager` accepts float- and double-precision sparse covariance
+storage and rejects missing or incompatible objects. These changes do not
+alter the pair-response plotter's existing 40-160 GeV reporting intervals.
 
 ## Outputs and software tests
 

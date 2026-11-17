@@ -1,3 +1,4 @@
+#include <stdexcept>
 /*
  * Implementation of EECHistogramManager
  */
@@ -2400,10 +2401,11 @@ void EECHistogramManager::LoadJetPtUnfoldingCovariance(){
   int higherTrackPtBin = 0;
   int weightExponentBin = 0;
   int weightRestricted = 0;
-  THnSparseD* histogramArray;
+  THnSparse* histogramArray;
 
   // Load the jet pT unfolding distribution
-  histogramArray = (THnSparseD*)fInputFile->Get(fJetPtCovarianceMatrixName[kCovarianceMatrixMeasured]);
+  histogramArray = dynamic_cast<THnSparse*>(fInputFile->Get(fJetPtCovarianceMatrixName[kCovarianceMatrixMeasured]));
+  if(!histogramArray) throw std::runtime_error("Missing or invalid jet-pT unfolding covariance");
   higherTrackPtBin = histogramArray->GetAxis(2)->GetNbins()+1;
 
   // Check the number of dimensions in the histogram array. It will be 4 in older files and 5 in newer files

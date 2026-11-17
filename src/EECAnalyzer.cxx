@@ -854,12 +854,12 @@ void EECAnalyzer::ReadConfigurationFromCard(){
     throw std::invalid_argument("Run3UsePpL1FastJet 1 is valid only for ppRef2024 with Run3JEC 1");
   if((fUseRun3JEC || fFillRun3JetQA) && (!(fIsOOData || fIsPp2024Data) || fCard->Get("JetType")!=1 || std::abs(fCard->Get("JetRadius")-.4)>1e-6))
     throw std::invalid_argument("Requested Run-3 calibration/QA supports native R4 OO/ppRef only");
-  if(fFillRun3JetQA && !fRun3JetID)
-    throw std::invalid_argument("Run3JetQA requires Run3JetID 1 to label the actual ID prescription");
+  if(fFillRun3JetQA && !fRun3JetID && !(fIsPp2024Data && !fIsRealData))
+    throw std::invalid_argument("Run3JetQA without Jet ID is supported only for explicit ppRef MC studies");
   if((fRun3JetID || fApplyJetVeto) && (!(fIsOOData || fIsPp2024Data) || fCard->Get("JetType") != 1))
     throw std::invalid_argument("Run-3 PF Jet ID/veto requires OO2025 or ppRef2024 PF jets.");
   if(fApplyJetVeto){
-    if(!fRun3JetID) throw std::invalid_argument("ApplyJetVeto requires explicit Run3JetID 1 (pinned collision-system HIN ID).");
+    if(!fRun3JetID && !(fIsPp2024Data && !fIsRealData)) throw std::invalid_argument("ApplyJetVeto without Jet ID is supported only for explicit ppRef MC studies");
     for(const char* key : {"JetVetoMapFile", "JetVetoMapHistogram", "JetVetoPtConvention", "JetVetoInputMinPt"})
       if(!fCard->HasKey(key)) throw std::invalid_argument(std::string("ApplyJetVeto requires ")+key);
     const double inputMin = fCard->Get("JetVetoInputMinPt");
@@ -3956,7 +3956,7 @@ Bool_t EECAnalyzer::PassRun3JetVeto(ForestReader* jetReader, Bool_t mixing){
       if(jet.rawPt<=0) continue;
       pt=CorrectRecoJet(jetReader,index).back();
     }
-    if(!EECJetSelection::IsEligibleVetoJet(jet, pt, Run3JetIDPrescription())) continue;
+    if(!EECJetSelection::IsEligibleVetoJet(jet, pt, Run3JetIDPrescription(), fRun3JetID != 0)) continue;
     eligible.emplace_back(jet.eta, EECJetSelection::DetectorPhi(jet.phi));
     if(fJetVetoMap->IsVetoed(jet.eta, jet.phi)) reject = true;
   }
@@ -3969,6 +3969,8 @@ Bool_t EECAnalyzer::PassRun3JetVeto(ForestReader* jetReader, Bool_t mixing){
       if(!reject) fHistograms->fhJetVetoEtaPhiAfter[stream]->Fill(jet.first, jet.second);
     }
   }
+  if(!mixing && fHistograms->fRun3JetQA)
+    fHistograms->fRun3JetQA->FillVeto(fIsOOData?jetReader->GetCentrality():-.5,!reject,eligible);
   return !reject;
 }
 
@@ -3981,7 +3983,7 @@ void EECAnalyzer::FillRun3JetDiagnostics(ForestReader* reader, bool passesVeto) 
     if(fCutBadPhiRegion && phi>-.1 && phi<1.2) continue;
     const auto stages=CorrectRecoJet(reader,index);
     const double pt=stages.back();
-    if(pt<fJetMinimumPtCut || pt>fJetMaximumPtCut) continue;
+    if(pt<fJetMinimumPtCut || pt>=fJetMaximumPtCut) continue;
     if(fMatchJets) {
       const bool matched=reader->HasMatchingJet(index);
       const double partner=matched?reader->GetMatchedPt(index):-1;
@@ -3997,8 +3999,8 @@ void EECAnalyzer::FillRun3JetDiagnostics(ForestReader* reader, bool passesVeto) 
           trackMax=std::max(trackMax,static_cast<double>(reader->GetTrackPt(t)));
     }
     const bool trackPass=EECJetSelection::PassTrackMaxFraction(trackMax,raw,fMinimumMaxTrackPtFraction,fMaximumMaxTrackPtFraction);
-    const bool idPass=EECJetSelection::PassJetID(reader->GetJetSelectionInputs(index),Run3JetIDPrescription());
-    fHistograms->fRun3JetQA->Fill(pt,raw,trackMax,centrality,fTotalEventWeight,trackPass,idPass,passesVeto,stages);
+    const bool idPass=!fRun3JetID || EECJetSelection::PassJetID(reader->GetJetSelectionInputs(index),Run3JetIDPrescription());
+    fHistograms->fRun3JetQA->Fill(pt,raw,trackMax,centrality,fTotalEventWeight,trackPass,idPass,passesVeto,stages,eta,phi);
   }
 }
 

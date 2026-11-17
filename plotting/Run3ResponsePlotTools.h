@@ -9,6 +9,7 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TLatex.h>
+#include <TLine.h>
 #include <TNamed.h>
 #include <TROOT.h>
 #include <TStyle.h>
@@ -44,7 +45,8 @@ struct Input {
   EECCard* card=nullptr;int centrality=0,track=0,power=1;TString selection,provenance,out;
   Input(const char* name,const char* output,double low,double high,double threshold,int mode):out(output){
     file.reset(TFile::Open(name,"READ"));Require(file&&!file->IsZombie()&&!file->TestBit(TFile::kRecovered),"Cannot open intact projected input");
-    Require(Scalar(*file,"DataType")==10 && Scalar(*file,"McCorrelationType")==mode,"Wrong OO MC reconstruction mode for this plot family");
+    const bool pp=Scalar(*file,"DataType")==12;
+    Require((pp || Scalar(*file,"DataType")==10) && Scalar(*file,"McCorrelationType")==mode,"Wrong OO/ppRef MC reconstruction mode for this plot family");
     for(const char* k:{"CentralityBinEdges","JetPtBinEdgesEEC","TrackPtBinEdgesEEC","WeightExponent","JetRadius"})
       Require(file->Get(TString("JCard/")+k),TString("Missing JCard/")+k);
     manager=std::make_unique<EECHistogramManager>(file.get());card=manager->GetCard();
@@ -55,8 +57,10 @@ struct Input {
     track=card->GetBinIndexTrackPtEEC(threshold);
     Require(track>=0&&track<card->GetNTrackPtBinsEEC()&&Near(card->GetLowBinBorderTrackPtEEC(track),threshold),"Exact track threshold missing");
     Require(!gSystem->AccessPathName(output)||gSystem->mkdir(output,true)==0,"Cannot create output directory");
-    selection=Near(low,-1)&&Near(high,100)?"OO integrated selected events":Form("OO centrality %g-%g%%",low,high);
+    selection=pp?"ppRef inclusive":(Near(low,-1)&&Near(high,100)?"OO integrated selected events [-1,100] axis":Form("OO centrality %g-%g%%",low,high));
+    if(TString(name).Contains("/pilot/"))selection+="; pilot A/B input";
     selection+=Form("; R=0.4; projected n=%d",power);
+    if(pp && Scalar(*file,"Run3JetID")==0)selection+="; Jet ID off";
     provenance=Form("input=%s; centrality=[%g,%g); track=%g; n=%d; read-only; no unfolding, calibration fit or pair-map derivation",name,low,high,threshold,power);
   }
 };
@@ -100,7 +104,7 @@ inline JDrawer& Drawer(bool twoD,bool logX,bool logY,bool logZ){
 inline void Header(const TString& selection,const TString& detail){
   TLatex t;t.SetNDC();t.SetTextFont(62);t.SetTextSize(.032);t.DrawLatex(.15,.963,"CMS");
   t.SetTextFont(52);t.SetTextSize(.025);t.DrawLatex(.25,.963,"Simulation Preliminary");
-  t.SetTextFont(42);t.SetTextSize(.022);t.SetTextAlign(31);t.DrawLatex(.96,.963,"Pythia+Hijing, 5.36 TeV");t.SetTextAlign(11);
+  t.SetTextFont(42);t.SetTextSize(.022);t.SetTextAlign(31);t.DrawLatex(.96,.963,selection.BeginsWith("ppRef")?"Pythia pp, 5.36 TeV":"OO MC, 5.36 TeV");t.SetTextAlign(11);
   t.SetTextSize(.024);t.DrawLatex(.15,.918,selection);t.SetTextSize(.020);t.DrawLatex(.15,.876,detail);
 }
 inline void Save(const TString& stem,TCanvas* canvas,const Input& in,const TString& description,
@@ -125,6 +129,13 @@ inline void Matrix(const TH2D* source,Input& in,const TString& name,const TStrin
   if(logAxes){PositiveRange(*h->GetXaxis());PositiveRange(*h->GetYaxis());}
   auto& d=Drawer(true,logAxes,logAxes,positive);d.DrawHistogram(h.get(),xt,yt,"","COLZ");Header(in.selection,detail);
   if(conditional){TLatex t;t.SetNDC();t.SetTextSize(.018);t.DrawLatex(.15,.833,"Each reco slice normalized over gen bins; unsupported slices blank");}
+  if(indices){
+    const int blocks=in.card->GetNJetPtBinsEEC();Require(blocks>0 && h->GetNbinsX()%blocks==0,"Invalid flattened block map");
+    const int width=h->GetNbinsX()/blocks;
+    for(int j=1;j<blocks;++j){double edge=j*width+.5;TLine vertical(edge,.5,edge,h->GetNbinsY()+.5),horizontal(.5,edge,h->GetNbinsX()+.5,edge);vertical.SetLineColor(kGray+1);horizontal.SetLineColor(kGray+1);vertical.SetLineStyle(3);horizontal.SetLineStyle(3);vertical.DrawClone();horizontal.DrawClone();}
+    TLatex note;note.SetNDC();note.SetTextSize(.016);note.DrawLatex(.15,.832,Form("%d #Deltar bins per jet-p_{T} block; full %d-block support retained",width,blocks));
+    if(Near(Scalar(*in.file,"MinJetPtCut"),10.))note.DrawLatex(.15,.808,"Report p_{T}^{jet}: 10-20, 20-30, 30-40, 40-80, 80-120, 120-160 GeV");
+  }
   auto* canvas=gPad->GetCanvas();const TString stem=in.out+"/"+name;
   const TString definition=detail+(conditional?"; fixed-X regular-Y normalization; normalizer fixed in errors; not full covariance; unsupported slices blank":"; raw bin sums, no normalization");
   Save(stem,canvas,in,definition,{{raw.get(),"raw"},{h.get(),"display"},{mask.get(),"conditional_support"}});
@@ -153,8 +164,8 @@ inline void Spectrum(const TH1D* source,Input& in,const TString& name,const TStr
   std::cout<<"SPECTRUM_FLOW "<<name<<" sumw="<<raw->GetBinContent(0)+raw->GetBinContent(raw->GetNbinsX()+1)<<'\n';delete canvas;
 }
 inline int Slices(TH2D& response,Input& in,const TString& prefix){
-  int n=0;const double edges[]={40,80,120,160};
-  for(int j=0;j<3;++j)for(int fixGen=0;fixGen<2;++fixGen){
+  int n=0;const std::vector<double> edges=Near(Scalar(*in.file,"MinJetPtCut"),10.)?std::vector<double>{5,10,20,30,40,80,120,160,200,300,500,5020}:std::vector<double>{40,80,120,160};
+  for(size_t j=0;j+1<edges.size();++j)for(int fixGen=0;fixGen<2;++fixGen){
     auto bins=Exact(*(fixGen?response.GetYaxis():response.GetXaxis()),edges[j],edges[j+1]);
     if(bins.first<0){std::cout<<"UNSUPPORTED_NATIVE_INTERVAL "<<prefix<<' '<<edges[j]<<'-'<<edges[j+1]<<"; not relabelled or interpolated\n";continue;}
     std::unique_ptr<TH1D> h(fixGen?response.ProjectionX(Unique(),bins.first,bins.second,"e"):response.ProjectionY(Unique(),bins.first,bins.second,"e"));h->SetDirectory(nullptr);
@@ -191,9 +202,11 @@ inline void UnfoldingPlots(const char* input,const char* out,double low,double h
   Require(Near(Scalar(*in.file,"JetPtWeight"),0.),"This marginal audit requires JetPtWeight=0");
   auto jet=Copy(in.manager->GetHistogramJetPtOneDimensionalUnfoldingResponse(in.centrality));
   Matrix(jet.get(),in,"nativeJetResponse","Reconstructed jet p_{T} (GeV)","Generated jet p_{T} (GeV)","Native jet response; full guard-bin support; matched entries",false,true);++n;
+  Matrix(jet.get(),in,"nativeJetResponseConditional","Reconstructed jet p_{T} (GeV)","Generated jet p_{T} (GeV)","Matched response: P(gen bin | reco bin); all 11 bins",true,true);++n;
   n+=Slices(*jet,in,"nativeJetSlice");
   auto eec=Copy(in.manager->GetHistogramJetPtUnfoldingResponse(in.centrality,in.track));
   Matrix(eec.get(),in,"eecResponse","Reconstructed (jet p_{T}, #Deltar) bin index","Generated (jet p_{T}, #Deltar) bin index","EEC-weighted response; flattened indices, NOT GeV",false,false,true);++n;
+  Matrix(eec.get(),in,"eecResponseNativeCoordinate","Reco (#Deltar #otimes jet p_{T})","Gen (#Deltar #otimes jet p_{T})","Native flattened coordinate; same gen-particle pair on both axes; NOT GeV",false,false,false);++n;
   for(int reco=0;reco<2;++reco){
     auto h=Copy(reco?in.manager->GetHistogramJetPtUnfoldingMeasured(in.centrality,in.track):in.manager->GetHistogramJetPtUnfoldingTruth(in.centrality,in.track));
     Spectrum(h.get(),in,reco?"eecMeasured":"eecTruth","Stored flattened (jet p_{T}, #Deltar) coordinate","Response input marginal; includes unmatched contributions; not unfolded");++n;

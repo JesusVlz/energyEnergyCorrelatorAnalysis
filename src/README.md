@@ -93,3 +93,41 @@ overflow, and chain schema consistency:
 g++ -std=c++17 $(root-config --cflags) validation/test_full_pf_multiplicities.cxx src/Run3JetSelection.cxx $(root-config --libs) -o /tmp/test_full_pf_multiplicities
 /tmp/test_full_pf_multiplicities
 ```
+
+## Run-3 jet selection and diagnostics
+
+`Run3JetSelection` supplies the detector-jet ID and event-veto eligibility
+rules. For pp reference MC (`DataType 12`), `Run3JetQA 1` and `ApplyJetVeto 1`
+also support an explicit `Run3JetID 0`. Other samples still require Jet ID
+when either feature is enabled. Disabling Jet ID retains the veto's selected
+jet pT > 15 GeV and charged-plus-neutral electromagnetic fraction < 0.9
+requirements, input checks, and configured detector map. The
+`IsEligibleVetoJet` interface requires Jet ID by default.
+
+`Run3JetQA.h` records selection and calibration stages, including an
+independent event-veto-only stage. ID-only stages are inactive when Jet ID
+is disabled; `JetIDState` and the histogram labels record that choice.
+The diagnostic jet-pT selection uses an exclusive upper boundary.
+
+Selected reconstructed jets also fill `selectedJetEtaWeighted` and
+`selectedJetPhiWeighted` with analysis WTA coordinates, card-defined jet-pT
+bins, and centrality. The signal-event veto records detector eta/phi
+occupancy before and after rejection and unweighted event counts by activity
+in `signalVetoEventsActivity`. Its first bin, labelled `eligible`, counts
+all events reaching the veto after preceding event cuts, including events
+with no eligible jets; tested events equal kept plus rejected events.
+Mixing-event veto calls do not fill these signal-event counters.
+
+These objects and their definitions are saved under `run3JetQA`. See the
+[plotting README](../plotting/README.md) for the corresponding plotters.
+
+## Covariance precision and pair-export metadata
+
+`DoublePrecisionCovariance 1` stores `jetPtUnfoldingCovariance` as a
+`THnSparseD` to reduce accumulation roundoff in native second moments.
+Without this opt-in, storage remains `THnSparseF`. The producer and plotting
+loader use the common `THnSparse` interface for both formats.
+
+`ConfigurationCard` also persists `PairExportFile` and `PairExportNamespace`
+as `JCard/PairExportFileString` and `JCard/PairExportNamespaceString`, alongside
+the existing string-valued Run-3 configuration metadata.

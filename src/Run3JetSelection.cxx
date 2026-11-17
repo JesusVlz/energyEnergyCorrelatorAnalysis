@@ -240,7 +240,7 @@ bool IsEligibleVetoJet(const JetInputs& jet, double selectedPt, bool leptonVeto)
       leptonVeto ? JetIDPrescription::TightLeptonVeto : JetIDPrescription::Tight);
 }
 
-bool IsEligibleVetoJet(const JetInputs& jet, double selectedPt, JetIDPrescription prescription) {
+bool IsEligibleVetoJet(const JetInputs& jet, double selectedPt, JetIDPrescription prescription, bool requireJetID) {
   ValidatePrescription(prescription);
   if(!std::isfinite(selectedPt) || selectedPt < 0) {
     throw std::invalid_argument("Run-3 event veto: selected pT must be finite and nonnegative");
@@ -248,7 +248,7 @@ bool IsEligibleVetoJet(const JetInputs& jet, double selectedPt, JetIDPrescriptio
   DetectorPhi(jet.phi);
   ValidateJetIDInputs(jet);
   if(selectedPt <= 15 || jet.chargedEmFraction + jet.neutralEmFraction >= 0.9) return false;
-  return PassJetID(jet, prescription);
+  return !requireJetID || PassJetID(jet, prescription);
 }
 
 bool RejectEventForJet(const JetInputs& jet, double selectedPt,

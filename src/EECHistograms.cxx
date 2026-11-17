@@ -1107,7 +1107,14 @@ void EECHistograms::CreateHistograms(){
 
   // Create the histogram for jet pT unfolding response
   fhUnfoldingResponse = new THnSparseF("jetPtUnfoldingResponse", "jetPtUnfoldingResponse", nAxesJetPtUnfoldResponse, nBinsJetPtUnfoldResponse, lowBinBorderJetPtUnfoldResponse, highBinBorderJetPtUnfoldResponse); fhUnfoldingResponse->Sumw2();
-  fhJetPtUnfoldingCovariance = new THnSparseF("jetPtUnfoldingCovariance", "jetPtUnfoldingCovariance", nAxesJetPtUnfoldResponse, nBinsJetPtUnfoldResponse, lowBinBorderJetPtUnfoldResponse, highBinBorderJetPtUnfoldResponse); fhJetPtUnfoldingCovariance->Sumw2();
+  // Native second moments can be nearly rank deficient. Float accumulation
+  // can make a positive-semidefinite matrix fail the covariance audit.
+  // Keep historical storage unchanged unless the card explicitly opts in.
+  if(fCard->HasKey("DoublePrecisionCovariance") && fCard->Get("DoublePrecisionCovariance") == 1)
+    fhJetPtUnfoldingCovariance = new THnSparseD("jetPtUnfoldingCovariance", "jetPtUnfoldingCovariance", nAxesJetPtUnfoldResponse, nBinsJetPtUnfoldResponse, lowBinBorderJetPtUnfoldResponse, highBinBorderJetPtUnfoldResponse);
+  else
+    fhJetPtUnfoldingCovariance = new THnSparseF("jetPtUnfoldingCovariance", "jetPtUnfoldingCovariance", nAxesJetPtUnfoldResponse, nBinsJetPtUnfoldResponse, lowBinBorderJetPtUnfoldResponse, highBinBorderJetPtUnfoldResponse);
+  fhJetPtUnfoldingCovariance->Sumw2();
 
   // Set custom bin axes for the histograms
   fhUnfoldingResponse->SetBinEdges(0, fullUnfoldingBinning);
