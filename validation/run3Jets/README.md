@@ -65,3 +65,21 @@ PbPb-for-OO and pp-for-ppRef ID, explicit event-veto configuration, conditional
 QA and reproduction. [Candidate provenance](vetoMapSources.md) records the verified
 user-uploaded ROOT files and unresolved production coverage. The earlier standalone
 `veto_rule.py` remains a diagnostic; the analyzer now has the C++ event-level path.
+
+## JetQA selection eta/phi regression
+
+`testRun3JetQAKinematics.cxx` checks the saved per-selection eta/phi histograms:
+independent TrackMax/JetID/event-veto stages, disabled cuts, signed weights
+and Sumw2, coordinate flow bins, phi wrapping, and rejection of nonfinite
+coordinates before any histogram changes. It also checks the existing
+final-selected histograms. The fixture is included in `run_selection_tests.py`.
+Run the complete selection suite in the configured ROOT environment with:
+
+```bash
+python3 validation/run3Jets/run_selection_tests.py --output /tmp/new_jetqa_regression
+```
+
+The new objects live in `run3JetQA` in raw analysis/merged outputs. The standard
+EEC projection macro does not copy the JetQA directory; use the raw output for
+selection comparisons. Inputs from before this histogram schema change must
+not be mixed with new outputs in a production merge.

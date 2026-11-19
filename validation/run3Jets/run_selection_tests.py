@@ -35,6 +35,7 @@ def main():
         ('analyzer','validation/run3Jets/checkAnalyzerJetSelection.cxx',objects,True),
         ('calibration','validation/run3Jets/checkCalibrationInputs.cxx',objects,True),
         ('update20261108','validation/run3Jets/testRun3Update.cxx',objects,True),
+        ('qa_kinematics','validation/run3Jets/testRun3JetQAKinematics.cxx',['src/ConfigurationCard.o'],False),
         ('response_regression','validation/run3Response/checkAnalyzerConfiguration.cxx',objects,True),
     ]
     for label,source,inputs,private in fixtures:

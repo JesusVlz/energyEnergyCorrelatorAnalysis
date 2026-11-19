@@ -109,6 +109,21 @@ independent event-veto-only stage. ID-only stages are inactive when Jet ID
 is disabled; `JetIDState` and the histogram labels record that choice.
 The diagnostic jet-pT selection uses an exclusive upper boundary.
 
+Every selection stage also fills `selectionEtaWeighted`, `selectionEtaCounts`,
+`selectionPhiWeighted`, and `selectionPhiCounts`. These TH3D histograms have
+axes (analysis-jet coordinate, selection stage, centrality), with the same
+seven stages, event exposure, event weights and card-defined kinematic/matching
+cuts as `selectionPtWeighted`/`selectionPtCounts`. Eta has 80 bins over
+[-2, 2]; phi has 72 bins over [-pi, pi) and is wrapped into that interval.
+Flow bins are retained. Coordinates follow `JetAxis` (0: E-scheme, 1: WTA).
+These selection comparisons integrate over the configured analysis jet-pT
+range; they do not store an additional jet-pT axis. Sumw2 is retained for both
+weighted yields and unweighted counts, and disabled stages keep the existing
+labels and empty contents. `SelectionKinematicsDefinition` records this
+in each output. They are filled for reconstructed analysis-jet modes
+(RecoReco and RecoGen); GenGen/GenReco do not apply these reco-quality stages.
+New analysis outputs are needed to obtain the added histograms.
+
 Selected reconstructed jets also fill `selectedJetEtaWeighted` and
 `selectedJetPhiWeighted` with analysis WTA coordinates, card-defined jet-pT
 bins, and centrality. The signal-event veto records detector eta/phi

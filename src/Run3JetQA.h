@@ -29,15 +29,23 @@ public:
     TDirectory::TContext context(nullptr);
     fSelection.reset(new TH3D("selectionPtWeighted",";Final calibrated jet p_{T} (GeV);Selection;Centrality (%)",500,0,1000,7,-.5,6.5,101,-1,100));
     fCounts.reset(new TH3D("selectionPtCounts",";Final calibrated jet p_{T} (GeV);Selection;Centrality (%)",500,0,1000,7,-.5,6.5,101,-1,100));
+    fSelectionEta.reset(new TH3D("selectionEtaWeighted",";Analysis jet #eta;Selection;Centrality (%)",80,-2,2,7,-.5,6.5,101,-1,100));
+    fSelectionEtaCounts.reset(new TH3D("selectionEtaCounts",";Analysis jet #eta;Selection;Centrality (%)",80,-2,2,7,-.5,6.5,101,-1,100));
+    fSelectionPhi.reset(new TH3D("selectionPhiWeighted",";Analysis jet #phi;Selection;Centrality (%)",72,-TMath::Pi(),TMath::Pi(),7,-.5,6.5,101,-1,100));
+    fSelectionPhiCounts.reset(new TH3D("selectionPhiCounts",";Analysis jet #phi;Selection;Centrality (%)",72,-TMath::Pi(),TMath::Pi(),7,-.5,6.5,101,-1,100));
+    const std::vector<TH3D*> selectionHistograms={fSelection.get(),fCounts.get(),fSelectionEta.get(),fSelectionEtaCounts.get(),fSelectionPhi.get(),fSelectionPhiCounts.get()};
     fCalibration.reset(new TH3D("calibrationPtWeighted",";Jet p_{T} at this calibration level (GeV);Actual JEC level;Centrality (%)",500,0,1000,4,-.5,3.5,101,-1,100));
     fTrackFraction.reset(new TH3D("trackMaxOverRawPt",";trackMax/rawPt;Raw jet p_{T} (GeV);Centrality (%)",120,0,1.2,100,0,1000,101,-1,100));
-    for(TH3D* h:{fSelection.get(),fCounts.get(),fCalibration.get(),fTrackFraction.get()}) { h->SetDirectory(nullptr); h->Sumw2(); }
+    for(TH3D* h:selectionHistograms) { h->SetDirectory(nullptr); h->Sumw2(); }
+    for(TH3D* h:{fCalibration.get(),fTrackFraction.get()}) { h->SetDirectory(nullptr); h->Sumw2(); }
     const char* selections[]={"No jet-quality selection","trackMax/rawPt only","Jet ID only","trackMax/rawPt AND Jet ID","Jet ID AND event veto","trackMax/rawPt AND Jet ID AND event veto","event veto only"};
-    for(int i=0;i<7;++i) {fSelection->GetYaxis()->SetBinLabel(i+1,selections[i]);fCounts->GetYaxis()->SetBinLabel(i+1,selections[i]);}
+    for(TH3D* h:selectionHistograms)
+      for(int i=0;i<7;++i) h->GetYaxis()->SetBinLabel(i+1,selections[i]);
     if(!fJetID) {
-      for(int stage:{2,3,4}) {fSelection->GetYaxis()->SetBinLabel(stage+1,"INACTIVE: Jet ID disabled");fCounts->GetYaxis()->SetBinLabel(stage+1,"INACTIVE: Jet ID disabled");}
-      fSelection->GetYaxis()->SetBinLabel(6,"trackMax/rawPt AND event veto (Jet ID disabled)");
-      fCounts->GetYaxis()->SetBinLabel(6,"trackMax/rawPt AND event veto (Jet ID disabled)");
+      for(TH3D* h:selectionHistograms) {
+        for(int stage:{2,3,4}) h->GetYaxis()->SetBinLabel(stage+1,"INACTIVE: Jet ID disabled");
+        h->GetYaxis()->SetBinLabel(6,"trackMax/rawPt AND event veto (Jet ID disabled)");
+      }
     }
     const char* corrections[]={"rawpt","after L1FastJet","after L2Relative","after L2Residual (data only)"};
     for(int i=0;i<4;++i) fCalibration->GetYaxis()->SetBinLabel(i+1,corrections[i]);
@@ -71,13 +79,17 @@ public:
             bool trackPass,bool idPass,bool vetoPass,const std::vector<double>& stages,double eta,double phi) {
     if(!std::isfinite(weight) || !std::isfinite(pt) || !std::isfinite(centrality))
       throw std::invalid_argument("Nonfinite Run-3 jet QA input");
-    const bool selected[]={true,trackPass,fJetID&&idPass,fJetID&&trackPass&&idPass,
-                           fVeto&&fJetID&&idPass&&vetoPass,fVeto&&trackPass&&(!fJetID||idPass)&&vetoPass,fVeto&&vetoPass};
-    for(int i=0;i<7;++i) if(selected[i]) { fSelection->Fill(pt,i,centrality,weight); fCounts->Fill(pt,i,centrality); }
-    if(raw>0 && std::isfinite(trackMax) && trackMax>=0) fTrackFraction->Fill(trackMax/raw,raw,centrality,weight);
-    if(!(trackPass && (!fJetID || idPass) && vetoPass)) return;
     if(!std::isfinite(eta) || !std::isfinite(phi)) throw std::invalid_argument("Nonfinite jet axis in QA");
     double wrappedPhi=std::remainder(phi,2*TMath::Pi());if(wrappedPhi>=TMath::Pi())wrappedPhi-=2*TMath::Pi();
+    const bool selected[]={true,trackPass,fJetID&&idPass,fJetID&&trackPass&&idPass,
+                           fVeto&&fJetID&&idPass&&vetoPass,fVeto&&trackPass&&(!fJetID||idPass)&&vetoPass,fVeto&&vetoPass};
+    for(int i=0;i<7;++i) if(selected[i]) {
+      fSelection->Fill(pt,i,centrality,weight); fCounts->Fill(pt,i,centrality);
+      fSelectionEta->Fill(eta,i,centrality,weight); fSelectionEtaCounts->Fill(eta,i,centrality);
+      fSelectionPhi->Fill(wrappedPhi,i,centrality,weight); fSelectionPhiCounts->Fill(wrappedPhi,i,centrality);
+    }
+    if(raw>0 && std::isfinite(trackMax) && trackMax>=0) fTrackFraction->Fill(trackMax/raw,raw,centrality,weight);
+    if(!(trackPass && (!fJetID || idPass) && vetoPass)) return;
     fEta->Fill(eta,pt,centrality,weight);fPhi->Fill(wrappedPhi,pt,centrality,weight);
     const size_t expected=fOO?2:(fRequestedJEC?(fData?(fPpL1?4:3):(fPpL1?3:2)):(fData?3:2));
     if(stages.size()!=expected) throw std::logic_error("Unexpected calibration stage count in Run3JetQA");
@@ -103,6 +115,8 @@ public:
     if(!directory) directory=gDirectory->mkdir("run3JetQA");
     directory->cd();
     fSelection->Write(); fCounts->Write(); fCalibration->Write(); fTrackFraction->Write();
+    fSelectionEta->Write(); fSelectionEtaCounts->Write(); fSelectionPhi->Write(); fSelectionPhiCounts->Write();
+    TNamed("SelectionKinematicsDefinition","selection{Pt,Eta,Phi}{Weighted,Counts}: identical seven selection stages, event exposure and card-defined kinematic/matching cuts. Eta/phi use the analysis axis (JetAxis=0: E-scheme, JetAxis=1: WTA); phi is wrapped to [-pi,pi). Eta/phi spectra integrate over the full selected jet-pT range; no additional pT-bin selection is stored. Weighted yields use the same event weight as selectionPtWeighted; Counts are unweighted. Coordinate underflow/overflow is retained.").Write();
     TNamed("VetoEventDenominator","All signal events reaching the veto after trigger/standard event cuts, including zero eligible veto jets; unweighted, exactly once per event. Tested = kept + rejected in each physical-activity bin.").Write();
     fEta->Write();fPhi->Write();fVetoBefore->Write();fVetoAfter->Write();fVetoEvents->Write();
     TNamed("KinematicsDefinition","Final-selected reconstructed jets; analysis WTA eta/phi, final calibrated pT; weighted yields at common event exposure. Veto occupancy uses detector coordinates and unweighted eligible jets/events before veto rejection.").Write();
@@ -129,6 +143,7 @@ private:
   bool fRequestedJEC,fPpL1,fOO,fData,fVeto,fJetID;
   std::string fTable,fMapPath,fMapKey;
   std::unique_ptr<TH3D> fSelection,fCounts,fCalibration,fTrackFraction,fEta,fPhi,fVetoBefore,fVetoAfter;
+  std::unique_ptr<TH3D> fSelectionEta,fSelectionEtaCounts,fSelectionPhi,fSelectionPhiCounts;
   std::unique_ptr<TH2D> fVetoEvents;
   std::unique_ptr<TH2> fMap;
 };
