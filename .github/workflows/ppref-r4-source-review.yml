@@ -1,0 +1,26 @@
+name: ppRef R4 source review
+on:
+  push:
+    branches: [install/ppref-r4-pairs-20261119]
+    paths: [.github/workflows/ppref-r4-source-review.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Archive public tracked source for local tests
+        run: |
+          mkdir -p /tmp/ppref-r4-source
+          git archive --format=tar.gz -o /tmp/ppref-r4-source/source.tar.gz HEAD
+          git rev-parse HEAD > /tmp/ppref-r4-source/commit.txt
+          git ls-tree -r HEAD > /tmp/ppref-r4-source/tree.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ppref-r4-source-review
+          path: /tmp/ppref-r4-source
+          retention-days: 2
