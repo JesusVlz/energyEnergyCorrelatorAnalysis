@@ -78,7 +78,7 @@ def base(system, mc, activity):
     return result
 
 
-def validate(card):
+def validate(card, profile='historical'):
     if UNUSED_TRACK_KEYS.intersection(card):
         raise ValueError('Run-3 cards must not request PbPb-only track cuts')
     def number(key):
@@ -98,12 +98,27 @@ def validate(card):
         raise ValueError('Track selection/table mismatch')
     jet_edges = list(map(float, card['JetPtBinEdgesEEC'].split()))
     first, last = int(number('FirstUnfoldedJetPtBin')), int(number('LastUnfoldedJetPtBin'))
-    if jet_edges[first] != 40 or jet_edges[last + 1] != 160:
+    report_low = 10 if profile == 'preapproval-v6' else 40
+    if not 0 <= first <= last < len(jet_edges)-1 or jet_edges[first] != report_low or jet_edges[last + 1] != 160:
         raise ValueError('Wrong report-bin indices')
     if any(b <= a for a, b in zip(jet_edges, jet_edges[1:])):
         raise ValueError('Jet edges must increase')
-    if len(jet_edges) > 11 or len(card['CentralityBinEdges'].split()) > 6:
-        raise ValueError('Native covariance array capacity exceeded')
+    # Flattened response/covariance dimensions are dynamic. The fixed jet
+    # capacities are 20 (correction helpers) and 60 (projection manager).
+    # fThisEventCorrelator[5][10] indexes powers and TRACK bins, not jet bins.
+    if len(jet_edges) > 21 or len(card['CentralityBinEdges'].split()) > 6:
+        raise ValueError('Native jet/activity capacity exceeded')
+    if len(card['WeightExponent'].split()) > 5 or len(card['TrackPtBinEdgesEEC'].split()) > 11:
+        raise ValueError('Native power/track covariance capacity exceeded')
+    if profile == 'preapproval-v6':
+        if jet_edges != [5,10,20,30,40,80,120,160,200,300,500,5020]:
+            raise ValueError('Wrong extended jet support')
+        if number('MinJetPtCut') != 10 or number('MinJetPtUnfoldingReco') != 10 or number('MinJetPtUnfoldingTruth') != 5:
+            raise ValueError('Wrong extended selection/response guards')
+        if number('MatchJets') != 0 or int(number('FilledHistograms')) & 64:
+            raise ValueError('Matched-only/JES-JER production is outside nominal v6')
+        if int(number('DataType')) == 12 and (card.get('Run3UsePpL1FastJet') != '0' or number('BackgroundMethods') != 0 or 'MixingFileList' in card):
+            raise ValueError('ppRef v6 requires explicit L1 off and no background')
     if int(number('BackgroundMethods')) & 4 and 'MixingFileList' not in card:
         raise ValueError('Mixing requires an explicit pool')
     if number('DisableTrackPairEfficiencyCorrection') == 0 and 'Run3TrackPairCorrectionFile' not in card:
@@ -503,7 +518,13 @@ def main():
     sub = parser.add_subparsers(dest='command')
     m = sub.add_parser('materialize')
     m.add_argument('template'); m.add_argument('--values', required=True); m.add_argument('--output', required=True)
+    p = sub.add_parser('preapproval-v6')
+    p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--baseline-manifest', type=Path, required=True)
     args = parser.parse_args()
+    if args.command == 'preapproval-v6':
+        from preapproval_v6 import write_catalog
+        write_catalog(args.output, args.baseline_manifest); return
     if args.command == 'materialize':
         materialize(args); return
     if args.write == args.check:
@@ -519,8 +540,9 @@ def main():
             p.parent.mkdir(parents=True, exist_ok=True); p.write_text(text)
         elif not p.is_file() or p.read_text() != text:
             raise ValueError('Missing/stale catalog file: ' + name)
+    # Materialized and user-maintained OO campaign cards are outside this generated catalog.
     extra = set(str(p.relative_to(REPO)) for p in (REPO/'cards/R4').rglob('*')
-                if p.is_file() and p.relative_to(REPO/'cards/R4').parts[0] != 'materialized') - set(expected)
+                if p.is_file() and p.relative_to(REPO/'cards/R4').parts[0] not in {'materialized', 'OO'}) - set(expected)
     if extra:
         raise ValueError('Unexpected files in generated catalog: ' + str(sorted(extra)))
     inventory = json.loads(expected['cards/R4/catalog.json'])

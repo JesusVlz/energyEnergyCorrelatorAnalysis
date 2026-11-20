@@ -17,7 +17,7 @@ import subprocess
 REPO = Path(__file__).resolve().parents[2]
 
 
-def project(input_path, output_path, power, mask, scratch):
+def project(input_path, output_path, power, mask, scratch, prebuilt_library=None):
     import ROOT
     ROOT.gROOT.SetBatch(True)
     input_path = input_path.resolve(strict=True)
@@ -30,13 +30,14 @@ def project(input_path, output_path, power, mask, scratch):
         'EECHistogramManager', 'EECCard', 'AlgorithmLibrary', 'EECBackgroundScale',
         'EECSignalToBackgroundUnfoldingScale', 'EECUnfoldConfiguration')]
     sources += [REPO/'src/ConfigurationCard.cxx', REPO/'src/EECHistograms.cxx']
-    library = scratch/'standardManager.so'
+    library = Path(prebuilt_library).resolve(strict=True) if prebuilt_library else scratch/'standardManager.so'
     command = ['g++', '-shared', '-fPIC', '-O0', '-I'+str(REPO),
                *map(str, sources),
                *shlex.split(subprocess.check_output(['root-config', '--cflags', '--libs'], text=True)),
                '-lEG', '-o', str(library)]
-    with (scratch/'build.log').open('w') as log:
-        subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
+    if not prebuilt_library:
+        with (scratch/'build.log').open('w') as log:
+            subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
     if ROOT.gSystem.Load(str(library)) < 0:
         raise RuntimeError('Cannot load freshly compiled standard manager')
     macro_path = REPO/'plotting/projectEEChistograms.C'
@@ -78,7 +79,8 @@ def project(input_path, output_path, power, mask, scratch):
     finally:
         projected.Close()
     receipt = dict(input=str(input_path), output=str(output_path), power=power, mask=mask,
-                   root_version=ROOT.gROOT.GetVersion(), build_command=command,
+                   root_version=ROOT.gROOT.GetVersion(), build_command=None if prebuilt_library else command,
+                   library_sha256=hashlib.sha256(library.read_bytes()).hexdigest(),
                    macro=str(macro_path), macro_sha256=hashlib.sha256(original.encode()).hexdigest(),
                    source_sha256={str(p.relative_to(REPO)): hashlib.sha256(p.read_bytes()).hexdigest()
                                   for p in [*sources, Path(__file__).resolve(), macro_path]},
@@ -150,10 +152,11 @@ def main():
     parser.add_argument('--power', type=int, choices=(1, 2), required=True)
     parser.add_argument('--mask', type=int, default=108803)
     parser.add_argument('--scratch', type=Path, required=True, help='new directory for isolated build and receipt')
+    parser.add_argument('--library', type=Path, help='Hash-frozen standard manager built with the worker runtime')
     args = parser.parse_args()
     if args.mask <= 0 or args.mask >= 1 << 17:
         parser.error('--mask must select existing standard projection bits0..16')
-    project(args.input, args.output, args.power, args.mask, args.scratch)
+    project(args.input, args.output, args.power, args.mask, args.scratch, args.library)
 
 
 if __name__ == '__main__':

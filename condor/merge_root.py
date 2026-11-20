@@ -6,8 +6,10 @@ module requires PyROOT and hadd and checks the ROOT files in local scratch.
 """
 import json
 import math
+import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 RUNTIME_CARD_KEYS = frozenset(('InputFiles', 'MixingFileList', 'MixingFileListPath',
@@ -181,6 +183,17 @@ def inspect_root(path, _accumulator=None):
         histograms, metadata, runtime_metadata = {}, {}, {}
         for name, object in _walk(file):
             is_one, is_sparse = object.InheritsFrom('TH1'), object.InheritsFrom('THnBase')
+            if name == 'run3JetQA/configuredJetVetoMap':
+                import hashlib, struct
+                require(is_one and object.GetDimension()==2, 'Configured veto map must be TH2')
+                fingerprint=hashlib.sha256()
+                for b in range(object.GetNcells()):
+                    values=(float(object.GetBinContent(b)),float(object.GetBinError(b)))
+                    require(all(math.isfinite(v) for v in values), 'Nonfinite configured veto map')
+                    fingerprint.update(struct.pack('!dd',*values))
+                metadata[name]={'class':str(object.ClassName()),'axes':[_axis(object.GetXaxis()),_axis(object.GetYaxis())],
+                                'bin_sha256':fingerprint.hexdigest(),'role':'invariant configured map, copied once'}
+                continue
             if is_one or is_sparse:
                 require(not object.InheritsFrom('TProfile') and not object.InheritsFrom('TProfile2D') and
                         not object.InheritsFrom('TProfile3D'), 'Profile merging is unsupported: '+name)
@@ -234,11 +247,15 @@ def _restore_card(first_input, output, provenance):
         # hadd creates cycles for non-additive metadata too. Equality was
         # checked across inputs, so retain one canonical metadata object.
         for path, object in _walk(source):
-            if object.InheritsFrom('TH1') or object.InheritsFrom('THnBase'):
+            if (object.InheritsFrom('TH1') or object.InheritsFrom('THnBase')) and path != 'run3JetQA/configuredJetVetoMap':
                 continue
             parent, _, name = path.rpartition('/')
             target = destination.GetDirectory(parent) if parent else destination
-            require(bool(target), 'Missing metadata directory '+parent)
+            if not target:
+                target = destination
+                for component in parent.split('/'):
+                    target = target.GetDirectory(component) or target.mkdir(component)
+            require(bool(target), 'Could not create metadata directory '+parent)
             target.Delete(name+';*')
             target.cd()
             require(object.Write(name,ROOT.TObject.kOverwrite)>0, 'Could not restore metadata '+path)
@@ -254,7 +271,7 @@ def _restore_card(first_input, output, provenance):
 
 
 def merge_root(inputs, output, expected_totals=None):
-    """hadd without skipping, restore the first card, validate every merged bin.
+    """Merge every histogram, restore verified metadata, validate every bin.
 
     Inputs must be unique, output must not exist. Optional expected_totals keys:
     all_events, inclusive_jet_entries, eec_entries, n_events_bins, from verified
@@ -287,7 +304,12 @@ def merge_root(inputs, output, expected_totals=None):
                    'runtime_metadata':record['runtime_metadata']} for record in records]}
     with tempfile.NamedTemporaryFile(mode='w',prefix='merge-root-',suffix='.inputs.txt',dir=output.parent) as source_list:
         source_list.write('\n'.join(paths)+'\n'); source_list.flush()
-        command = ['hadd','-n','20',str(output),'@'+source_list.name]
+        # Exclude non-additive metadata during reduction: repeated hadd batches
+        # otherwise multiply key cycles. Restore the verified canonical copy below.
+        excluded = ['JCard', 'MergeProvenance', *records[0]['metadata'],
+                    *records[0]['runtime_metadata']]
+        command = [sys.executable, str(Path(__file__).resolve()), str(output),
+                   source_list.name, json.dumps(excluded)]
         subprocess.run(command, check=True)
     _restore_card(paths[0],output,provenance)
     merged = inspect_root(output)
@@ -308,3 +330,69 @@ def merge_root(inputs, output, expected_totals=None):
             'provenance':provenance,
             'validation_scope':'All histogram entries and dense/allocated sparse bin contents; stored squared errors; axes, labels, classes, invariant card and metadata; exact nEvents bins and exposures.',
             'float_bin_relative_tolerance':5e-5}
+
+
+def _merge_histograms_hadd(output, input_list, excluded):
+    """Strict CLI hadd; strip metadata only from private scratch copies.
+
+    ROOT 6.34 hadd lacks object-list filtering. A single-input TFileMerger
+    creates each filtered copy without repeated UPDATE deletions. The CLI
+    hadd does the actual addition. Restore canonical metadata in the caller.
+    """
+    ROOT = _root()
+    import hashlib
+    paths = Path(input_list).read_text().splitlines()
+    # Optional bounded memory-backed scratch changes only temporary file location.
+    # Larger native EEC products retain disk scratch; never consume unbounded RAM.
+    filter_parent = Path(output).parent
+    requested = os.environ.get('EEC_HADD_FILTER_TMPDIR')
+    if requested and sum(Path(path).stat().st_size for path in paths) <= 2 * 1024**3:
+        candidate = Path(requested)
+        candidate.mkdir(parents=True, exist_ok=True)
+        filter_parent = candidate
+    with tempfile.TemporaryDirectory(prefix='hadd-inputs-',dir=filter_parent) as tmp:
+        scratch=Path(tmp);filtered=[]
+        for index,path in enumerate(paths):
+            local=scratch/('input%05d.root'%index)
+            merger=ROOT.TFileMerger(False,False)
+            merger.SetMaxOpenedFiles(2)
+            require(merger.OutputFile(str(local),'CREATE'),'Cannot create filtered scratch file')
+            # TFileMerger matches object names, not directory-qualified paths.
+            # The caller's complete schema/bin validation also rejects a name
+            # collision that would accidentally exclude an additive histogram.
+            for name in excluded:merger.AddObjectNames(name.rsplit('/',1)[-1])
+            require(merger.AddFile(path),'Cannot read input for metadata filtering')
+            require(merger.PartialMerge(ROOT.TFileMerger.kAll | ROOT.TFileMerger.kSkipListed),
+                    'Cannot prepare metadata-filtered input')
+            del merger  # Fully close the private file before it is used by hadd.
+            file=_open(local)
+            try:
+                for name in excluded:require(not file.Get(name),'Metadata filter retained '+name)
+            finally:file.Close()
+            filtered.append(str(local))
+        listing=scratch/'inputs.txt';listing.write_text('\n'.join(filtered)+'\n')
+        command=['hadd','-n','20',str(output),'@'+str(listing)]
+        print('MANUAL_HADD',json.dumps(dict(command=command,input_count=len(paths),
+            original_input_list_sha256=hashlib.sha256(Path(input_list).read_bytes()).hexdigest(),
+            exclusions=excluded,root_version=ROOT.gROOT.GetVersion())),flush=True)
+        subprocess.run(command,check=True)
+
+
+def _merge_histograms(output, input_list, excluded):
+    if os.environ.get('EEC_MERGE_BACKEND')=='hadd':
+        return _merge_histograms_hadd(output,input_list,excluded)
+    ROOT = _root()
+    merger = ROOT.TFileMerger(False, False)
+    merger.SetMaxOpenedFiles(20)
+    require(merger.OutputFile(output, 'CREATE'), 'Cannot create merge output')
+    for name in excluded:
+        merger.AddObjectNames(name)
+    for path in Path(input_list).read_text().splitlines():
+        require(merger.AddFile(path), 'Cannot add merge input: '+path)
+    require(merger.PartialMerge(ROOT.TFileMerger.kAll | ROOT.TFileMerger.kSkipListed),
+            'ROOT histogram merge failed')
+
+
+if __name__ == '__main__':
+    require(len(sys.argv) == 4, 'Expected output, input-list, excluded-metadata JSON')
+    _merge_histograms(sys.argv[1], sys.argv[2], json.loads(sys.argv[3]))

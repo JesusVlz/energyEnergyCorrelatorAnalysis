@@ -118,6 +118,16 @@ def main():
         assert 'negative second moment' in str(error)
     else:
         raise AssertionError('Negative second moment accepted')
+    blocked = copy.deepcopy(reduced)
+    blocked.update(profile='preapproval-v6', shape_status='BLOCKED_LITERAL_NORMALIZATION_BOUNDARIES_ABSENT', shape_statistics=[])
+    blocked['binning']['dr_support'][1] = .0073
+    absolute_only, no_shape, no_statistics, blocker = batch_plot.prepare_statistics(blocked, absolute_only=True)
+    assert absolute_only == absolute and no_shape is None and not no_statistics
+    try:
+        batch_plot.prepare_statistics(blocked)
+    except ValueError as error:
+        assert 'stored edges' in str(error)
+    else:raise AssertionError('Missing shape boundaries silently accepted')
     ROOT = plots.root_setup()
     reference_dir = args.output / 'reference'
     reference_dir.mkdir(exist_ok=True)

@@ -14,8 +14,8 @@ from pathlib import Path
 from preparation_contract import REPO, VERSION, VERTEX, payload_path, digest
 
 
-def settings(system, selection, correlation=0):
-    return {'DataType': 10 if system == 'OO' else 12,
+def settings(system, selection, correlation=0, profile='historical'):
+    result = {'DataType': 10 if system == 'OO' else 12,
             'Run3TrackSelection': selection, 'MaxTrackPtRelativeError': 0.1,
             'VertexMaxDistance': VERTEX[selection], 'TrackEtaCut': 2.4,
             'MinTrackPtCut': 0.5, 'MaxTrackPtCut': 500, 'MinPairTrackPt': 2,
@@ -28,8 +28,16 @@ def settings(system, selection, correlation=0):
             'SkipCovarianceMatrix': 1, 'FilledHistograms': 23, 'MaxEventsPerFile': 10000,
             'CentralityBinEdges': '0 30 50 90 100' if system == 'OO' else '-1 100'}
 
+    if system == 'pp': result['Run3UsePpL1FastJet'] = 0
+    if profile == 'preapproval-v6':
+        result.update(MinJetPtCut=10, MaxJetPtCut=5020,
+            JetPtBinEdgesEEC='5 10 20 30 40 80 120 160 200 300 500 5020',
+            MinJetPtUnfoldingReco=10, MinJetPtUnfoldingTruth=5,
+            FirstUnfoldedJetPtBin=1, LastUnfoldedJetPtBin=6, MaxEventsPerFile=0)
+    return result
 
-def write_cards(output):
+
+def write_cards(output, profile='historical'):
     from export_forest import card_text
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
@@ -39,7 +47,7 @@ def write_cards(output):
         for selection in VERTEX:
             for population, correlation in (('RecoReco', 0), ('RecoGen', 1)):
                 path = output / f'{system}_{selection}_{population}.input'
-                text = card_text(base, settings(system, selection, correlation))
+                text = card_text(base, settings(system, selection, correlation, profile))
                 # Never inherit a candidate correction/export path from a base card.
                 text = '\n'.join(line for line in text.splitlines() if not line.split('#',1)[0].split() or
                                   line.split()[0] not in ('Run3TrackPairCorrectionFile', 'PairExportFile', 'PairExportNamespace')) + '\n'
@@ -219,6 +227,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     cards = sub.add_parser('cards'); cards.add_argument('--output',type=Path,required=True)
+    cards.add_argument('--profile', choices=('historical','preapproval-v6'), default='historical')
     audit = sub.add_parser('audit-tables'); audit.add_argument('--output',type=Path,required=True)
     p = sub.add_parser('plan'); p.add_argument('--output',type=Path,required=True)
     for system in ('oo','pp'):
@@ -228,7 +237,7 @@ def main():
     p.add_argument('--min-pairs',type=int,default=10)
     args = parser.parse_args()
     if args.command == 'cards':
-        result=write_cards(args.output);print(json.dumps({'cards':len(result),'output':str(args.output.resolve())}))
+        result=write_cards(args.output, args.profile);print(json.dumps({'cards':len(result),'output':str(args.output.resolve())}))
     elif args.command == 'audit-tables':
         result=audit_tables();args.output.parent.mkdir(parents=True,exist_ok=True)
         args.output.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

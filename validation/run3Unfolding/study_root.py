@@ -112,7 +112,8 @@ def card_values(handle):
         if name in result: continue
         obj = d.Get(name)
         if obj.ClassName().startswith('TVectorT'):
-            result[name] = [float(obj[i]) for i in range(obj.GetLwb(),obj.GetUpb()+1)]
+            # TVector cards have a one-based lower bound; newer PyROOT [] checks assume zero.
+            result[name] = [float(obj(i)) for i in range(obj.GetLwb(),obj.GetUpb()+1)]
         elif obj.InheritsFrom('TObjString'): result[name] = str(obj.GetString())
     return result
 
@@ -142,6 +143,12 @@ class Product:
             if not equal(self.metadata.get(k),[v]): raise ValueError('Wrong pilot setting: '+k)
         if self.metadata.get('WeightExponent') != [float(channel['power'])]:
             raise ValueError('Use a separate explicit per-power projected product')
+        if channel.get('profile')=='preapproval-v6':
+            extended=dict(JetPtBinEdgesEEC=[5,10,20,30,40,80,120,160,200,300,500,5020],MinJetPtCut=[10],MinJetPtUnfoldingReco=[10],MinJetPtUnfoldingTruth=[5],MatchJets=[0])
+            if not ordinary:extended.update(McCorrelationType=[1],FilledHistograms=[147],SkipCovarianceMatrix=[0],DisableTrackPairEfficiencyCorrection=[1])
+            if channel['system']=='pp':extended['Run3UsePpL1FastJet']=[0]
+            for key,value in extended.items():
+                if not equal(self.metadata.get(key),value):raise ValueError('Wrong extended response contract: '+key)
         self.card = root.EECCard(self.handle)
         self.ic = interval_index(self.metadata['CentralityBinEdges'],channel['activity'])
         self.it = physical_index(self.metadata['TrackPtBinEdgesEEC'],2.)

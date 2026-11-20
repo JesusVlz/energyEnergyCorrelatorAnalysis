@@ -70,7 +70,7 @@ def write_tables(ROOT, result, output):
         for name, values in vectors.items():
             vector = ROOT.TVectorT('float')(1, len(values))
             for i, value in enumerate(values, 1):
-                vector[i] = value
+                vector.GetMatrixArray()[i - 1] = value
             vector.Write(name)
         rootfile.cd()
         counts = defaultdict(int)
@@ -144,6 +144,8 @@ def draw_closure(ROOT, result, output, rootfile, selected_jet=None, shape=False,
     dr, jet = result['binning']['dr_support'], result['binning']['jet']
     groups = defaultdict(list)
     for row in result['holdout_spectra']:
+        if result.get('profile') == 'preapproval-v6' and not (10 <= jet[row['key'][2]] and jet[row['key'][2]+1] <= 160):
+            continue
         if selected_jet is None or row['key'][2] == selected_jet:
             groups[tuple(row['key'][:-1])].append(row)
     statistics = statistics_override if statistics_override is not None else event_statistics(result)
@@ -232,6 +234,8 @@ def draw_closure(ROOT, result, output, rootfile, selected_jet=None, shape=False,
         drawer.SetDefaultAppearanceSplitCanvas(); drawer.SetLogX(True); drawer.SetLogY(True)
         drawer.SetBottomMargin(.13); drawer.SetTitleOffsetX(.8)
         drawer.SetRelativeCanvasSize(1.1, .95)
+        if result.get('profile') == 'preapproval-v6':
+            drawer.SetTopMargin(.16)  # Room for four header lines in the upper pad.
         drawer.CreateSplitCanvas()
         frame = hists['gen'].Clone('frame_' + channel); frame.Reset()
         xminimum = .008
@@ -240,7 +244,7 @@ def draw_closure(ROOT, result, output, rootfile, selected_jet=None, shape=False,
         frame.SetMaximum(maximum * 30 if maximum > 0 else 10.)
         ylabel = f'(1/#Sigma) d#Sigma^{{({n})}}/d#DeltaR' if shape else (f'(1/N_{{jet}}) d#Sigma^{{({n})}}/d#DeltaR' if denominator > 0 else f'd#Sigma^{{({n})}}/d#DeltaR')
         drawer.DrawHistogramToUpperPad(frame, '#DeltaR', ylabel, '', 'AXIS')
-        legend = ROOT.TLegend(.45, .56, .94, .84); legend.SetBorderSize(0); legend.SetFillStyle(0); legend.SetTextSize(.032)
+        legend = ROOT.TLegend(.45, .43 if result.get('profile') == 'preapproval-v6' else .56, .94, .71 if result.get('profile') == 'preapproval-v6' else .84); legend.SetBorderSize(0); legend.SetFillStyle(0); legend.SetTextSize(.032)
         label = 'OO selected MB' if selection == 'MB' else ('pp reference' if selection == 'ppRef' else 'OO ' + selection[1:].replace('_', '-') + '%')
         for field in FIELDS:
             graphs[field].Draw('PZ SAME')
@@ -248,13 +252,17 @@ def draw_closure(ROOT, result, output, rootfile, selected_jet=None, shape=False,
             legend.AddEntry(graphs[field], LABELS[field], 'p')
         legend.Draw()
         note = ROOT.TLatex(); note.SetNDC(); note.SetTextFont(42); note.SetTextSize(.033)
-        note.DrawLatex(.22, .94, f'{label}, R=0.4, {jet[j]:g} < p_{{T,jet}} < {jet[j+1]:g} GeV, n={n}')
+        if result.get('profile') == 'preapproval-v6':
+            note.DrawLatex(.22, .96, '#bf{CMS} Simulation Preliminary')
+            note.DrawLatex(.22, .81, 'Candidate map; no closure qualification')
+            if not positive:note.DrawLatex(.22, .38, 'EMPTY SELECTED BIN')
+        note.DrawLatex(.22, .91 if result.get('profile') == 'preapproval-v6' else .94, f'{label}, R=0.4, {jet[j]:g} < p_{{T,jet}} < {jet[j+1]:g} GeV, n={n}')
         note.SetTextSize(.028)
-        note.DrawLatex(.22, .89, 'p_{T,track}>2 GeV, |#eta|<2.4; independent validation events')
+        note.DrawLatex(.22, .86 if result.get('profile') == 'preapproval-v6' else .89, 'p_{T,track}>2 GeV, |#eta|<2.4; independent validation events')
         if shape:
             note.DrawLatex(.22, .49, 'Unit area: 0.008 #leq #DeltaR < 0.4; incomplete pair shapes omitted')
         elif any(graph.GetN() for graph in partials.values()):
-            note.DrawLatex(.22, .49, 'Open squares: supported pairs only; incomplete correction')
+            note.DrawLatex(.22, .40 if result.get('profile') == 'preapproval-v6' else .49, 'Open squares: supported pairs only; incomplete correction')
         drawer.SetLogY(False)
         ratioframe = frame.Clone('ratioframe_' + channel); ratioframe.Reset(); ratioframe.SetMinimum(0.); ratioframe.SetMaximum(max(ratio_limits) * 1.05)
         drawer.DrawHistogramToLowerPad(ratioframe, '#DeltaR', 'Reco / truth', '', 'AXIS')
@@ -264,6 +272,7 @@ def draw_closure(ROOT, result, output, rootfile, selected_jet=None, shape=False,
         canvas = ROOT.gPad.GetCanvas(); canvas.SetName(channel)
         filename = output / (channel + '.pdf')
         canvas.SaveAs(str(filename)); canvas.Write('canvas')
+        if result.get('profile') == 'preapproval-v6':canvas.SaveAs(str(filename.with_suffix('.png')))
         keep.extend((frame, ratioframe, legend, note, line, canvas, drawer))
         report.append({'channel': list(key), 'normalization': 'unit area [0.008,0.4)' if shape else 'common selected weighted jets', 'weighted_jets': denominator,
                        'unsupported_angular_bins': unsupported,

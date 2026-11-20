@@ -58,7 +58,7 @@ constexpr double kVzMax = 15.0;
 constexpr double kCentralitySplit = 30.0;
 constexpr double kRatioMin = 0.50;
 constexpr double kRatioMax = 1.50;
-const char* const kOOLabel = "P+H"; // Keep the generator shorthand in the supplied example.
+const char* const kOOLabel = "Pythia+Hijing";
 const char* const kPPLabel = "PYTHIA";
 
 // BEGIN PORTABLE MATH
@@ -434,7 +434,8 @@ void SaveCanvas(TCanvas& c, const TString& directory, const TString& stem) {
 }
 
 TCanvas* DrawComparison(const Distribution& d, const TH1D& after, bool refit,
-                       int rebin, const TString& outputDir, std::ostream& log) {
+                       int rebin, const TString& outputDir, std::ostream& log,
+                       bool showCmsLabel=true, bool saveFullRatioRange=false) {
   TH1D* hd=ForDisplay(*d.data,d.centrality,rebin);
   TH1D* hb=ForDisplay(*d.before,d.centrality,rebin);
   TH1D* ha=ForDisplay(after,d.centrality,rebin);
@@ -455,25 +456,26 @@ TCanvas* DrawComparison(const Distribution& d, const TH1D& after, bool refit,
   drawer->SetCanvasSize(700,650);
   drawer->SetSplitRatio(0.32);
   drawer->SetMargins(0.17,0.045,0.09,0.12);
+  drawer->SetTitleOffsetY(1.65);
+  drawer->SetNDivisionsX(d.centrality ? 509 : 506);
   drawer->CreateSplitCanvas();
   drawer->SetLogY(true);
   const char* xtitle=d.centrality ? "hiBin" : "v_{z} (cm)";
   drawer->DrawHistogramToUpperPad(hd,xtitle,"Normalized distribution","","E1");
   hd->GetXaxis()->SetLabelSize(0); hd->GetXaxis()->SetTitleSize(0);
   hb->Draw("E1 SAME"); ha->Draw("E1 SAME");
-  auto* legend=new TLegend(d.centrality ? 0.46 : 0.22,
+  auto* legend=new TLegend(d.centrality ? 0.34 : 0.22,
                           d.centrality ? 0.63 : 0.14,
-                          d.centrality ? 0.93 : 0.79,
+                          d.centrality ? 0.95 : 0.93,
                           d.centrality ? 0.83 : 0.34);
   legend->SetBorderSize(0); legend->SetFillStyle(0); legend->SetTextFont(42); legend->SetTextSize(0.041);
   const TString mcLabel=d.system=="OO" ? kOOLabel : kPPLabel;
-  legend->AddEntry(hd,d.system=="OO" ? "OO Data" : "pp Data","lp");
-  legend->AddEntry(hb,mcLabel+" (before reweight)","lp");
-  legend->AddEntry(ha,mcLabel+(refit ? " (after refit)" : " (stored weights)"),"lp");
+  legend->AddEntry(hd,d.system=="OO" ? "OO Data" : "pp Data","p");
+  legend->AddEntry(hb,mcLabel+" (before reweight)","p");
+  legend->AddEntry(ha,mcLabel+(refit ? " (after refit)" : " (after reweight)"),"p");
   legend->Draw();
   auto* label=new TLatex(); label->SetNDC(); label->SetTextFont(42); label->SetTextSize(0.040);
-  label->DrawLatex(0.17,0.925,"#bf{CMS} #it{Preliminary}");
-  label->SetTextAlign(31); label->DrawLatex(0.955,0.925,"5.36 TeV");
+  if (showCmsLabel) label->DrawLatex(0.17,0.925,"#bf{CMS} #it{Preliminary}");
   if (refit) {
     label->SetTextAlign(13); label->SetTextSize(0.031);
     label->DrawLatex(0.20,0.83,"1D refit check");
@@ -505,6 +507,27 @@ TCanvas* DrawComparison(const Distribution& d, const TH1D& after, bool refit,
   canvas->SetName(Unique(stem));
   SaveCanvas(*canvas,outputDir,stem);
   ratioBefore->Write(stem+"_ratio_before"); ratioAfter->Write(stem+"_ratio_after");
+  if (saveFullRatioRange && clipped) {
+    double fullLow=kRatioMin,fullHigh=kRatioMax;
+    for (TGraphErrors* graph : {ratioBefore,ratioAfter})
+      for (int i=0;i<graph->GetN();++i) {
+        fullLow=std::min(fullLow,graph->GetPointY(i)-graph->GetErrorY(i));
+        fullHigh=std::max(fullHigh,graph->GetPointY(i)+graph->GetErrorY(i));
+      }
+    const double pad=0.05*(fullHigh-fullLow);
+    // RedrawAxis adds a histogram copy; keep its limits aligned with the frame.
+    const auto setRatioRange=[&](double low, double high) {
+      for (TObject* object : *drawer->GetLowerPad()->GetListOfPrimitives())
+        if (auto* h=dynamic_cast<TH1*>(object)) {
+          h->SetMinimum(low); h->SetMaximum(high);
+        }
+      drawer->GetLowerPad()->Modified();
+    };
+    setRatioRange(fullLow-pad,fullHigh+pad);
+    SaveCanvas(*canvas,outputDir,stem+"_fullRatioRange");
+    setRatioRange(kRatioMin,kRatioMax);
+    canvas->Modified(); canvas->Update();
+  }
   return canvas;
 }
 
@@ -562,7 +585,8 @@ void deriveMonteCarloWeightsRun3(const char* ooData="", const char* ooMC="",
                                 const char* ppData="", const char* ppMC="",
                                 const char* outputDirectory="figures/mcWeightsRun3",
                                 const char* mode="both", double maxCentrality=90.0,
-                                int vertexPlotRebin=1, int centralityPlotRebin=1) {
+                                int vertexPlotRebin=1, int centralityPlotRebin=1,
+                                bool showCmsLabel=true, bool saveFullRatioRange=false) {
   using namespace Run3MCWeights;
   Require(ooData && ooMC && ppData && ppMC && outputDirectory && mode,
           "Use empty strings, not null pointers, for unused input arguments.");
@@ -648,14 +672,14 @@ void deriveMonteCarloWeightsRun3(const char* ooData="", const char* ooMC="",
       const int rebin=centrality ? centralityPlotRebin : vertexPlotRebin;
       if (stored) {
         ReportAgreement(d,*d.stored,"stored production weights",log);
-        TCanvas* c=DrawComparison(d,*d.stored,false,rebin,outDir,log);
+        TCanvas* c=DrawComparison(d,*d.stored,false,rebin,outDir,log,showCmsLabel,saveFullRatioRange);
         if (centrality) storedCent=c; else storedVz=c;
       }
       if (derive) {
         Fit fit=Derive(d,log);
         WriteFit(d,fit,parameters);
         ReportAgreement(d,*fit.after,"single-marginal refit preview",log);
-        TCanvas* c=DrawComparison(d,*fit.after,true,rebin,outDir,log);
+        TCanvas* c=DrawComparison(d,*fit.after,true,rebin,outDir,log,showCmsLabel,saveFullRatioRange);
         if (centrality) refitCent=c; else refitVz=c;
       }
     }

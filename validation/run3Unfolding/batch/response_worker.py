@@ -179,7 +179,7 @@ def skim(input_path, output_dir, system, namespace, max_events=0, source_input=N
                 skim_bytes=[p.stat().st_size for p in paths]), paths
 
 
-def raw_report(path):
+def raw_report(path, explicit_card=None):
     import ROOT
     handle = ROOT.TFile.Open(str(path), 'READ')
     if not handle or handle.IsZombie() or handle.TestBit(ROOT.TFile.kRecovered):
@@ -190,6 +190,9 @@ def raw_report(path):
         required = dict(WeightExponent=[1., 2.], MinJetPtUnfoldingTruth=[5.],
                         FirstUnfoldedJetPtBin=[3.], LastUnfoldedJetPtBin=[5.],
                         MaxEventsPerFile=[0.], MinTrackPtCut=[2.], McCorrelationType=[1.])
+        if explicit_card is not None:
+            values={line.split()[0]:line.split('#',1)[0].split()[1:] for line in Path(explicit_card).read_text().splitlines() if line.split('#',1)[0].split()}
+            for key in required:required[key]=list(map(float,values[key]))
         for key, expected in required.items():
             if actual.get(key) != expected:
                 raise ValueError('Unexpected embedded response selection '+key)
@@ -228,7 +231,8 @@ def raw_report(path):
 def run(args):
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    card = Path(__file__).parent/'cards'/(args.system+'_R04_response.input')
+    card = getattr(args, 'card', None) or Path(__file__).parent/'cards'/(args.system+'_R04_response.input')
+    card = card.resolve(strict=True)
     analysis_repo = (args.analysis_repo or REPO).resolve(strict=True)
     native = analysis_repo/'eecAnalysis'
     started = time.time()
@@ -254,7 +258,7 @@ def run(args):
                 command = [str(native), str(file_list), str(card), str(raw), '0', 'true']
                 with (output/(label+'.log')).open('w') as log:
                     subprocess.run(command, cwd=analysis_repo, stdout=log, stderr=subprocess.STDOUT, check=True)
-                report = raw_report(raw)
+                report = raw_report(raw,card)
                 report['command'] = command
                 metadata = dict(receipt, skim=provenance, fold=index, label=label,
                                 scope='Response matrices only; no unfolding or iteration choice')
@@ -263,7 +267,7 @@ def run(args):
                 ROOT.TObjString(json.dumps(metadata, sort_keys=True)).Write('ResponseProvenance')
                 handle.Close()
                 # Verify after the final UPDATE while the file is still local.
-                raw_report(raw)
+                raw_report(raw,card)
                 target = output/raw.name
                 expected = digest(raw)
                 shutil.copyfile(raw, target)
@@ -285,6 +289,7 @@ def main():
     parser.add_argument('input', type=Path)
     parser.add_argument('output', type=Path, help='New output folder; staging stays local')
     parser.add_argument('--system', choices=('OO', 'pp'), required=True)
+    parser.add_argument('--card', type=Path, help='Explicit frozen native response card; defaults preserve historical scope')
     parser.add_argument('--analysis-repo', type=Path, help='Runtime analysis checkout containing executable and calibration files')
     parser.add_argument('--namespace', help='Exact physical sample namespace; defaults to established campaign')
     parser.add_argument('--source-input', type=Path, help='Original input path if INPUT was staged locally')

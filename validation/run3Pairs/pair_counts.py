@@ -21,6 +21,43 @@ CONTROL = (.1, .4)
 TRIGGER_ETA = 1.6  # native Run-3 R4 JetEtaCut; AN method 1 uses jet acceptance
 VERSION = 'run3-an751-v2'
 SELECTIONS = {'OO': ('MB', 'C0_30', 'C30_50', 'C50_90'), 'pp': ('ppRef',)}
+PROFILE = 'historical'
+REFERENCE = None
+HISTORICAL = (PT, JET, DR, VERSION)
+
+
+def configure_profile(profile='historical', reference=None):
+    """Opt-in binning only; retain the established n=0 count/normalization algorithm."""
+    global PT, JET, DR, VERSION, PROFILE, REFERENCE
+    if profile=='historical':
+        PT,JET,DR,VERSION=HISTORICAL;PROFILE=profile;REFERENCE=None;return
+    if profile!='preapproval-v6':raise ValueError('Unknown pair profile')
+    import ROOT
+    source=Path(reference) if reference else Path(__file__).resolve().parents[2]/'trackCorrectionTables/trackPairEfficiencyCorrection_pp2017_32DeltaRBins_2023-07-11.root'
+    handle=ROOT.TFile.Open(str(source),'READ')
+    if not handle or handle.IsZombie():raise ValueError('Missing actual angular-binning reference')
+    key='trackPairEfficiencyCorrection_C0T0A0'
+    try:
+        hist=handle.Get(key)
+        if not hist or hist.GetNbinsX()!=32:raise ValueError('Reference does not provide the required 32 angular bins')
+        dr=tuple(float(hist.GetXaxis().GetBinLowEdge(i)) for i in range(1,34))
+        if any(not math.isfinite(v) for v in dr) or any(a>=b for a,b in zip(dr,dr[1:])):raise ValueError('Invalid reference edges')
+    finally:handle.Close()
+    PT=(2.,3.,4.,6.,8.,12.,20.,50.,100.,500.)
+    JET=(5.,10.,20.,30.,40.,80.,120.,160.,200.,300.,500.,5020.)
+    DR=dr;VERSION='run3-an751-v6-32dr-lowpt';PROFILE=profile
+    REFERENCE=dict(source=str(source.resolve()),sha256=file_digest(source),object=key,use='Angular schema only; no correction values copied')
+
+
+def binning():
+    return {'pt':list(PT),'jet':list(JET),'activity_hiBin':list(ACTIVITY),'dr_support':list(DR)}
+
+
+def require_profile(document):
+    if document.get('correction_version')!=VERSION:raise ValueError('Pair profile/version mismatch')
+    if 'binning' in document and document['binning']!=binning():raise ValueError('Pair binning mismatch; recount original pair exports')
+    if PROFILE=='preapproval-v6' and 'binning' not in document:raise ValueError('Extended counts must bind exact bin edges')
+
 
 
 def physical_key(event):
@@ -134,7 +171,7 @@ def validate(events):
             for population in ('gen', 'reco'):
                 validate_population(event[population], allow_unsupported_auxiliary=(population == 'reco'))
         for jet in event['jets']:
-            if bin_index(jet['pt'], JET) is None:
+            if bin_index(jet['pt'], JET) is None or (PROFILE=='preapproval-v6' and jet['pt']<10):
                 raise ValueError('Unsupported reconstructed jet pT')
             if not any(radius_is(jet, value) for value in (.4, .8)):
                 raise ValueError('Unsupported native radius')
@@ -407,7 +444,7 @@ def run(events, min_pairs=10, control=CONTROL):
                       'jet_pt': JET, 'powers': [1, 2], 'OO_selections': list(SELECTIONS['OO'])},
             'control': {'interval': list(control), 'endpoints': 'strict', 'status': 'FIXED_AN_0p1_0p4', 'support': list(control_rows.values())},
             'min_raw_pairs_per_cell_and_control': min_pairs,
-            'binning': {'pt': PT, 'jet': JET, 'activity_hiBin': ACTIVITY, 'dr_support': DR},
+            'binning': binning(), 'profile': PROFILE, 'angular_reference': REFERENCE,
             'map_key_fields': ['sample', 'radius', 'activity_bin', 'jet_bin', 'pt_hi_bin', 'pt_lo_bin', 'dr_bin'],
             'jet_independent_map_key_fields': ['sample', 'radius', 'activity_bin', 'pt_hi_bin', 'pt_lo_bin', 'dr_bin'],
             'holdout_key_fields': ['sample', 'radius', 'jet_bin', 'n', 'selection', 'dr_bin'],
@@ -459,9 +496,12 @@ def main():
     parser.add_argument('input', type=Path, help='JSONL events exported using analyzer selections and source-event corrections')
     parser.add_argument('output', type=Path)
     parser.add_argument('--input-list', action='store_true', help='input is a newline-separated JSONL path manifest; relative paths resolve beside the manifest')
+    parser.add_argument('--profile', choices=('historical','preapproval-v6'), default='historical')
+    parser.add_argument('--angular-reference',type=Path)
     parser.add_argument('--min-pairs', type=int, default=10)
     parser.add_argument('--control', nargs=2, type=float, default=CONTROL, metavar=('LOW', 'HIGH'), help='fixed AN interval: 0.1 0.4')
     args = parser.parse_args()
+    configure_profile(args.profile,args.angular_reference)
     if args.min_pairs < 1 or tuple(args.control) != CONTROL:
         parser.error('--min-pairs must be positive; --control is fixed to 0.1 0.4')
     if args.input_list:

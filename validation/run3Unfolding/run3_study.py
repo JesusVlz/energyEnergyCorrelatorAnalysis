@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """MC-only Run-3 R4 preflight/scan using native products and RooUnfoldBayes."""
 import argparse
+from array import array
 import csv
 import gzip
 import json
@@ -15,7 +16,7 @@ import tempfile
 import traceback
 import numpy as np
 from study_math import (REPORT_BINS, diagnostics, flattened_layout, forward_fold,
-    interval_index, normalization_bins, response_operator, summarize_scan)
+    interval_index, normalization_bins, normalize, response_operator, summarize_scan)
 from study_root import (Product, REPO, assert_compatible, axis_edges, hmatrix,
     load_root, run_solver, sha256, variances, vector, write_matrix)
 
@@ -46,6 +47,7 @@ def validate_channel(c):
         scales = c['fake_scales']
         if set(scales)!={'A_to_B','B_to_A'} or any(not math.isfinite(float(x)) or float(x)<0 for x in scales.values()):
             raise ValueError('Both finite nonnegative fake exposures required, or neither')
+    if c.get('profile','historical') not in ('historical','preapproval-v6'):raise ValueError('Unknown response profile')
     return c
 
 
@@ -80,6 +82,7 @@ def verify_split(c,base,hashes):
 
 
 def one_channel(root,c,base,out,action,region):
+    report_bins=((10.,20.),(20.,30.),(30.,40.),(40.,80.),(80.,120.),(120.,160.)) if c.get('profile')=='preapproval-v6' else REPORT_BINS
     products = []; data = {}
     keys = ('train','validation','train_reco','train_gen','validation_reco','validation_gen')
     paths = {k:resolve(base,c[k]) for k in keys if c.get(k)}
@@ -93,7 +96,7 @@ def one_channel(root,c,base,out,action,region):
         assert_compatible(a.metadata,b.metadata,response_only=True)
         responses = [a.response(),b.response()]
         jets = a.jets
-        for bounds in REPORT_BINS: interval_index(jets,bounds)
+        for bounds in report_bins: interval_index(jets,bounds)
         n,dr = flattened_layout(axis_edges(responses[0][1].GetXaxis()),jets)
         for triplet in responses:
             for h in triplet[:2]:
@@ -114,7 +117,7 @@ def one_channel(root,c,base,out,action,region):
         data['jets'],data['dr'] = jets,dr
         record = dict(channel=c,files={k:str(v) for k,v in paths.items()},sha256=hashes,split=split,
             diagnostics=reports,cards=[a.metadata,b.metadata],root_version=root.gROOT.GetVersion(),
-            requested_delta_r_region=region,reported_jet_bins=REPORT_BINS,
+            requested_delta_r_region=region,reported_jet_bins=report_bins,
             status='PREFLIGHT_ONLY',truth_definition=c.get('truth_definition','response_marginal'),
             statistical_status='MEASURED_PER_JET_COVARIANCE; JOINT_CLOSURE_STATISTICS_PENDING',
             checklist_pending=['generator normalization','guard/binning stability','prior/model stress',
@@ -142,7 +145,7 @@ def one_channel(root,c,base,out,action,region):
                 measured,truth,vm = references[held]
                 if np.any((vector(measured)>0)&(vector(tm)<=0)): raise ValueError('Held-out measured bins lack training support')
                 mask,_ = normalization_bins(dr,region)
-                for bounds in REPORT_BINS:
+                for bounds in report_bins:
                     j = interval_index(jets,bounds); ids = j*n+np.flatnonzero(mask)
                     if vector(tm)[ids].sum()<=0 or vector(tt)[ids].sum()<=0: raise ValueError('Unsupported reported jet bin: '+str(bounds))
                     if np.any((vector(truth)[ids]>0)&(data[f'K_{training}'][:,ids].sum(axis=0)<=0)):
@@ -167,7 +170,45 @@ def one_channel(root,c,base,out,action,region):
                         data[f'refold_{s}_{iteration}'] = forward_fold(data[f'K_{training}'],vector(u),data[f'fake_{training}'],float(exposure))
                     record['roounfold_api'] = api
                 del gate
-            rows,candidate = summarize_scan(data,jets,dr,region)
+            rows,candidate = summarize_scan(data,jets,dr,region,report_bins)
+            # Serialize the existing diagnostic arrays for C++/ROOT plotting.
+            # This adds no second normalization or statistics implementation.
+            result.cd()
+            for bounds in report_bins:
+                j = interval_index(jets,bounds)
+                for split_index in (0,1):
+                    sl = slice(j*n,(j+1)*n)
+                    norm,_ = normalization_bins(dr,region)
+                    def write_shape(name,values,cov):
+                        density,vcov,_ = normalize(values,cov,np.diff(dr),norm)
+                        h = root.TH1D(name,name,n,array('d',dr))
+                        h.SetDirectory(0)
+                        for angular in range(n):
+                            width = float(dr[angular+1]-dr[angular])
+                            h.SetBinContent(angular+1,float(density[angular])*width)
+                            h.SetBinError(angular+1,float(np.sqrt(max(0.,vcov[angular,angular])))*width)
+                        h.Write()
+                    write_shape(f'eec_truth_split{split_index+1}_jet{j}',data[f'truth_{split_index}'][sl],np.diag(data[f'truth_var_{split_index}'][sl]))
+                    write_shape(f'eec_measured_split{split_index+1}_jet{j}',data[f'measured_{split_index}'][sl],data[f'measured_cov_{split_index}'][sl,sl])
+                    for iteration in range(1,21):
+                        write_shape(f'eec_unfolded_split{split_index+1}_k{iteration}_jet{j}',data[f'u_{split_index}_{iteration}'][sl],data[f'cov_{split_index}_{iteration}'][sl,sl])
+                    chi_graph = root.TGraph()
+                    chi_graph.SetName(f'chi2_split{split_index+1}_jet{j}')
+                    for row in rows:
+                        if row['split']==split_index+1 and row['jet_low']==bounds[0] and row['jet_high']==bounds[1]:
+                            chi_graph.SetPoint(chi_graph.GetN(),row['iteration'],row['chi2'])
+                    chi_graph.Write()
+                    for iteration in range(1,21):
+                        graph = root.TGraphErrors()
+                        graph.SetName(f'ratio_split{split_index+1}_k{iteration}_jet{j}')
+                        values = data[f'ratio_{split_index}_{iteration}_{j}']
+                        errors = data[f'error_{split_index}_{iteration}_{j}']
+                        for angular in range(n):
+                            if not np.isfinite(values[angular]) or not np.isfinite(errors[angular]): continue
+                            point = graph.GetN()
+                            graph.SetPoint(point,float((dr[angular]+dr[angular+1])/2),float(values[angular]))
+                            graph.SetPointError(point,float((dr[angular+1]-dr[angular])/2),float(errors[angular]))
+                        graph.Write()
             record.update(status='SCAN_EXECUTED_DIAGNOSTIC_ONLY',candidate=candidate,solver_calls=40,
                 refolding='FIXED_EXPOSURE_DIAGNOSTIC' if c.get('fake_scales') else 'NOT_RUN_NO_FAKE_EXPOSURE')
             root.TObjString(json.dumps(record,allow_nan=False)).Write('StudyProvenance')
@@ -190,7 +231,7 @@ def main():
     parser.add_argument('--drawing-library'); parser.add_argument('--roounfold-library',default='libRooUnfold')
     args = parser.parse_args(); source = json.loads(args.manifest.read_text())
     if source.get('schema_version')!=1: parser.error('Unsupported manifest version')
-    channels = [validate_channel(dict(c)) for c in source['channels']]
+    channels = [validate_channel(dict(c,profile=c.get('profile',source.get('profile','historical')))) for c in source['channels']]
     if not channels or len({c['id'] for c in channels})!=len(channels): parser.error('Empty or duplicate channels')
     args.output.mkdir(parents=True,exist_ok=False); (args.output/'logs').mkdir()
     (args.output/'commands.sh').write_text('#!/bin/sh\n'+shlex.join([sys.executable,*sys.argv])+'\n')

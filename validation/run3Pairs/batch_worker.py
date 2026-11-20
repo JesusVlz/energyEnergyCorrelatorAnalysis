@@ -34,9 +34,23 @@ def main():
     parser.add_argument('--output-dir',type=Path,required=True)
     parser.add_argument('--scratch',type=Path,required=True)
     parser.add_argument('--input-local',type=Path,help='already staged byte-identical input; original identity remains in task provenance')
+    parser.add_argument('--export-jsonl',type=Path,help='Reuse a receipt-bound native export instead of rereading the forest')
+    parser.add_argument('--raw-ledger',type=Path)
+    parser.add_argument('--metadata',type=Path)
     args=parser.parse_args();started=time.monotonic();manifest=batch.read_json(args.manifest)
     if not 0<=args.task_index<len(manifest['tasks']):parser.error('task index outside frozen manifest')
     task=manifest['tasks'][args.task_index];original=Path(task['input']);source=args.input_local or original
+    if args.export_jsonl is not None:
+        if not args.raw_ledger or not args.metadata:parser.error('Reusing an export requires its raw ledger and metadata')
+        p.configure_profile(manifest.get('profile','historical'))
+        expected=task.get('native_export_sha256',{})
+        for key,path in (('jsonl',args.export_jsonl),('raw_ledger',args.raw_ledger),('metadata',args.metadata)):
+            if p.file_digest(path)!=expected.get(key):raise ValueError('Export reuse hash mismatch: '+key)
+        args.output_dir.mkdir(parents=True,exist_ok=True)
+        prefix=args.output_dir/f"{task['system']}_{task['file_index']:03d}"
+        receipt=batch.train(args.export_jsonl,prefix,args.raw_ledger,args.metadata,task)
+        print(json.dumps(dict(status='PAIR_COUNTS_FROM_VERIFIED_NATIVE_EXPORT',event_counts=receipt['event_counts'],prefix=str(prefix))))
+        return
     identity=task.get('input_identity',{})
     if source.stat().st_size!=identity.get('size_bytes',source.stat().st_size):raise ValueError('Frozen input size mismatch')
     if args.input_local is None and identity.get('mtime_ns',source.stat().st_mtime_ns)!=source.stat().st_mtime_ns:raise ValueError('Frozen input modification time mismatch')

@@ -117,6 +117,13 @@ def export(args):
                     'CentralityBinEdges': '0 30 50 90 100' if args.system == 'OO' else '-1 100',
                     'JetPtBinEdgesEEC': '40 80 120 160',
                     'PairExportFile': paths[population], 'PairExportNamespace': args.sample_namespace}
+        if args.system == 'pp':
+            settings['Run3UsePpL1FastJet'] = 0
+        if getattr(args, 'profile', 'historical') == 'preapproval-v6':
+            settings.update(MinJetPtCut=10, MaxJetPtCut=5020,
+                JetPtBinEdgesEEC='5 10 20 30 40 80 120 160 200 300 500 5020',
+                MinJetPtUnfoldingReco=10, MinJetPtUnfoldingTruth=5,
+                FirstUnfoldedJetPtBin=1, LastUnfoldedJetPtBin=6, MatchJets=0)
         card = prefix.with_suffix('.input')
         card.write_text(card_text(base, settings))
         command = [str(REPO/'eecAnalysis'), str(args.input.resolve()), str(card),
@@ -206,12 +213,13 @@ def main():
     parser.add_argument('--payload', type=Path)
     parser.add_argument('--max-events', type=int, default=10000)
     parser.add_argument('--card', type=Path)
+    parser.add_argument('--profile', choices=('historical','preapproval-v6'), default='historical')
     parser.add_argument('--responses', action='store_true', help='also fill existing native AN angular/momentum response histograms')
     parser.add_argument('--parity', action='store_true', help='bounded native/exported EEC weight comparison, both powers')
     parser.add_argument('--reuse-native', action='store_true', help='merge/check already completed native runs')
     args = parser.parse_args()
-    if args.max_events < 1:
-        parser.error('--max-events must be positive')
+    if args.max_events < 0:
+        parser.error('--max-events must be nonnegative; zero means all entries')
     export(args)
 
 

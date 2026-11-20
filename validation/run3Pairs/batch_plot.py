@@ -64,7 +64,7 @@ def statistics_index(rows, spectra, label):
     return index
 
 
-def prepare_statistics(result):
+def prepare_statistics(result, absolute_only=False):
     if result.get('holdout_event_vectors'):
         raise ValueError('Batch plotting expects reduced moments, not retained event vectors')
     if 'event_statistics' not in result or 'shape_statistics' not in result:
@@ -72,8 +72,12 @@ def prepare_statistics(result):
     counts = result.get('event_counts')
     if not isinstance(counts, dict) or not all(name in counts for name in ('selected', 'train', 'holdout', 'raw')):
         raise ValueError('Batch closure requires actual raw/selected/train/holdout event_counts')
-    shape_result, unused_empty_vector_statistics, shape_support = plots.normalized_shapes(result)
     absolute = statistics_index(result['event_statistics'], result['holdout_spectra'], 'event_statistics')
+    if absolute_only:
+        if result.get('profile') != 'preapproval-v6' or result.get('shape_status') != 'BLOCKED_LITERAL_NORMALIZATION_BOUNDARIES_ABSENT':
+            raise ValueError('Absolute-only rendering requires the explicit v6 shape-boundary blocker')
+        return absolute, None, {}, [{'status': result['shape_status']}]
+    shape_result, unused_empty_vector_statistics, shape_support = plots.normalized_shapes(result)
     shape = statistics_index(result['shape_statistics'], shape_result['holdout_spectra'], 'shape_statistics')
     return absolute, shape_result, shape, shape_support
 
@@ -99,7 +103,7 @@ def bounded_resolution_inputs(paths, per_file, directory):
 
 
 def render(ROOT, result, output, input_provenance, selected_jet=None,
-           tables_only=False, events=None, resolution_events_per_file=10000):
+           tables_only=False, events=None, resolution_events_per_file=10000, absolute_only=False):
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     result = copy.copy(result)
@@ -120,13 +124,16 @@ def render(ROOT, result, output, input_provenance, selected_jet=None,
         'shape_convention': 'Established AN interval [0.008,0.4); full stored angular support retained in ROOT',
         'tables': plots.write_tables(ROOT, result, output),
     }
+    if absolute_only:
+        report['shape_uncertainties'] = 'BLOCKED: literal normalization boundaries absent; no normalized-shape result'
+        report['shape_convention'] = 'NOT_EVALUATED; requested interval [0.008,0.4) retained'
     if not tables_only:
-        absolute, shape_result, shape_statistics, shape_support = prepare_statistics(result)
+        absolute, shape_result, shape_statistics, shape_support = prepare_statistics(result, absolute_only)
         rootfile = ROOT.TFile(str(output / 'closure.root'), 'RECREATE')
         try:
             report['closure'] = plots.draw_closure(ROOT, result, output, rootfile, selected_jet,
                                                   statistics_override=absolute)
-            report['shape_closure'] = plots.draw_closure(ROOT, shape_result, output, rootfile, selected_jet,
+            report['shape_closure'] = [] if absolute_only else plots.draw_closure(ROOT, shape_result, output, rootfile, selected_jet,
                                                         shape=True, statistics_override=shape_statistics)
             report['shape_support'] = shape_support
             if events:
@@ -151,6 +158,7 @@ def main():
     parser.add_argument('--jet-bin', type=int, choices=(0, 1, 2))
     parser.add_argument('--first-then-all', action='store_true', help='Render first_40_80/ before all/, using the same global correction')
     parser.add_argument('--tables-only', action='store_true')
+    parser.add_argument('--absolute-only', action='store_true', help='Explicit v6 shape-boundary blocker: retain absolute diagnostics only')
     parser.add_argument('--events', type=Path, nargs='*', default=[], help='Optional representative holdout JSONL or gzip caches for existing resolution plots')
     parser.add_argument('--resolution-events-per-file', type=int, default=10000)
     args = parser.parse_args()
@@ -165,12 +173,12 @@ def main():
     summaries = []
     for output, selected_jet in outputs:
         report = render(ROOT, result, output, provenance, selected_jet, args.tables_only,
-                        args.events, args.resolution_events_per_file)
+                        args.events, args.resolution_events_per_file, args.absolute_only)
         summaries.append({'output': str(output.resolve()), 'tables': len(report['tables']),
                           'closure_plots': len(report.get('closure', [])),
                           'shape_plots': len(report.get('shape_closure', [])),
                           'resolution_plots': len(report.get('resolution', []))})
-    print(json.dumps({'status': 'COMPLETE_CONDITIONAL_STATISTICS', 'products': summaries}))
+    print(json.dumps({'status': 'ABSOLUTE_ONLY_SHAPE_BLOCKED' if args.absolute_only else 'COMPLETE_CONDITIONAL_STATISTICS', 'products': summaries}))
 
 
 if __name__ == '__main__':

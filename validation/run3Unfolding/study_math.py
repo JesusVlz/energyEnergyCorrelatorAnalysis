@@ -138,12 +138,12 @@ def ratio(u, vu, t, vt, cross=None):
     return u/t, covariance(v)
 
 
-def summarize_scan(data, jets, dr, region):
+def summarize_scan(data, jets, dr, region, report_bins=REPORT_BINS):
     """AN-style diagnostic only: truth Sumw2 proxy, no joint cross covariance."""
     n = len(dr)-1; widths = np.diff(dr)
     norm, effective = normalization_bins(dr,region)
     chi = np.zeros((2,20)); rows = []; masks = {}
-    for bounds in REPORT_BINS:
+    for bounds in report_bins:
         j = interval_index(jets,bounds); sl = slice(j*n,(j+1)*n)
         valid = norm.copy()
         for s in (0,1): valid &= data[f'truth_{s}'][sl] > 0
@@ -171,7 +171,7 @@ def summarize_scan(data, jets, dr, region):
     best = int(np.argmin(data['chi2_average']))+1
     candidate = dict(iterations=best,status='DIAGNOSTIC_MINIMUM_NOT_VALIDATED',frozen=False,
         boundary_minimum=best in (1,20),fixed_bin_masks=masks,effective_region=effective,
-        criterion='Minimum two-fold mean of the sum of three per-jet-bin diagonal unity chi2 values',
+        criterion='Minimum two-fold mean of the sum of requested per-jet-bin diagonal unity chi2 values',
         limitations=['Truth covariance uses diagonal Sumw2 proxy','No unfolded/truth cross covariance',
                      'No response-MC statistical uncertainty','No untouched final validation sample'])
     return rows,candidate

@@ -106,7 +106,7 @@ def train(input_path,prefix,raw_ledger=None,metadata_path=None,task=None):
         validate_contract(metadata['tracking_contract'])
     elif task and task.get('preparation_version'):
         raise ValueError('New campaign requires corrected, versioned native export')
-    result={'batch_schema':SCHEMA,'correction_version':p.VERSION,'system':system,'sample_namespace':namespace,
+    result={'batch_schema':SCHEMA,'correction_version':p.VERSION,'binning':p.binning(),'profile':p.PROFILE,'angular_reference':p.REFERENCE,'system':system,'sample_namespace':namespace,
             'event_counts':dict(numbers),'derivation_coverage':coverage,
             'differential':raw_counts(table),'jet_independent':raw_counts(independent),
             'input_jsonl_sha256':p.file_digest(input_path),'native_metadata':metadata,'task':task,
@@ -140,6 +140,7 @@ def merge_training(manifest,directory,system,output,identity_db,min_pairs=10):
             prefix=f"{system}_{task['file_index']:03d}";receipt_path=directory/(prefix+'.receipt.json');receipt=read_json(receipt_path)
             if receipt['task']!=task:raise ValueError('Shard task does not match frozen manifest')
             count_path=checked_file(directory,receipt,'counts');counts=read_json(count_path)
+            p.require_profile(counts)
             if counts['raw_identity_scope']!='ALL_SCANNED_EVENTS':raise ValueError('Full raw identity ledger required')
             if counts['batch_schema']!=SCHEMA or counts['correction_version']!=p.VERSION:raise ValueError('Incompatible shard physics version')
             core_hash=core_hash or counts['physics_core_sha256']
@@ -310,20 +311,41 @@ def merge_validation(training,directory,output):
             add(target,row,('reco_pairs','single_n1','single_n2'))
     if number!=result['event_counts']['holdout']:raise ValueError('Global holdout coverage mismatch')
     result['holdout_spectra']=finalize_spectra(sums,result['system']);result['jet_event_sums']=rows(jets);result['correction_application']=rows(usage)
-    result['event_statistics']=rows(absolute);result['shape_statistics']=rows(shape_statistics(result,absolute,moments,totals))
+    result['event_statistics']=rows(absolute)
+    angular=result['binning']['dr_support']
+    if result.get('profile')=='preapproval-v6' and (.008 not in angular or .4 not in angular):
+        # The mandated native grid has neither exact shape boundary. Preserve
+        # independent absolute closure; do not interpolate counts or silently
+        # change the normalization interval to make shape validation appear valid.
+        result['shape_statistics']=[]
+        result['shape_status']='BLOCKED_LITERAL_NORMALIZATION_BOUNDARIES_ABSENT'
+        result['shape_requested_interval']=[.008,.4]
+    else:
+        result['shape_statistics']=rows(shape_statistics(result,absolute,moments,totals))
+        result['shape_status']='EXACT_STORED_BOUNDARIES'
+
     result['unsupported_holdout_bins']=[{k:row[k] for k in ('key','masked_pairs','masked_single','single','supported_fraction_single')} for row in result['holdout_spectra'] if row['masked_pairs']]
     result['covariance_status']='Exact existing absolute-bin and normalized-shape physical-event second moments; conditional on fixed training map and jet denominator. Compact holdout jet caches retain inputs for later joint covariance. Finite-training-map uncertainty not evaluated.'
-    result['batch_status']='ALL_EXPECTED_SHARDS_TRAINED_AND_HELD_OUT';result['training_sha256']=digest
+    if result['shape_status'].startswith('BLOCKED'):
+        result['covariance_status']='Absolute physical-event moments retained, conditional on fixed training map and jet denominator. Normalized-shape statistics blocked: literal .008 and .4 edges absent. Finite-training-map uncertainty not evaluated.'
+        result['batch_status']='ALL_EXPECTED_SHARDS_ABSOLUTE_ONLY_SHAPE_BLOCKED'
+    else:result['batch_status']='ALL_EXPECTED_SHARDS_TRAINED_AND_HELD_OUT'
+    result['training_sha256']=digest
     write_json(output,result);return result
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);sub=parser.add_subparsers(dest='command',required=True)
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--profile',choices=('historical','preapproval-v6'),default='historical')
+    parser.add_argument('--angular-reference',type=Path)
+    sub=parser.add_subparsers(dest='command',required=True)
     t=sub.add_parser('train');t.add_argument('input',type=Path);t.add_argument('prefix',type=Path);t.add_argument('--raw-ledger',type=Path,required=True);t.add_argument('--metadata',type=Path,required=True);t.add_argument('--task',type=Path,required=True)
     m=sub.add_parser('merge-training');m.add_argument('manifest',type=Path);m.add_argument('directory',type=Path);m.add_argument('output',type=Path);m.add_argument('--system',choices=['OO','pp'],required=True);m.add_argument('--identity-db',type=Path,required=True);m.add_argument('--min-pairs',type=int,default=10)
     v=sub.add_parser('validate');v.add_argument('cache',type=Path);v.add_argument('training',type=Path);v.add_argument('output',type=Path)
     f=sub.add_parser('merge-validation');f.add_argument('training',type=Path);f.add_argument('directory',type=Path);f.add_argument('output',type=Path)
     a=parser.parse_args()
+    p.configure_profile(a.profile,a.angular_reference)
+    if a.command in ('validate','merge-validation'):p.require_profile(read_json(a.training))
     if a.command=='train':r=train(a.input,a.prefix,a.raw_ledger,a.metadata,read_json(a.task))
     elif a.command=='merge-training':r=merge_training(a.manifest,a.directory,a.system,a.output,a.identity_db,a.min_pairs)
     elif a.command=='validate':r=validate_cache(a.cache,a.training,a.output)

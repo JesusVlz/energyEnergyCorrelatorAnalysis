@@ -326,7 +326,7 @@ def write_executable(path, content):
     path.chmod(0o755)
 
 
-def build_snapshot(snapshot, cmssw_base, arch, jobs, log_path, optimize=False):
+def build_snapshot(snapshot, cmssw_base, arch, jobs, log_path, optimize=False, keep_objects=False):
     make_command = ["make", "-j{}".format(jobs)]
     if optimize:
         make_command.append("CXX=g++ -O2")
@@ -346,8 +346,9 @@ def build_snapshot(snapshot, cmssw_base, arch, jobs, log_path, optimize=False):
     executable = snapshot / "eecAnalysis"
     if not executable.is_file() or not os.access(str(executable), os.X_OK):
         raise RuntimeError("Payload build did not produce an executable: {}".format(executable))
-    for path in snapshot.rglob("*.o"):
-        path.unlink()
+    if not keep_objects:
+        for path in snapshot.rglob("*.o"):
+            path.unlink()
 
 
 def parse_args():

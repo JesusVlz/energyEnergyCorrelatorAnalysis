@@ -47,6 +47,9 @@ class RootMergeTest(unittest.TestCase):
         histogram.Fill(.5,1.5,weight)
         histogram.Write()
         ROOT.TNamed('WeightState','Same immutable metadata').Write()
+        metadata = file.mkdir('metadataOnly')
+        metadata.cd()
+        ROOT.TNamed('State', 'constant').Write()
         file.cd()
         ROOT.TObjString('input-'+name).Write('InputFiles')
         card = file.mkdir('JCard')
@@ -60,12 +63,30 @@ class RootMergeTest(unittest.TestCase):
         file.Close()
         return path
 
+    def test_configured_veto_map_is_copied_once_and_mismatch_rejected(self):
+        first=self.write_input('map_a.root',1);second=self.write_input('map_b.root',2)
+        for path in (first,second):
+            f=ROOT.TFile.Open(str(path),'UPDATE');d=f.mkdir('run3JetQA');d.cd()
+            h=ROOT.TH2D('configuredJetVetoMap','map',2,-1,1,2,-3.2,3.2);h.SetBinContent(1,2,1);h.Write();f.Close()
+        out=self.directory/'map_merged.root';merge_root([first,second],out)
+        f=ROOT.TFile.Open(str(out));self.assertEqual(f.Get('run3JetQA/configuredJetVetoMap').GetBinContent(1,2),1);f.Close()
+        f=ROOT.TFile.Open(str(second),'UPDATE');h=f.Get('run3JetQA/configuredJetVetoMap');h.SetBinContent(1,2,2);f.GetDirectory('run3JetQA').cd();h.Write('',ROOT.TObject.kOverwrite);f.Close()
+        with self.assertRaisesRegex(ValueError,'metadata differs'):merge_root([first,second],self.directory/'wrong_map.root')
+
     def test_weighted_dense_sparse_and_configuration_survive_real_hadd(self):
         first = self.write_input('a.root',2)
         second = self.write_input('b.root',-1)
         original = inspect_root(first)
         output = self.directory/'merged.root'
-        result = merge_root([first,second],output,{'all_events':2,'inclusive_jet_entries':4,'eec_entries':4})
+        real_restore = __import__('merge_root')._restore_card
+        def verify_metadata_excluded(*args):
+            file = ROOT.TFile.Open(str(output))
+            self.assertFalse(bool(file.Get('JCard')))
+            self.assertFalse(bool(file.Get('InputFiles')))
+            file.Close()
+            real_restore(*args)
+        with mock.patch('merge_root._restore_card', side_effect=verify_metadata_excluded):
+            result = merge_root([first,second],output,{'all_events':2,'inclusive_jet_entries':4,'eec_entries':4})
         self.assertEqual(result['status'],'PASS_ALL_HISTOGRAM_BINS_AND_CANONICAL_CARD')
         self.assertEqual(result['root_validation']['card'],original['card'])
         self.assertEqual(result['root_validation']['n_events_bins'],[0]+[2]*9+[0])

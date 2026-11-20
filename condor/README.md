@@ -1,3 +1,9 @@
+# Current R4 MC production
+
+Use [RUN3_MC.md](RUN3_MC.md) and `prepareRun3MC.py` for the complete 33-card
+OO/ppRef campaign matching the CRAB R4 plan. The older five-mode and strict-closure
+workflows below remain available for explicitly selected studies.
+
 # O–O and pp MC on CERN HTCondor
 
 Prepare and submit from AFS. The analysis source and input forests remain on EOS;
