@@ -167,8 +167,8 @@ See [configuration and validation](validation/run3Jets/IMPLEMENTATION.md) and
 are verified, and the tarball script includes the maps and metadata.
 
 
-The repository root retains the 12 OO2025 and ppRef2024 5.36 TeV cards,
-including the existing separate R=0.8 workstream. Legacy Run-2 PbPb, pp and
+The repository root retains the eight R4 OO2025 and ppRef2024 5.36 TeV cards.
+Deferred R8 cards are under [cards/R8/pending/](cards/R8/pending/). Legacy Run-2 PbPb, pp and
 pPb local cards are now in [cards/archive/run2/](cards/archive/run2/README.md).
 See the [card inventory and layout](cards/README.md) for exact paths and a
 snapshot of every card. Pass the archived path for a legacy local run.
@@ -196,9 +196,9 @@ pp/pPb per-system card convention. The original OO cards retain the provisional
 | Stream | Data | MC |
 |---|---|---|
 | Inclusive OO, native R=0.4 | [cardEECOOInclusiveR04.input](cardEECOOInclusiveR04.input) | [cardEECOOMCInclusiveR04.input](cardEECOOMCInclusiveR04.input) |
-| Inclusive OO, native R=0.8 | [cardEECOOInclusiveR08.input](cardEECOOInclusiveR08.input) | [cardEECOOMCInclusiveR08.input](cardEECOOMCInclusiveR08.input) |
+| Inclusive OO, native R=0.8 | [cards/R8/pending/cardEECOOInclusiveR08.input](cards/R8/pending/cardEECOOInclusiveR08.input) | [cards/R8/pending/cardEECOOMCInclusiveR08.input](cards/R8/pending/cardEECOOMCInclusiveR08.input) |
 | Inclusive pp, native R=0.4 | [cardEECpp5v36TeVR04.input](cardEECpp5v36TeVR04.input) | [cardEECpp5v36TeVMCR04.input](cardEECpp5v36TeVMCR04.input) |
-| Inclusive pp, native R=0.8 | [cardEECpp5v36TeVR08.input](cardEECpp5v36TeVR08.input) | [cardEECpp5v36TeVMCR08.input](cardEECpp5v36TeVMCR08.input) |
+| Inclusive pp, native R=0.8 | [cards/R8/pending/cardEECpp5v36TeVR08.input](cards/R8/pending/cardEECpp5v36TeVR08.input) | [cards/R8/pending/cardEECpp5v36TeVMCR08.input](cards/R8/pending/cardEECpp5v36TeVMCR08.input) |
 
 Integrated OO uses the standard EEC pipeline with a broad centrality
 interval; it is not a separate analysis mode.

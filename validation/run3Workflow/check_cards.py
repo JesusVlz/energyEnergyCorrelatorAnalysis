@@ -25,6 +25,8 @@ def main():
     for prefix, data_type in samples:
         for code, radius, jet_type in (("R04", .4, 1), ("R08", .8, 3)):
             path = root / (prefix + code + ".input")
+            if code == "R08":
+                path = root / "cards/R8/pending" / (prefix + code + ".input")
             card = parse(path)
             expected = dict(DataType=[data_type], JetType=[jet_type], JetRadius=[radius],
                             JetAxis=[1], JetEtaCut=[1.6], TrackEtaCut=[2.4],

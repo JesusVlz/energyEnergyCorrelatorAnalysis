@@ -1,0 +1,34 @@
+{
+  "cardEECOOInclusiveR08.input": {
+    "path": "cards/R8/pending/cardEECOOInclusiveR08.input",
+    "sha256": "1a6cfd116f390e17bfec11ffa55b57e29fb8b95a29ac2c3fccda616deb60c99c"
+  },
+  "cardEECOOMCInclusiveR08.input": {
+    "path": "cards/R8/pending/cardEECOOMCInclusiveR08.input",
+    "sha256": "ff7a9d0bfc36d54b809071fe0a0c657b0abbd5b8925b85525f5d3149898c45e8"
+  },
+  "cardEECpp5v36TeVMCR08.input": {
+    "path": "cards/R8/pending/cardEECpp5v36TeVMCR08.input",
+    "sha256": "400826bb622ec9aea17850cbaf1034951462332f287f5d71042c004ac9e0e595"
+  },
+  "cardEECpp5v36TeVR08.input": {
+    "path": "cards/R8/pending/cardEECpp5v36TeVR08.input",
+    "sha256": "3454e3f378c3e27a26e75d6726649001c6ca518341c6afbb3fac7c8434b103e4"
+  },
+  "validation/run3Workflow/cards/OOMC_R08_diagnostic.input": {
+    "path": "cards/R8/pending/validation/run3Workflow/cards/OOMC_R08_diagnostic.input",
+    "sha256": "d6e5b17ba351cdcf688d74f35aba153eeccb79907a89b767bb3dd2ca7e1ca4cc"
+  },
+  "validation/run3Workflow/cards/OO_R08_diagnostic.input": {
+    "path": "cards/R8/pending/validation/run3Workflow/cards/OO_R08_diagnostic.input",
+    "sha256": "eb3905e6c11d30f3564f3036ac8e2d83289326a3bbd612750e29459367b3a467"
+  },
+  "validation/run3Workflow/cards/ppMC_R08_diagnostic.input": {
+    "path": "cards/R8/pending/validation/run3Workflow/cards/ppMC_R08_diagnostic.input",
+    "sha256": "111870320b6cc29c477213d563f7ae5977d5bc6b268614c699917c93e3ca4e66"
+  },
+  "validation/run3Workflow/cards/pp_R08_diagnostic.input": {
+    "path": "cards/R8/pending/validation/run3Workflow/cards/pp_R08_diagnostic.input",
+    "sha256": "f502c779fe4ad8febea6a1b05921d4d5c04fb540e026f57a47dffce92bd19dae"
+  }
+}
