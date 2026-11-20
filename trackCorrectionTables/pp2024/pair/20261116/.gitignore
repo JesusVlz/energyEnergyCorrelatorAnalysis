@@ -1,0 +1,4 @@
+# Track only these three owner-supplied preliminary ROOT payloads.
+!Nominal/trackPairEfficiencyCorrection_pp_run3-an751-v6-32dr-lowpt.root
+!Loose/trackPairEfficiencyCorrection_pp_run3-an751-v6-32dr-lowpt.root
+!Tight/trackPairEfficiencyCorrection_pp_run3-an751-v6-32dr-lowpt.root
