@@ -19,8 +19,8 @@ calibration availability or override the existing analysis guards.
 | OO, inclusive R=0.4 | [cardEECOOInclusiveR04.input](../cardEECOOInclusiveR04.input) | [cardEECOOMCInclusiveR04.input](../cardEECOOMCInclusiveR04.input) |
 | ppRef, base R=0.4 | [cardEECpp5v36TeV.input](../cardEECpp5v36TeV.input) | [cardEECpp5v36TeVMC.input](../cardEECpp5v36TeVMC.input) |
 | ppRef, dedicated R=0.4 | [cardEECpp5v36TeVR04.input](../cardEECpp5v36TeVR04.input) | [cardEECpp5v36TeVMCR04.input](../cardEECpp5v36TeVMCR04.input) |
-| OO, separate R=0.8 | [cardEECOOInclusiveR08.input](../cardEECOOInclusiveR08.input) | [cardEECOOMCInclusiveR08.input](../cardEECOOMCInclusiveR08.input) |
-| ppRef, separate R=0.8 | [cardEECpp5v36TeVR08.input](../cardEECpp5v36TeVR08.input) | [cardEECpp5v36TeVMCR08.input](../cardEECpp5v36TeVMCR08.input) |
+| OO, separate R=0.8 | [cardEECOOInclusiveR08.input](../cards/R8/pending/cardEECOOInclusiveR08.input) | [cardEECOOMCInclusiveR08.input](../cards/R8/pending/cardEECOOMCInclusiveR08.input) |
+| ppRef, separate R=0.8 | [cardEECpp5v36TeVR08.input](../cards/R8/pending/cardEECpp5v36TeVR08.input) | [cardEECpp5v36TeVMCR08.input](../cards/R8/pending/cardEECpp5v36TeVMCR08.input) |
 
 ## Complete inventory snapshot
 
@@ -58,3 +58,11 @@ Run-3 cards omit the unused calo/chi2/hit cut controls. Check all active cards
 with `python3 validation/run3Integration/checkSlimTrackCards.py` and the catalog
 with `python3 cards/build_r4_catalog.py --check`. Historical inventory/evidence
 snapshots are intentionally unchanged. R8 is outside active production scope.
+
+## ppRef R4 preliminary pair tables
+
+See [ppRef2024/R4/README.md](ppRef2024/R4/README.md) for the checksum-checked
+16 November 2026 Nominal/Loose/Tight candidates and JetID-on application cards.
+The ROOT binaries require the separate verified installation; cards alone do not install them.
+These are preliminary tests, not qualified final-spectrum defaults.
+R8 cards have moved to [R8/pending/](R8/pending/); R4 remains the active scope.

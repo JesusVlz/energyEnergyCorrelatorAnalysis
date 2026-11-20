@@ -1,0 +1,73 @@
+# PRELIMINARY ppRef2024 R4 Data Loose: supplied 20261116 residual pair table.
+# Requires checksum-checked ROOT installation; see README.md and manifest.json.
+# Jet ID ON by request; original table was derived with Jet ID OFF.
+# No new closure is claimed. Ordinary EEC only; no particle/unfolding responses.
+# 15-200 GeV application test: 15-20 uses the stored 10-20 correction bin.
+# Run from repository root. Trigger/sample applicability remains a user input.
+DataType 11
+McCorrelationType 0
+MatchJets 0
+TriggerSelection 8
+FilledHistograms 31
+JetType 1
+JetAxis 1
+JetEtaCut 1.6
+MinJetPtCut 15
+MaxJetPtCut 200
+CutBadPhi 0
+CutWithEtaCM 0
+MinMaxTrackPtFraction 0.01
+MaxMaxTrackPtFraction 0.98
+JetUncertainty 0
+Run3JetID 1
+Run3JetIDTable MiniPOG20261108
+Run3JetQA 1
+Run3JEC 1
+Run3UsePpL1FastJet 0
+ApplyJetVeto 1
+JetVetoMapFile jetVetoMaps/pp2024/Summer24Prompt24_RunBCDEFGHI.root
+JetVetoMapHistogram jetvetomap_all
+JetVetoPtConvention stored
+JetVetoInputMinPt 15
+Run3TrackSelection Loose
+TrackEtaCut 2.4
+MinTrackPtCut 0.5
+MaxTrackPtCut 500
+MaxTrackPtRelativeError 0.1
+VertexMaxDistance 5
+SubeventCut 2
+TrackEfficiencyVariation 0
+JetPtWeight 0
+DisableTrackPairEfficiencyCorrection 0
+ZVertexCut 15
+LowPtHatCut -1
+HighPtHatCut 1
+MultiplicityMode 0
+JetRadius 0.4
+WeightExponent 1 2
+SmearDeltaR 0
+SmearEnergyWeight 0
+JetPtBinEdgesEEC 15 20 30 40 80 120 160 200
+TrackPtBinEdgesEEC 0.5 1 1.5 2 2.5 3 3.5 4 300
+SkipCovarianceMatrix 0
+MinJetPtUnfoldingReco 20
+MinJetPtUnfoldingTruth 10
+CentralityBinEdges -1 100
+TrackPtBinEdges 0.7 1 2 3 4 8 12 300
+PtHatBinEdges 0 30 50 80 120 170 220 280 370 460
+BackgroundMethods 0
+MegaSkimMixing 1
+EventMatchForMixing 0
+BinnedMixing 0
+VzMixingBins -0.5 1
+HiBinMixingBins -0.5 1
+HFEnergyMixingBins 0 1
+MultiplicityMixingBins -0.5 1
+HFEnergyShift 0
+DebugLevel 1
+MaxEventsPerFile 1000
+ChannelRadiusCode 4
+MinPairTrackPt 2
+FirstUnfoldedJetPtBin 0
+LastUnfoldedJetPtBin 6
+Run3TrackPairCorrectionFile trackCorrectionTables/pp2024/pair/20261116/Loose/trackPairEfficiencyCorrection_pp_run3-an751-v6-32dr-lowpt.root
