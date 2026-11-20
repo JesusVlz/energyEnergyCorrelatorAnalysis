@@ -165,3 +165,55 @@ Exact submission records, frozen provenance and queue snapshots are in each
 campaign. `results/2026-10-30-gengen-pilot/campaign_summary.json` records both
 clusters/settings and the local evidence. The background task sheet has been
 updated with actual code/run/physics status and the 2 November follow-up gates.
+
+## Event-mixing lookup table, bounded I/O, and physics validation
+
+`src/MixingLookupTable.{h,cxx}`, `buildMixingLookupTable.cxx`, single-handle
+`ForestReader::ReadForestFromFile` / `ReadTrackTreeOnlyFromFile`, and
+`EECAnalyzer::FlushPendingMixedJets` replace the multi-file `TChain` donor path:
+
+![Event-Mixing I/O and File-Descriptor Benchmark](evidence/2026-11-20/mixing_lookup_io_benchmark.png)
+
+- **I/O and file-descriptor behavior (`origin/main` vs `New`):**
+  - Startup donor `.root` opens drop from `4N + 6` per job to `0` when using a
+    prebuilt `<MixingFileList>.lookup.tsv` (or sequential single-handle metadata
+    opens of only the job's `MixingMaxOpenFiles` shard when omitted).
+  - Concurrent open `.root` file descriptors drop from `5 * N_signal + 6` leaked
+    `TChain` handles (`26` open FDs observed on 4 OO signal + 1 donor file) to at
+    most `1` open `.root` file at any instant (`0` leaked `TFile`s).
+  - Grouped sequential `trackTree` prefetch reduces real OO 2025 read volume on
+    4 signal files (128,605 events) from `29,569 MiB` (`31.0 GB`) to `535 MiB`
+    (`0.56 GB`, **55x less I/O**, **5.3x faster** runtime), while fixing the
+    legacy `ForestReader::GetNEvents()` `TChain` bug that read only file `0`'s
+    entry count in multi-file donor lists.
+- **Bit-for-bit algorithmic equivalence (`Lookup` vs `Fallback`):**
+  - With identical `MixingRandomSeed`, `.lookup.tsv` and `MixingLookupTable none`
+    match to `0.000e+00` across all 64 output histograms on real OO 2025 MB data
+    (`482/482` sparse EEC bins), real ppRef 2024 data (`1,158/1,158` sparse EEC
+    bins), all four OO 2025 MC modes (`RecoReco`, `RecoGen`, `GenReco`,
+    `GenGen`), and byte-for-byte identical `OOMixingPilot` `.partners.csv`,
+    `.pool.csv`, `.jets.csv`, and `.contributions.csv` ledgers.
+
+![Real-Data EEC Physics Validation](evidence/2026-11-20/mixing_lookup_physics_validation.png)
+
+- **Real-data physics validation (`origin/main` vs `New`):**
+  - Tested on **128,605** real CMS OO 2025 MB events (`L1_object_data_990..993.root`,
+    mixed against both 1-file and 6-file 191,644-event MB pools) and **49,214**
+    real CMS ppRef 2024 events (`HiForestMiniAOD_579.root`, mixed against 5,100
+    eligible unbiased soft-UE donor events with `Max$(jtpt) < 20 GeV`).
+  - **Exact same-event invariance:** `0.000e+00` maximum difference across
+    `nEvents`, `vertexZ`, `centrality`, `triggersAfterSelection`, `trackCuts`,
+    `multiplicityInJetCone`, `multiplicityInReflectedCone`, `inclusiveJet`,
+    `track`, and all **8** non-mixed EEC pairing categories (`SameJetSameJet`,
+    reflected, and perpendicular cones).
+  - **Mixed-event background and subtracted EEC closure ($\Delta R < 0.4$, $p_{\mathrm{T,trk}} > 2\text{ GeV}$):**
+    - OO 2025 ($p_{\mathrm{T,jet}} > 20\text{ GeV}$, 1-file): `Sig*Mix` $\chi^2/\mathrm{ndf} = 14.51/22$ ($p=0.882$), `Mix*Mix_same` $7.38/17$ ($p=0.978$), `Mix1*Mix2` $8.29/15$ ($p=0.912$), total $B_{\mathrm{mix}}$ $13.81/23$ ($p=0.932$), subtracted EEC integral `New/Old = 1.00381` (`+0.381%`).
+    - OO 2025 ($p_{\mathrm{T,jet}} > 20\text{ GeV}$, 6-file): $n=1$ $B_{\mathrm{mix}}$ $\chi^2/\mathrm{ndf} = 18.07/27$ ($p=0.901$), subtracted EEC `New/Old = 0.99955` (`-0.045%`); $n=2$ $B_{\mathrm{mix}}$ $\chi^2/\mathrm{ndf} = 23.19/27$ ($p=0.675$), subtracted EEC `New/Old = 1.00154` (`+0.154%`); $40 < p_{\mathrm{T,jet}} < 160\text{ GeV}$ $n=1$ $B_{\mathrm{mix}}$ $15.33/17$ ($p=0.572$), subtracted EEC `New/Old = 0.99407` (`-0.593%`).
+    - ppRef 2024 ($40 < p_{\mathrm{T,jet}} < 160\text{ GeV}$): $n=1$ `Sig*Mix` $\chi^2/\mathrm{ndf} = 7.96/17$ ($p=0.967$), $n=1$ $B_{\mathrm{mix}}$ $8.68/17$ ($p=0.950$, subtracted EEC `New/Old = 0.99780`, `-0.220%`), $n=2$ $B_{\mathrm{mix}}$ $12.18/17$ ($p=0.789$, subtracted EEC `New/Old = 0.99499`, `-0.501%`).
+    - Global pull distribution across 115 independent mixed-EEC bins: mean `-0.034`, RMS `0.800` (zero $>2\sigma$ outliers); per-jet `jetPtUnfoldingCovariance` integrals match to `+0.82%` (OO 2025) and `+0.46%` (ppRef 2024).
+
+Run the automated C++/Python lookup, file-handle cap, sharding, and equivalence suite with:
+
+```bash
+python3 -m unittest validation/run3Mixing/test_mixing_lookup_table.py -v
+```

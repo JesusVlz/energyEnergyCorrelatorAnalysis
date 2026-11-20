@@ -48,10 +48,11 @@ make
 make -C plotting
 ```
 
-Run the executable without arguments to print its command-line help:
+`make` builds `eecAnalysis` and the optional event-mixing donor metadata builder `buildMixingLookupTable`. Run either executable without arguments to print its command-line help:
 
 ```bash
 ./eecAnalysis
+./buildMixingLookupTable
 ```
 
 ### 3. Run a local O–O test
@@ -265,6 +266,21 @@ it to `0`, keeps the established QA binning; `ConfigurationCard::HasKey` allows
 older cards to omit this optional key. The maximum-particle-pT and jet-closure
 axes retain their existing binning because their consumers apply separate
 particle thresholds and jet-pT selections that require those axes.
+
+### Event-mixing lookup table and bounded file-handle I/O
+
+Mixed-cone runs (`BackgroundMethods` bit 2) match donor events using a lightweight metadata lookup table (`MixingLookupTable`) and load donor tracks in a grouped single-open prefetch pass (`EECAnalyzer::FlushPendingMixedJets`), avoiding simultaneous `TChain` opens and random `TBasket` seeks across donor ROOT files:
+
+1. **Optional prebuilt lookup table (`.lookup.tsv`):** Prebuild once per donor list and card configuration so analysis jobs open **zero** donor ROOT files at startup:
+   ```bash
+   ./buildMixingLookupTable mixingFileList/OO2025_MB_pool_pilot.txt cards/R4/materialized/OO_Data_split_allCones_MB35.input
+   ```
+   By default `eecAnalysis` auto-discovers `<MixingFileList>.lookup.tsv` and validates that its recorded `DataType`, trigger, vertex/event cuts, jet-veto settings, and canonical donor paths match the active card. If no `.lookup.tsv` is present, `eecAnalysis` automatically scans only the job's active donor shard one `TFile` at a time without reading `trackTree`.
+2. **Optional mixing I/O card keys** (omitting them preserves defaults):
+   - `MixingLookupTable <path|none>` — explicit `.lookup.tsv` path, or `none` to force direct metadata scanning.
+   - `MixingMaxOpenFiles 4` — deterministic per-job shard of active donor files (default `4`; `0` activates all files in `MixingFileList`). If a rare vertex/activity bin has fewer than two partners in the initial shard, additional donor files are expanded on demand.
+   - `MixingRandomSeed 0` — optional positive `UInt_t` seed for deterministic bit-for-bit partner reproduction across tests (`0` or omitted uses `TRandom3(0)`).
+3. **Validation:** Verified bit-for-bit (`0.000e+00` across all 64 histograms) between `.lookup.tsv` and direct single-handle scanning, and validated against `origin/main` across 128,605 real CMS OO 2025 events, 49,214 real CMS ppRef 2024 events, and OO 2025 MC (`RecoReco`, `RecoGen`, `GenReco`, `GenGen`), achieving ~55x lower read I/O with exact (`0.000e+00`) same-event invariance and statistically consistent mixed-event subtraction; see [validation/run3Mixing/README.md](validation/run3Mixing/README.md#event-mixing-lookup-table-bounded-io-and-physics-validation).
 
 ## Running with CRAB
 
@@ -682,6 +698,7 @@ Do these approximately in this order:
 | Path | Contents |
 |---|---|
 | `eecAnalysis.cxx` | Main executable and command-line interface |
+| `buildMixingLookupTable.cxx` | Standalone builder for prebuilt event-mixing donor lookup tables (`.lookup.tsv`) |
 | `src/` | Forest readers, analyzer, histograms, and correction code |
 | `plotting/` | Projection, processing, QA, comparison, and unfolding macros |
 | `crab/` | CRAB configurations, cards, input lists, and wrapper scripts |

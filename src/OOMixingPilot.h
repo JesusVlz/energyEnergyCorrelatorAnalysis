@@ -51,6 +51,8 @@ struct PilotEvent {
   bool eligible=false, backgroundKnown=false, backgroundExcluded=false, physicalExcluded=false;
   std::uint64_t background=0;
   BackgroundFingerprint fingerprint;
+  std::string signatureText;
+  std::string SignatureText() const { return signatureText.empty() ? fingerprint.text() : signatureText; }
 };
 inline unsigned int PilotPool(const PilotEvent& event,std::uint64_t seed){
   return event.backgroundKnown ? (event.background^seed)%2 : PilotPool(event.id,seed);

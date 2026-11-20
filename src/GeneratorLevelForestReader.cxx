@@ -146,6 +146,8 @@ GeneratorLevelForestReader& GeneratorLevelForestReader::operator=(const Generato
     fRecoJetPhiArray[i] = in.fRecoJetPhiArray[i];
     fRecoJetRawPtArray[i] = in.fRecoJetRawPtArray[i];
   }
+  fOwnsTrees = false;
+  fTrackTreeOnlyMode = in.fTrackTreeOnlyMode;
   
   return *this;
 }
@@ -155,6 +157,7 @@ GeneratorLevelForestReader& GeneratorLevelForestReader::operator=(const Generato
  */
 GeneratorLevelForestReader::~GeneratorLevelForestReader(){
   // destructor
+  BurnForest();
 }
 
 /*
@@ -515,27 +518,33 @@ void GeneratorLevelForestReader::Initialize(){
   }
   
   // Connect the branches to the track tree
-  if(fReadTrackTree){
-    fTrackTree->SetBranchStatus("*",0);
-    fTrackTree->SetBranchStatus("pt",1);
-    fTrackTree->SetBranchAddress("pt",&fTrackPtArray,&fTrackPtBranch);
-    fTrackTree->SetBranchStatus("phi",1);
-    fTrackTree->SetBranchAddress("phi",&fTrackPhiArray,&fTrackPhiBranch);
-    fTrackTree->SetBranchStatus("eta",1);
-    fTrackTree->SetBranchAddress("eta",&fTrackEtaArray,&fTrackEtaBranch);
-    fTrackTree->SetBranchStatus("sube",1);
-    fTrackTree->SetBranchAddress("sube",&fTrackSubeventArray,&fTrackChi2Branch);  // Reuse a branch from ForestReader that is not otherwise needed here
-
-    // The track charge is not available in mega skims
-    if(!fMegaSkimMode){
-      fTrackTree->SetBranchStatus("chg",1);
-      fTrackTree->SetBranchAddress("chg",&fTrackChargeArray,&fTrackPtErrorBranch);  // Reuse a branch from ForestReader that is not otherwise needed here
-    }
+  if(fReadTrackTree && fTrackTree){
+    InitializeTrackTreeOnly();
   } // Reading track trees
 
-  // We need to load one event to initialize TChains properly. Not sure why, but this is how things seem to work
-  GetEvent(0);
+  // Prime event zero when entries exist to initialize branches/chains properly
+  if(fHeavyIonTree->GetEntries() > 0){
+    GetEvent(0);
+  }
 
+}
+
+void GeneratorLevelForestReader::InitializeTrackTreeOnly(){
+  fTrackTree->SetBranchStatus("*",0);
+  fTrackTree->SetBranchStatus("pt",1);
+  fTrackTree->SetBranchAddress("pt",&fTrackPtArray,&fTrackPtBranch);
+  fTrackTree->SetBranchStatus("phi",1);
+  fTrackTree->SetBranchAddress("phi",&fTrackPhiArray,&fTrackPhiBranch);
+  fTrackTree->SetBranchStatus("eta",1);
+  fTrackTree->SetBranchAddress("eta",&fTrackEtaArray,&fTrackEtaBranch);
+  fTrackTree->SetBranchStatus("sube",1);
+  fTrackTree->SetBranchAddress("sube",&fTrackSubeventArray,&fTrackChi2Branch);  // Reuse a branch from ForestReader that is not otherwise needed here
+
+  // The track charge is not available in mega skims
+  if(!fMegaSkimMode){
+    fTrackTree->SetBranchStatus("chg",1);
+    fTrackTree->SetBranchAddress("chg",&fTrackChargeArray,&fTrackPtErrorBranch);  // Reuse a branch from ForestReader that is not otherwise needed here
+  }
 }
 
 /*
@@ -547,18 +556,7 @@ Long64_t GeneratorLevelForestReader::GetTotalChainEntries() const{
 }
 
 void GeneratorLevelForestReader::ReadForestFromFile(TFile *inputFile){
-  std::vector<TString> fileList;
-  fileList.push_back(inputFile->GetName());
-  ReadForestFromFileList(fileList);
-}
-
-/*
- * Connect a new tree to the reader
- */
-void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fileList){
-
-  // Open one file to determine if we are dealing with miniAOD or regular AOD
-  TFile *inputFile = TFile::Open(fileList.at(0));
+  BurnForest();
   if(inputFile == nullptr || inputFile->IsZombie()){
     throw std::runtime_error("GeneratorLevelForestReader: cannot open input forest");
   }
@@ -568,13 +566,104 @@ void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fil
   TTree* miniAODcheck = (TTree*)inputFile->Get("HiForestInfo/HiForest");
   fIsMiniAOD = !(miniAODcheck == NULL);
 
+  const char *treeName[4] = {"none","none","none","none"};
+  if(fDataType == kPp || fDataType == kPpMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
+    treeName[0] = "ak4CaloJetAnalyzer/t";
+    treeName[1] = "ak4PFJetAnalyzer/t";
+    if(fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC) treeName[3] = "ak8PFJetAnalyzer/t";
+  } else if(fDataType == kOO || fDataType == kOOMC){
+    treeName[0] = "akCs2PFJetAnalyzer/t";
+    treeName[1] = "akCs4PFJetAnalyzer/t";
+    treeName[2] = "akCs6PFJetAnalyzer/t";
+    treeName[3] = "akCs8PFJetAnalyzer/t";
+  } else {
+    treeName[0] = "akPu4CaloJetAnalyzer/t";
+    treeName[1] = "akCs4PFJetAnalyzer/t";
+    treeName[2] = "akPu4PFJetAnalyzer/t";
+    treeName[3] = "akFlowPuCs4PFJetAnalyzer/t";
+  }
+
+  fHeavyIonTree = dynamic_cast<TTree*>(inputFile->Get("hiEvtAnalyzer/HiTree"));
+  if(!fHeavyIonTree) throw std::runtime_error("GeneratorLevelForestReader: missing hiEvtAnalyzer/HiTree");
+  if(fUseJetTrigger){
+    fHltTree = dynamic_cast<TTree*>(inputFile->Get("hltanalysis/HltTree"));
+    if(!fHltTree) throw std::runtime_error("GeneratorLevelForestReader: missing hltanalysis/HltTree");
+  }
+  if(!fMegaSkimMode){
+    fSkimTree = dynamic_cast<TTree*>(inputFile->Get("skimanalysis/HltTree"));
+    if(!fSkimTree) throw std::runtime_error("GeneratorLevelForestReader: missing skimanalysis/HltTree");
+  }
+
+  if(!fMixingMode){
+    fJetTree = dynamic_cast<TTree*>(inputFile->Get(treeName[fJetType]));
+    if(fJetTree == nullptr){
+      throw std::runtime_error(std::string("GeneratorLevelForestReader: missing native jet tree ") + treeName[fJetType]);
+    }
+    if(fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
+      EECJetGeometry::RequireRun3JetBranches(fJetTree, true, true, fJetAxis, fMatchJets);
+    }
+  }
+
+  if(fReadTrackTree){
+    fTrackTree = dynamic_cast<TTree*>(inputFile->Get("HiGenParticleAna/hi"));
+    if(!fTrackTree) throw std::runtime_error("GeneratorLevelForestReader: missing HiGenParticleAna/hi");
+  }
+
+  fOwnsTrees = false;
+  fTrackTreeOnlyMode = false;
+  Initialize();
+}
+
+void GeneratorLevelForestReader::ReadTrackTreeOnlyFromFile(TFile *inputFile){
+  BurnForest();
+  if(inputFile == nullptr || inputFile->IsZombie()){
+    throw std::runtime_error("GeneratorLevelForestReader: cannot open input forest for particle prefetch");
+  }
+  fTrackTree = dynamic_cast<TTree*>(inputFile->Get("HiGenParticleAna/hi"));
+  if(!fTrackTree) throw std::runtime_error("GeneratorLevelForestReader: missing HiGenParticleAna/hi");
+  fOwnsTrees = false;
+  fTrackTreeOnlyMode = true;
+  InitializeTrackTreeOnly();
+}
+
+/*
+ * Connect a new tree to the reader
+ */
+void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fileList){
+  BurnForest();
+  if(fileList.empty()){
+    throw std::invalid_argument("GeneratorLevelForestReader: empty input file list");
+  }
+
+  // Open one file to determine if we are dealing with miniAOD or regular AOD
+  TFile *inputFile = TFile::Open(fileList.at(0));
+  if(inputFile == nullptr || inputFile->IsZombie()){
+    delete inputFile;
+    throw std::runtime_error("GeneratorLevelForestReader: cannot open input forest");
+  }
+  if(fJetType < 0 || fJetType > 3 || fJetAxis < 0 || fJetAxis > 1){
+    inputFile->Close();
+    delete inputFile;
+    throw std::invalid_argument("GeneratorLevelForestReader: invalid jet type or axis");
+  }
+  TTree* miniAODcheck = (TTree*)inputFile->Get("HiForestInfo/HiForest");
+  fIsMiniAOD = !(miniAODcheck == NULL);
+
   // Helper variable for finding the correct tree
   const char *treeName[4] = {"none","none","none","none"};
 
   // Connect a trees from the file to the reader
-  fHeavyIonTree = new TChain("hiEvtAnalyzer/HiTree");
-  if(fUseJetTrigger) fHltTree = new TChain("hltanalysis/HltTree");
-  if(!fMegaSkimMode) fSkimTree = new TChain("skimanalysis/HltTree");
+  TChain* heavyIonChain = new TChain("hiEvtAnalyzer/HiTree");
+  TChain* hltChain = fUseJetTrigger ? new TChain("hltanalysis/HltTree") : nullptr;
+  TChain* skimChain = !fMegaSkimMode ? new TChain("skimanalysis/HltTree") : nullptr;
+  TChain* jetChain = nullptr;
+  TChain* trackChain = nullptr;
+
+  fHeavyIonTree = heavyIonChain;
+  fHltTree = hltChain;
+  fSkimTree = skimChain;
+  fOwnsTrees = true;
+  fTrackTreeOnlyMode = false;
 
   // The jet tree has different name in different datasets
   if(fDataType == kPp || fDataType == kPpMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
@@ -597,24 +686,38 @@ void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fil
     if(inputFile->Get(treeName[fJetType]) == nullptr){
       const std::string missingTree = treeName[fJetType];
       inputFile->Close();
+      delete inputFile;
+      BurnForest();
       throw std::runtime_error("GeneratorLevelForestReader: missing native jet tree " + missingTree);
     }
     if(fDataType == kOO || fDataType == kOOMC || fDataType == kPpRef5p36TeV || fDataType == kPpRef5p36TeVMC){
-      EECJetGeometry::RequireRun3JetBranches(dynamic_cast<TTree*>(inputFile->Get(treeName[fJetType])), true, true, fJetAxis, fMatchJets);
+      try {
+        EECJetGeometry::RequireRun3JetBranches(dynamic_cast<TTree*>(inputFile->Get(treeName[fJetType])), true, true, fJetAxis, fMatchJets);
+      } catch(...) {
+        inputFile->Close();
+        delete inputFile;
+        BurnForest();
+        throw;
+      }
     }
-    fJetTree = new TChain(treeName[fJetType]);
+    jetChain = new TChain(treeName[fJetType]);
+    fJetTree = jetChain;
   }
   inputFile->Close();
+  delete inputFile;
 
   // The track tree is different than in other types of forests
-  if(fReadTrackTree) fTrackTree = new TChain("HiGenParticleAna/hi");
+  if(fReadTrackTree){
+    trackChain = new TChain("HiGenParticleAna/hi");
+    fTrackTree = trackChain;
+  }
 
   for(std::vector<TString>::iterator listIterator = fileList.begin(); listIterator != fileList.end(); listIterator++){
-    fHeavyIonTree->Add(*listIterator);
-    if(!fMegaSkimMode) fSkimTree->Add(*listIterator);
-    if(fUseJetTrigger) fHltTree->Add(*listIterator);
-    if(!fMixingMode) fJetTree->Add(*listIterator);
-    if(fReadTrackTree) fTrackTree->Add(*listIterator);
+    heavyIonChain->Add(*listIterator);
+    if(skimChain) skimChain->Add(*listIterator);
+    if(hltChain) hltChain->Add(*listIterator);
+    if(jetChain) jetChain->Add(*listIterator);
+    if(trackChain) trackChain->Add(*listIterator);
   }
   
   // Connect branches to trees
@@ -625,48 +728,68 @@ void GeneratorLevelForestReader::ReadForestFromFileList(std::vector<TString> fil
  * Burn the current forest.
  */
 void GeneratorLevelForestReader::BurnForest(){
-  fHeavyIonTree->Delete();
-  fJetTree->Delete();
-  fHltTree->Delete();
-  fSkimTree->Delete();
-  fTrackTree->Delete();
+  if(fOwnsTrees){
+    delete fHeavyIonTree;
+    delete fJetTree;
+    delete fHltTree;
+    delete fSkimTree;
+    delete fTrackTree;
+  }
+  fHeavyIonTree = nullptr;
+  fJetTree = nullptr;
+  fHltTree = nullptr;
+  fSkimTree = nullptr;
+  fTrackTree = nullptr;
+  fOwnsTrees = false;
+  fTrackTreeOnlyMode = false;
 }
 
 /*
  * Check if there are problems in the file list
  */
 bool GeneratorLevelForestReader::CheckFileProblems(){
+  if(!fHeavyIonTree) return true;
+  if(auto* chain = dynamic_cast<TChain*>(fHeavyIonTree)){
+    // Loop over all the files that are in TChains and check they are doing fine
+    TObjArray *fileElements = chain->GetListOfFiles();
+    for (TObject *op: *fileElements) {
+      auto chainElement = static_cast<TChainElement *>(op);
+      TFile *testFile = TFile::Open(chainElement->GetTitle());
 
-  // Loop over all the files that are in TChains and check they are doing fine
-  TObjArray *fileElements = fHeavyIonTree->GetListOfFiles();
-  for (TObject *op: *fileElements) {
-    auto chainElement = static_cast<TChainElement *>(op);
-    TFile *testFile = TFile::Open(chainElement->GetTitle());
+      if(!testFile || !testFile->IsOpen()){
+        delete testFile;
+        return true;
+      }
 
-    // Check that the file is still open
-    if(!testFile->IsOpen()) return true;
+      if(testFile->IsZombie()){
+        testFile->Close();
+        delete testFile;
+        return true;
+      }
 
-    // Check that the file did not turn into a zombie
-    if(testFile->IsZombie()) return true;
-
-    // If everything is fine with the file, we can close the test file
-    testFile->Close();
+      testFile->Close();
+      delete testFile;
+    }
+    return false;
   }
-
-  // If no problems are found from any of the files, return false
-  return false;
-
+  TFile* currentFile = fHeavyIonTree->GetCurrentFile();
+  return !currentFile || !currentFile->IsOpen() || currentFile->IsZombie();
 }
 
 /*
  * Load an event to memory
  */
 void GeneratorLevelForestReader::GetEvent(Int_t nEvent){
+  if(fTrackTreeOnlyMode){
+    fTrackTree->GetEntry(nEvent);
+    fnTracks = fTrackPtArray->size();
+    return;
+  }
   fHeavyIonTree->GetEntry(nEvent);
   if(!fMixingMode) fJetTree->GetEntry(nEvent);
   if(fUseJetTrigger) fHltTree->GetEntry(nEvent);
   if(!fMegaSkimMode) fSkimTree->GetEntry(nEvent);
-  if(fReadTrackTree) {
+  if(fReadTrackTree && fTrackTree) {
     fTrackTree->GetEntry(nEvent);
     
     // Read the numbers of tracks for this event

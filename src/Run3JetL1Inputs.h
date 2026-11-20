@@ -22,8 +22,43 @@ public:
   Run3JetL1Inputs(std::string rhoTree, std::string rhoBranch, std::string areaBranch)
     : fRhoTreeName(std::move(rhoTree)), fRhoName(std::move(rhoBranch)), fAreaName(std::move(areaBranch)) {}
 
+  void BindFile(TFile* file, const char* jetTreeName) {
+    if(!file || file->IsZombie()) throw std::runtime_error("Run-3 L1 cannot read from null/zombie TFile");
+    fAreas.reset();
+    fRhos.reset();
+    fDirectAreas = dynamic_cast<TTree*>(file->Get(jetTreeName));
+    fDirectRhos = dynamic_cast<TTree*>(file->Get(fRhoTreeName.c_str()));
+    auto* events = dynamic_cast<TTree*>(file->Get("hiEvtAnalyzer/HiTree"));
+    if(!fDirectAreas || !fDirectRhos || !events ||
+       fDirectAreas->GetEntries()!=events->GetEntries() || fDirectRhos->GetEntries()!=events->GetEntries())
+      throw std::runtime_error("Run-3 L1 needs aligned jet, rho and event trees with identical entry counts");
+    const std::string areaType = Type(fDirectAreas, fAreaName, "nref");
+    const std::string rhoType = Type(fDirectRhos, fRhoName);
+    fAreaDouble = areaType=="Double_t";
+    fRhoDouble = rhoType=="Double_t";
+    EECJetSelection::Detail::RequireJetLeaf(fDirectAreas, "nref", "Int_t");
+    fDirectAreas->SetBranchStatus("*",0); fDirectRhos->SetBranchStatus("*",0);
+    fDirectAreas->SetBranchStatus("nref",1); fDirectAreas->SetBranchStatus(fAreaName.c_str(),1);
+    fDirectRhos->SetBranchStatus(fRhoName.c_str(),1);
+    if(fDirectAreas->SetBranchAddress("nref",&fCount)<0 ||
+       (fAreaDouble ? fDirectAreas->SetBranchAddress(fAreaName.c_str(),fAreaD.data()) : fDirectAreas->SetBranchAddress(fAreaName.c_str(),fAreaF.data()))<0 ||
+       (fRhoDouble ? fDirectRhos->SetBranchAddress(fRhoName.c_str(),&fRhoD) : fDirectRhos->SetBranchAddress(fRhoName.c_str(),&fRhoF))<0)
+      throw std::runtime_error("Run-3 L1 cannot bind rho/area inputs");
+    fRead = false;
+  }
+
+  void Reset() {
+    fAreas.reset();
+    fRhos.reset();
+    fDirectAreas = nullptr;
+    fDirectRhos = nullptr;
+    fRead = false;
+  }
+
   void Bind(const std::vector<TString>& files, const char* jetTreeName) {
     if(files.empty()) throw std::invalid_argument("Run-3 L1 input file list is empty");
+    fDirectAreas = nullptr;
+    fDirectRhos = nullptr;
     fAreas.reset(new TChain(jetTreeName));
     fRhos.reset(new TChain(fRhoTreeName.c_str()));
     bool first = true;
@@ -55,9 +90,11 @@ public:
 
   void Read(Long64_t entry, int expectedJetCount) {
     fRead = false;
-    if(!fAreas || !fRhos || entry<0 || entry>=fAreas->GetEntries()) throw std::out_of_range("Run-3 L1 invalid event entry");
-    const auto areaEntry = fAreas->LoadTree(entry), rhoEntry = fRhos->LoadTree(entry);
-    auto* areaTree = fAreas->GetTree(); auto* rhoTree = fRhos->GetTree();
+    TTree* areaSource = fDirectAreas ? fDirectAreas : fAreas.get();
+    TTree* rhoSource = fDirectRhos ? fDirectRhos : fRhos.get();
+    if(!areaSource || !rhoSource || entry<0 || entry>=areaSource->GetEntries()) throw std::out_of_range("Run-3 L1 invalid event entry");
+    const auto areaEntry = areaSource->LoadTree(entry), rhoEntry = rhoSource->LoadTree(entry);
+    auto* areaTree = areaSource->GetTree(); auto* rhoTree = rhoSource->GetTree();
     if(areaEntry<0 || rhoEntry<0 || !areaTree || !rhoTree) throw std::runtime_error("Run-3 L1 cannot load entry");
     EECJetSelection::Detail::RequireJetLeaf(areaTree,"nref","Int_t");
     if(Type(areaTree,fAreaName,"nref")!=(fAreaDouble?"Double_t":"Float_t") ||
@@ -90,6 +127,8 @@ private:
   }
   std::string fRhoTreeName,fRhoName,fAreaName;
   std::unique_ptr<TChain> fAreas,fRhos;
+  TTree* fDirectAreas=nullptr;
+  TTree* fDirectRhos=nullptr;
   std::array<Float_t,250> fAreaF{};
   std::array<Double_t,250> fAreaD{};
   Float_t fRhoF=0;

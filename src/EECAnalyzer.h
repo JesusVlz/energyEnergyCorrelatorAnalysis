@@ -37,7 +37,9 @@
 #include "SmearingProvider.h"
 #include "Run3JetSelection.h"
 #include <cmath>
+#include <unordered_map>
 #include "OOMixingPilot.h"
+#include "MixingLookupTable.h"
 
 class EECAnalyzer{
   
@@ -59,19 +61,46 @@ public:
   
   // Constructors and destructor
   EECAnalyzer(); // Default constructor
-  EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard* newCard, Int_t runLocal, Int_t mixingListIndex); // Custom constructor
+  EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard* newCard, Int_t runLocal, Int_t mixingListIndex, Int_t jobShardId = -1); // Custom constructor
   EECAnalyzer(const EECAnalyzer& in); // Copy constructor
   virtual ~EECAnalyzer(); // Destructor
   EECAnalyzer& operator=(const EECAnalyzer& obj); // Equal sign operator
   
   // Methods
   void RunAnalysis();                     // Run the dijet analysis
+  void BuildAndWriteMixingLookupTable(const std::string& mixingListPath, const std::string& outputLookupPath, Int_t maxPoolEvents = 0); // Build and persist a donor lookup table
   EECHistograms* GetHistograms() const;   // Getter for histograms
 
  private:
   
+  struct CachedDonorTrack {
+    Double_t pt = 0.0;
+    Double_t eta = 0.0;
+    Double_t phi = 0.0;
+    Double_t efficiencyCorrection = 1.0;
+    Int_t subevent = -1;
+  };
+
+  struct PendingMixedJet {
+    Double_t jetPt = 0.0;
+    Double_t jetEta = 0.0;
+    Double_t jetPhi = 0.0;
+    Double_t centrality = 0.0;
+    Double_t totalEventWeight = 1.0;
+    Int_t signalHiBin = 1;
+    Int_t ooClosureJetIndex = -1;
+    oo_eec::PilotEvent ooClosureSignal;
+    std::vector<double> selectedTrackPt[EECHistograms::knJetConeTypes];
+    std::vector<double> relativeTrackEta[EECHistograms::knJetConeTypes];
+    std::vector<double> relativeTrackPhi[EECHistograms::knJetConeTypes];
+    std::vector<int> selectedTrackSubevent[EECHistograms::knJetConeTypes];
+    std::vector<double> selectedTrackCorrection[EECHistograms::knJetConeTypes];
+    int coneSourceHiBin[EECHistograms::knJetConeTypes] = {0};
+    std::vector<Int_t> donorGlobalIndices;
+  };
+
   // Private methods
-  void CalculateEnergyEnergyCorrelator(const vector<double> selectedTrackPt[EECHistograms::knJetConeTypes], const vector<double> relativeTrackEta[EECHistograms::knJetConeTypes], const vector<double> relativeTrackPhi[EECHistograms::knJetConeTypes], const vector<int> selectedTrackSubevent[EECHistograms::knJetConeTypes], const vector<double> selectedTrackCorrection[EECHistograms::knJetConeTypes], const int coneSourceHiBin[EECHistograms::knJetConeTypes], const double jetPt);  // Calculate energy-energy correlators
+  void CalculateEnergyEnergyCorrelator(const vector<double> selectedTrackPt[EECHistograms::knJetConeTypes], const vector<double> relativeTrackEta[EECHistograms::knJetConeTypes], const vector<double> relativeTrackPhi[EECHistograms::knJetConeTypes], const vector<int> selectedTrackSubevent[EECHistograms::knJetConeTypes], const vector<double> selectedTrackCorrection[EECHistograms::knJetConeTypes], const int coneSourceHiBin[EECHistograms::knJetConeTypes], const double jetPt, const Double_t explicitCentrality = -999.0, const Int_t explicitHiBin = -999);  // Calculate energy-energy correlators
   void CalculateEnergyEnergyCorrelatorForUnfolding(const vector<double> selectedTrackPt, const vector<double> relativeTrackEta, const vector<double> relativeTrackPhi, const double jetPt, const double genPt); // Calculate energy-energy correlators for unfolding
   void FillOneDimensionalJetPtUnfoldingHistograms(const double jetPt, const double genPt); // Fill histograms for one dimensional jet pT unfolding
   void FillJetPtResponseMatrix(const Int_t jetIndex); // Fill jet pT response matrix
@@ -82,19 +111,25 @@ public:
   void ExportPairTracks(std::ostream& output, bool inJet, double jetEta=0, double jetPhi=0); // Native selected tracks in physical detector coordinates
 
   // Methods for event mixing
-  void PrepareOOClosurePool();
+  MixingLookupConfig MakeMixingLookupConfig() const;
+  std::vector<TString> ParseMixingFileList(const TString& mixingListPath) const;
+  void InitializeJetCalibrationAndReaders(Bool_t readTrackTree);
+  void ScanMixingFilesIntoLookupTable(const std::vector<TString>& mixingFiles, const std::vector<Int_t>& fileIndices, Int_t maxEventsCap, MixingLookupTable& table, Bool_t* truncatedOut = nullptr);
+  void PrepareMixingPoolFromLookup(const std::vector<TString>& mixingFiles, const TString& mixingListPath);
+  void FlushPendingMixedJets(const std::vector<TString>& mixingFiles);
+  void PrepareOOClosurePool(Bool_t poolLoadedFromLookup = false);
   void AssignOOClosurePartners(Int_t entry);
   Int_t GetOOClosureMultiplicity(ForestReader* reader, bool pureHijing) const;
   oo_eec::PilotEvent ReadOOClosureEvent(ForestReader* reader, Int_t entry, bool pureHijing) const;
   std::shared_ptr<oo_eec::ClosurePilotState> fOOClosure = std::make_shared<oo_eec::ClosurePilotState>();
   void PrepareMixingVectors(); // Find vz and hiBin values from mixed event in preparation for event mixing
   void PrepareBinnedMixingVectors(); // Prepare variables needed for mixing in a binned manner
-  void FindMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Int_t const currentMultiplicity, const Int_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing); // Find the mixed events that are matched with the signal event using multiplicity
-  void FindHiBinMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t hibin, const Int_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing); // Find the mixed events that are matched with the signal event using hiBin
-  void FindHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Double_t hfEnergy, const Int_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing); // Find the mixed events that are matched with the signal event using HF energy
-  void FindBinnedMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Int_t const currentMultiplicity, const Int_t eventNumber, const Int_t iEvent); // Find the mixed events that are matched with the signal event using multiplicity bins
-  void FindBinnedHiBinMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t hibin, const Int_t eventNumber, const Int_t iEvent); // Find the mixed events that are matched with the signal event using hiBin bins
-  void FindBinnedHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Double_t hfEnergy, const Int_t eventNumber, const Int_t iEvent); // Find the mixed events that are matched with the signal event using HF energy bins
+  void FindMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Int_t const currentMultiplicity, const ULong64_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing); // Find the mixed events that are matched with the signal event using multiplicity
+  void FindHiBinMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t hibin, const ULong64_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing); // Find the mixed events that are matched with the signal event using hiBin
+  void FindHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Double_t hfEnergy, const ULong64_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing); // Find the mixed events that are matched with the signal event using HF energy
+  void FindBinnedMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Int_t const currentMultiplicity, const ULong64_t eventNumber, const Int_t iEvent); // Find the mixed events that are matched with the signal event using multiplicity bins
+  void FindBinnedHiBinMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t hibin, const ULong64_t eventNumber, const Int_t iEvent); // Find the mixed events that are matched with the signal event using hiBin bins
+  void FindBinnedHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Double_t hfEnergy, const ULong64_t eventNumber, const Int_t iEvent); // Find the mixed events that are matched with the signal event using HF energy bins
   Int_t FindMixingBin(Double_t value, Double_t anchor, Double_t width); // Find a generic mixing bin
   Int_t FindMixingBin(Double_t value, std::vector<Double_t> borders); // Find a generic mixing bin from bin borders
   Int_t FindMixingVzBin(Double_t vz); // Find mixing vz bin from a vz value
@@ -166,6 +201,8 @@ public:
   ForestReader* fTrackReader;                    // Reader for tracks in the event
   ForestReader* fMixedEventReader;               // Reader for mixed events
   UnfoldingForestReader* fUnfoldingForestReader; // Reader for unfolding study
+  Bool_t fOwnsMixedEventReader = false;          // True when allocated by InitializeJetCalibrationAndReaders
+  Bool_t fOwnsUnfoldingReader = false;           // True when allocated by InitializeJetCalibrationAndReaders
   std::vector<TString> fFileNames;               // Vector for all the files to loop over
   ConfigurationCard* fCard;                      // Configuration card for the analysis
   EECHistograms* fHistograms;                    // Filled histograms
@@ -185,7 +222,7 @@ public:
   TRandom3* fRng;                                // Random number generator
 
   // Histograms to determine the covariance matrix
-  TH1D* fThisEventCorrelator[5][10];        // Energy-energy correlators calculated exclusively from this event
+  TH1D* fThisEventCorrelator[5][10] = {{nullptr}}; // Energy-energy correlators calculated exclusively from this event
   
   // Analyzed data and forest types
   Int_t fDataType;                   // Analyzed data type
@@ -284,6 +321,12 @@ public:
   std::vector<Double_t> fHFEnergyMixingBinBorders;     // Bin borders for HF energy used for event matching in mixing
   std::vector<Double_t> fMultiplicityMixingBinBorders; // Bin borders for multiplicity used for event matching in mixing
   Double_t fHFEnergyMatchingShift;      // Shift the matched HF energy value to find a reference value without hard interaction
+  Int_t fJobShardId = -1;               // Optional CRAB/batch job index for deterministic donor-file sharding
+  Int_t fMixingMaxOpenFiles = 4;        // Max distinct donor files opened per job (0 = unlimited across pool)
+  std::uint64_t fMixingShardHash = 0;   // Deterministic per-job hash used to shard donor files evenly
+  MixingLookupTable fMixingLookupTable; // Indexed donor metadata lookup table
+  std::vector<PendingMixedJet> fPendingMixedJets; // Qualifying signal jets awaiting grouped single-open donor track prefetch
+  std::unordered_map<Int_t, std::vector<CachedDonorTrack>> fPrefetchedDonorTracks; // Cached selected tracks for matched donor events
   
   // Which histograms are filled. Do not fill all in order to save memory and not to crash jobs.
   Bool_t fFillEventInformation;                   // Fill event information histograms

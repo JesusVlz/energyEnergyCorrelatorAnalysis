@@ -75,9 +75,12 @@ public:
   virtual Long64_t GetTotalChainEntries() const; // Explicit full-chain count; legacy GetNEvents behavior is retained.
   virtual Int_t GetNEvents() const;                        // Get the number of events
   virtual void ReadForestFromFile(TFile *inputFile) = 0;   // Read the forest from a file
+  virtual void ReadTrackTreeOnlyFromFile(TFile *inputFile) { ReadForestFromFile(inputFile); } // Bind only track tree for grouped donor prefetch
   virtual void ReadForestFromFileList(std::vector<TString> fileList) = 0;   // Read the forest from a file list
   virtual void BurnForest() = 0;                           // Burn the forest
   virtual bool CheckFileProblems() = 0;                    // Check if there are problems in the file list
+  void SetReadTrackTree(Bool_t readTrackTree) { fReadTrackTree = readTrackTree; }
+  Bool_t GetReadTrackTree() const { return fReadTrackTree; }
   
   // Getters for leaves in heavy ion tree
   Float_t GetVz() const;              // Getter for vertex z position

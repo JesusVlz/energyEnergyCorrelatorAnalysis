@@ -146,3 +146,11 @@ loader use the common `THnSparse` interface for both formats.
 `ConfigurationCard` also persists `PairExportFile` and `PairExportNamespace`
 as `JCard/PairExportFileString` and `JCard/PairExportNamespaceString`, alongside
 the existing string-valued Run-3 configuration metadata.
+
+## Event-mixing lookup table and single-handle forest I/O
+
+**MixingLookupTable.cxx**
+
+Stores compact per-donor event metadata (`fileIndex`, `localEntry`, `run`, `lumi`, 64-bit `eventNumber`, `vz`, `hiBin`, `hfEnergy`, `multiplicity`, `eligible`, and optional `OOMixingPilot` fingerprint fields), validates `.lookup.tsv` headers against active card cuts/triggers/veto settings and canonicalized donor paths, deterministically shards multi-file donor pools per job (`MixingMaxOpenFiles`, default `4`), and buckets eligible donors by `(vz, activity)` in canonical `(fileIndex, localEntry)` order (`MixingLookupTable::FindMatchedDonors`).
+
+`HighForestReader::ReadForestFromFile` and `GeneratorLevelForestReader::ReadForestFromFile` bind `TTree*` directly from the caller's open `TFile*` without allocating multi-file `TChain` handles, and `ReadTrackTreeOnlyFromFile` binds only the track/particle tree during `EECAnalyzer::FlushPendingMixedJets` so matched donor tracks are prefetched in a single sequential pass per needed donor file.

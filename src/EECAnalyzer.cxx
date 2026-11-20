@@ -1,6 +1,7 @@
 // Class for the main analysis algorithms for the energy-energy correlator analysis
 
 // Root includes
+#include <TDirectory.h>
 #include <TFile.h>
 #include <TMath.h>
 
@@ -166,6 +167,7 @@ EECAnalyzer::EECAnalyzer() :
   fRecoJetReader = NULL;
   fTrackReader = NULL;
   fMixedEventReader = NULL;
+  fUnfoldingForestReader = NULL;
   
   // Create a corrector for track pair efficiency
   fTrackPairEfficiencyCorrector = new TrackPairEfficiencyCorrector();
@@ -187,19 +189,20 @@ EECAnalyzer::EECAnalyzer() :
 /*
  * Custom constructor
  */
-EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard *newCard, Int_t runLocal, Int_t mixingListIndex) :
+EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard *newCard, Int_t runLocal, Int_t mixingListIndex, Int_t jobShardId) :
   fFileNames(fileNameVector),
   fCard(newCard),
   fHistograms(0),
-  fJetCorrector(),
-  fJetUncertainty(),
+  fJetCorrector(nullptr),
+  fJetUncertainty(nullptr),
   fTrackPairEfficiencyCorrector(nullptr),
   fMaxEventsPerFile(0),
   fVzWeight(1),
   fCentralityWeight(1),
   fPtHatWeight(1),
   fTotalEventWeight(1),
-  fMixingListIndex(mixingListIndex)
+  fMixingListIndex(mixingListIndex),
+  fJobShardId(jobShardId)
 {
   // Custom constructor
   fHistograms = new EECHistograms(fCard);
@@ -210,6 +213,13 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   fRecoJetReader = NULL;
   fTrackReader = NULL;
   fMixedEventReader = NULL;
+  fUnfoldingForestReader = NULL;
+
+  for(int oBin = 0; oBin < 5; oBin++){
+    for(int iBin = 0; iBin < 10; iBin++){
+      fThisEventCorrelator[oBin][iBin] = NULL;
+    }
+  }
 
   // Decode indices for local running to read mixing files from proper location
   if(runLocal > 1){
@@ -457,7 +467,14 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   
   // Initialize the random number generator with a random seed
   fRng = new TRandom3();
-  fRng->SetSeed(0);
+  if(fCard && fCard->HasKey("MixingRandomSeed")){
+    const double seedVal = fCard->Get("MixingRandomSeed");
+    if(!std::isfinite(seedVal) || seedVal < 0 || seedVal != std::floor(seedVal) || seedVal > 4294967295.0)
+      throw std::invalid_argument("MixingRandomSeed must be an unsigned 32-bit integer.");
+    fRng->SetSeed(static_cast<UInt_t>(seedVal));
+  } else {
+    fRng->SetSeed(0);
+  }
 
   // Energy-energy correlator constructed only from this event
   const Int_t nDeltaRBins = fHistograms->GetNDeltaRBinsEEC();
@@ -467,10 +484,16 @@ EECAnalyzer::EECAnalyzer(std::vector<TString> fileNameVector, ConfigurationCard 
   }
   deltaRBins[nDeltaRBins] = fHistograms->GetDeltaRBinBorderHighEEC(nDeltaRBins);
 
+  for(int oBin = 0; oBin < 5; oBin++){
+    for(int iBin = 0; iBin < 10; iBin++){
+      fThisEventCorrelator[oBin][iBin] = nullptr;
+    }
+  }
   const Int_t nTrackPtBinsEEC = fCard->GetNBin("TrackPtBinEdgesEEC");
   for(auto iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); iWeightExponent++){
     for(Int_t iTrackPt = 0; iTrackPt < nTrackPtBinsEEC; iTrackPt++){
       fThisEventCorrelator[iWeightExponent][iTrackPt] = new TH1D(Form("thisEventCorrelator%d%d", iWeightExponent, iTrackPt), Form("thisEventCorrelator%d%d", iWeightExponent, iTrackPt), nDeltaRBins, deltaRBins);
+      fThisEventCorrelator[iWeightExponent][iTrackPt]->SetDirectory(nullptr);
     }
   }
 
@@ -769,7 +792,14 @@ EECAnalyzer::~EECAnalyzer(){
   if(fRng) delete fRng;
   if(fJetReader) delete fJetReader;
   if(fRecoJetReader) delete fRecoJetReader;
-  if(fTrackReader && (fMcCorrelationType == kGenReco || fMcCorrelationType == kRecoGen)) delete fTrackReader;
+  if(fTrackReader && fTrackReader != fJetReader) delete fTrackReader;
+  if(fOwnsMixedEventReader && fMixedEventReader) delete fMixedEventReader;
+  if(fOwnsUnfoldingReader && fUnfoldingForestReader) delete fUnfoldingForestReader;
+  for(int oBin = 0; oBin < 5; oBin++){
+    for(int iBin = 0; iBin < 10; iBin++){
+      if(fThisEventCorrelator[oBin][iBin]) delete fThisEventCorrelator[oBin][iBin];
+    }
+  }
 }
 
 /*
@@ -1015,6 +1045,25 @@ void EECAnalyzer::ReadConfigurationFromCard(){
 
   // Shift in HF energy when finding events to mix with
   fHFEnergyMatchingShift = fCard->Get("HFEnergyShift");
+
+  if(fCard->HasKey("MixingMaxOpenFiles")){
+    const double maxOpen = fCard->Get("MixingMaxOpenFiles");
+    if(!std::isfinite(maxOpen) || maxOpen < 0 || maxOpen != std::floor(maxOpen))
+      throw std::invalid_argument("MixingMaxOpenFiles must be a nonnegative integer (0 = unlimited).");
+    fMixingMaxOpenFiles = static_cast<Int_t>(maxOpen);
+  } else {
+    fMixingMaxOpenFiles = 4;
+  }
+
+  if(fCard->HasKey("MixingShardIndex")){
+    const double shardIdx = fCard->Get("MixingShardIndex");
+    if(!std::isfinite(shardIdx) || shardIdx < 0 || shardIdx != std::floor(shardIdx))
+      throw std::invalid_argument("MixingShardIndex must be a nonnegative integer.");
+    fMixingShardHash = static_cast<std::uint64_t>(shardIdx);
+  } else {
+    const Int_t effectiveShardId = (fJobShardId >= 0) ? fJobShardId : (fMixingListIndex < 0 ? -fMixingListIndex : -1);
+    fMixingShardHash = MixingLookupTable::ComputeShardHash(effectiveShardId, fFileNames);
+  }
   
   //************************************************
   //         Read which histograms to fill
@@ -1218,9 +1267,8 @@ void EECAnalyzer::RunAnalysis(){
   // Event mixing variables
   std::vector<TString> mixingFiles;      // List of mixing files
   Int_t currentMultiplicity;             // Multiplicity in the current event
-  Int_t mixedEventFillIndex;             // Index used to fill mixed event track information into vectors
   std::vector<Int_t> mixedEventIndices;  // Vector for holding the events we have already mixed with
-  Int_t eventNumber;                     // Event number
+  ULong64_t eventNumber;                 // 64-bit physical event number
   Double_t hfSum;                        // Energy sum in HF calorimeters
 
   // HF calorimeters
@@ -1240,7 +1288,6 @@ void EECAnalyzer::RunAnalysis(){
   
   // File name helper variables
   TString currentFile;
-  TFile *testFile;
   
   // Histograms that should be filled
   Int_t filledHistograms = fCard->Get("FilledHistograms");
@@ -1268,159 +1315,7 @@ void EECAnalyzer::RunAnalysis(){
   Double_t fillerUnfoldingCovariance[nFillUnfoldingCovariance];
   Double_t fillerHFEnergy[nFillHFEnergy];
   
-  // Setup the jet energy correction files based on the analyzed data type
-  std::string correctionFileRelative[ForestReader::knDataTypes];
-  correctionFileRelative[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPbPb] = "jetEnergyCorrections/Autumn18_HI_V8_DATA_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPpMC] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPbPbMC] = "jetEnergyCorrections/Autumn18_HI_V8_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPPb_pToMinusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPPb_pToPlusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_pgoing_Embedded_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_pgoing_Embedded_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kOO] = "jetEnergyCorrections/L2Relative_AK4PF_OO_V1.txt";
-  correctionFileRelative[ForestReader::kOOMC] = "jetEnergyCorrections/L2Relative_AK4PF_OO_V1.txt";
-  correctionFileRelative[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/Prompt24HIpp_V1_MC_L2Relative_AK4PF.txt";
-  correctionFileRelative[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/Prompt24HIpp_V1_MC_L2Relative_AK4PF.txt";
-
-
-  std::string correctionFileResidual[ForestReader::knDataTypes];
-  correctionFileResidual[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_L2L3Residual_AK4PF.txt";
-  correctionFileResidual[ForestReader::kPbPb] = "jetEnergyCorrections/Autumn18_HI_V8_DATA_L2L3Residual_AK4PF.txt";
-  correctionFileResidual[ForestReader::kPpMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
-  correctionFileResidual[ForestReader::kPbPbMC] = "CorrectionNotAppliedPF.txt";
-  correctionFileResidual[ForestReader::kPPb_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
-  correctionFileResidual[ForestReader::kPPb_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
-  correctionFileResidual[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
-  correctionFileResidual[ForestReader::kPPbMC_pToMinusEta] = "CorrectionNotAppliedPF.txt";
-  correctionFileResidual[ForestReader::kPPbMC_pToPlusEta] = "CorrectionNotAppliedPF.txt";
-  correctionFileResidual[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt"; // Use the dummy string
-  correctionFileResidual[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
-  correctionFileResidual[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt";
-  correctionFileResidual[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt";
-
-  std::string uncertaintyFile[ForestReader::knDataTypes];
-  uncertaintyFile[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_Uncertainty_AK4PF.txt";
-  uncertaintyFile[ForestReader::kPbPb] = "jetEnergyCorrections/Autumn18_HI_V8_DATA_Uncertainty_AK4PF.txt";
-  uncertaintyFile[ForestReader::kPpMC] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_MC_Uncertainty_AK4PF.txt";
-  uncertaintyFile[ForestReader::kPbPbMC] = "jetEnergyCorrections/Autumn18_HI_V8_MC_Uncertainty_AK4PF.txt";
-  uncertaintyFile[ForestReader::kPPb_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
-  uncertaintyFile[ForestReader::kPPb_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
-  uncertaintyFile[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
-  uncertaintyFile[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
-  uncertaintyFile[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
-  uncertaintyFile[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
-  uncertaintyFile[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
-  uncertaintyFile[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
-  uncertaintyFile[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
-  
-  // For calo jets, use the correction files for calo jets (otherwise same name, but replace PF with Calo)
-  if(fJetType == 0 && !fIsOOData){
-    size_t pfIndex = 0;
-    pfIndex = correctionFileRelative[fDataType].find("PF", pfIndex);
-    correctionFileRelative[fDataType].replace(pfIndex, 2, "Calo");
-    pfIndex = 0;
-    pfIndex = correctionFileResidual[fDataType].find("PF", pfIndex);
-    correctionFileResidual[fDataType].replace(pfIndex, 2, "Calo");
-    pfIndex = 0;
-    pfIndex = uncertaintyFile[fDataType].find("PF", pfIndex);
-    uncertaintyFile[fDataType].replace(pfIndex, 2, "Calo");
-    
-  }
-  
-  vector<string> correctionFiles;
-  
-  // The relative correction is available for every configured collision system
-  correctionFiles.push_back(correctionFileRelative[fDataType]);
-
-  // OO currently has only an L2Relative correction. Do not append a dummy
-  // L2L3Residual level; add the OO residual here once it becomes available.
-
-  if(fIsRealData && !fIsOOData) {
-    correctionFiles.push_back(correctionFileResidual[fDataType]);
-  }
-  
-  if(fUseRun3JEC) {
-    correctionFiles.clear();
-    if(fIsOOData) {
-      const std::string base="jetEnergyCorrections/OO2025/";
-      correctionFiles.push_back(base+"Prompt25HIOO_V1_MC_L2Relative_AK4PF.txt");
-    } else {
-      const std::string base="jetEnergyCorrections/pp2024/";
-      if(fUsePpL1FastJet) correctionFiles.push_back(base+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt");
-      correctionFiles.push_back(base+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
-      if(fIsRealData) correctionFiles.push_back(base+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt");
-    }
-    for(const auto& path:correctionFiles) {
-      std::ifstream input(path);
-      if(!input.good()) throw std::runtime_error("Missing pinned Run-3 JEC payload: "+path);
-    }
-  } else if(fIsOOData || fIsPp2024Data) {
-    std::cout<<"Run3JEC 0: legacy calibration retained for comparison; current Run-3 L2 calibration is NOT active."<<std::endl;
-  }
-  fJetCorrector = new JetCorrector(correctionFiles);
-  fJetUncertainty = new JetUncertainty(uncertaintyFile[fDataType]);
-    
-  //************************************************
-  //      Find forest readers for data files
-  //************************************************
-  
-  if(fMcCorrelationType == kGenReco || fMcCorrelationType == kGenGen){
-    fJetReader = new GeneratorLevelForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,fMatchJets,readTrackTree);
-  } else {
-    fJetReader = new HighForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,fMatchJets,readTrackTree);
-  }
-  
-  // Select the reader for tracks based on forest and MC correlation type
-  if(fMcCorrelationType == kRecoGen){
-    fTrackReader = new GeneratorLevelForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,fMatchJets);
-  } else if (fMcCorrelationType == kGenReco){
-    fTrackReader = new HighForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,fMatchJets);
-  } else {
-    fTrackReader = fJetReader;
-  }
-
-  // Select the reader for mixed events
-  if(fDoMixedCone){
-    if(fMcCorrelationType == kRecoGen || fMcCorrelationType == kGenGen){
-      fMixedEventReader = new GeneratorLevelForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,false,true,true,fMegaSkimMode);
-    } else {
-      fMixedEventReader = new HighForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,false,true,true,fMegaSkimMode);
-    }
-  }
-
-  if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms){
-    fUnfoldingForestReader = new UnfoldingForestReader(fDataType,fJetType,fJetAxis);
-  }
-
-  if(fRun3JetID || fApplyJetVeto || fUseRun3JEC){
-    if(auto* reco = dynamic_cast<HighForestReader*>(fJetReader)) reco->EnableRun3JetSelection(true);
-    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
-      fUnfoldingForestReader->EnableRun3JetSelection(true);
-  }
-  if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data){
-    if(auto* reco = dynamic_cast<HighForestReader*>(fJetReader)) reco->EnableRun3PpL1Inputs();
-    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
-      fUnfoldingForestReader->EnableRun3PpL1Inputs();
-  }
-  if(fApplyJetVeto || fUseRun3JEC){
-    if(fMcCorrelationType == kGenReco || fMcCorrelationType == kGenGen){
-      fRecoJetReader = new HighForestReader(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false);
-      fRecoJetReader->EnableRun3JetSelection(true);
-      if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data) fRecoJetReader->EnableRun3PpL1Inputs();
-    }
-    if(fDoMixedCone && fApplyJetVeto){
-      if(auto* reco = dynamic_cast<HighForestReader*>(fMixedEventReader)) {
-        reco->EnableRun3JetSelection(true);
-        if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data && fJetVetoPtConvention=="recomputed") reco->EnableRun3PpL1Inputs();
-      } else {
-        fMixedVetoJetReader = std::make_shared<HighForestReader>(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false, true, false);
-        fMixedVetoJetReader->EnableRun3JetSelection(true);
-        if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data && fJetVetoPtConvention=="recomputed") fMixedVetoJetReader->EnableRun3PpL1Inputs();
-      }
-    }
-  }
+  InitializeJetCalibrationAndReaders(readTrackTree);
 
   // Prepare mixed event files and a forest reader for reflected cone mixing
   const char* fileListName[2][ForestReader::knDataTypes][2] = {};
@@ -1495,8 +1390,11 @@ void EECAnalyzer::RunAnalysis(){
   fileListName[1][ForestReader::kOO][0] = "mixingFileList/OO2025_MB_pool_pilot.txt"; // currently no mixing implemented for OO
   fileListName[1][ForestReader::kOOMC][0] = "none"; // currently no mixing implemented for OOMC
 
-        
-  // Read the mixing files if defined and a file list exists
+  fPendingMixedJets.clear();
+  fPrefetchedDonorTracks.clear();
+
+  // Prepare mixed event lookup table (from prebuilt sidecar/configured table with zero TFile::Open calls,
+  // or via single-handle metadata-only scan of the job's active shard) without opening multi-file TChains.
   if(fDoMixedCone){
     const char* legacyList = fileListName[fLocalRun][fDataType][fMegaSkimMode];
     TString mixingList = fCard->HasKey("MixingFileList") ? fCard->GetStr("MixingFileList") : TString(legacyList ? legacyList : "none");
@@ -1507,157 +1405,24 @@ void EECAnalyzer::RunAnalysis(){
       if(fDataType == ForestReader::kOO){
         throw std::runtime_error("OO mixing requires a dedicated mixing file list");
       }
-    
-
       cout << "EECAnalyzer::Note: You are trying to do mixed cone background estimation for a dataset for which no mixed event file list is defined in the code! The input file list is used also for mixing." << endl;
       mixingFiles = fFileNames;
-    
     } else {
-
-      std::string lineInFile;
-      std::ifstream mixingFileStream(mixingList.Data());
-      if(!mixingFileStream) throw std::runtime_error("Cannot open configured MixingFileList: " + std::string(mixingList.Data()));
-      while (std::getline(mixingFileStream,lineInFile)) {
-        const auto first = lineInFile.find_first_not_of(" \t\r");
-        if(first == std::string::npos || lineInFile[first] == '#') continue;
-        lineInFile = lineInFile.substr(first, lineInFile.find_last_not_of(" \t\r")-first+1);
-
-        // Strip an xrootd redirector only when local mixing was explicitly selected.
-        if(fLocalMixing && lineInFile.rfind("root://",0) == 0){
-          const auto pathStart = lineInFile.find("//",7);
-          if(pathStart == std::string::npos) throw std::runtime_error("Malformed xrootd mixing path");
-          mixingFiles.push_back(lineInFile.substr(pathStart+1));
-        } else {
-          mixingFiles.push_back(lineInFile);
-        }
-      }
-    } // Mixing file list exists
+      mixingFiles = ParseMixingFileList(mixingList);
+    }
 
     if(mixingFiles.empty()) throw std::runtime_error("Configured mixing pool is empty.");
-    // Check that all the mixing files we are supposed to read exist and can be opened
-    for(auto currentFile : mixingFiles){
-      testFile = TFile::Open(currentFile);
 
-      // Check that the file exists
-      if(!testFile){
-        cout << "Error! Could not find the file: " << currentFile.Data() << endl;
-        assert(0);
-      }
-
-      // Check that the file is open
-      if(!testFile->IsOpen()){
-        cout << "Error! Could not open the file: " << currentFile.Data() << endl;
-        assert(0);
-      }
-    
-      // Check that the file is not zombie
-      if(testFile->IsZombie()){
-        cout << "Error! The following file is a zombie: " << currentFile.Data() << endl;
-        assert(0);
-      }
-
-      // Close the test file after the test 
-      testFile->Close();
-    }
-
-    // If everything is fine, we can read the mixing information from the minimum bias files
-    fMixedEventReader->ReadForestFromFileList(mixingFiles);
-    if(fMixedVetoJetReader){
-      fMixedVetoJetReader->ReadForestFromFileList(mixingFiles);
-      const Long64_t vetoEntries=fOOClosure->enabled ? fMixedVetoJetReader->GetTotalChainEntries() : fMixedVetoJetReader->GetNEvents();
-      const Long64_t mixingEntries=fOOClosure->enabled ? fMixedEventReader->GetTotalChainEntries() : fMixedEventReader->GetNEvents();
-      if(vetoEntries != mixingEntries)
-        throw std::runtime_error("Mixing generator/reconstructed veto entry counts differ");
-    }
-
-    // Print the used mixing files
     if(fDebugLevel > 0){
-      cout << "Mixing files: " << endl;
-      for(std::vector<TString>::iterator mixIterator = mixingFiles.begin(); mixIterator != mixingFiles.end(); mixIterator++){
-        cout << *mixIterator << endl;
+      cout << "Mixing files (" << mixingFiles.size() << "): " << endl;
+      for(const auto& mixFile : mixingFiles){
+        cout << mixFile << endl;
       }
       cout << endl;
     }
 
-    // Scourge the mixed events to find centrality and vz values that are matched for the mixed events
-    fnEventsInMixingFile = fOOClosure->enabled
-      ? static_cast<Int_t>(std::min<Long64_t>(fMixedEventReader->GetTotalChainEntries(),fOOClosure->maxPool))
-      : fMixedEventReader->GetNEvents();
-    if(fOOClosure->enabled && fMixedEventReader->GetTotalChainEntries()>fnEventsInMixingFile) fHistograms->MarkTruncatedInput();
-
-    if(fOOClosure->enabled){
-      PrepareOOClosurePool();
-    } else if(fBinnedMixing){
-
-      // Find the event matching variables from mixed event list
-      PrepareBinnedMixingVectors();
-
-      // Make a two dimensional illustration of the mixed event statistics
-      std::vector<Double_t> vzMixingCountVector = GetBinnedMixingBinBorders(fVzMixingBinBorders, fMixedEventVzBin);
-      std::vector<Double_t> eventActivityCountVector;
-      std::vector<Double_t> eventActivityBinBorders;
-
-      if(fEventMatchForMixing == kMatchHiBin){
-        eventActivityCountVector = GetBinnedMixingBinBorders(fHiBinMixingBinBorders, fMixedEventHiBinBin);
-        eventActivityBinBorders = fHiBinMixingBinBorders;
-      } else if (fEventMatchForMixing == kMatchHFEnergy){
-        eventActivityCountVector = GetBinnedMixingBinBorders(fHFEnergyMixingBinBorders, fMixedEventHFEnergyBin);
-        eventActivityBinBorders = fHFEnergyMixingBinBorders;
-      } else {
-        eventActivityCountVector = GetBinnedMixingBinBorders(fMultiplicityMixingBinBorders, fMixedEventMultiplicityBin);
-        eventActivityBinBorders = fMultiplicityMixingBinBorders;
-      }
-      
-
-      fHistograms->fhMixedEventCounts->SetBins(vzMixingCountVector.size() - 1, vzMixingCountVector.data(), eventActivityCountVector.size() - 1, eventActivityCountVector.data());
-
-      for(int iMixedEvent = 0; iMixedEvent < fMixedEventVzBin.size(); iMixedEvent++){
-        fHistograms->fhMixedEventCounts->Fill(FindExampleValue(fMixedEventVzBin.at(iMixedEvent), fVzMixingBinBorders), FindExampleValue(eventActivityCountVector.at(iMixedEvent), eventActivityBinBorders));
-      }
-
-    } else {
-
-      // Find the event matching variables from mixed event list
-      PrepareMixingVectors();
-
-      std::size_t nEligible = 0;
-      for (Double_t value : fMixedEventVz) {
-        if (TMath::Abs(value - kNonsenseValue) >= 1e-6) ++nEligible;
-      }
-
-      cout << "OO mixing: pool entries = " << fnEventsInMixingFile
-           << ", eligible after event cuts and MB trigger = "
-           << nEligible << endl;
-
-      if (nEligible < 2) {
-        throw std::runtime_error(
-            "OO mixing: fewer than two eligible pool events");
-      }
-
-      // Make a two dimensional illustration of the mixed event statistics
-      std::vector<Double_t> vzMixingCountVector = GetMixingBinBorders(fVzMixingBinBorders, fMixedEventVz);
-      std::vector<Double_t> eventActivityCountVector;
-      std::vector<Double_t> eventActivityVector;
-
-      if(fEventMatchForMixing == kMatchHiBin){
-        for(auto number : fMixedEventHiBin) eventActivityVector.push_back(number);
-        eventActivityCountVector = GetMixingBinBorders(fHiBinMixingBinBorders, eventActivityVector);
-      } else if (fEventMatchForMixing == kMatchHFEnergy){
-        eventActivityCountVector = GetMixingBinBorders(fHFEnergyMixingBinBorders, fMixedEventHFEnergy);
-        eventActivityVector = fMixedEventHFEnergy;
-      } else {
-        for(auto number : fMixedEventMultiplicity) eventActivityVector.push_back(number);
-        eventActivityCountVector = GetMixingBinBorders(fMultiplicityMixingBinBorders, eventActivityVector);
-      }
-
-      fHistograms->fhMixedEventCounts->SetBins(vzMixingCountVector.size() - 1, vzMixingCountVector.data(), eventActivityCountVector.size() - 1, eventActivityCountVector.data());
-
-      for(int iMixedEvent = 0; iMixedEvent < fMixedEventVz.size(); iMixedEvent++){
-        fHistograms->fhMixedEventCounts->Fill(fMixedEventVz.at(iMixedEvent), eventActivityVector.at(iMixedEvent));
-      }
-    }
-
-  } // Prepare event mixing for PbPb data and MC 
+    PrepareMixingPoolFromLookup(mixingFiles, mixingList);
+  } // Prepare event mixing lookup table
   
   //************************************************
   //       Main analysis loop over all files
@@ -1694,6 +1459,8 @@ void EECAnalyzer::RunAnalysis(){
     // Find the filename and open the input file
     currentFile = fFileNames.at(iFile);
     inputFile = TFile::Open(currentFile);
+    copyInputFile = nullptr;
+    unfoldingInputFile = nullptr;
     std::unique_ptr<TFile> vetoInputFile;
     if((fApplyJetVeto || fUseRun3JEC) && fRecoJetReader){
       vetoInputFile.reset(TFile::Open(currentFile));
@@ -1728,8 +1495,8 @@ void EECAnalyzer::RunAnalysis(){
     //            Read forest from file
     //************************************************
     
-    // If file is good, read the forest from the file
-    fJetReader->ReadForestFromFile(inputFile);  // There might be a memory leak in handling the forest...
+    // Bind directly to the open TFile without creating redundant TChains
+    fJetReader->ReadForestFromFile(inputFile);
     if(useDifferentReaderForJetsAndTracks) fTrackReader->ReadForestFromFile(copyInputFile); // If we mix reco and gen, the reader for jets and tracks is different
     if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms) fUnfoldingForestReader->ReadForestFromFile(unfoldingInputFile);
     if(vetoInputFile){
@@ -2519,78 +2286,20 @@ void EECAnalyzer::RunAnalysis(){
           // Estimate background from cones dropped to mixed events.
           if(fDoMixedCone){
 
-            // Event matching is different for different systems
+            // Match donor events in memory from the lookup table (zero ROOT I/O in jet loop)
             if(fOOClosure->enabled){
               mixedEventIndices.clear();
               for(int partner:fOOClosure->assignment.partners) mixedEventIndices.push_back(fOOClosure->pool.at(partner).entry);
             } else if(fEventMatchForMixing == kMatchHiBin){
-              // Match HiBin
               FindHiBinMatchedEvents(mixedEventIndices, 2, vz, hiBin, eventNumber, iEvent, fBinnedMixing);
             } else if (fEventMatchForMixing == kMatchHFEnergy){
-              // Match HF energy
               FindHFEnergyMatchedEvents(mixedEventIndices, 2, vz, hfSum, eventNumber, iEvent, fBinnedMixing);
             } else {
-              // Match background multiplicity
               currentMultiplicity = GetGenMultiplicity(fTrackReader, kSubeventNonZero, false);
               FindMultiplicityMatchedEvents(mixedEventIndices, 2, vz, currentMultiplicity, eventNumber, iEvent, fBinnedMixing); 
             }
 
-            // Make the pPb MC "minimum bias" by only accepting particles from the EPOS simulation
-            //if(fDataType == ForestReader::kPPbMC_pToPlusEta || fDataType == ForestReader::kPPbMC_pToMinusEta){
-            //  if(fMcCorrelationType == kRecoGen || fMcCorrelationType == kGenGen){
-            //    fSubeventCut = kSubeventNonZero;
-            //  }
-            //}   
-
-            // Fill the pairing arrays with the found mixed event indices
-            mixedEventFillIndex = EECHistograms::kMixedCone;
-
-            for(int mixedEventIndex : mixedEventIndices){
-
-              // If match vz and hiBin, then load the event from the mixed event tree and find particles from jet cone region
-              ReadMixingEvent(mixedEventIndex);
-
-              nTracks = fMixedEventReader->GetNTracks();
-              for(Int_t iTrack = 0; iTrack < nTracks; iTrack++){
-
-                // Check that all the track cuts are passed. In mega skim mode, only tracks passing the cuts are saved, so no need to check the track cuts again here.
-                if(!fMegaSkimMode){
-                  if(!PassTrackCuts(fMixedEventReader,iTrack,fHistograms->fhTrackCuts,true)) continue;
-                }
-
-                // Find the track kinematics
-                trackPt = fMixedEventReader->GetTrackPt(iTrack);
-                trackEta = fMixedEventReader->GetTrackEta(iTrack);
-                trackPhi = fMixedEventReader->GetTrackPhi(iTrack);
-                trackEfficiencyCorrection = GetTrackEfficiencyCorrection(trackPt, trackEta, fMixedEventReader->GetHiBin());
-                trackSubevent = fMixedEventReader->GetTrackSubevent(iTrack);
-                // Pure HIJING origin follows audited source provenance, never an embedded sube selection.
-                if(fOOClosure->enabled) trackSubevent=1;
-
-
-                // If the track is close to a jet, change the track eta-phi coordinates to a system where the jet axis is at origin
-                deltaRTrackJet = GetDeltaR(jetEta, jetPhi, trackEta, trackPhi);
-                if(deltaRTrackJet < fJetRadius){
-                  relativeTrackPhi[mixedEventFillIndex].push_back(fOOClosure->enabled ? oo_eec::PilotRelativePhi(trackPhi,jetPhi) : trackPhi-jetPhi);
-                  relativeTrackEta[mixedEventFillIndex].push_back(trackEta-jetEta);
-
-                  // Also remember track pT and subevent
-                  selectedTrackPt[mixedEventFillIndex].push_back(trackPt);
-                  selectedTrackCorrection[mixedEventFillIndex].push_back(trackEfficiencyCorrection);
-                  coneSourceHiBin[mixedEventFillIndex]=fMixedEventReader->GetHiBin();
-                  selectedTrackSubevent[mixedEventFillIndex].push_back(trackSubevent);
-                } // Track is close to a jet
-              } // Mixed event track loop
-
-              // Currently there are two events we mix with, fill the second mixed cone to the second index
-              mixedEventFillIndex = EECHistograms::kSecondMixedCone;
-      
-            } // Loop over good events to mix with
-
-            // Return to original cut after analyzing all particles for the mixing check
-            //fSubeventCut = fCard->Get("SubeventCut");
-
-          } // Event mixing for PbPb data and MC
+          } // Event mixing partner matching
 
           //************************
           //      Jet cone Q/A      
@@ -2643,51 +2352,75 @@ void EECAnalyzer::RunAnalysis(){
           
           // Calculate the energy-energy correlator within this jet
           if(fFillEnergyEnergyCorrelators || fFillEnergyEnergyCorrelatorsSystematics){
-
-            // Before calculating the energy-energy correlators, reset histograms for covariance matrix calculation
-            // Covariance matrix calculation only for data, not needed in MC
-            if(!fSkipCovarianceMatrix){
-              for(auto iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); iWeightExponent++){
-                for(Int_t iTrackPt = 0; iTrackPt < nTrackPtBinsEEC; iTrackPt++){
-                  fThisEventCorrelator[iWeightExponent][iTrackPt]->Reset();
-                } // Track pT loop for covariance matrices
+            if(fDoMixedCone){
+              PendingMixedJet pending;
+              pending.jetPt = jetPt;
+              pending.jetEta = jetEta;
+              pending.jetPhi = jetPhi;
+              pending.centrality = centrality;
+              pending.totalEventWeight = fTotalEventWeight;
+              pending.signalHiBin = hiBin;
+              pending.ooClosureJetIndex = fOOClosure->jetIndex;
+              if(fOOClosure->enabled) pending.ooClosureSignal = fOOClosure->signal;
+              for(int iCone = 0; iCone < EECHistograms::knJetConeTypes; iCone++){
+                pending.selectedTrackPt[iCone] = selectedTrackPt[iCone];
+                pending.relativeTrackEta[iCone] = relativeTrackEta[iCone];
+                pending.relativeTrackPhi[iCone] = relativeTrackPhi[iCone];
+                pending.selectedTrackSubevent[iCone] = selectedTrackSubevent[iCone];
+                pending.selectedTrackCorrection[iCone] = selectedTrackCorrection[iCone];
+                pending.coneSourceHiBin[iCone] = coneSourceHiBin[iCone];
               }
+              pending.donorGlobalIndices = mixedEventIndices;
+              fPendingMixedJets.push_back(std::move(pending));
+              if(fPendingMixedJets.size() >= 32768){
+                FlushPendingMixedJets(mixingFiles);
+              }
+            } else {
+              // Before calculating the energy-energy correlators, reset histograms for covariance matrix calculation
+              // Covariance matrix calculation only for data, not needed in MC
+              if(!fSkipCovarianceMatrix){
+                for(auto iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); iWeightExponent++){
+                  for(Int_t iTrackPt = 0; iTrackPt < nTrackPtBinsEEC; iTrackPt++){
+                    fThisEventCorrelator[iWeightExponent][iTrackPt]->Reset();
+                  } // Track pT loop for covariance matrices
+                }
+              }
+
+              // Then calculate the energy-energy correlator for this jet
+              CalculateEnergyEnergyCorrelator(selectedTrackPt, relativeTrackEta, relativeTrackPhi, selectedTrackSubevent, selectedTrackCorrection, coneSourceHiBin, jetPt, centrality, hiBin);
+
+              // After that is done, add the contents from this event to the total coveriance matrix
+              // Covariance matrix calculation only for data, not needed in MC
+              if(!fSkipCovarianceMatrix){
+                fillerUnfoldingCovariance[3] = centrality; // Axis 3: Centrality
+                for(auto iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); iWeightExponent++){
+                  fillerUnfoldingCovariance[4] = iWeightExponent; // Axis 4: Weight exponent index
+                  for(Int_t iTrackPt = 0; iTrackPt < nTrackPtBinsEEC; iTrackPt++){
+                    trackPt = fCard->Get("TrackPtBinEdgesEEC", iTrackPt) + 0.1;
+                    fillerUnfoldingCovariance[2] = trackPt;  // Axis 2: Track pT corresponding to bin
+                    for(Int_t iDeltaRBin = 1; iDeltaRBin <= nDeltaRBins; iDeltaRBin++){
+                      deltaRBinContent1 = fThisEventCorrelator[iWeightExponent][iTrackPt]->GetBinContent(iDeltaRBin);
+                      transformedDeltaR1 = TransformToUnfoldingAxis(fHistograms->GetDeltaRBinBorderLowEEC(iDeltaRBin)+0.0001, jetPt);
+
+                      for(Int_t jDeltaRBin = 1; jDeltaRBin <= nDeltaRBins; jDeltaRBin++){
+                        deltaRBinContent2 = fThisEventCorrelator[iWeightExponent][iTrackPt]->GetBinContent(jDeltaRBin);
+                        transformedDeltaR2 = TransformToUnfoldingAxis(fHistograms->GetDeltaRBinBorderLowEEC(jDeltaRBin)+0.0001, jetPt);
+
+                        // Calculate the covariance between the two bins
+                        eecCovariance = deltaRBinContent1 * deltaRBinContent2;
+
+                        // Fill the calculation result to correct bin
+                        fillerUnfoldingCovariance[0] = transformedDeltaR1; // Axis 0: Transformed deltaR axis
+                        fillerUnfoldingCovariance[1] = transformedDeltaR2; // Axis 1: Transformed deltaR axis
+
+                        fHistograms->fhJetPtUnfoldingCovariance->Fill(fillerUnfoldingCovariance, eecCovariance);
+
+                      } // Inner DeltaR loop
+                    } // Outer DeltaR loop
+                  } // Track pT loop for covariance matrices
+                } // Weight exponent loop
+              } // Fill covariance matrix histograms
             }
-
-            // Then calculate the energy-energy correlator for this jet
-            CalculateEnergyEnergyCorrelator(selectedTrackPt, relativeTrackEta, relativeTrackPhi, selectedTrackSubevent, selectedTrackCorrection, coneSourceHiBin, jetPt);
-
-            // After that is done, add the contents from this event to the total coveriance matrix
-            // Covariance matrix calculation only for data, not needed in MC
-            if(!fSkipCovarianceMatrix){
-              fillerUnfoldingCovariance[3] = centrality; // Axis 3: Centrality
-              for(auto iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); iWeightExponent++){
-                fillerUnfoldingCovariance[4] = iWeightExponent; // Axis 4: Weight exponent index
-                for(Int_t iTrackPt = 0; iTrackPt < nTrackPtBinsEEC; iTrackPt++){
-                  trackPt = fCard->Get("TrackPtBinEdgesEEC", iTrackPt) + 0.1;
-                  fillerUnfoldingCovariance[2] = trackPt;  // Axis 2: Track pT corresponding to bin
-                  for(Int_t iDeltaRBin = 1; iDeltaRBin <= nDeltaRBins; iDeltaRBin++){
-                    deltaRBinContent1 = fThisEventCorrelator[iWeightExponent][iTrackPt]->GetBinContent(iDeltaRBin);
-                    transformedDeltaR1 = TransformToUnfoldingAxis(fHistograms->GetDeltaRBinBorderLowEEC(iDeltaRBin)+0.0001, jetPt);
-
-                    for(Int_t jDeltaRBin = 1; jDeltaRBin <= nDeltaRBins; jDeltaRBin++){
-                      deltaRBinContent2 = fThisEventCorrelator[iWeightExponent][iTrackPt]->GetBinContent(jDeltaRBin);
-                      transformedDeltaR2 = TransformToUnfoldingAxis(fHistograms->GetDeltaRBinBorderLowEEC(jDeltaRBin)+0.0001, jetPt);
-
-                      // Calculate the covariance between the two bins
-                      eecCovariance = deltaRBinContent1 * deltaRBinContent2;
-
-                      // Fill the calculation result to correct bin
-                      fillerUnfoldingCovariance[0] = transformedDeltaR1; // Axis 0: Transformed deltaR axis
-                      fillerUnfoldingCovariance[1] = transformedDeltaR2; // Axis 1: Transformed deltaR axis
-
-                      fHistograms->fhJetPtUnfoldingCovariance->Fill(fillerUnfoldingCovariance, eecCovariance);
-                    
-                    } // Inner DeltaR loop
-                  } // Outer DeltaR loop
-                } // Track pT loop for covariance matrices
-              } // Weight exponent loop
-            } // Fill covariance matrix histograms
           } // Fill energy-energy correlator histograms
           
         } // Fill anything in-jet particle pairing related
@@ -2761,10 +2494,21 @@ void EECAnalyzer::RunAnalysis(){
     //      Cleanup at the end of the file loop
     //************************************************
     
-    // Close the input files after the event has been read
+    // Detach readers and close/delete the input files after all events in this file have been read
+    fJetReader->BurnForest();
+    if(useDifferentReaderForJetsAndTracks) fTrackReader->BurnForest();
+    if(fRecoJetReader) fRecoJetReader->BurnForest();
+    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms) fUnfoldingForestReader->BurnForest();
     inputFile->Close();
-    if(useDifferentReaderForJetsAndTracks) copyInputFile->Close();
-    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms) unfoldingInputFile->Close();
+    delete inputFile;
+    if(useDifferentReaderForJetsAndTracks && copyInputFile){
+      copyInputFile->Close();
+      delete copyInputFile;
+    }
+    if((fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms) && unfoldingInputFile){
+      unfoldingInputFile->Close();
+      delete unfoldingInputFile;
+    }
     
     // Write some debug messages if prompted
     if(fDebugLevel > 1){
@@ -2777,10 +2521,14 @@ void EECAnalyzer::RunAnalysis(){
     
   } // File loop
 
+  if(fDoMixedCone){
+    FlushPendingMixedJets(mixingFiles);
+  }
+
   if(fOOClosure->enabled){
     for(std::size_t index=0;index<fOOClosure->pool.size();++index){
       const auto& event=fOOClosure->pool[index];
-      fOOClosure->poolLedger<<oo_eec::PilotKey(event.id,true)<<','<<event.id.run<<','<<event.id.lumi<<','<<event.id.event<<','<<event.entry<<','<<event.vz<<','<<event.nh<<','<<event.hiBin<<','<<event.hf<<','<<event.weight<<','<<event.eligible<<','<<(oo_eec::PilotPool(event,fOOClosure->seed)==0?'A':'B')<<','<<fOOClosure->uses[index]<<",unknown_lineage_fingerprint_screened,"<<(event.backgroundKnown?event.background:0)<<','<<event.fingerprint.text()<<','<<event.backgroundExcluded<<','<<event.physicalExcluded<<','<<fOOClosure->partitionPolicy<<'\n';
+      fOOClosure->poolLedger<<oo_eec::PilotKey(event.id,true)<<','<<event.id.run<<','<<event.id.lumi<<','<<event.id.event<<','<<event.entry<<','<<event.vz<<','<<event.nh<<','<<event.hiBin<<','<<event.hf<<','<<event.weight<<','<<event.eligible<<','<<(oo_eec::PilotPool(event,fOOClosure->seed)==0?'A':'B')<<','<<fOOClosure->uses[index]<<",unknown_lineage_fingerprint_screened,"<<(event.backgroundKnown?event.background:0)<<','<<event.SignatureText()<<','<<event.backgroundExcluded<<','<<event.physicalExcluded<<','<<fOOClosure->partitionPolicy<<'\n';
     }
     fOOClosure->partners.flush();fOOClosure->poolLedger.flush();fOOClosure->jets.flush();fOOClosure->contributions.flush();
   }
@@ -2799,7 +2547,7 @@ void EECAnalyzer::RunAnalysis(){
  *  const vector<int> selectedTrackSubevent[EECHistograms::knJetConeTypes] = subevent array for tracks selected for the analysis
  *  const double jetPt = pT of the jet the tracks are close to
  */
-void EECAnalyzer::CalculateEnergyEnergyCorrelator(const vector<double> selectedTrackPt[EECHistograms::knJetConeTypes], const vector<double> relativeTrackEta[EECHistograms::knJetConeTypes], const vector<double> relativeTrackPhi[EECHistograms::knJetConeTypes], const vector<int> selectedTrackSubevent[EECHistograms::knJetConeTypes], const vector<double> selectedTrackCorrection[EECHistograms::knJetConeTypes], const int coneSourceHiBin[EECHistograms::knJetConeTypes], const double jetPt){
+void EECAnalyzer::CalculateEnergyEnergyCorrelator(const vector<double> selectedTrackPt[EECHistograms::knJetConeTypes], const vector<double> relativeTrackEta[EECHistograms::knJetConeTypes], const vector<double> relativeTrackPhi[EECHistograms::knJetConeTypes], const vector<int> selectedTrackSubevent[EECHistograms::knJetConeTypes], const vector<double> selectedTrackCorrection[EECHistograms::knJetConeTypes], const int coneSourceHiBin[EECHistograms::knJetConeTypes], const double jetPt, const Double_t explicitCentrality, const Int_t explicitHiBin){
   
   std::map<std::tuple<int,int,int,int,int>,double> pilotContributions;
   // Define a filler for THnSparse
@@ -2812,9 +2560,9 @@ void EECAnalyzer::CalculateEnergyEnergyCorrelator(const vector<double> selectedT
   Int_t secondParticleType[EECHistograms::knPairingTypes] = {EECHistograms::kSignalCone, EECHistograms::kReflectedCone, EECHistograms::kReflectedCone, EECHistograms::kMixedCone, EECHistograms::kMixedCone, EECHistograms::kSecondMixedCone, EECHistograms::kSecondMixedCone, EECHistograms::kSecondMixedCone, EECHistograms::kPerpendicularCone, EECHistograms::kPerpendicularCone, EECHistograms::kSecondPerpendicularCone, EECHistograms::kSecondPerpendicularCone, EECHistograms::kSecondPerpendicularCone};
   
   // Event information
-  Double_t centrality = fTrackReader->GetCentrality();
-  Int_t hiBin = fTrackReader->GetHiBin();
-  if(fMultiplicityMode) centrality = GetCentralityFromMultiplicity(GetMultiplicity());
+  Double_t centrality = (explicitCentrality > -900.0) ? explicitCentrality : fTrackReader->GetCentrality();
+  Int_t hiBin = (explicitHiBin > -900) ? explicitHiBin : fTrackReader->GetHiBin();
+  if(explicitCentrality <= -900.0 && fMultiplicityMode) centrality = GetCentralityFromMultiplicity(GetMultiplicity());
   
   // Variables for tracks
   Double_t trackPt1;       // Track pT for the first track
@@ -4856,7 +4604,13 @@ Double_t EECAnalyzer::SimpleSmearDeltaR(const Double_t deltaR){
  *  const Int_t iEvent = Number of the current event
  *  const Bool_t binnedMixing = True: Use binned matching, False: Use unbinned matching
  */
-void EECAnalyzer::FindMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t currentMultiplicity, const Int_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing){
+void EECAnalyzer::FindMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t currentMultiplicity, const ULong64_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing){
+
+  if(fMixingLookupTable.GetTotalRecordCount() > 0){
+    const Bool_t hasPhys = fJetReader && fJetReader->HasPhysicalEventIdentity() && fJetReader->GetEventNumber() == eventNumber;
+    fMixingLookupTable.FindMatchedDonors(mixedEventIndices, nEventsToMatch, vz, static_cast<Double_t>(currentMultiplicity), fHFEnergyMatchingShift, eventNumber, iEvent, fDebugLevel, fRng, hasPhys, hasPhys ? fJetReader->GetRunNumber() : 0, hasPhys ? fJetReader->GetLumiNumber() : 0);
+    return;
+  }
 
   // If we are doing binned matching to find mixed events, use different method for that
   if(binnedMixing){
@@ -4954,7 +4708,13 @@ void EECAnalyzer::FindMultiplicityMatchedEvents(std::vector<int>& mixedEventIndi
  *  const Int_t iEvent = Number of the current event
  *  const Bool_t binnedMixing = True: Use binned matching, False: Use unbinned matching
  */ 
-void EECAnalyzer::FindHiBinMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t hiBin, const Int_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing){
+void EECAnalyzer::FindHiBinMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t hiBin, const ULong64_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing){
+
+  if(fMixingLookupTable.GetTotalRecordCount() > 0){
+    const Bool_t hasPhys = fJetReader && fJetReader->HasPhysicalEventIdentity() && fJetReader->GetEventNumber() == eventNumber;
+    fMixingLookupTable.FindMatchedDonors(mixedEventIndices, nEventsToMatch, vz, static_cast<Double_t>(hiBin), fHFEnergyMatchingShift, eventNumber, iEvent, fDebugLevel, fRng, hasPhys, hasPhys ? fJetReader->GetRunNumber() : 0, hasPhys ? fJetReader->GetLumiNumber() : 0);
+    return;
+  }
 
   // If we are doing binned matching to find mixed events, use different method for that
   if(binnedMixing){
@@ -5047,7 +4807,13 @@ void EECAnalyzer::FindHiBinMatchedEvents(std::vector<int>& mixedEventIndices, co
  *  const Int_t iEvent = Loop index of the current event
  *  const Bool_t binnedMixing = True: Use binned matching, False: Use unbinned matching
  */
-void EECAnalyzer::FindHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Double_t hfEnergy, const Int_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing){
+void EECAnalyzer::FindHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, Double_t hfEnergy, const ULong64_t eventNumber, const Int_t iEvent, const Bool_t binnedMixing){
+
+  if(fMixingLookupTable.GetTotalRecordCount() > 0){
+    const Bool_t hasPhys = fJetReader && fJetReader->HasPhysicalEventIdentity() && fJetReader->GetEventNumber() == eventNumber;
+    fMixingLookupTable.FindMatchedDonors(mixedEventIndices, nEventsToMatch, vz, hfEnergy, fHFEnergyMatchingShift, eventNumber, iEvent, fDebugLevel, fRng, hasPhys, hasPhys ? fJetReader->GetRunNumber() : 0, hasPhys ? fJetReader->GetLumiNumber() : 0);
+    return;
+  }
 
   // If we are doing binned matching to find mixed events, use different method for that
   if(binnedMixing){
@@ -5153,8 +4919,13 @@ void EECAnalyzer::FindHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices,
  *  const Int_t iEvent = Number of the current event
  *  
  */
-void EECAnalyzer::FindBinnedMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t currentMultiplicity, const Int_t eventNumber, const Int_t iEvent){
+void EECAnalyzer::FindBinnedMultiplicityMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t currentMultiplicity, const ULong64_t eventNumber, const Int_t iEvent){
 
+  if(fMixingLookupTable.GetTotalRecordCount() > 0){
+    const Bool_t hasPhys = fJetReader && fJetReader->HasPhysicalEventIdentity() && fJetReader->GetEventNumber() == eventNumber;
+    fMixingLookupTable.FindMatchedDonors(mixedEventIndices, nEventsToMatch, vz, static_cast<Double_t>(currentMultiplicity), fHFEnergyMatchingShift, eventNumber, iEvent, fDebugLevel, fRng, hasPhys, hasPhys ? fJetReader->GetRunNumber() : 0, hasPhys ? fJetReader->GetLumiNumber() : 0);
+    return;
+  }
 
   // Event matching based on multiplicity bins
   Int_t mixedEventIndex = fMixingStartIndex;     // Current index for mixed event file
@@ -5242,7 +5013,13 @@ void EECAnalyzer::FindBinnedMultiplicityMatchedEvents(std::vector<int>& mixedEve
  *  const Int_t iEvent = Number of the current event
  *  
  */ 
-void EECAnalyzer::FindBinnedHiBinMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t hiBin, const Int_t eventNumber, const Int_t iEvent){
+void EECAnalyzer::FindBinnedHiBinMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Int_t hiBin, const ULong64_t eventNumber, const Int_t iEvent){
+
+  if(fMixingLookupTable.GetTotalRecordCount() > 0){
+    const Bool_t hasPhys = fJetReader && fJetReader->HasPhysicalEventIdentity() && fJetReader->GetEventNumber() == eventNumber;
+    fMixingLookupTable.FindMatchedDonors(mixedEventIndices, nEventsToMatch, vz, static_cast<Double_t>(hiBin), fHFEnergyMatchingShift, eventNumber, iEvent, fDebugLevel, fRng, hasPhys, hasPhys ? fJetReader->GetRunNumber() : 0, hasPhys ? fJetReader->GetLumiNumber() : 0);
+    return;
+  }
 
   // Event matching for PbPb
   Int_t mixedEventIndex = fMixingStartIndex;     // Current index for mixed event file
@@ -5331,7 +5108,13 @@ void EECAnalyzer::FindBinnedHiBinMatchedEvents(std::vector<int>& mixedEventIndic
  *  const Int_t iEvent = Loop index of the current event
  *
  */
-void EECAnalyzer::FindBinnedHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Double_t hfEnergy, const Int_t eventNumber, const Int_t iEvent){
+void EECAnalyzer::FindBinnedHFEnergyMatchedEvents(std::vector<int>& mixedEventIndices, const Int_t nEventsToMatch, const Double_t vz, const Double_t hfEnergy, const ULong64_t eventNumber, const Int_t iEvent){
+
+  if(fMixingLookupTable.GetTotalRecordCount() > 0){
+    const Bool_t hasPhys = fJetReader && fJetReader->HasPhysicalEventIdentity() && fJetReader->GetEventNumber() == eventNumber;
+    fMixingLookupTable.FindMatchedDonors(mixedEventIndices, nEventsToMatch, vz, hfEnergy, fHFEnergyMatchingShift, eventNumber, iEvent, fDebugLevel, fRng, hasPhys, hasPhys ? fJetReader->GetRunNumber() : 0, hasPhys ? fJetReader->GetLumiNumber() : 0);
+    return;
+  }
 
   // Event matching for pPb
   Int_t mixedEventIndex = fMixingStartIndex;     // Current index for mixed event file
@@ -5442,36 +5225,63 @@ oo_eec::PilotEvent EECAnalyzer::ReadOOClosureEvent(ForestReader* reader,Int_t en
   return result;
 }
 
-void EECAnalyzer::PrepareOOClosurePool(){
+void EECAnalyzer::PrepareOOClosurePool(Bool_t poolLoadedFromLookup){
   // Separate native reader: prescan exactly the same capped signal-entry ranges,
   // preserving the main reader's source-event state and event-cut QA.
   if(fOOClosure->partitionPolicy==0){
-  GeneratorLevelForestReader prescan(fDataType,fTriggerSelection,fJetType,fJetAxis,false,true,true,false);
-  int scanned=0;
-  for(const auto& file:fFileNames){
-    if(scanned>=fOOClosure->maxSignal) break;
-    prescan.ReadForestFromFileList(std::vector<TString>{file});
-    int count=static_cast<int>(std::min<Long64_t>(prescan.GetTotalChainEntries(),fOOClosure->maxSignal-scanned));
-    if(fMaxEventsPerFile>0) count=std::min(count,fMaxEventsPerFile);
-    for(int entry=0;entry<count;++entry){
-      prescan.GetEvent(entry);
-      const auto event=ReadOOClosureEvent(&prescan,entry,false);
-      if(!fOOClosure->signalHoldoutIds.insert(event.id).second)
-        throw std::runtime_error("Duplicate signal physical identity in capped OO holdout prescan");
-      if(event.backgroundKnown) fOOClosure->signalBackgrounds.insert(event.background);
-      ++scanned;
+    GeneratorLevelForestReader prescan(fDataType,fTriggerSelection,fJetType,fJetAxis,false,true,true,false);
+    int scanned=0;
+    for(const auto& file:fFileNames){
+      if(scanned>=fOOClosure->maxSignal) break;
+      std::unique_ptr<TFile> sigFile(TFile::Open(file));
+      if(!sigFile || !sigFile->IsOpen() || sigFile->IsZombie())
+        throw std::runtime_error("Cannot open signal file for OO holdout prescan: "+std::string(file.Data()));
+      prescan.ReadForestFromFile(sigFile.get());
+      int count=static_cast<int>(std::min<Long64_t>(prescan.GetNEvents(),fOOClosure->maxSignal-scanned));
+      if(fMaxEventsPerFile>0) count=std::min(count,fMaxEventsPerFile);
+      for(int entry=0;entry<count;++entry){
+        prescan.GetEvent(entry);
+        const auto event=ReadOOClosureEvent(&prescan,entry,false);
+        if(!fOOClosure->signalHoldoutIds.insert(event.id).second)
+          throw std::runtime_error("Duplicate signal physical identity in capped OO holdout prescan");
+        if(event.backgroundKnown) fOOClosure->signalBackgrounds.insert(event.background);
+        ++scanned;
+      }
+      prescan.BurnForest();
+      sigFile->Close();
     }
-  }
-  cout<<"OOClosurePilot: signal holdout prescan="<<scanned<<", physical IDs="<<fOOClosure->signalHoldoutIds.size()<<", nonempty background fingerprints="<<fOOClosure->signalBackgrounds.size()<<endl;
+    cout<<"OOClosurePilot: signal holdout prescan="<<scanned<<", physical IDs="<<fOOClosure->signalHoldoutIds.size()<<", nonempty background fingerprints="<<fOOClosure->signalBackgrounds.size()<<endl;
   } // Existing bounded test reserves its scanned signals; campaign policy reserves donors.
   fOOClosure->reservedPoolIds.clear();
   fOOClosure->reservedPoolBackgrounds.clear();
   fOOClosure->pool.clear();
   unsigned long eligible=0,countA=0,countB=0,excludedPhysical=0,excludedBackground=0;
   for(int entry=0;entry<fnEventsInMixingFile;++entry){
-    ReadMixingEvent(entry);
-    auto event=ReadOOClosureEvent(fMixedEventReader,entry,true);
-    event.eligible=PassEventCuts(fMixedEventReader,false);
+    oo_eec::PilotEvent event;
+    bool passMB=true;
+    if(poolLoadedFromLookup){
+      const auto& rec=fMixingLookupTable.GetRecord(entry);
+      if(!rec.hasPhysicalId) throw std::runtime_error("OO pilot requires physical run/lumi/64-bit evt branches");
+      event.id={rec.run,rec.lumi,rec.eventNumber};
+      event.entry=entry;
+      event.vz=rec.vz;
+      event.nh=rec.ooNh;
+      event.weight=rec.eventWeight;
+      event.hiBin=rec.storedHiBin;
+      event.hf=oo_eec::PilotHfOff(rec.rawHfSum);
+      event.backgroundKnown=rec.backgroundKnown;
+      event.background=rec.backgroundKey;
+      event.signatureText=rec.backgroundSignature;
+      if(!std::isfinite(event.vz) || !std::isfinite(event.weight) || !std::isfinite(event.hf))
+        throw std::runtime_error("Non-finite OO pilot event metadata");
+      event.eligible=rec.passEventCuts;
+      passMB=rec.passMBTrigger;
+    } else {
+      ReadMixingEvent(entry);
+      event=ReadOOClosureEvent(fMixedEventReader,entry,true);
+      event.eligible=PassEventCuts(fMixedEventReader,false);
+      passMB=(fMixedEventReader->GetCaloJet15FilterBit()==1);
+    }
     if(fOOClosure->partitionPolicy==0){
       oo_eec::ExcludePilotHoldout(event,fOOClosure->signalHoldoutIds,fOOClosure->signalBackgrounds);
     } else {
@@ -5480,9 +5290,9 @@ void EECAnalyzer::PrepareOOClosurePool(){
     }
     excludedPhysical+=event.physicalExcluded;
     excludedBackground+=event.backgroundExcluded;
-    if(fTriggerSelection==8 && fMixedEventReader->GetCaloJet15FilterBit()!=1) event.eligible=false;
+    if(fTriggerSelection==8 && !passMB) event.eligible=false;
     if(event.eligible){ ++eligible; if(oo_eec::PilotPool(event,fOOClosure->seed)==0) ++countA; else ++countB; }
-    fOOClosure->pool.push_back(event);
+    fOOClosure->pool.push_back(std::move(event));
   }
   oo_eec::ValidatePilotPool(fOOClosure->pool);
   int largestNH=0;
@@ -5640,9 +5450,11 @@ void EECAnalyzer::PrepareBinnedMixingVectors(){
 
   // Read vz and hiBin from each event in event mixing file to memory.
   // This way we avoid loading different mixed events in a loop several times
-  fMixedEventVzBin.clear();                       // Clear the vectors for 
-  fMixedEventHFEnergyBin.clear();                 // any possible contents 
-  fMixedEventEventNumber.clear();                 // they might have
+  fMixedEventVzBin.clear();
+  fMixedEventHiBinBin.clear();
+  fMixedEventMultiplicityBin.clear();
+  fMixedEventHFEnergyBin.clear();
+  fMixedEventEventNumber.clear();
 
   // Event matching based on HiBin
   if(fEventMatchForMixing == kMatchHiBin){
@@ -5654,13 +5466,13 @@ void EECAnalyzer::PrepareBinnedMixingVectors(){
       if(fMegaSkimMode){
         // Event selection is already applied in mega skim mode. No need to check it again here.
         fMixedEventVzBin.push_back(FindMixingVzBin(fMixedEventReader->GetVz()));
-        fMixedEventHiBin.push_back(FindMixingHiBinBin(fMixedEventReader->GetHiBin()));
+        fMixedEventHiBinBin.push_back(FindMixingHiBinBin(fMixedEventReader->GetHiBin()));
       } else if(PassEventCuts(fMixedEventReader,false)){
         fMixedEventVzBin.push_back(FindMixingVzBin(fMixedEventReader->GetVz()));
-        fMixedEventHiBin.push_back(FindMixingHiBinBin(fMixedEventReader->GetHiBin()));
+        fMixedEventHiBinBin.push_back(FindMixingHiBinBin(fMixedEventReader->GetHiBin()));
       } else { // If event cuts not passed, input values such that events will never be mixed with these
         fMixedEventVzBin.push_back(kNonsenseBin);
-        fMixedEventHiBin.push_back(kNonsenseBin);
+        fMixedEventHiBinBin.push_back(kNonsenseBin);
       }
     } // Loop over all mixed events
   } // Event matching based on HiBin
@@ -5769,25 +5581,25 @@ Double_t EECAnalyzer::FindExampleValue(Int_t iBin, std::vector<Double_t> borders
 
 // Find mixing vz bin from a vz value
 Int_t EECAnalyzer::FindMixingVzBin(Double_t vz){
-  if(fVzMixingBinBorders.size() > 2) FindMixingBin(vz, fVzMixingBinBorders);
+  if(fVzMixingBinBorders.size() > 2) return FindMixingBin(vz, fVzMixingBinBorders);
   return FindMixingBin(vz, fVzMixingBinBorders.at(0), fVzMixingBinBorders.at(1));
 }
 
 // Find mixing HF energy bin from hfEnergy value
 Int_t EECAnalyzer::FindMixingHFEnergyBin(Double_t hfEnergy){
-  if(fHFEnergyMixingBinBorders.size() > 2) FindMixingBin(hfEnergy, fHFEnergyMixingBinBorders);
+  if(fHFEnergyMixingBinBorders.size() > 2) return FindMixingBin(hfEnergy, fHFEnergyMixingBinBorders);
   return FindMixingBin(hfEnergy, fHFEnergyMixingBinBorders.at(0), fHFEnergyMixingBinBorders.at(1));
 }
 
 // Find mixing HiBin bin from HiBin value
 Int_t EECAnalyzer::FindMixingHiBinBin(Int_t hiBin){
-  if(fHiBinMixingBinBorders.size() > 2) FindMixingBin(hiBin, fHiBinMixingBinBorders);
+  if(fHiBinMixingBinBorders.size() > 2) return FindMixingBin(hiBin, fHiBinMixingBinBorders);
   return FindMixingBin(hiBin, fHiBinMixingBinBorders.at(0), fHiBinMixingBinBorders.at(1));
 }
 
 // Find mixing multiplicity bin from multiplicity value
 Int_t EECAnalyzer::FindMixingMultiplicityBin(Int_t multiplicity){
-  if(fMultiplicityMixingBinBorders.size() > 2) FindMixingBin(multiplicity, fMultiplicityMixingBinBorders);
+  if(fMultiplicityMixingBinBorders.size() > 2) return FindMixingBin(multiplicity, fMultiplicityMixingBinBorders);
   return FindMixingBin(multiplicity, fMultiplicityMixingBinBorders.at(0), fMultiplicityMixingBinBorders.at(1));
 }
 
@@ -5863,4 +5675,785 @@ std::vector<Double_t> EECAnalyzer::GetBinnedMixingBinBorders(std::vector<Double_
   }
 
   return binBorders;
+}
+
+void EECAnalyzer::InitializeJetCalibrationAndReaders(Bool_t readTrackTree){
+  if(fTrackReader && fTrackReader != fJetReader) delete fTrackReader;
+  delete fJetReader;
+  if(fOwnsMixedEventReader) delete fMixedEventReader;
+  if(fOwnsUnfoldingReader) delete fUnfoldingForestReader;
+  delete fRecoJetReader;
+  delete fJetCorrector;
+  delete fJetUncertainty;
+  fJetReader = nullptr;
+  fTrackReader = nullptr;
+  fMixedEventReader = nullptr;
+  fUnfoldingForestReader = nullptr;
+  fOwnsMixedEventReader = false;
+  fOwnsUnfoldingReader = false;
+  fRecoJetReader = nullptr;
+  fMixedVetoJetReader.reset();
+  fJetCorrector = nullptr;
+  fJetUncertainty = nullptr;
+
+  // Setup the jet energy correction files based on the analyzed data type
+  std::string correctionFileRelative[ForestReader::knDataTypes];
+  correctionFileRelative[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPbPb] = "jetEnergyCorrections/Autumn18_HI_V8_DATA_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPpMC] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPbPbMC] = "jetEnergyCorrections/Autumn18_HI_V8_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPPb_pToMinusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPPb_pToPlusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_pgoing_Embedded_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_Pbgoing_Embedded_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Autumn16_HI_pPb_pgoing_Embedded_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kOO] = "jetEnergyCorrections/L2Relative_AK4PF_OO_V1.txt";
+  correctionFileRelative[ForestReader::kOOMC] = "jetEnergyCorrections/L2Relative_AK4PF_OO_V1.txt";
+  correctionFileRelative[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/Prompt24HIpp_V1_MC_L2Relative_AK4PF.txt";
+  correctionFileRelative[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/Prompt24HIpp_V1_MC_L2Relative_AK4PF.txt";
+
+  std::string correctionFileResidual[ForestReader::knDataTypes];
+  correctionFileResidual[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_L2L3Residual_AK4PF.txt";
+  correctionFileResidual[ForestReader::kPbPb] = "jetEnergyCorrections/Autumn18_HI_V8_DATA_L2L3Residual_AK4PF.txt";
+  correctionFileResidual[ForestReader::kPpMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kPbPbMC] = "CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kPPb_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
+  correctionFileResidual[ForestReader::kPPb_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
+  correctionFileResidual[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_L2L3Residual_AK4PF.txt";
+  correctionFileResidual[ForestReader::kPPbMC_pToMinusEta] = "CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kPPbMC_pToPlusEta] = "CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  correctionFileResidual[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt";
+  correctionFileResidual[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt";
+
+  std::string uncertaintyFile[ForestReader::knDataTypes];
+  uncertaintyFile[ForestReader::kPp] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_DATA_Uncertainty_AK4PF.txt";
+  uncertaintyFile[ForestReader::kPbPb] = "jetEnergyCorrections/Autumn18_HI_V8_DATA_Uncertainty_AK4PF.txt";
+  uncertaintyFile[ForestReader::kPpMC] = "jetEnergyCorrections/Spring18_ppRef5TeV_V6_MC_Uncertainty_AK4PF.txt";
+  uncertaintyFile[ForestReader::kPbPbMC] = "jetEnergyCorrections/Autumn18_HI_V8_MC_Uncertainty_AK4PF.txt";
+  uncertaintyFile[ForestReader::kPPb_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
+  uncertaintyFile[ForestReader::kPPb_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
+  uncertaintyFile[ForestReader::kPPb_pToMinusEta_5TeV] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
+  uncertaintyFile[ForestReader::kPPbMC_pToMinusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
+  uncertaintyFile[ForestReader::kPPbMC_pToPlusEta] = "jetEnergyCorrections/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF_modifiedtopPb.txt";
+  uncertaintyFile[ForestReader::kOO] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  uncertaintyFile[ForestReader::kOOMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  uncertaintyFile[ForestReader::kPpRef5p36TeV] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+  uncertaintyFile[ForestReader::kPpRef5p36TeVMC] = "jetEnergyCorrections/CorrectionNotAppliedPF.txt";
+
+  // For calo jets, use the correction files for calo jets (otherwise same name, but replace PF with Calo)
+  if(fJetType == 0 && !fIsOOData){
+    size_t pfIndex = 0;
+    pfIndex = correctionFileRelative[fDataType].find("PF", pfIndex);
+    correctionFileRelative[fDataType].replace(pfIndex, 2, "Calo");
+    pfIndex = 0;
+    pfIndex = correctionFileResidual[fDataType].find("PF", pfIndex);
+    correctionFileResidual[fDataType].replace(pfIndex, 2, "Calo");
+    pfIndex = 0;
+    pfIndex = uncertaintyFile[fDataType].find("PF", pfIndex);
+    uncertaintyFile[fDataType].replace(pfIndex, 2, "Calo");
+  }
+
+  vector<string> correctionFiles;
+  correctionFiles.push_back(correctionFileRelative[fDataType]);
+  if(fIsRealData && !fIsOOData) {
+    correctionFiles.push_back(correctionFileResidual[fDataType]);
+  }
+
+  if(fUseRun3JEC) {
+    correctionFiles.clear();
+    if(fIsOOData) {
+      const std::string base="jetEnergyCorrections/OO2025/";
+      correctionFiles.push_back(base+"Prompt25HIOO_V1_MC_L2Relative_AK4PF.txt");
+    } else {
+      const std::string base="jetEnergyCorrections/pp2024/";
+      if(fUsePpL1FastJet) correctionFiles.push_back(base+"Prompt24HIpp_V1_MC_L1FastJet_AK4PF.txt");
+      correctionFiles.push_back(base+"Prompt24HIpp_V2_MC_L2Relative_AK4PF.txt");
+      if(fIsRealData) correctionFiles.push_back(base+"Prompt24HIpp_V1_DATA_L2Residual_AK4PF.txt");
+    }
+    for(const auto& path:correctionFiles) {
+      std::ifstream input(path);
+      if(!input.good()) throw std::runtime_error("Missing pinned Run-3 JEC payload: "+path);
+    }
+  } else if(fIsOOData || fIsPp2024Data) {
+    std::cout<<"Run3JEC 0: legacy calibration retained for comparison; current Run-3 L2 calibration is NOT active."<<std::endl;
+  }
+  fJetCorrector = new JetCorrector(correctionFiles);
+  fJetUncertainty = new JetUncertainty(uncertaintyFile[fDataType]);
+
+  if(fMcCorrelationType == kGenReco || fMcCorrelationType == kGenGen){
+    fJetReader = new GeneratorLevelForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,fMatchJets,readTrackTree);
+  } else {
+    fJetReader = new HighForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,fMatchJets,readTrackTree);
+  }
+
+  if(!readTrackTree){
+    fTrackReader = fJetReader;
+  } else if(fMcCorrelationType == kRecoGen){
+    fTrackReader = new GeneratorLevelForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,fMatchJets);
+  } else if(fMcCorrelationType == kGenReco){
+    fTrackReader = new HighForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,fMatchJets);
+  } else {
+    fTrackReader = fJetReader;
+  }
+
+  if(fDoMixedCone){
+    if(fMcCorrelationType == kRecoGen || fMcCorrelationType == kGenGen){
+      fMixedEventReader = new GeneratorLevelForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,false,true,true,fMegaSkimMode);
+    } else {
+      fMixedEventReader = new HighForestReader(fDataType,fTriggerSelection,fJetType,fJetAxis,false,true,true,fMegaSkimMode);
+    }
+    fOwnsMixedEventReader = true;
+  }
+
+  if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms){
+    fUnfoldingForestReader = new UnfoldingForestReader(fDataType,fJetType,fJetAxis);
+    fOwnsUnfoldingReader = true;
+  }
+
+  if(fRun3JetID || fApplyJetVeto || fUseRun3JEC){
+    if(auto* reco = dynamic_cast<HighForestReader*>(fJetReader)) reco->EnableRun3JetSelection(true);
+    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
+      fUnfoldingForestReader->EnableRun3JetSelection(true);
+  }
+  if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data){
+    if(auto* reco = dynamic_cast<HighForestReader*>(fJetReader)) reco->EnableRun3PpL1Inputs();
+    if(fFillJetPtUnfoldingResponse || fFillTrackParticleMatchingHistograms)
+      fUnfoldingForestReader->EnableRun3PpL1Inputs();
+  }
+  if(fApplyJetVeto || fUseRun3JEC){
+    if(fMcCorrelationType == kGenReco || fMcCorrelationType == kGenGen){
+      fRecoJetReader = new HighForestReader(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false);
+      fRecoJetReader->EnableRun3JetSelection(true);
+      if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data) fRecoJetReader->EnableRun3PpL1Inputs();
+    }
+    if(fDoMixedCone && fApplyJetVeto){
+      if(auto* reco = dynamic_cast<HighForestReader*>(fMixedEventReader)) {
+        reco->EnableRun3JetSelection(true);
+        if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data && fJetVetoPtConvention=="recomputed") reco->EnableRun3PpL1Inputs();
+      } else {
+        fMixedVetoJetReader = std::make_shared<HighForestReader>(fDataType, fTriggerSelection, fJetType, fJetAxis, 0, false, true, false);
+        fMixedVetoJetReader->EnableRun3JetSelection(true);
+        if(fUseRun3JEC && fUsePpL1FastJet && fIsPp2024Data && fJetVetoPtConvention=="recomputed") fMixedVetoJetReader->EnableRun3PpL1Inputs();
+      }
+    }
+  }
+}
+
+std::vector<TString> EECAnalyzer::ParseMixingFileList(const TString& mixingListPath) const{
+  std::vector<TString> mixingFiles;
+  std::string lineInFile;
+  std::ifstream mixingFileStream(mixingListPath.Data());
+  if(!mixingFileStream)
+    throw std::runtime_error("Cannot open configured MixingFileList: " + std::string(mixingListPath.Data()));
+  while(std::getline(mixingFileStream, lineInFile)){
+    const auto first = lineInFile.find_first_not_of(" \t\r");
+    if(first == std::string::npos || lineInFile[first] == '#') continue;
+    lineInFile = lineInFile.substr(first, lineInFile.find_last_not_of(" \t\r") - first + 1);
+
+    // Strip an xrootd redirector only when local mixing was explicitly selected.
+    if(fLocalMixing && lineInFile.rfind("root://", 0) == 0){
+      const auto pathStart = lineInFile.find("//", 7);
+      if(pathStart == std::string::npos) throw std::runtime_error("Malformed xrootd mixing path");
+      mixingFiles.push_back(lineInFile.substr(pathStart + 1));
+    } else {
+      mixingFiles.push_back(lineInFile);
+    }
+  }
+  return mixingFiles;
+}
+
+MixingLookupConfig EECAnalyzer::MakeMixingLookupConfig() const{
+  MixingLookupConfig cfg;
+  cfg.dataType = fDataType;
+  cfg.megaSkimMode = fMegaSkimMode;
+  cfg.vzCut = fVzCut;
+  cfg.triggerSelection = fTriggerSelection;
+  cfg.applyJetVeto = fApplyJetVeto;
+  if(fApplyJetVeto){
+    cfg.jetVetoMapFile = fCard->HasKey("JetVetoMapFile") ? fCard->GetStr("JetVetoMapFile").Data() : "";
+    cfg.jetVetoMapHistogram = fCard->HasKey("JetVetoMapHistogram") ? fCard->GetStr("JetVetoMapHistogram").Data() : "";
+    cfg.jetVetoPtConvention = fJetVetoPtConvention.Data();
+    cfg.run3JetID = fRun3JetID;
+    cfg.run3JetIDTable = fCard->HasKey("Run3JetIDTable") ? fCard->GetStr("Run3JetIDTable").Data() : "MiniPOG20261108";
+    cfg.useRun3JEC = fUseRun3JEC;
+    cfg.usePpL1FastJet = fUsePpL1FastJet;
+  }
+  cfg.ooClosurePilot = fOOClosure->enabled;
+  cfg.requireGenMultiplicity = (fEventMatchForMixing == kMatchMultiplicity);
+  return cfg;
+}
+
+void EECAnalyzer::ScanMixingFilesIntoLookupTable(const std::vector<TString>& mixingFiles,
+                                                 const std::vector<Int_t>& fileIndices,
+                                                 Int_t maxEventsCap,
+                                                 MixingLookupTable& table,
+                                                 Bool_t* truncatedOut){
+  if(truncatedOut) *truncatedOut = false;
+  if(!fMixedEventReader) throw std::logic_error("ScanMixingFilesIntoLookupTable requires initialized fMixedEventReader");
+
+  // Only bind/read trackTree during metadata scan when OOClosurePilot or generator multiplicity matching requires it.
+  const Bool_t needTracksForMetadata = fOOClosure->enabled || (fEventMatchForMixing == kMatchMultiplicity);
+
+  for(std::size_t k = 0; k < fileIndices.size(); ++k){
+    if(maxEventsCap > 0 && static_cast<Int_t>(table.GetTotalRecordCount()) >= maxEventsCap){
+      if(truncatedOut) *truncatedOut = true;
+      break;
+    }
+
+    const Int_t fileIdx = fileIndices[k];
+    const TString& filePath = mixingFiles.at(fileIdx);
+    TDirectory::TContext directoryGuard;
+    std::unique_ptr<TFile> donorFile(TFile::Open(filePath));
+    if(!donorFile || !donorFile->IsOpen() || donorFile->IsZombie()){
+      throw std::runtime_error("Cannot open mixing file: " + std::string(filePath.Data()));
+    }
+
+    // Pass 1a: read scalar event metadata (and gen particles only if needed) from the single open TFile
+    fMixedEventReader->SetReadTrackTree(needTracksForMetadata);
+    fMixedEventReader->ReadForestFromFile(donorFile.get());
+    const Long64_t totalEntriesInFile = fMixedEventReader->GetNEvents();
+    Int_t entriesToRead = static_cast<Int_t>(totalEntriesInFile);
+    if(maxEventsCap > 0){
+      const Long64_t remaining = static_cast<Long64_t>(maxEventsCap) - static_cast<Long64_t>(table.GetTotalRecordCount());
+      if(totalEntriesInFile > remaining){
+        if(truncatedOut) *truncatedOut = true;
+        entriesToRead = static_cast<Int_t>(std::max<Long64_t>(0, remaining));
+      }
+    }
+
+    std::vector<MixingDonorRecord> fileRecords;
+    fileRecords.reserve(entriesToRead);
+    for(Int_t localEntry = 0; localEntry < entriesToRead; ++localEntry){
+      fMixedEventReader->GetEvent(localEntry);
+
+      MixingDonorRecord rec;
+      rec.fileIndex = fileIdx;
+      rec.localEntry = localEntry;
+      rec.hasPhysicalId = fMixedEventReader->HasPhysicalEventIdentity();
+      rec.run = fMixedEventReader->GetRunNumber();
+      rec.lumi = fMixedEventReader->GetLumiNumber();
+      rec.eventNumber = fMixedEventReader->GetEventNumber();
+      rec.vz = fMixedEventReader->GetVz();
+      rec.storedHiBin = fMixedEventReader->GetStoredHiBin();
+      rec.hfSum = fMixedEventReader->GetHFSum();
+      rec.rawHfSum = fMixedEventReader->GetRawHFSum();
+      rec.eventWeight = fMixedEventReader->GetEventWeight();
+      rec.pvBit = (fMixedEventReader->GetPrimaryVertexFilterBit() != 0);
+      rec.hfCoincBit = (fMixedEventReader->GetHfCoincidenceFilterBit() != 0);
+      rec.pileupBit = (fMixedEventReader->GetPileupFilterBit() != 0);
+      rec.vzBit = (TMath::Abs(rec.vz) <= fVzCut);
+      rec.passMBTrigger = (fMixedEventReader->GetCaloJet15FilterBit() == 1);
+
+      const Bool_t passStd =
+        rec.pvBit &&
+        rec.hfCoincBit &&
+        (fMixedEventReader->GetClusterCompatibilityFilterBit() != 0) &&
+        (fMixedEventReader->GetHBHENoiseFilterBit() != 0) &&
+        (fMixedEventReader->GetBeamScrapingFilterBit() != 0) &&
+        rec.pileupBit &&
+        rec.vzBit;
+      rec.passStandardEventCuts = fMegaSkimMode ? true : passStd;
+
+      if(fMegaSkimMode){
+        rec.passEventCuts = true;
+      } else if(!fApplyJetVeto){
+        rec.passEventCuts = passStd;
+      } else if(!fMixedVetoJetReader){
+        rec.passEventCuts = passStd ? PassRun3JetVeto(fMixedEventReader, true) : false;
+      } else {
+        rec.passEventCuts = passStd; // Finalized in Pass 1b below using the same open donorFile
+      }
+
+      if(fEventMatchForMixing == kMatchMultiplicity){
+        rec.genMultiplicity = GetGenMultiplicity(fMixedEventReader, kSubeventAny, fMegaSkimMode);
+      }
+
+      if(fOOClosure->enabled){
+        const Int_t globalEntry = static_cast<Int_t>(table.GetTotalRecordCount() + fileRecords.size());
+        const auto pilotEv = ReadOOClosureEvent(fMixedEventReader, globalEntry, true);
+        rec.ooNh = pilotEv.nh;
+        rec.backgroundKnown = pilotEv.backgroundKnown;
+        rec.backgroundKey = pilotEv.background;
+        rec.backgroundSignature = pilotEv.SignatureText();
+      }
+
+      fileRecords.push_back(std::move(rec));
+    }
+
+    fMixedEventReader->BurnForest();
+    fMixedEventReader->SetReadTrackTree(true);
+
+    // Pass 1b: if generator-mode mixing uses an independent reconstructed veto reader,
+    // bind it sequentially to the SAME open TFile* (avoiding simultaneous HiTree SetBranchAddress collisions).
+    if(fApplyJetVeto && fMixedVetoJetReader && !fMegaSkimMode){
+      fMixedVetoJetReader->ReadForestFromFile(donorFile.get());
+      if(fMixedVetoJetReader->GetNEvents() != totalEntriesInFile){
+        fMixedVetoJetReader->BurnForest();
+        throw std::runtime_error("Mixing generator/reconstructed veto entry counts differ");
+      }
+      for(Int_t localEntry = 0; localEntry < entriesToRead; ++localEntry){
+        if(fileRecords[localEntry].passStandardEventCuts){
+          fMixedVetoJetReader->GetEvent(localEntry);
+          fileRecords[localEntry].passEventCuts = PassRun3JetVeto(fMixedVetoJetReader.get(), true);
+        } else {
+          fileRecords[localEntry].passEventCuts = false;
+        }
+      }
+      fMixedVetoJetReader->BurnForest();
+    }
+
+    donorFile->Close();
+
+    for(const auto& rec : fileRecords){
+      table.AddRecord(rec);
+    }
+  }
+}
+
+void EECAnalyzer::PrepareMixingPoolFromLookup(const std::vector<TString>& mixingFiles, const TString& mixingListPath){
+  if(!fOOClosure->enabled &&
+     fEventMatchForMixing != kMatchHiBin &&
+     fEventMatchForMixing != kMatchHFEnergy &&
+     fEventMatchForMixing != kMatchMultiplicity){
+    throw std::invalid_argument(Form(
+      "EECAnalyzer::ERROR There are three different event matching methods implemented for mixing. %d = Match HiBin, %d = Match HF energy, %d = Match background multiplicity. In the card, you defined EventMatchForMixing = %d.",
+      kMatchHiBin, kMatchHFEnergy, kMatchMultiplicity, fEventMatchForMixing));
+  }
+
+  fMixingLookupTable.Clear();
+  const MixingLookupConfig expectedCfg = MakeMixingLookupConfig();
+
+  bool loadedFromLookup = false;
+  std::string loadedLookupPath;
+  if(fCard->HasKey("MixingLookupTable")){
+    const std::string configuredLookup = fCard->GetStr("MixingLookupTable").Data();
+    if(!configuredLookup.empty() && configuredLookup != "none"){
+      std::string rejectReason;
+      if(!fMixingLookupTable.TryLoadFromFile(configuredLookup, expectedCfg, mixingFiles, rejectReason)){
+        throw std::runtime_error("Configured MixingLookupTable (" + configuredLookup + ") rejected: " + rejectReason);
+      }
+      loadedFromLookup = true;
+      loadedLookupPath = configuredLookup;
+    }
+  } else {
+    for(const auto& candidate : MixingLookupTable::CandidateLookupPaths(mixingListPath.Data())){
+      std::ifstream probe(candidate);
+      if(!probe.good()) continue;
+      std::string rejectReason;
+      if(fMixingLookupTable.TryLoadFromFile(candidate, expectedCfg, mixingFiles, rejectReason)){
+        loadedFromLookup = true;
+        loadedLookupPath = candidate;
+        break;
+      } else {
+        cout << "EECAnalyzer::Note: Sidecar lookup table " << candidate
+             << " skipped (" << rejectReason << "); falling back to single-handle metadata scan." << endl;
+      }
+    }
+  }
+
+  if(loadedFromLookup){
+    cout << "EECAnalyzer: Loaded prebuilt mixing lookup table " << loadedLookupPath
+         << " (" << fMixingLookupTable.GetTotalRecordCount() << " donor events across "
+         << mixingFiles.size() << " files; 0 donor ROOT files opened at startup)." << endl;
+  }
+
+  if(fOOClosure->enabled){
+    if(!loadedFromLookup){
+      std::vector<Int_t> allFiles(mixingFiles.size());
+      for(std::size_t i = 0; i < mixingFiles.size(); ++i) allFiles[i] = static_cast<Int_t>(i);
+      Bool_t truncated = false;
+      ScanMixingFilesIntoLookupTable(mixingFiles, allFiles, fOOClosure->maxPool, fMixingLookupTable, &truncated);
+      if(truncated) fHistograms->MarkTruncatedInput();
+    } else if(static_cast<Long64_t>(fMixingLookupTable.GetTotalRecordCount()) > fOOClosure->maxPool){
+      fHistograms->MarkTruncatedInput();
+    }
+
+    fnEventsInMixingFile = static_cast<Int_t>(std::min<std::size_t>(
+      fMixingLookupTable.GetTotalRecordCount(),
+      static_cast<std::size_t>(fOOClosure->maxPool)));
+
+    if(loadedFromLookup && fApplyJetVeto && fHistograms->fhJetVetoEventCounts){
+      for(Int_t i = 0; i < fnEventsInMixingFile; ++i){
+        const auto& rec = fMixingLookupTable.GetRecord(i);
+        if(rec.passStandardEventCuts){
+          fHistograms->fhJetVetoEventCounts->Fill(3);
+          fHistograms->fhJetVetoEventCounts->Fill(rec.passEventCuts ? 4 : 5);
+        }
+      }
+    }
+
+    PrepareOOClosurePool(true);
+    return;
+  }
+
+  // Standard binned/unbinned mixing: select this job's deterministic shard window across mixingFiles
+  if(loadedFromLookup){
+    const std::vector<Int_t> activeFileVec = fMixingLookupTable.SelectActiveFiles(
+      mixingFiles.size(), fMixingMaxOpenFiles, fMixingShardHash, fDataType, fMegaSkimMode);
+    const std::set<Int_t> activeFileSet(activeFileVec.begin(), activeFileVec.end());
+    fMixingLookupTable.BuildIndex(
+      fEventMatchForMixing, fBinnedMixing, fDataType, fMegaSkimMode, activeFileSet,
+      fVzMixingBinBorders, fHiBinMixingBinBorders, fHFEnergyMixingBinBorders, fMultiplicityMixingBinBorders);
+
+    if(fApplyJetVeto && fHistograms->fhJetVetoEventCounts){
+      for(Int_t idx : fMixingLookupTable.GetActiveRecordIndices()){
+        const auto& rec = fMixingLookupTable.GetRecord(idx);
+        if(rec.passStandardEventCuts){
+          fHistograms->fhJetVetoEventCounts->Fill(3);
+          fHistograms->fhJetVetoEventCounts->Fill(rec.passEventCuts ? 4 : 5);
+        }
+      }
+    }
+  } else {
+    std::vector<Int_t> activeFileVec = fMixingLookupTable.SelectActiveFiles(
+      mixingFiles.size(), fMixingMaxOpenFiles, fMixingShardHash, fDataType, fMegaSkimMode);
+    ScanMixingFilesIntoLookupTable(mixingFiles, activeFileVec, 0, fMixingLookupTable);
+
+    // If the initial shard window has < 2 eligible donor events, expand around the file ring until >= 2 are found
+    auto countLoadedEligible = [&]() -> std::size_t {
+      std::size_t count = 0;
+      for(const auto& rec : fMixingLookupTable.GetRecords()){
+        if(rec.IsEligible(fDataType, fMegaSkimMode)) ++count;
+      }
+      return count;
+    };
+    const std::size_t nTotalFiles = mixingFiles.size();
+    const std::size_t startFile = static_cast<std::size_t>(fMixingShardHash % nTotalFiles);
+    for(std::size_t offset = activeFileVec.size(); offset < nTotalFiles && countLoadedEligible() < 2; ++offset){
+      const Int_t nextFile = static_cast<Int_t>((startFile + offset) % nTotalFiles);
+      activeFileVec.push_back(nextFile);
+      ScanMixingFilesIntoLookupTable(mixingFiles, std::vector<Int_t>{nextFile}, 0, fMixingLookupTable);
+    }
+
+    fMixingLookupTable.BuildIndex(
+      fEventMatchForMixing, fBinnedMixing, fDataType, fMegaSkimMode, std::set<Int_t>{},
+      fVzMixingBinBorders, fHiBinMixingBinBorders, fHFEnergyMixingBinBorders, fMultiplicityMixingBinBorders);
+  }
+
+  const auto& activeIndices = fMixingLookupTable.GetActiveRecordIndices();
+  fnEventsInMixingFile = static_cast<Int_t>(activeIndices.size());
+  const std::size_t nEligible = fMixingLookupTable.GetEligibleActiveCount();
+
+  fMixedEventVz.clear();
+  fMixedEventHiBin.clear();
+  fMixedEventMultiplicity.clear();
+  fMixedEventHFEnergy.clear();
+  fMixedEventEventNumber.clear();
+  fMixedEventVzBin.clear();
+  fMixedEventHiBinBin.clear();
+  fMixedEventMultiplicityBin.clear();
+  fMixedEventHFEnergyBin.clear();
+
+  if(fBinnedMixing){
+    if(nEligible < 2){
+      throw std::runtime_error("Binned mixing: fewer than two eligible pool events");
+    }
+    for(Int_t globalIdx : activeIndices){
+      const auto& rec = fMixingLookupTable.GetRecord(globalIdx);
+      fMixedEventEventNumber.push_back(rec.eventNumber);
+      if(rec.IsEligible(fDataType, fMegaSkimMode)){
+        fMixedEventVzBin.push_back(FindMixingVzBin(rec.vz));
+        if(fEventMatchForMixing == kMatchHiBin) fMixedEventHiBinBin.push_back(FindMixingHiBinBin(rec.NormalizedHiBin()));
+        else if(fEventMatchForMixing == kMatchHFEnergy) fMixedEventHFEnergyBin.push_back(FindMixingHFEnergyBin(rec.hfSum));
+        else fMixedEventMultiplicityBin.push_back(FindMixingMultiplicityBin(rec.genMultiplicity));
+      } else {
+        fMixedEventVzBin.push_back(kNonsenseBin);
+        if(fEventMatchForMixing == kMatchHiBin) fMixedEventHiBinBin.push_back(kNonsenseBin);
+        else if(fEventMatchForMixing == kMatchHFEnergy) fMixedEventHFEnergyBin.push_back(kNonsenseBin);
+        else fMixedEventMultiplicityBin.push_back(kNonsenseBin);
+      }
+    }
+
+    std::vector<Double_t> vzMixingCountVector = GetBinnedMixingBinBorders(fVzMixingBinBorders, fMixedEventVzBin);
+    std::vector<Double_t> eventActivityCountVector;
+    std::vector<Double_t> eventActivityBinBorders;
+    const std::vector<Int_t>* activityBins = nullptr;
+
+    if(fEventMatchForMixing == kMatchHiBin){
+      eventActivityCountVector = GetBinnedMixingBinBorders(fHiBinMixingBinBorders, fMixedEventHiBinBin);
+      eventActivityBinBorders = fHiBinMixingBinBorders;
+      activityBins = &fMixedEventHiBinBin;
+    } else if(fEventMatchForMixing == kMatchHFEnergy){
+      eventActivityCountVector = GetBinnedMixingBinBorders(fHFEnergyMixingBinBorders, fMixedEventHFEnergyBin);
+      eventActivityBinBorders = fHFEnergyMixingBinBorders;
+      activityBins = &fMixedEventHFEnergyBin;
+    } else {
+      eventActivityCountVector = GetBinnedMixingBinBorders(fMultiplicityMixingBinBorders, fMixedEventMultiplicityBin);
+      eventActivityBinBorders = fMultiplicityMixingBinBorders;
+      activityBins = &fMixedEventMultiplicityBin;
+    }
+
+    fHistograms->fhMixedEventCounts->SetBins(
+      vzMixingCountVector.size() - 1, vzMixingCountVector.data(),
+      eventActivityCountVector.size() - 1, eventActivityCountVector.data());
+
+    for(std::size_t i = 0; i < fMixedEventVzBin.size(); ++i){
+      if(fMixedEventVzBin[i] == kNonsenseBin || (*activityBins)[i] == kNonsenseBin) continue;
+      fHistograms->fhMixedEventCounts->Fill(
+        FindExampleValue(fMixedEventVzBin[i], fVzMixingBinBorders),
+        FindExampleValue((*activityBins)[i], eventActivityBinBorders));
+    }
+  } else {
+    Long64_t nPassCuts = 0, nPassMB = 0, nPassBoth = 0;
+    Long64_t nPV = 0, nHF = 0, nPileup = 0, nVz = 0;
+
+    for(Int_t globalIdx : activeIndices){
+      const auto& rec = fMixingLookupTable.GetRecord(globalIdx);
+      fMixedEventEventNumber.push_back(rec.eventNumber);
+      if(!fMegaSkimMode && fEventMatchForMixing == kMatchHiBin){
+        const Bool_t mbOk = (fDataType != ForestReader::kOO) || rec.passMBTrigger;
+        nPV += rec.pvBit;
+        nHF += rec.hfCoincBit;
+        nPileup += rec.pileupBit;
+        nVz += rec.vzBit;
+        nPassCuts += rec.passEventCuts;
+        nPassMB += mbOk;
+        nPassBoth += (rec.passEventCuts && mbOk);
+      }
+
+      if(rec.IsEligible(fDataType, fMegaSkimMode)){
+        fMixedEventVz.push_back(rec.vz);
+        if(fEventMatchForMixing == kMatchHiBin) fMixedEventHiBin.push_back(rec.NormalizedHiBin());
+        else if(fEventMatchForMixing == kMatchHFEnergy) fMixedEventHFEnergy.push_back(rec.hfSum);
+        else fMixedEventMultiplicity.push_back(rec.genMultiplicity);
+      } else {
+        fMixedEventVz.push_back(kNonsenseValue);
+        if(fEventMatchForMixing == kMatchHiBin) fMixedEventHiBin.push_back(kNonsenseValue);
+        else if(fEventMatchForMixing == kMatchHFEnergy) fMixedEventHFEnergy.push_back(kNonsenseValue);
+        else fMixedEventMultiplicity.push_back(kNonsenseValue);
+      }
+    }
+
+    if(fDataType == ForestReader::kOO && !fMegaSkimMode && fEventMatchForMixing == kMatchHiBin){
+      cout << "OO pool QA: total=" << fnEventsInMixingFile
+           << " PV=" << nPV << " HF=" << nHF
+           << " pileup=" << nPileup << " vz=" << nVz
+           << " allEventCuts=" << nPassCuts
+           << " MB=" << nPassMB << " both=" << nPassBoth << endl;
+    }
+
+    cout << "OO mixing: pool entries = " << fnEventsInMixingFile
+         << ", eligible after event cuts and MB trigger = "
+         << nEligible << endl;
+
+    if(nEligible < 2){
+      throw std::runtime_error("OO mixing: fewer than two eligible pool events");
+    }
+
+    std::vector<Double_t> vzMixingCountVector = GetMixingBinBorders(fVzMixingBinBorders, fMixedEventVz);
+    std::vector<Double_t> eventActivityCountVector;
+    std::vector<Double_t> eventActivityVector;
+
+    if(fEventMatchForMixing == kMatchHiBin){
+      for(auto number : fMixedEventHiBin) eventActivityVector.push_back(number);
+      eventActivityCountVector = GetMixingBinBorders(fHiBinMixingBinBorders, eventActivityVector);
+    } else if(fEventMatchForMixing == kMatchHFEnergy){
+      eventActivityCountVector = GetMixingBinBorders(fHFEnergyMixingBinBorders, fMixedEventHFEnergy);
+      eventActivityVector = fMixedEventHFEnergy;
+    } else {
+      for(auto number : fMixedEventMultiplicity) eventActivityVector.push_back(number);
+      eventActivityCountVector = GetMixingBinBorders(fMultiplicityMixingBinBorders, eventActivityVector);
+    }
+
+    fHistograms->fhMixedEventCounts->SetBins(
+      vzMixingCountVector.size() - 1, vzMixingCountVector.data(),
+      eventActivityCountVector.size() - 1, eventActivityCountVector.data());
+
+    for(std::size_t i = 0; i < fMixedEventVz.size(); ++i){
+      fHistograms->fhMixedEventCounts->Fill(fMixedEventVz[i], eventActivityVector[i]);
+    }
+  }
+}
+
+void EECAnalyzer::FlushPendingMixedJets(const std::vector<TString>& mixingFiles){
+  if(fPendingMixedJets.empty()) return;
+
+  // Group all uncached donor events by donor file index so each required donor ROOT file
+  // is opened AT MOST ONCE, binding only trackTree and reading entries in ascending order.
+  std::map<Int_t, std::vector<std::pair<Int_t, Int_t>>> neededByFile;
+  std::set<Int_t> queuedGlobals;
+  for(const auto& pending : fPendingMixedJets){
+    for(Int_t globalIdx : pending.donorGlobalIndices){
+      if(globalIdx < 0) continue;
+      if(fPrefetchedDonorTracks.find(globalIdx) != fPrefetchedDonorTracks.end()) continue;
+      if(!queuedGlobals.insert(globalIdx).second) continue;
+      const auto& rec = fMixingLookupTable.GetRecord(globalIdx);
+      neededByFile[rec.fileIndex].emplace_back(rec.localEntry, globalIdx);
+    }
+  }
+
+  for(auto& kv : neededByFile){
+    const Int_t fileIdx = kv.first;
+    auto& entries = kv.second;
+    std::sort(entries.begin(), entries.end());
+
+    const TString& donorPath = mixingFiles.at(fileIdx);
+    TDirectory::TContext directoryGuard;
+    std::unique_ptr<TFile> donorFile(TFile::Open(donorPath));
+    if(!donorFile || !donorFile->IsOpen() || donorFile->IsZombie()){
+      throw std::runtime_error("Cannot open donor file for mixed-cone track prefetch: " + std::string(donorPath.Data()));
+    }
+
+    fMixedEventReader->ReadTrackTreeOnlyFromFile(donorFile.get());
+    for(const auto& entryPair : entries){
+      const Int_t localEntry = entryPair.first;
+      const Int_t globalIdx = entryPair.second;
+      const auto& rec = fMixingLookupTable.GetRecord(globalIdx);
+      const Int_t donorHiBin = rec.NormalizedHiBin();
+
+      fMixedEventReader->GetEvent(localEntry);
+      const Int_t nTracks = fMixedEventReader->GetNTracks();
+
+      std::vector<CachedDonorTrack> selectedTracks;
+      selectedTracks.reserve(static_cast<std::size_t>(std::max(0, nTracks / 4)));
+      for(Int_t iTrack = 0; iTrack < nTracks; ++iTrack){
+        if(!fMegaSkimMode){
+          if(!PassTrackCuts(fMixedEventReader, iTrack, fHistograms->fhTrackCuts, true)) continue;
+        }
+        CachedDonorTrack trk;
+        trk.pt = fMixedEventReader->GetTrackPt(iTrack);
+        trk.eta = fMixedEventReader->GetTrackEta(iTrack);
+        trk.phi = fMixedEventReader->GetTrackPhi(iTrack);
+        trk.efficiencyCorrection = GetTrackEfficiencyCorrection(trk.pt, trk.eta, donorHiBin);
+        trk.subevent = fOOClosure->enabled ? 1 : fMixedEventReader->GetTrackSubevent(iTrack);
+        selectedTracks.push_back(trk);
+      }
+      fPrefetchedDonorTracks.emplace(globalIdx, std::move(selectedTracks));
+    }
+    fMixedEventReader->BurnForest();
+    donorFile->Close();
+  }
+
+  const Double_t savedTotalEventWeight = fTotalEventWeight;
+  const Int_t savedOOJetIndex = fOOClosure->jetIndex;
+  const oo_eec::PilotEvent savedOOSignal = fOOClosure->signal;
+
+  const Int_t nDeltaRBins = fHistograms->GetNDeltaRBinsEEC();
+  const Int_t nTrackPtBinsEEC = fCard->GetNBin("TrackPtBinEdgesEEC");
+  Double_t fillerUnfoldingCovariance[5] = {0};
+
+  for(auto& pending : fPendingMixedJets){
+    Int_t mixedEventFillIndex = EECHistograms::kMixedCone;
+    for(Int_t globalIdx : pending.donorGlobalIndices){
+      const auto& rec = fMixingLookupTable.GetRecord(globalIdx);
+      const Int_t donorHiBin = rec.NormalizedHiBin();
+      const auto& donorTracks = fPrefetchedDonorTracks.at(globalIdx);
+      for(const auto& trk : donorTracks){
+        const Double_t deltaRTrackJet = GetDeltaR(pending.jetEta, pending.jetPhi, trk.eta, trk.phi);
+        if(deltaRTrackJet < fJetRadius){
+          pending.relativeTrackPhi[mixedEventFillIndex].push_back(
+            fOOClosure->enabled ? oo_eec::PilotRelativePhi(trk.phi, pending.jetPhi) : (trk.phi - pending.jetPhi));
+          pending.relativeTrackEta[mixedEventFillIndex].push_back(trk.eta - pending.jetEta);
+          pending.selectedTrackPt[mixedEventFillIndex].push_back(trk.pt);
+          pending.selectedTrackCorrection[mixedEventFillIndex].push_back(trk.efficiencyCorrection);
+          pending.coneSourceHiBin[mixedEventFillIndex] = donorHiBin;
+          pending.selectedTrackSubevent[mixedEventFillIndex].push_back(trk.subevent);
+        }
+      }
+      mixedEventFillIndex = EECHistograms::kSecondMixedCone;
+    }
+
+    fTotalEventWeight = pending.totalEventWeight;
+    if(fOOClosure->enabled){
+      fOOClosure->jetIndex = pending.ooClosureJetIndex;
+      fOOClosure->signal = pending.ooClosureSignal;
+    }
+
+    if(!fSkipCovarianceMatrix){
+      for(std::size_t iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); ++iWeightExponent){
+        for(Int_t iTrackPt = 0; iTrackPt < nTrackPtBinsEEC; ++iTrackPt){
+          fThisEventCorrelator[iWeightExponent][iTrackPt]->Reset();
+        }
+      }
+    }
+
+    CalculateEnergyEnergyCorrelator(
+      pending.selectedTrackPt, pending.relativeTrackEta, pending.relativeTrackPhi,
+      pending.selectedTrackSubevent, pending.selectedTrackCorrection, pending.coneSourceHiBin,
+      pending.jetPt, pending.centrality, pending.signalHiBin);
+
+    if(!fSkipCovarianceMatrix){
+      fillerUnfoldingCovariance[3] = pending.centrality;
+      for(std::size_t iWeightExponent = 0; iWeightExponent < fWeightExponent.size(); ++iWeightExponent){
+        fillerUnfoldingCovariance[4] = iWeightExponent;
+        for(Int_t iTrackPt = 0; iTrackPt < nTrackPtBinsEEC; ++iTrackPt){
+          fillerUnfoldingCovariance[2] = fCard->Get("TrackPtBinEdgesEEC", iTrackPt) + 0.1;
+          for(Int_t iDeltaRBin = 1; iDeltaRBin <= nDeltaRBins; ++iDeltaRBin){
+            const Double_t deltaRBinContent1 = fThisEventCorrelator[iWeightExponent][iTrackPt]->GetBinContent(iDeltaRBin);
+            const Double_t transformedDeltaR1 = TransformToUnfoldingAxis(fHistograms->GetDeltaRBinBorderLowEEC(iDeltaRBin) + 0.0001, pending.jetPt);
+            for(Int_t jDeltaRBin = 1; jDeltaRBin <= nDeltaRBins; ++jDeltaRBin){
+              const Double_t deltaRBinContent2 = fThisEventCorrelator[iWeightExponent][iTrackPt]->GetBinContent(jDeltaRBin);
+              const Double_t transformedDeltaR2 = TransformToUnfoldingAxis(fHistograms->GetDeltaRBinBorderLowEEC(jDeltaRBin) + 0.0001, pending.jetPt);
+              fillerUnfoldingCovariance[0] = transformedDeltaR1;
+              fillerUnfoldingCovariance[1] = transformedDeltaR2;
+              fHistograms->fhJetPtUnfoldingCovariance->Fill(fillerUnfoldingCovariance, deltaRBinContent1 * deltaRBinContent2);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fTotalEventWeight = savedTotalEventWeight;
+  if(fOOClosure->enabled){
+    fOOClosure->jetIndex = savedOOJetIndex;
+    fOOClosure->signal = savedOOSignal;
+  }
+
+  fPendingMixedJets.clear();
+  if(fPrefetchedDonorTracks.size() > 32768){
+    fPrefetchedDonorTracks.clear();
+  }
+}
+
+void EECAnalyzer::BuildAndWriteMixingLookupTable(const std::string& mixingListPath,
+                                                 const std::string& outputLookupPath,
+                                                 Int_t maxPoolEvents){
+  const Bool_t savedDoMixedCone = fDoMixedCone;
+  fDoMixedCone = true;
+  if(fApplyJetVeto && fMegaSkimMode){
+    fDoMixedCone = savedDoMixedCone;
+    throw std::invalid_argument("Jet veto requires full native reco jets in mixing; mega skims cannot establish the event mask.");
+  }
+
+  InitializeJetCalibrationAndReaders(false);
+
+  const std::vector<TString> mixingFiles = ParseMixingFileList(mixingListPath);
+  if(mixingFiles.empty()){
+    fDoMixedCone = savedDoMixedCone;
+    throw std::runtime_error("Configured MixingFileList is empty: " + mixingListPath);
+  }
+
+  MixingLookupTable table;
+  std::vector<Int_t> allFiles(mixingFiles.size());
+  for(std::size_t i = 0; i < mixingFiles.size(); ++i){
+    allFiles[i] = static_cast<Int_t>(i);
+  }
+
+  const Int_t effectiveMaxEvents = (maxPoolEvents > 0) ? maxPoolEvents : (fOOClosure->enabled ? fOOClosure->maxPool : 0);
+  ScanMixingFilesIntoLookupTable(mixingFiles, allFiles, effectiveMaxEvents, table);
+
+  std::vector<Int_t> fileEntryCounts(mixingFiles.size(), 0);
+  for(const auto& rec : table.GetRecords()){
+    if(rec.fileIndex >= 0 && static_cast<std::size_t>(rec.fileIndex) < fileEntryCounts.size()){
+      ++fileEntryCounts[static_cast<std::size_t>(rec.fileIndex)];
+    }
+  }
+  table.SetFileMetadata(mixingFiles, fileEntryCounts);
+
+  const MixingLookupConfig cfg = MakeMixingLookupConfig();
+  table.WriteToFile(outputLookupPath, cfg);
+
+  std::size_t nEligible = 0;
+  for(const auto& rec : table.GetRecords()){
+    if(rec.IsEligible(fDataType, fMegaSkimMode)) ++nEligible;
+  }
+  cout << "Built mixing lookup table: " << outputLookupPath
+       << " (files=" << mixingFiles.size()
+       << ", events=" << table.GetTotalRecordCount()
+       << ", eligible=" << nEligible << ")" << endl;
+
+  fDoMixedCone = savedDoMixedCone;
 }

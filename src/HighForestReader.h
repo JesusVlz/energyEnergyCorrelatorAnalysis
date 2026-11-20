@@ -39,11 +39,12 @@ public:
   
   // Methods
   Long64_t GetTotalChainEntries() const override;
-  void ReadForestFromFile(TFile* inputFile);  // Read the forest from a file
-  void ReadForestFromFileList(std::vector<TString> fileList);  // Read the forest from a file list
-  void BurnForest();                           // Burn the forest  
-  void GetEvent(Int_t nEvent);                 // Get the nEventh event from the file
-  bool CheckFileProblems();                    // Check if there are problems in the file list
+  void ReadForestFromFile(TFile* inputFile) override;  // Read the forest from a file
+  void ReadTrackTreeOnlyFromFile(TFile* inputFile) override; // Bind only track tree from an open file
+  void ReadForestFromFileList(std::vector<TString> fileList) override;  // Read the forest from a file list
+  void BurnForest() override;                  // Burn the forest
+  void GetEvent(Int_t nEvent) override;        // Get the nEventh event from the file
+  bool CheckFileProblems() override;           // Check if there are problems in the file list
   
   // Getters for leaves in jet tree
   Float_t GetJetPt(Int_t iJet) const;         // Getter for jet pT
@@ -106,15 +107,18 @@ private:
   
   // Methods
   void Initialize();       // Connect the branches to the tree
+  void InitializeTrackTreeOnly(); // Connect only track branches for single-open donor prefetch
   Int_t GetMatchingIndex(Int_t iJet) const; // Get the matching generator level jet index for the given reconstructed jet
 
-  // Trees in the forest
-  TChain* fHeavyIonTree;    // Tree for heavy ion event information
-  TChain* fJetTree;         // Tree for jet information
-  TChain* fHltTree;         // Tree for high level trigger information
-  TChain* fSkimTree;        // Tree for event selection information
-  TChain* fTrackTree;       // Tree for tracks.  miniAOD: ppTrack/trackTree. AOD: PbPbTracks/trackTree
-  TChain* fParticleTree;    // Tree for generator level particles. Needed for event mixing in MC
+  // Trees in the forest (direct TTree* for single-file reads, TChain* when fOwnsTrees is true)
+  TTree* fHeavyIonTree;     // Tree for heavy ion event information
+  TTree* fJetTree;          // Tree for jet information
+  TTree* fHltTree;          // Tree for high level trigger information
+  TTree* fSkimTree;         // Tree for event selection information
+  TTree* fTrackTree;        // Tree for tracks.  miniAOD: ppTrack/trackTree. AOD: PbPbTracks/trackTree
+  TTree* fParticleTree;     // Tree for generator level particles. Needed for event mixing in MC
+  Bool_t fOwnsTrees = false;
+  Bool_t fTrackTreeOnlyMode = false;
   
   // Non-common branches for all types of trees
   TBranch* fnJetsBranch;         // Branch for number of jets in an event
