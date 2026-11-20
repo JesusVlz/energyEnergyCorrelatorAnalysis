@@ -1,3 +1,4 @@
+# PRELIMINARY pp pair table 20261116: original derivation JetID OFF; JetID-on closure pending.
 # Configuration card for energy-energy correlator analysis
 
 # Data type for the analysis
@@ -35,11 +36,11 @@ MaxMaxTrackPtFraction 0.98 # Maximum fraction of jet pT taken by the highest pT 
 JetUncertainty 0           # 0 = Nominal jet pT, 1 = Minus uncertainty, 2 = Plus uncertainty, 3 = Nominal smear for MC, 4 = Uncertainty smear down, 5 = Uncertainty smear up
 
 # Run-3 miniPOG Jet ID ADDED to trackMax/rawPt; whole-event veto remains separate
-Run3JetID 1 # Additional to the independent trackMax/rawPt requirement
+Run3JetID 1
 Run3JetIDTable MiniPOG20261108 # Owner-supplied HIN miniPOG table, not a dated website release
 Run3JetQA 1 # Save pre-veto selection and fixed-sample calibration-stage spectra
 Run3JEC 1 # Run-3 jet-pT JEC
-Run3UsePpL1FastJet 1 # Current forests do not save the rho input needed by L1FastJet; keep off for production
+Run3UsePpL1FastJet 0
 
 ApplyJetVeto 1
 JetVetoMapFile jetVetoMaps/pp2024/Summer24Prompt24_RunBCDEFGHI.root
@@ -61,7 +62,7 @@ TrackEfficiencyVariation 0.0 # For tracking uncertainties, vary the efficiency c
 JetPtWeight 0 # In MC: 0 = Do not weight jet pT. 1 = Weight jet pT. 2 = Weight only true jet pT for response matrices.
 
 # Flags for residual correction method
-DisableTrackPairEfficiencyCorrection 1 # 0 = Do not disable the correction. 1 = Disable the correction
+DisableTrackPairEfficiencyCorrection 0
 
 # Cuts for event selection
 ZVertexCut 15       # Maximum vz value for accepted tracks
@@ -105,3 +106,5 @@ HFEnergyShift 0 # OFF for Run-3; no inherited HF shift
 
 # Debug
 DebugLevel 2   # 0 = No debug messages, 1 = Some debug messages, 2 = All debug messages
+Run3TrackPairCorrectionFile trackCorrectionTables/pp2024/pair/20261116/Nominal/trackPairEfficiencyCorrection_pp_run3-an751-v6-32dr-lowpt.root
+MinPairTrackPt 2
