@@ -30,11 +30,12 @@ public:
   
   // Methods
   Long64_t GetTotalChainEntries() const override;
-  void ReadForestFromFile(TFile *inputFile);   // Read the forest from a file
-  void ReadForestFromFileList(std::vector<TString> fileList);  // Read the forest from a file list
-  void BurnForest();                           // Burn the forest  
-  void GetEvent(Int_t nEvent);                 // Get the nEventh event from the file
-  bool CheckFileProblems();                    // Check if there are problems in the file list
+  void ReadForestFromFile(TFile *inputFile) override;   // Read the forest from a file
+  void ReadTrackTreeOnlyFromFile(TFile *inputFile) override; // Bind only generator particle tree from an open file
+  void ReadForestFromFileList(std::vector<TString> fileList) override;  // Read the forest from a file list
+  void BurnForest() override;                  // Burn the forest
+  void GetEvent(Int_t nEvent) override;        // Get the nEventh event from the file
+  bool CheckFileProblems() override;           // Check if there are problems in the file list
   
   // Getters for leaves in jet tree
   Float_t GetJetPt(Int_t iJet) const;         // Getter for jet pT
@@ -87,14 +88,17 @@ private:
   
   // Methods
   void Initialize();       // Connect the branches to the tree
+  void InitializeTrackTreeOnly(); // Connect only generator particle branches for single-open donor prefetch
   Int_t GetMatchingIndex(Int_t iJet) const; // Get the mathing reconstructed jet index for the given generator level jet
 
-  // Trees in the forest
-  TChain* fHeavyIonTree;    // Tree for heavy ion event information
-  TChain* fJetTree;         // Tree for jet information
-  TChain* fHltTree;         // Tree for HLT information
-  TChain* fSkimTree;        // Tree for event selection information
-  TChain* fTrackTree;       // Tree for GenParticles: HiGenParticleAna/hi
+  // Trees in the forest (direct TTree* for single-file reads, TChain* when fOwnsTrees is true)
+  TTree* fHeavyIonTree;     // Tree for heavy ion event information
+  TTree* fJetTree;          // Tree for jet information
+  TTree* fHltTree;          // Tree for HLT information
+  TTree* fSkimTree;         // Tree for event selection information
+  TTree* fTrackTree;        // Tree for GenParticles: HiGenParticleAna/hi
+  Bool_t fOwnsTrees = false;
+  Bool_t fTrackTreeOnlyMode = false;
   
   // Leaves for jet tree
   Float_t fJetPtArray[fnMaxJet] = {0};         // pT:s of all the jets in an event

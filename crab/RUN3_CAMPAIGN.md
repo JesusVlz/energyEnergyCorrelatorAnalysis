@@ -112,11 +112,19 @@ path before retrying. `--parts` can select remaining complete partitions.
 
 The CRAB checks accept a nonempty donor list of any size and reject duplicate
 or file-level overlapping donors. Check that all five Nebraska files open and
-contain the needed trees and branches before adding `--submit`. The worker
-archive must be rebuilt after adding or changing a donor list. If the local
-`ppRef2024_pool_pilot.txt` was overwritten with the five new paths, compare
-it with the separately tracked ZeroBias list before restoring the original
-35-file reservation required by `splitPPRefForestFiles.py`.
+contain the needed trees and branches before adding `--submit`. For mixed-cone
+campaigns, you can optionally prebuild `mixingFileList/<pool>.txt.lookup.tsv`
+with `./buildMixingLookupTable mixingFileList/<pool>.txt <card.input>` before
+running `python3 crab/makeOOAnalysisTar.py`: the worker archive packages
+non-hidden `.lookup.tsv` tables under `mixingFileList/` so CRAB jobs open zero
+donor ROOT files at startup and open at most `MixingMaxOpenFiles` (default `4`;
+`0` = all files) active donor files once during grouped track prefetch. If no
+`.lookup.tsv` is packaged, workers fall back automatically to scanning only
+their deterministic per-job donor shard one `TFile` at a time. The worker
+archive must be rebuilt after adding or changing a donor list or lookup table.
+If the local `ppRef2024_pool_pilot.txt` was overwritten with the five new
+paths, compare it with the separately tracked ZeroBias list before restoring
+the original 35-file reservation required by `splitPPRefForestFiles.py`.
 
 ```bash
 python3 crab/submitRun3.py oo-data --pilot 10

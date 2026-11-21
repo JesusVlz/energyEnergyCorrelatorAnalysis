@@ -15,14 +15,17 @@ LDFLAGS  += $(shell root-config --libs)
         
 # Use the following form if you have classes inherint TObject
 # HDRS += $(HDRSDICT) src/Class.h ... nanoDict.h       
-HDRS += src/ForestReader.h src/HighForestReader.h src/GeneratorLevelForestReader.h src/UnfoldingForestReader.h src/EECHistograms.h src/EECAnalyzer.h src/ConfigurationCard.h src/JetCorrector.h src/JetUncertainty.h src/trackingEfficiency2018PbPb.h src/trackingEfficiency2017pp.h src/trackingEfficiency2016pPb.h src/trackingEfficiency2024pp.h src/trackingEfficiency2025OO.h src/TrackingEfficiencyInterface.h src/BinningCard.h src/TrackPairEfficiencyCorrector.h src/SmearingProvider.h src/JetMetScalingFactorManager.h src/CovarianceHelper.h
+HDRS += src/ForestReader.h src/HighForestReader.h src/GeneratorLevelForestReader.h src/UnfoldingForestReader.h src/EECHistograms.h src/EECAnalyzer.h src/ConfigurationCard.h src/JetCorrector.h src/JetUncertainty.h src/trackingEfficiency2018PbPb.h src/trackingEfficiency2017pp.h src/trackingEfficiency2016pPb.h src/trackingEfficiency2024pp.h src/trackingEfficiency2025OO.h src/TrackingEfficiencyInterface.h src/BinningCard.h src/TrackPairEfficiencyCorrector.h src/SmearingProvider.h src/JetMetScalingFactorManager.h src/CovarianceHelper.h src/MixingLookupTable.h
+
+LOOKUP_PROGRAM = buildMixingLookupTable
 
 SRCS = $(HDRS:.h=.cxx)
 OBJS = $(HDRS:.h=.o)
 
-all:            $(PROGRAM)
+all:            $(PROGRAM) $(if $(wildcard $(LOOKUP_PROGRAM).cxx),$(LOOKUP_PROGRAM))
 
-src/EECAnalyzer.o: src/OOMixingPilot.h src/OOEventIdentity.h src/Run3JetGeometry.h src/Run3JetSelection.h src/Run3JetSelectionInputs.h
+src/EECAnalyzer.o: src/OOMixingPilot.h src/OOEventIdentity.h src/Run3JetGeometry.h src/Run3JetSelection.h src/Run3JetSelectionInputs.h src/MixingLookupTable.h
+src/MixingLookupTable.o: src/MixingLookupTable.h src/OOEventIdentity.h
 src/Run3JetSelection.o: src/Run3JetSelectionInputs.h
 src/ForestReader.o src/HighForestReader.o src/UnfoldingForestReader.o src/GeneratorLevelForestReader.o: src/ForestReader.h src/Run3JetSelectionInputs.h
 
@@ -32,6 +35,11 @@ src/HighForestReader.o src/GeneratorLevelForestReader.o: src/Run3JetBranchValida
 $(PROGRAM):     $(OBJS) $(PROGRAM).cxx
 		@echo "Linking $(PROGRAM) ..."
 		$(CXX) -lEG -L$(PWD) $(PROGRAM).cxx $(CXXFLAGS) $(OBJS) $(LDFLAGS) -o $(PROGRAM)
+		@echo "done"
+
+$(LOOKUP_PROGRAM): $(OBJS) $(LOOKUP_PROGRAM).cxx
+		@echo "Linking $(LOOKUP_PROGRAM) ..."
+		$(CXX) -lEG -L$(PWD) $(LOOKUP_PROGRAM).cxx $(CXXFLAGS) $(OBJS) $(LDFLAGS) -o $(LOOKUP_PROGRAM)
 		@echo "done"
 
 %.cxx:
@@ -46,7 +54,7 @@ $(PROGRAM):     $(OBJS) $(PROGRAM).cxx
 
 # If dictionaries built, need to clean also them: *Dict*
 clean:
-		rm -rf $(OBJS) $(PROGRAM).o *.dSYM $(PROGRAM)
+		rm -rf $(OBJS) $(PROGRAM).o $(LOOKUP_PROGRAM).o *.dSYM $(PROGRAM) $(LOOKUP_PROGRAM)
 
 cl:  clean $(PROGRAM)
 

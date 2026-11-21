@@ -20,7 +20,7 @@ def main():
     crab = Path(__file__).resolve().parent
     repository = crab.parent
     output = crab / 'eecOO.tar.gz'
-    sources = [repository / 'Makefile', repository / 'eecAnalysis.cxx']
+    sources = [repository / 'Makefile', repository / 'eecAnalysis.cxx', repository / 'buildMixingLookupTable.cxx']
     sources += sorted(path for path in (repository / 'src').rglob('*')
                       if path.is_file() and path.suffix in ('.h', '.cxx', '.cc', '.hh', '.hpp'))
     for directory in ('jetEnergyCorrections', 'jetVetoMaps', 'trackCorrectionTables', 'mixingFileList'):
@@ -31,6 +31,7 @@ def main():
         'src/Run3JetSelection.cxx', 'src/Run3JetSelectionInputs.h',
         'src/Run3JetBranchValidation.h', 'src/Run3JetGeometry.h',
         'src/OOMixingPilot.h', 'src/OOEventIdentity.h',
+        'src/MixingLookupTable.cxx', 'src/MixingLookupTable.h',
         'jetEnergyCorrections/L2Relative_AK4PF_OO_V1.txt',
         'jetVetoMaps/OO2025/Summer24Prompt25_RunCDEFG.root',
         'mixingFileList/OO2025_MB_pool_pilot.txt',
@@ -42,7 +43,8 @@ def main():
     revision = subprocess.check_output(['git', '-C', str(repository), 'rev-parse', 'HEAD'], text=True).strip()
     status = subprocess.check_output(
         ['git', '-C', str(repository), 'status', '--porcelain', '--', 'Makefile', 'eecAnalysis.cxx',
-         'src', 'jetEnergyCorrections', 'jetVetoMaps', 'trackCorrectionTables', 'mixingFileList'], text=True)
+         'buildMixingLookupTable.cxx', 'src', 'jetEnergyCorrections', 'jetVetoMaps',
+         'trackCorrectionTables', 'mixingFileList'], text=True)
     manifest = {'git_commit': revision, 'working_tree_dirty': bool(status.strip()), 'files_sha256': {}}
     with tempfile.NamedTemporaryFile(dir=crab, prefix='.eecOO.', suffix='.tar.gz', delete=False) as tmp:
         temporary = Path(tmp.name)

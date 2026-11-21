@@ -221,7 +221,8 @@ int main(int argc, char **argv) {
   analysisTimer->Start();
   
   // Run the analysis over the list of files
-  EECAnalyzer* eecAnalysis = new EECAnalyzer(fileNameVector, configurationCard, localRunIndex, mixingListIndex);
+  const int jobShardId = runLocal ? (argc >= 7 && mixingListIndex >= 0 ? mixingListIndex : -1) : crabJobId;
+  EECAnalyzer* eecAnalysis = new EECAnalyzer(fileNameVector, configurationCard, localRunIndex, mixingListIndex, jobShardId);
   eecAnalysis->RunAnalysis();
   histograms = eecAnalysis->GetHistograms();
 
